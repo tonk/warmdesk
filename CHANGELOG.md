@@ -19,7 +19,7 @@
 - Made the chat panel **resizable**: drag the left edge to adjust width between 260 px and 720 px
 - Applied the same bubble/date-separator/avatar pattern to `DirectMessagesView.vue`
 - Added a conversation sidebar with an active indicator and empty state to `DirectMessagesView.vue`
-- Two lines added to router.go — one for `/favicon.svg` and one for `/logo.svg`.
+- Fixed missing static routes for `/favicon.svg` and `/logo.svg` in the backend router; both files were 404-ing when served from `web_dir`
 
 #### Direct Messages — sidebar navigation
 - Clicking a username in the app sidebar now correctly opens a direct message conversation
@@ -42,6 +42,10 @@
 - Messages are persisted to the database and polled every 5 seconds so all participants see new messages without a manual refresh; scroll position is preserved when reading history
 - After sending a message a fresh fetch runs immediately to pick up concurrent messages
 - GitHub Markdown rendered in all conversation messages using `marked` + `DOMPurify` (same as project chat and card comments); own-message bubble overrides keep code blocks and blockquotes readable on the primary colour background
+
+#### Admin — set password for any user
+- Added a **New password** field to the Edit User modal; leaving it blank preserves the existing password
+- Backend `AdminUpdateUser` handler now accepts an optional `password` field, validates a minimum length of 8 characters, and stores it as a bcrypt hash
 
 ### Bug Fixes
 - `User.LastSeenAt` field renamed to `LastLoginAt` (JSON: `last_login_at`) to match the requirements; updated in model, login handler, Settings view, and Admin view

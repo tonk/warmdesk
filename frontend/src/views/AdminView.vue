@@ -263,6 +263,10 @@
           <option value="es">Español</option>
         </select>
       </div>
+      <div class="form-group">
+        <label class="form-label">{{ $t('auth.password') }} <span class="form-label-hint">(leave blank to keep current)</span></label>
+        <input class="form-input" v-model="editUser._newPassword" type="password" autocomplete="new-password" minlength="8" placeholder="New password…" />
+      </div>
       <template #footer>
         <button class="btn btn-secondary" @click="editUser = null">{{ $t('common.cancel') }}</button>
         <button class="btn btn-primary" @click="saveEditUser">{{ $t('common.save') }}</button>
@@ -445,19 +449,23 @@ async function deleteUser(user) {
 }
 
 function openEditUser(user) {
-  editUser.value = { ...user }
+  editUser.value = { ...user, _newPassword: '' }
 }
 
 async function saveEditUser() {
   try {
-    const { data } = await adminApi.updateUser(editUser.value.id, {
+    const payload = {
       first_name: editUser.value.first_name,
       last_name: editUser.value.last_name,
       display_name: editUser.value.display_name,
       email: editUser.value.email,
       avatar_url: editUser.value.avatar_url,
       locale: editUser.value.locale
-    })
+    }
+    if (editUser.value._newPassword) {
+      payload.password = editUser.value._newPassword
+    }
+    const { data } = await adminApi.updateUser(editUser.value.id, payload)
     const idx = users.value.findIndex(u => u.id === data.id)
     if (idx >= 0) users.value[idx] = data
     editUser.value = null

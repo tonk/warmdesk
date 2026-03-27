@@ -46,6 +46,7 @@ func AdminUpdateUser(c *gin.Context) {
 		DisplayName     string `json:"display_name"`
 		AvatarURL       string `json:"avatar_url"`
 		Email           string `json:"email"`
+		Password        string `json:"password"`
 		Locale          string `json:"locale"`
 		DateTimeFormat  string `json:"date_time_format"`
 		Timezone        string `json:"timezone"`
@@ -97,6 +98,18 @@ func AdminUpdateUser(c *gin.Context) {
 	}
 	if req.SidebarPosition == "left" || req.SidebarPosition == "right" {
 		updates["sidebar_position"] = req.SidebarPosition
+	}
+	if req.Password != "" {
+		if len(req.Password) < 8 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "password must be at least 8 characters"})
+			return
+		}
+		hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "could not hash password"})
+			return
+		}
+		updates["password_hash"] = string(hash)
 	}
 
 	if len(updates) > 0 {

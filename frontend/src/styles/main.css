@@ -103,6 +103,7 @@ input, textarea, select {
 
 .form-group { margin-bottom: 16px; }
 .form-label { display: block; font-weight: 500; margin-bottom: 6px; font-size: 13px; }
+.form-label-hint { font-weight: 400; font-size: 11px; color: var(--color-text-muted); }
 .form-input {
   width: 100%;
   padding: 8px 12px;
