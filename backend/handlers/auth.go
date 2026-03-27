@@ -67,7 +67,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		PasswordHash:   hash,
 		DisplayName:    displayName,
 		GlobalRole:     "user",
-		Locale:         "en",
+		Locale:         defs["locale"],
 		IsActive:       true,
 		DateTimeFormat: defs["date_time_format"],
 		Timezone:       defs["timezone"],
@@ -125,7 +125,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	now := time.Now()
-	database.DB.Model(&user).Update("last_seen_at", now)
+	database.DB.Model(&user).Update("last_login_at", now)
 
 	tokens, err := h.issueTokens(user)
 	if err != nil {
@@ -211,7 +211,8 @@ func (h *AuthHandler) UpdateMe(c *gin.Context) {
 	if req.AvatarURL != "" {
 		updates["avatar_url"] = req.AvatarURL
 	}
-	if req.Locale == "en" || req.Locale == "nl" {
+	validLocales := map[string]bool{"en": true, "nl": true, "de": true, "fr": true, "es": true}
+	if validLocales[req.Locale] {
 		updates["locale"] = req.Locale
 	}
 	if req.Theme == "light" || req.Theme == "dark" || req.Theme == "system" {

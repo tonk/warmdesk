@@ -82,8 +82,10 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useSidebarStore } from '@/stores/sidebar'
+import { useAuthStore } from '@/stores/auth'
 
 const sidebarStore = useSidebarStore()
+const auth = useAuthStore()
 
 // Collapse state — persisted in localStorage
 const STORAGE_KEY = 'sidebar_open'
@@ -112,10 +114,10 @@ const sortedProjects = computed(() => {
 const sortedUsers = computed(() => {
   const chatSet = new Set(sidebarStore.chatUsers.map(u => u.id))
   const inChat = sidebarStore.allUsers
-    .filter(u => chatSet.has(u.id))
+    .filter(u => chatSet.has(u.id) && u.id !== auth.user?.id)
     .map(u => ({ ...u, inChat: true }))
   const notInChat = sidebarStore.allUsers
-    .filter(u => !chatSet.has(u.id))
+    .filter(u => !chatSet.has(u.id) && u.id !== auth.user?.id)
     .map(u => ({ ...u, inChat: false }))
   return [...inChat, ...notInChat]
 })

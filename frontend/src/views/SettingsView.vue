@@ -39,6 +39,9 @@
               <select class="form-input" v-model="form.locale">
                 <option value="en">English</option>
                 <option value="nl">Nederlands</option>
+                <option value="de">Deutsch</option>
+                <option value="fr">Français</option>
+                <option value="es">Español</option>
               </select>
             </div>
             <div class="form-group">
@@ -124,7 +127,7 @@
         <div class="settings-card info-card">
           <div class="info-row">
             <span class="info-label">{{ $t('settings.last_login') }}</span>
-            <span class="info-value">{{ auth.user?.last_seen_at ? formatDateTime(auth.user.last_seen_at) : '-' }}</span>
+            <span class="info-value">{{ auth.user?.last_login_at ? formatDateTime(auth.user.last_login_at) : '-' }}</span>
           </div>
           <div class="info-row">
             <span class="info-label">{{ $t('settings.settings_updated_at') }}</span>

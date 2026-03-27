@@ -15,6 +15,7 @@ const (
 	settingDefaultTheme           = "default_theme"
 	settingDefaultFont            = "default_font"
 	settingDefaultFontSize        = "default_font_size"
+	settingDefaultLocale          = "default_locale"
 )
 
 var systemSettingDefaults = map[string]string{
@@ -24,6 +25,7 @@ var systemSettingDefaults = map[string]string{
 	settingDefaultTheme:          "system",
 	settingDefaultFont:           "system",
 	settingDefaultFontSize:       "14",
+	settingDefaultLocale:         "en",
 }
 
 // GetSystemSettings returns public system settings (registration + global UI defaults).
@@ -36,6 +38,7 @@ func GetSystemSettings(c *gin.Context) {
 		"default_theme":               all[settingDefaultTheme],
 		"default_font":                all[settingDefaultFont],
 		"default_font_size":           all[settingDefaultFontSize],
+		"default_locale":              all[settingDefaultLocale],
 	})
 }
 
@@ -54,6 +57,7 @@ func AdminUpdateSystemSettings(c *gin.Context) {
 		DefaultTheme          string `json:"default_theme"`
 		DefaultFont           string `json:"default_font"`
 		DefaultFontSize       string `json:"default_font_size"`
+		DefaultLocale         string `json:"default_locale"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -82,6 +86,10 @@ func AdminUpdateSystemSettings(c *gin.Context) {
 	if req.DefaultFontSize != "" {
 		database.DB.Save(&models.SystemSetting{Key: settingDefaultFontSize, Value: req.DefaultFontSize})
 	}
+	validLocales := map[string]bool{"en": true, "nl": true, "de": true, "fr": true, "es": true}
+	if validLocales[req.DefaultLocale] {
+		database.DB.Save(&models.SystemSetting{Key: settingDefaultLocale, Value: req.DefaultLocale})
+	}
 
 	AdminGetSystemSettings(c)
 }
@@ -105,6 +113,7 @@ func GetGlobalDefaults() map[string]string {
 		"theme":            all[settingDefaultTheme],
 		"font":             all[settingDefaultFont],
 		"font_size":        all[settingDefaultFontSize],
+		"locale":           all[settingDefaultLocale],
 	}
 }
 

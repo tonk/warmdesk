@@ -38,7 +38,7 @@
         <!-- Members Tab -->
         <div v-if="tab === 'members'" class="tab-content">
           <div class="section-action">
-            <button class="btn btn-primary btn-sm" @click="showInvite = true">+ {{ $t('project.invite_member') }}</button>
+            <button class="btn btn-primary btn-sm" @click="showInvite = true; invite.userIds = []; inviteSearch = ''">+ {{ $t('project.invite_member') }}</button>
           </div>
           <table class="data-table">
             <thead>
@@ -144,14 +144,25 @@
   <BaseModal v-if="showInvite" :title="$t('project.invite_member')" @close="showInvite = false">
       <div class="form-group">
         <label class="form-label">{{ $t('project.select_user') }}</label>
-        <select class="form-input" v-model="invite.userId">
-          <option value="">— {{ $t('project.select_user') }} —</option>
-          <option
-            v-for="u in invitableUsers"
+        <div class="invite-search-wrap">
+          <input class="form-input invite-search" v-model="inviteSearch" placeholder="Filter users…" />
+        </div>
+        <div class="invite-user-list">
+          <label
+            v-for="u in filteredInvitableUsers"
             :key="u.id"
-            :value="u.id"
-          >{{ u.display_name || u.username }} ({{ u.email }})</option>
-        </select>
+            class="invite-user-row"
+          >
+            <input type="checkbox" :value="u.id" v-model="invite.userIds" class="invite-checkbox" />
+            <span class="invite-avatar">{{ (u.display_name || u.username).slice(0, 2).toUpperCase() }}</span>
+            <span class="invite-name">{{ u.display_name || u.username }}</span>
+            <span class="invite-email">{{ u.email }}</span>
+          </label>
+          <div v-if="!filteredInvitableUsers.length" class="invite-empty">No users available</div>
+        </div>
+        <div v-if="invite.userIds.length" class="invite-selected-count">
+          {{ invite.userIds.length }} user{{ invite.userIds.length > 1 ? 's' : '' }} selected
+        </div>
       </div>
       <div class="form-group">
         <label class="form-label">{{ $t('project.role') }}</label>
@@ -163,7 +174,7 @@
       </div>
       <template #footer>
         <button class="btn btn-secondary" @click="showInvite = false">{{ $t('common.cancel') }}</button>
-        <button class="btn btn-primary" :disabled="!invite.userId" @click="sendInvite">{{ $t('project.invite_member') }}</button>
+        <button class="btn btn-primary" :disabled="!invite.userIds.length" @click="sendInvite">{{ $t('project.invite_member') }}</button>
       </template>
   </BaseModal>
 
@@ -207,7 +218,8 @@ const members = ref([])
 const labels = ref([])
 const showInvite = ref(false)
 const showAddLabel = ref(false)
-const invite = ref({ userId: '', role: 'member' })
+const invite = ref({ userIds: [], role: 'member' })
+const inviteSearch = ref('')
 const allUsers = ref([])
 const newLabel = ref({ name: '', color: '#6366f1' })
 const form = ref({ name: '', description: '', color: '' })
@@ -219,6 +231,16 @@ const generatedKey = ref('')
 const invitableUsers = computed(() => {
   const memberIds = new Set(members.value.map(m => m.user_id || m.user?.id))
   return allUsers.value.filter(u => !memberIds.has(u.id))
+})
+
+const filteredInvitableUsers = computed(() => {
+  const q = inviteSearch.value.toLowerCase()
+  if (!q) return invitableUsers.value
+  return invitableUsers.value.filter(u =>
+    (u.display_name || '').toLowerCase().includes(q) ||
+    u.username.toLowerCase().includes(q) ||
+    u.email.toLowerCase().includes(q)
+  )
 })
 
 onMounted(async () => {
@@ -279,16 +301,24 @@ async function removeMember(member) {
 }
 
 async function sendInvite() {
-  const user = allUsers.value.find(u => u.id === invite.value.userId)
-  if (!user) return
-  try {
-    await projectsApi.inviteMember(slug.value, { login: user.username, role: invite.value.role })
-    showInvite.value = false
-    invite.value = { userId: '', role: 'member' }
-    loadMembers()
-    ui.success('Member invited')
-  } catch (e) {
-    ui.error(e.response?.data?.error || 'Failed to invite')
+  if (!invite.value.userIds.length) return
+  const users = allUsers.value.filter(u => invite.value.userIds.includes(u.id))
+  let failed = 0
+  for (const user of users) {
+    try {
+      await projectsApi.inviteMember(slug.value, { login: user.username, role: invite.value.role })
+    } catch {
+      failed++
+    }
+  }
+  showInvite.value = false
+  invite.value = { userIds: [], role: 'member' }
+  inviteSearch.value = ''
+  loadMembers()
+  if (failed === 0) {
+    ui.success(users.length > 1 ? `${users.length} members invited` : 'Member invited')
+  } else {
+    ui.error(`${failed} invitation(s) failed`)
   }
 }
 
@@ -377,5 +407,55 @@ function copyKey() {
 .api-body { font-size: 12px; background: var(--color-bg); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); margin-bottom: 16px; }
 .method { font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; color: #fff; }
 .method.post { background: #10b981; }
+
+/* ── Invite multi-select ─────────────────────────────────── */
+.invite-search-wrap { margin-bottom: 6px; }
+.invite-search { width: 100%; }
+
+.invite-user-list {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.invite-user-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background .1s;
+  user-select: none;
+}
+.invite-user-row:not(:last-child) { border-bottom: 1px solid var(--color-border); }
+.invite-user-row:hover { background: var(--color-bg); }
+
+.invite-checkbox { flex-shrink: 0; width: 15px; height: 15px; accent-color: var(--color-primary); cursor: pointer; }
+
+.invite-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.invite-name { font-size: 13px; font-weight: 500; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.invite-email { font-size: 11px; color: var(--color-text-muted); white-space: nowrap; }
+.invite-empty { padding: 16px; text-align: center; color: var(--color-text-muted); font-size: 13px; }
+
+.invite-selected-count {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--color-primary);
+  font-weight: 500;
+}
 .method.patch { background: #f59e0b; }
 </style>

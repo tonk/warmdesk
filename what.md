@@ -9,6 +9,9 @@ Create an application that has all these features and requirements
 - Multi language support
   * English
   * Dutch
+  * German
+  * French
+  * Spanish
 - Database support for
   * SQLlite
   * MySQL
@@ -49,6 +52,7 @@ Create an application that has all these features and requirements
       ** Use UTC as the default
     ** Interface color, dark, light or follow-system interface
     ** Interface font and font size
+    ** Default language setting, English by default
   * Add, change and remove projects
 - Keep track of last login
 - Keep track of last user settings change
@@ -56,7 +60,7 @@ Create an application that has all these features and requirements
   * Collapsible list of starred projects
   * Collapsible list of all projects, starred project marked and at the top
   * Collapsible list of all users, in chat users marked and at the top
-  * Make the users clickable and when clicked, open an direct message box to them
+  * Make the users clickable and when clicked, open an direct chat box to them
 - Allow sidebar to be moved to the left or right
 - In the projects
   * Allow the column names to be edited

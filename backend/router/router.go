@@ -70,13 +70,24 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webDir string) 
 		// Starred projects
 		protected.GET("/starred-projects", handlers.ListStarredProjects)
 
-		// Direct messages
+		// Direct messages (legacy 1-on-1)
 		dm := protected.Group("/direct-messages")
 		{
 			dm.GET("/conversations", handlers.ListConversations)
 			dm.GET("/:userId", handlers.ListDirectMessages)
 			dm.POST("/:userId", handlers.SendDirectMessage)
 			dm.DELETE("/:userId/:msgId", handlers.DeleteDirectMessage)
+		}
+
+		// Conversations (1-on-1 and group)
+		convs := protected.Group("/conversations")
+		{
+			convs.GET("", handlers.GetConversations)
+			convs.POST("", handlers.CreateConversation)
+			convs.GET("/:id/messages", handlers.GetConversationMessages)
+			convs.POST("/:id/messages", handlers.SendConversationMessage)
+			convs.DELETE("/:id/messages/:msgId", handlers.DeleteConversationMessage)
+			convs.POST("/:id/members", handlers.AddConversationMember)
 		}
 
 		// Projects

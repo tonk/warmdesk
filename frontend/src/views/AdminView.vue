@@ -43,7 +43,7 @@
                   </span>
                 </td>
                 <td>
-                  <small>{{ user.last_seen_at ? formatDateTime(user.last_seen_at) : '-' }}</small>
+                  <small>{{ user.last_login_at ? formatDateTime(user.last_login_at) : '-' }}</small>
                 </td>
                 <td>
                   <span :class="['badge', user.is_active ? 'badge-active' : 'badge-inactive']">
@@ -176,6 +176,17 @@
                 <option value="18">18px</option>
               </select>
             </div>
+
+            <div class="form-group" style="max-width:400px">
+              <label class="form-label">{{ $t('common.language') }}</label>
+              <select class="form-input" v-model="systemSettings.default_locale" @change="saveSettings">
+                <option value="en">English</option>
+                <option value="nl">Nederlands</option>
+                <option value="de">Deutsch</option>
+                <option value="fr">Français</option>
+                <option value="es">Español</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -247,6 +258,9 @@
         <select class="form-input" v-model="editUser.locale">
           <option value="en">English</option>
           <option value="nl">Nederlands</option>
+          <option value="de">Deutsch</option>
+          <option value="fr">Français</option>
+          <option value="es">Español</option>
         </select>
       </div>
       <template #footer>
@@ -327,7 +341,8 @@ const systemSettings = ref({
   default_timezone: 'UTC',
   default_theme: 'system',
   default_font: 'system',
-  default_font_size: '14'
+  default_font_size: '14',
+  default_locale: 'en'
 })
 let settingsLoaded = false
 
@@ -373,6 +388,7 @@ async function loadSettings() {
     systemSettings.value.default_theme            = data.default_theme || 'system'
     systemSettings.value.default_font             = data.default_font || 'system'
     systemSettings.value.default_font_size        = data.default_font_size || '14'
+    systemSettings.value.default_locale           = data.default_locale || 'en'
     settingsLoaded = true
   } catch {}
 }
@@ -385,7 +401,8 @@ async function saveSettings() {
       default_timezone:         systemSettings.value.default_timezone,
       default_theme:            systemSettings.value.default_theme,
       default_font:             systemSettings.value.default_font,
-      default_font_size:        systemSettings.value.default_font_size
+      default_font_size:        systemSettings.value.default_font_size,
+      default_locale:           systemSettings.value.default_locale
     })
     ui.success('Settings saved')
   } catch {
