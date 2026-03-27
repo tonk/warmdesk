@@ -1,0 +1,35 @@
+# Coworker configuration file
+# Environment variables override any value set here.
+
+# HTTP port the server listens on
+port: "8080"
+
+# Database driver: sqlite | mysql | postgres
+db_driver: sqlite
+
+# SQLite (default) — path to the database file
+db_dsn: "./coworker.db"
+
+# PostgreSQL example:
+# db_driver: postgres
+# db_dsn: "host=localhost user=coworker password=secret dbname=coworker port=5432 sslmode=disable"
+
+# MySQL / MariaDB example:
+# db_driver: mysql
+# db_dsn: "coworker:secret@tcp(localhost:3306)/coworker?charset=utf8mb4&parseTime=True&loc=Local"
+
+# Secret used to sign JWT tokens — change this to a long random string in production
+jwt_secret: "change-me-for-production"
+
+# Comma-separated list of allowed CORS origins, or * for any
+allowed_origins: "127.0.0.1"
+
+# Path to the built frontend files (dist/web after running `make build`)
+# Leave empty during development (Vite dev server is used instead)
+web_dir: "dist/web"
+
+# Redis URL for horizontal scaling (optional).
+# When set, WebSocket broadcasts are routed through Redis pub/sub so all
+# server instances deliver the message to their connected clients.
+# Omit or leave empty for single-instance deployments (no Redis needed).
+# redis_url: "redis://localhost:6379/0"

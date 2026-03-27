@@ -1,0 +1,50 @@
+package middleware
+
+import (
+	"crypto/sha256"
+	"encoding/hex"
+	"net/http"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/tonk/coworker/database"
+	"github.com/tonk/coworker/models"
+)
+
+// APIKeyAuth authenticates requests using an X-API-Key header or ?api_key= query param.
+// On success it sets the same context keys as JWT Auth so handlers work unchanged.
+func APIKeyAuth() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		raw := c.GetHeader("X-API-Key")
+		if raw == "" {
+			raw = c.Query("api_key")
+		}
+		if raw == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing API key"})
+			return
+		}
+
+		sum := sha256.Sum256([]byte(raw))
+		hash := hex.EncodeToString(sum[:])
+
+		var key models.APIKey
+		if err := database.DB.Preload("User").Where("key_hash = ?", hash).First(&key).Error; err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid API key"})
+			return
+		}
+
+		if !key.User.IsActive {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "account deactivated"})
+			return
+		}
+
+		// Update last used timestamp (best-effort)
+		now := time.Now()
+		database.DB.Model(&key).Update("last_used_at", now)
+
+		c.Set(ContextUserID, key.UserID)
+		c.Set(ContextUsername, key.User.Username)
+		c.Set(ContextGlobalRole, key.User.GlobalRole)
+		c.Next()
+	}
+}

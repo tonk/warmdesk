@@ -1,0 +1,94 @@
+package config
+
+import (
+	"log"
+	"os"
+
+	"gopkg.in/yaml.v3"
+)
+
+type Config struct {
+	Port           string `yaml:"port"`
+	DBDriver       string `yaml:"db_driver"`
+	DBDSN          string `yaml:"db_dsn"`
+	JWTSecret      string `yaml:"jwt_secret"`
+	AllowedOrigins string `yaml:"allowed_origins"`
+	WebDir         string `yaml:"web_dir"`
+	RedisURL       string `yaml:"redis_url"` // optional — enables horizontal scaling
+}
+
+// Load reads configuration with the following priority (highest first):
+//  1. Environment variables
+//  2. Config file (path from --config flag, CONFIG_FILE env var, or coworker.yaml)
+//  3. Built-in defaults
+//
+// Pass the value of the --config CLI flag as configPath; an empty string
+// falls back to the CONFIG_FILE env var and then to "coworker.yaml".
+func Load(configPath string) *Config {
+	cfg := defaults()
+	loadFile(cfg, configPath)
+	applyEnv(cfg)
+	return cfg
+}
+
+func defaults() *Config {
+	return &Config{
+		Port:           "8080",
+		DBDriver:       "sqlite",
+		DBDSN:          "./coworker.db",
+		JWTSecret:      "change-me-in-production",
+		AllowedOrigins: "http://localhost:5173",
+		WebDir:         "",
+	}
+}
+
+func loadFile(cfg *Config, flagPath string) {
+	// Priority: CLI flag > CONFIG_FILE env var > default filename
+	path := flagPath
+	if path == "" {
+		path = os.Getenv("CONFIG_FILE")
+	}
+	if path == "" {
+		path = "coworker.yaml"
+	}
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		// Config file is optional; absence is not an error unless explicitly specified.
+		if flagPath != "" {
+			log.Fatalf("config: cannot read file %q: %v", path, err)
+		}
+		return
+	}
+
+	if err := yaml.Unmarshal(data, cfg); err != nil {
+		log.Printf("warning: could not parse config file %s: %v", path, err)
+	} else {
+		log.Printf("loaded config from %s", path)
+	}
+}
+
+// applyEnv overrides config values with environment variables when set.
+func applyEnv(cfg *Config) {
+	if v := os.Getenv("PORT"); v != "" {
+		cfg.Port = v
+	}
+	if v := os.Getenv("DB_DRIVER"); v != "" {
+		cfg.DBDriver = v
+	}
+	if v := os.Getenv("DB_DSN"); v != "" {
+		cfg.DBDSN = v
+	}
+	if v := os.Getenv("JWT_SECRET"); v != "" {
+		cfg.JWTSecret = v
+	}
+	if v := os.Getenv("ALLOWED_ORIGINS"); v != "" {
+		cfg.AllowedOrigins = v
+	}
+	if v := os.Getenv("WEB_DIR"); v != "" {
+		cfg.WebDir = v
+	}
+	if v := os.Getenv("REDIS_URL"); v != "" {
+		cfg.RedisURL = v
+	}
+}

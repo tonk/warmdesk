@@ -1,0 +1,38 @@
+# ── Build output ─────────────────────────────────────────────────────────────
+dist/
+coworker
+coworker-*.tar.gz
+
+# ── Go ───────────────────────────────────────────────────────────────────────
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+
+# ── Node / Frontend ──────────────────────────────────────────────────────────
+frontend/node_modules/
+frontend/.vite/
+frontend/dist/
+
+# ── Runtime data ─────────────────────────────────────────────────────────────
+*.db
+*.db-shm
+*.db-wal
+*.log
+
+# ── Config (keep the example, ignore local overrides) ────────────────────────
+coworker.yaml
+*.local.yaml
+
+# ── OS / editor artifacts ─────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
