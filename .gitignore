@@ -19,6 +19,12 @@ frontend/node_modules/
 frontend/.vite/
 frontend/dist/
 
+# ── Tauri / Desktop app build artifacts ──────────────────────────────────────
+frontend/src-tauri/target/
+frontend/src-tauri/gen/
+# Packaged installers/bundles (AppImage, DMG, MSI, NSIS, deb, rpm, etc.)
+frontend/src-tauri/target/release/bundle/
+
 # ── Runtime data ─────────────────────────────────────────────────────────────
 *.db
 *.db-shm

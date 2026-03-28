@@ -1,0 +1,9 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/schema/acl/capability.json",
+  "identifier": "default",
+  "description": "Default capability — allows the app to connect to any external server URL.",
+  "windows": ["main"],
+  "permissions": [
+    "core:default"
+  ]
+}

@@ -88,6 +88,26 @@ Create an application that has all these features and requirements
     ** Align left
   * Logged users full name
     ** Align right
+- In the tickets
+  * Allow multiple assignees per card
+  * Allow watching a card to receive notifications
+  * Allow sorting cards within a column by due date, assignee or priority
+  * Add a checklist to a card
+- Add topics (threaded discussions) per project
+  * Create, edit and delete topics
+  * Reply to topics with markdown support
+- Add a viewer role to role based access control
+  * Viewers can read but not create or modify content
+- Favourite people
+  * Mark users as favourites for quick access
+- Direct message notifications
+  * Notify users of new direct messages
+- Group direct messages
+  * Start a group chat between multiple users
+- Admin can assign users to projects directly
+- Allow admin to reset user passwords
+- Build a desktop app using Tauri
+  * Distribute as AppImage (Linux), DMG (macOS) and installer (Windows)
 
 - Add README.md with explanation of Coworker
 - Add systemd example service files

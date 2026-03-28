@@ -51,7 +51,7 @@ export const useBoardStore = defineStore('board', () => {
   // Card mutations
   function addCard(card) {
     const col = columns.value.find(c => c.id === card.column_id)
-    if (col) {
+    if (col && !col.cards.some(c => c.id === card.id)) {
       col.cards.push(card)
       col.cards.sort((a, b) => a.position - b.position)
     }

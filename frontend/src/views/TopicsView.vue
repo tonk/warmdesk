@@ -1,14 +1,12 @@
 <template>
   <div class="topics-layout">
-    <AppHeader>
-      <template #breadcrumb>
-        <RouterLink :to="`/projects/${slug}`" class="breadcrumb-link">
-          {{ projectStore.currentProject?.name || slug }}
-        </RouterLink>
-        <span class="breadcrumb-sep">/</span>
-        <span class="breadcrumb-cur">{{ $t('topics.title') }}</span>
-      </template>
-    </AppHeader>
+    <div class="topics-toolbar">
+      <RouterLink :to="`/projects/${slug}`" class="breadcrumb-link">
+        {{ projectStore.currentProject?.name || slug }}
+      </RouterLink>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-cur">{{ $t('topics.title') }}</span>
+    </div>
 
     <div class="topics-body">
       <!-- ── Topics list ──────────────────────────────────── -->
@@ -164,7 +162,6 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
-import AppHeader from '@/components/layout/AppHeader.vue'
 import BaseModal from '@/components/common/BaseModal.vue'
 import CardEditor from '@/components/board/CardEditor.vue'
 import { useTopicsStore } from '@/stores/topics'
@@ -344,7 +341,8 @@ function renderMarkdown(text) {
 </script>
 
 <style scoped>
-.topics-layout { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+.topics-layout { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+.topics-toolbar { display: flex; align-items: center; padding: 8px 16px; border-bottom: 1px solid var(--color-border); flex-shrink: 0; }
 .topics-body { display: flex; flex: 1; overflow: hidden; }
 
 .topics-sidebar {
