@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/smtp"
@@ -131,7 +132,7 @@ func AdminUpdateSystemSettings(c *gin.Context) {
 		DefaultFontSize        string  `json:"default_font_size"`
 		DefaultLocale          string  `json:"default_locale"`
 		SMTPHost               *string `json:"smtp_host"`
-		SMTPPort               string  `json:"smtp_port"`
+		SMTPPort               json.Number `json:"smtp_port"` // accepts "587" or 587
 		SMTPFrom               *string `json:"smtp_from"`
 		SMTPUsername           *string `json:"smtp_username"` // pointer so empty string clears it
 		SMTPPassword           *string `json:"smtp_password"` // pointer so empty string clears it
@@ -177,7 +178,7 @@ func AdminUpdateSystemSettings(c *gin.Context) {
 		saveSetting(settingSMTPHost, *req.SMTPHost)
 	}
 	if req.SMTPPort != "" {
-		saveSetting(settingSMTPPort, req.SMTPPort)
+		saveSetting(settingSMTPPort, req.SMTPPort.String())
 	}
 	if req.SMTPFrom != nil {
 		saveSetting(settingSMTPFrom, *req.SMTPFrom)

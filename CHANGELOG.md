@@ -2,6 +2,11 @@
 
 All notable changes to Coworker are documented here.
 
+## v0.2.10 — 2026-03-29
+
+### Fixed
+- **SMTP port saved as number** — `<input type="number">` causes Vue to send the port as a JSON number; the Go struct expected a string and rejected it with an unmarshal error; frontend now coerces to string before sending and the backend field accepts `json.Number` so either format works
+
 ## v0.2.9 — 2026-03-29
 
 ### Fixed

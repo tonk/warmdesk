@@ -596,7 +596,7 @@ async function saveSmtpSettings() {
   try {
     const payload = {
       smtp_host:     systemSettings.value.smtp_host,
-      smtp_port:     systemSettings.value.smtp_port,
+      smtp_port:     String(systemSettings.value.smtp_port || '587'),
       smtp_from:     systemSettings.value.smtp_from,
       smtp_username: systemSettings.value.smtp_username,
     }
