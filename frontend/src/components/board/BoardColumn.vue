@@ -23,7 +23,15 @@
           / {{ column.wip_limit }}
         </span>
       </div>
-      <button class="btn btn-ghost btn-sm" @click="$emit('add-card', column.id)" title="Add card">+</button>
+      <div class="column-header-actions">
+        <button class="btn btn-ghost btn-sm" @click="$emit('add-card', column.id)" :title="$t('board.add_card')">+</button>
+        <button
+          v-if="column.cards.length === 0"
+          class="btn btn-ghost btn-sm delete-col-btn"
+          @click="$emit('delete-column', column.id)"
+          :title="$t('board.delete_column')"
+        >🗑</button>
+      </div>
     </div>
 
     <div class="sort-bar">
@@ -61,7 +69,7 @@ import Sortable from 'sortablejs'
 import BoardCard from './BoardCard.vue'
 
 const props = defineProps({ column: { type: Object, required: true } })
-const emit = defineEmits(['add-card', 'open-card', 'card-moved', 'rename-column'])
+const emit = defineEmits(['add-card', 'open-card', 'card-moved', 'rename-column', 'delete-column'])
 
 const listEl = ref(null)
 const nameInput = ref(null)
@@ -155,7 +163,10 @@ onBeforeUnmount(() => sortable?.destroy())
   padding: 12px 12px 8px;
   border-bottom: 1px solid var(--color-border);
 }
-.column-header-left { display: flex; align-items: center; gap: 6px; }
+.column-header-left { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+.column-header-actions { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+.delete-col-btn { color: var(--color-text-muted); font-size: 12px; opacity: 0.5; }
+.delete-col-btn:hover { opacity: 1; color: var(--color-danger); }
 
 .column-dot { width: 10px; height: 10px; border-radius: 50%; }
 .column-name { font-weight: 600; font-size: 13px; cursor: default; }

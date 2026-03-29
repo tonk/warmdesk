@@ -27,6 +27,7 @@ const (
 	settingSessionTimeoutMinutes  = "session_timeout_minutes"
 	settingCompanyName            = "company_name"
 	settingCompanyLogo            = "company_logo"
+	settingDefaultColumns         = "default_columns"
 )
 
 var systemSettingDefaults = map[string]string{
@@ -45,6 +46,7 @@ var systemSettingDefaults = map[string]string{
 	settingSessionTimeoutMinutes:  "60",
 	settingCompanyName:            "",
 	settingCompanyLogo:            "",
+	settingDefaultColumns:         "Backlog",
 }
 
 // InitSystemDefaults seeds the in-memory defaults from the config file so that
@@ -134,6 +136,7 @@ func AdminUpdateSystemSettings(c *gin.Context) {
 		SessionTimeoutMinutes  *int    `json:"session_timeout_minutes"`
 		CompanyName            *string `json:"company_name"`
 		CompanyLogo            *string `json:"company_logo"`
+		DefaultColumns         *string `json:"default_columns"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -195,6 +198,9 @@ func AdminUpdateSystemSettings(c *gin.Context) {
 	}
 	if req.CompanyLogo != nil {
 		database.DB.Save(&models.SystemSetting{Key: settingCompanyLogo, Value: *req.CompanyLogo})
+	}
+	if req.DefaultColumns != nil {
+		database.DB.Save(&models.SystemSetting{Key: settingDefaultColumns, Value: *req.DefaultColumns})
 	}
 
 	AdminGetSystemSettings(c)

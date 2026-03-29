@@ -38,6 +38,7 @@
             @open-card="openCardDetail"
             @card-moved="onCardMoved"
             @rename-column="onRenameColumn"
+            @delete-column="onDeleteColumn"
           />
         </div>
       </div>
@@ -98,6 +99,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import Sortable from 'sortablejs'
 import BoardColumn from '@/components/board/BoardColumn.vue'
 import CardDetail from '@/components/board/CardDetail.vue'
@@ -111,6 +113,7 @@ import { useWebSocket } from '@/composables/useWebSocket'
 import { projectsApi } from '@/api/projects'
 
 const route = useRoute()
+const { t } = useI18n()
 const slug = computed(() => route.params.slug)
 
 const boardStore = useBoardStore()
@@ -240,6 +243,16 @@ async function onRenameColumn({ columnId, name }) {
     if (col) col.name = name
   } catch (e) {
     ui.error('Failed to rename column')
+  }
+}
+
+async function onDeleteColumn(columnId) {
+  if (!confirm(t('board.delete_column_confirm'))) return
+  try {
+    await projectsApi.deleteColumn(slug.value, columnId)
+    boardStore.columns = boardStore.columns.filter(c => c.id !== columnId)
+  } catch (e) {
+    ui.error(e.response?.data?.error || 'Failed to delete column')
   }
 }
 

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/tonk/coworker/database"
@@ -9,6 +10,23 @@ import (
 	"github.com/tonk/coworker/models"
 	"github.com/tonk/coworker/services"
 )
+
+// getDefaultColumnNames reads the configured initial column names from system settings.
+func getDefaultColumnNames() []string {
+	all := loadAllSettings()
+	raw := all[settingDefaultColumns]
+	var names []string
+	for _, line := range strings.Split(raw, "\n") {
+		name := strings.TrimSpace(line)
+		if name != "" {
+			names = append(names, name)
+		}
+	}
+	if len(names) == 0 {
+		return []string{"Backlog"}
+	}
+	return names
+}
 
 func ListProjects(c *gin.Context) {
 	userID := middleware.GetUserID(c)
@@ -74,8 +92,10 @@ func CreateProject(c *gin.Context) {
 	}
 	database.DB.Create(&member)
 
-	// Default column
-	database.DB.Create(&models.Column{ProjectID: project.ID, Name: "Inbox", Position: 0})
+	// Default columns from system settings
+	for i, name := range getDefaultColumnNames() {
+		database.DB.Create(&models.Column{ProjectID: project.ID, Name: name, Position: float64((i + 1) * 1000)})
+	}
 
 	c.JSON(http.StatusCreated, project)
 }

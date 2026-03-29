@@ -39,8 +39,10 @@ func AdminCreateProject(c *gin.Context) {
 	// Add creator as owner
 	database.DB.Create(&models.ProjectMember{ProjectID: project.ID, UserID: userID, Role: "owner"})
 
-	// Default column
-	database.DB.Create(&models.Column{ProjectID: project.ID, Name: "Inbox", Position: 0})
+	// Default columns from system settings
+	for i, name := range getDefaultColumnNames() {
+		database.DB.Create(&models.Column{ProjectID: project.ID, Name: name, Position: float64((i + 1) * 1000)})
+	}
 
 	database.DB.Preload("CreatedBy").First(&project, project.ID)
 	c.JSON(http.StatusCreated, project)
