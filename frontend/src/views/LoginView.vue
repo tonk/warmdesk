@@ -25,7 +25,7 @@
         <RouterLink to="/register">{{ $t('auth.register') }}</RouterLink>
       </p>
     </div>
-    <div class="auth-version">Coworker {{ appVersion }}</div>
+    <div class="auth-version">Coworker v{{ appVersion }}</div>
   </div>
 </template>
 
@@ -105,7 +105,11 @@ async function handleSubmit() {
 .auth-link { text-align: center; margin-top: 20px; font-size: 13px; color: var(--color-text-muted); }
 
 .auth-version {
-  margin-top: 16px;
+  position: fixed;
+  bottom: 16px;
+  left: 0;
+  right: 0;
+  text-align: center;
   font-size: 12px;
   color: var(--color-text-muted);
   opacity: 0.6;

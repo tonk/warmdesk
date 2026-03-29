@@ -8,6 +8,7 @@ type Conversation struct {
 	CreatedAt   time.Time             `json:"created_at"`
 	UpdatedAt   time.Time             `json:"updated_at"`
 	Name        string                `gorm:"size:200" json:"name"`
+	Avatar      string                `gorm:"size:500" json:"avatar"`
 	IsGroup     bool                  `gorm:"default:false" json:"is_group"`
 	CreatedByID uint                  `gorm:"not null;index" json:"created_by_id"`
 	Members     []ConversationMember  `gorm:"foreignKey:ConversationID" json:"members"`

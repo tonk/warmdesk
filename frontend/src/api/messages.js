@@ -16,6 +16,7 @@ export const messagesApi = {
   deleteConvMessage: (convId, msgId) => client.delete(`/conversations/${convId}/messages/${msgId}`),
   addMember: (convId, data) => client.post(`/conversations/${convId}/members`, data),
   removeMember: (convId, userId) => client.delete(`/conversations/${convId}/members/${userId}`),
+  uploadAvatar: (convId, formData) => client.post(`/conversations/${convId}/avatar`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   editConvMessage: (convId, msgId, body) => client.patch(`/conversations/${convId}/messages/${msgId}`, { body }),
   toggleConvReaction: (convId, msgId, emoji) => client.post(`/conversations/${convId}/messages/${msgId}/reactions`, { emoji }),
 }

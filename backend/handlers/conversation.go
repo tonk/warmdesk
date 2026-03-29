@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -262,11 +264,35 @@ func RemoveConversationMember(c *gin.Context) {
 	database.DB.Where("conversation_id = ? AND user_id = ?", convID, targetID).
 		Delete(&models.ConversationMember{})
 
-	// Notify all remaining members
+	// Check remaining members
 	var memberIDs []uint
 	database.DB.Model(&models.ConversationMember{}).
 		Where("conversation_id = ?", convID).
 		Pluck("user_id", &memberIDs)
+
+	// If only the creator is left and there are no messages, delete the conversation
+	if len(memberIDs) == 1 {
+		var conv models.Conversation
+		database.DB.First(&conv, convID)
+		if memberIDs[0] == conv.CreatedByID {
+			var msgCount int64
+			database.DB.Model(&models.ConversationMessage{}).
+				Where("conversation_id = ? AND is_deleted = false", convID).
+				Count(&msgCount)
+			if msgCount == 0 {
+				database.DB.Where("conversation_id = ?", convID).Delete(&models.ConversationMember{})
+				database.DB.Delete(&conv)
+				appws.BroadcastToUser(conv.CreatedByID, appws.Message{
+					Type:    "dm.conversation_deleted",
+					Payload: map[string]interface{}{"conversation_id": convID},
+				})
+				c.JSON(http.StatusOK, gin.H{"message": "removed", "conversation_deleted": true})
+				return
+			}
+		}
+	}
+
+	// Notify remaining members of the removal
 	for _, uid := range memberIDs {
 		appws.BroadcastToUser(uid, appws.Message{
 			Type: "dm.member_removed",
@@ -371,6 +397,66 @@ func EditConversationMessage(c *gin.Context) {
 
 	database.DB.Preload("Sender").First(&msg, msg.ID)
 	c.JSON(http.StatusOK, msg)
+}
+
+// UploadConversationAvatar POST /conversations/:id/avatar
+// Accepts a multipart image, stores it in the uploads dir, and saves the URL on the conversation.
+func UploadConversationAvatar(c *gin.Context) {
+	me := middleware.GetUserID(c)
+	convID, _ := strconv.Atoi(c.Param("id"))
+
+	if !isMember(uint(convID), me) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "not a member"})
+		return
+	}
+
+	fh, err := c.FormFile("avatar")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "no file provided"})
+		return
+	}
+
+	uploadDir := "./uploads"
+	if attachmentCfg != nil && attachmentCfg.UploadDir != "" {
+		uploadDir = attachmentCfg.UploadDir
+	}
+	if err := os.MkdirAll(uploadDir, 0755); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create upload dir"})
+		return
+	}
+
+	ext := filepath.Ext(fh.Filename)
+	storedName := randomHex(16) + ext
+	dest := filepath.Join(uploadDir, storedName)
+	if err := c.SaveUploadedFile(fh, dest); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save file"})
+		return
+	}
+
+	avatarURL := "/uploads/" + storedName
+	if err := database.DB.Model(&models.Conversation{}).Where("id = ?", convID).
+		Update("avatar", avatarURL).Error; err != nil {
+		os.Remove(dest)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update avatar"})
+		return
+	}
+
+	// Broadcast to all members so their UI updates
+	var memberIDs []uint
+	database.DB.Model(&models.ConversationMember{}).
+		Where("conversation_id = ?", convID).
+		Pluck("user_id", &memberIDs)
+	for _, uid := range memberIDs {
+		appws.BroadcastToUser(uid, appws.Message{
+			Type: "dm.conversation_updated",
+			Payload: map[string]interface{}{
+				"conversation_id": convID,
+				"avatar":          avatarURL,
+			},
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"avatar": avatarURL})
 }
 
 func isMember(convID, userID uint) bool {

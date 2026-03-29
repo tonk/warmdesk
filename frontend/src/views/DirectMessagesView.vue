@@ -81,7 +81,8 @@
           <div class="conv-avatar-wrap">
             <template v-if="conv.is_group">
               <div class="group-avatar">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <img v-if="conv.avatar" :src="conv.avatar" class="avatar-img" @error="e => e.target.style.display='none'" />
+                <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
               </div>
             </template>
             <template v-else>
@@ -128,9 +129,14 @@
         <div class="dm-chat-header">
           <div class="conv-avatar-wrap">
             <template v-if="activeConv.is_group">
-              <div class="group-avatar group-avatar-md">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <div class="group-avatar group-avatar-md group-avatar-upload" @click="triggerAvatarUpload" title="Change group avatar">
+                <img v-if="activeConv.avatar" :src="activeConv.avatar" class="avatar-img" @error="e => e.target.style.display='none'" />
+                <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <div class="avatar-upload-overlay">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </div>
               </div>
+              <input ref="avatarInputEl" type="file" accept="image/*" class="hidden-input" @change="onAvatarSelected" />
             </template>
             <template v-else>
               <div class="conv-avatar conv-avatar-md" :style="avatarBg(otherMember(activeConv))">
@@ -338,6 +344,27 @@ const pendingFiles = ref([])
 const showAddMember = ref(false)
 const addMemberSearch = ref('')
 const filteredAddMembers = ref([])
+
+// Group avatar upload
+const avatarInputEl = ref(null)
+function triggerAvatarUpload() {
+  avatarInputEl.value?.click()
+}
+async function onAvatarSelected(e) {
+  const file = e.target.files?.[0]
+  if (!file || !activeConv.value) return
+  e.target.value = ''
+  try {
+    const fd = new FormData()
+    fd.append('avatar', file)
+    const { data } = await messagesApi.uploadAvatar(activeConv.value.id, fd)
+    activeConv.value = { ...activeConv.value, avatar: data.avatar }
+    const idx = conversations.value.findIndex(c => c.id === activeConv.value.id)
+    if (idx !== -1) conversations.value[idx] = { ...conversations.value[idx], avatar: data.avatar }
+  } catch {
+    ui.error('Failed to upload avatar')
+  }
+}
 
 onMounted(async () => {
   notificationsStore.markSeen()
@@ -612,11 +639,20 @@ async function addMember(user) {
 async function removeMember(member) {
   if (!confirm(t('dm.remove_member_confirm'))) return
   try {
-    await messagesApi.removeMember(activeConv.value.id, member.user_id)
-    // Refresh conversation to get updated member list
-    const { data } = await messagesApi.getConversations()
-    conversations.value = data || []
-    activeConv.value = conversations.value.find(c => c.id === activeConvId.value) || activeConv.value
+    const { data } = await messagesApi.removeMember(activeConv.value.id, member.user_id)
+    if (data?.conversation_deleted) {
+      // Conversation was auto-deleted (only creator left, no messages)
+      conversations.value = conversations.value.filter(c => c.id !== activeConvId.value)
+      activeConv.value = null
+      activeConvId.value = null
+      clearInterval(pollTimer)
+      messages.value = []
+    } else {
+      // Refresh conversation to get updated member list
+      const { data: convs } = await messagesApi.getConversations()
+      conversations.value = convs || []
+      activeConv.value = conversations.value.find(c => c.id === activeConvId.value) || activeConv.value
+    }
   } catch {
     ui.error('Failed to remove member')
   }
@@ -931,6 +967,21 @@ function dayLabel(dateStr) {
   color: var(--color-text-muted);
 }
 .group-avatar-md { width: 42px; height: 42px; }
+.group-avatar-upload { cursor: pointer; position: relative; }
+.group-avatar-upload:hover .avatar-upload-overlay { opacity: 1; }
+.avatar-upload-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(0,0,0,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity .15s;
+  color: #fff;
+}
+.hidden-input { display: none; }
 
 .avatar-img { width: 100%; height: 100%; object-fit: cover; }
 .avatar-initials { color: #fff; font-size: 13px; font-weight: 700; }
