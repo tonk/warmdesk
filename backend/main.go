@@ -2,7 +2,9 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/tonk/coworker/config"
@@ -13,9 +15,18 @@ import (
 	"github.com/tonk/coworker/ws"
 )
 
+// version is set at build time via -ldflags "-X main.version=<tag>".
+var version = "dev"
+
 func main() {
 	configFile := flag.String("config", "", "path to config file (overrides CONFIG_FILE env var)")
+	showVersion := flag.Bool("version", false, "print version and exit")
 	flag.Parse()
+
+	if *showVersion {
+		fmt.Println(version)
+		os.Exit(0)
+	}
 
 	cfg := config.Load(*configFile)
 	handlers.InitSystemDefaults(cfg)
