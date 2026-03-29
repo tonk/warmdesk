@@ -111,6 +111,7 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webDir string, 
 			convs.PATCH("/:id/messages/:msgId", handlers.EditConversationMessage)
 			convs.DELETE("/:id/messages/:msgId", handlers.DeleteConversationMessage)
 			convs.POST("/:id/members", handlers.AddConversationMember)
+			convs.DELETE("/:id/members/:userId", handlers.RemoveConversationMember)
 			convs.POST("/:id/messages/:msgId/reactions", handlers.ToggleConvReaction)
 		}
 

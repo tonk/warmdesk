@@ -141,7 +141,20 @@
           </div>
           <div class="dm-header-info">
             <div class="dm-header-name">{{ convDisplayName(activeConv) }}</div>
-            <div class="dm-header-handle">{{ memberList(activeConv) }}</div>
+            <div class="dm-header-handle">
+              <template v-if="activeConv.is_group">
+                <span v-for="m in activeConv.members" :key="m.user_id" class="member-chip">
+                  {{ m.user?.display_name || m.user?.username }}
+                  <button
+                    v-if="m.user_id !== auth.user?.id"
+                    class="chip-remove chip-remove-sm"
+                    @click.stop="removeMember(m)"
+                    :title="$t('dm.remove_member')"
+                  >×</button>
+                </span>
+              </template>
+              <template v-else>{{ memberList(activeConv) }}</template>
+            </div>
           </div>
           <!-- Add member button for group chats -->
           <button v-if="activeConv.is_group" class="add-member-btn" @click="showAddMember = !showAddMember" title="Add member">
@@ -276,6 +289,7 @@
 <script setup>
 import { ref, computed, nextTick, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useUIStore } from '@/stores/ui'
 import { messagesApi } from '@/api/messages'
@@ -290,6 +304,7 @@ import FileUploadButton from '@/components/common/FileUploadButton.vue'
 import MessageReactions from '@/components/common/MessageReactions.vue'
 
 const route = useRoute()
+const { t } = useI18n()
 const auth = useAuthStore()
 const notificationsStore = useNotificationsStore()
 const { formatTime } = useDateFormat()
@@ -343,13 +358,19 @@ onMounted(async () => {
 // Sidebar click navigation
 watch(() => route.query.user, async (userId) => {
   if (!userId) return
+  const loads = []
   if (!allUsers.value.length) {
-    try {
-      const { data } = await messagesApi.listUsers()
+    loads.push(messagesApi.listUsers().then(({ data }) => {
       allUsers.value = (data || []).filter(u => u.id !== auth.user?.id)
       filteredUsers.value = allUsers.value
-    } catch {}
+    }).catch(() => {}))
   }
+  if (!conversations.value.length) {
+    loads.push(messagesApi.getConversations().then(({ data }) => {
+      conversations.value = data || []
+    }).catch(() => {}))
+  }
+  if (loads.length) await Promise.all(loads)
   await openOrCreateDM(Number(userId))
 })
 
@@ -588,6 +609,19 @@ async function addMember(user) {
   }
 }
 
+async function removeMember(member) {
+  if (!confirm(t('dm.remove_member_confirm'))) return
+  try {
+    await messagesApi.removeMember(activeConv.value.id, member.user_id)
+    // Refresh conversation to get updated member list
+    const { data } = await messagesApi.getConversations()
+    conversations.value = data || []
+    activeConv.value = conversations.value.find(c => c.id === activeConvId.value) || activeConv.value
+  } catch {
+    ui.error('Failed to remove member')
+  }
+}
+
 function scrollToBottom() {
   if (messagesEl.value) messagesEl.value.scrollTop = messagesEl.value.scrollHeight
 }
@@ -780,6 +814,27 @@ function dayLabel(dateStr) {
 }
 .chip-remove:hover { color: #fff; }
 
+.member-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: var(--color-surface-raised);
+  border-radius: 10px;
+  padding: 1px 6px;
+  font-size: 11px;
+  margin-right: 3px;
+}
+.chip-remove-sm {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  padding: 0;
+}
+.chip-remove-sm:hover { color: var(--color-danger); }
+
 .group-name-input {
   width: 100%;
   padding: 6px 10px;
@@ -943,7 +998,7 @@ function dayLabel(dateStr) {
 }
 .dm-header-info { flex: 1; min-width: 0; }
 .dm-header-name { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.dm-header-handle { font-size: 12px; color: var(--color-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dm-header-handle { font-size: 12px; color: var(--color-text-muted); display: flex; flex-wrap: wrap; gap: 3px; align-items: center; }
 
 .add-member-btn {
   width: 32px;

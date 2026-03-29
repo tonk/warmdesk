@@ -233,7 +233,9 @@
     "title": "Directe berichten",
     "search_users": "Gebruikers zoeken...",
     "no_conversations": "Nog geen gesprekken. Begin er een door op + te klikken",
-    "select_conversation": "Selecteer een gesprek om te beginnen"
+    "select_conversation": "Selecteer een gesprek om te beginnen",
+    "remove_member": "Verwijderen uit groep",
+    "remove_member_confirm": "Deze persoon uit de groepschat verwijderen?"
   },
   "sidebar": {
     "starred": "Gemarkeerde projecten",
@@ -280,6 +282,8 @@
     "week": "Week",
     "project_filter": "Project",
     "all_projects": "Alle projecten",
+    "assignee_filter": "Verantwoordelijken",
+    "all_assignees": "Alle verantwoordelijken",
     "run": "Rapport genereren",
     "loading": "Rapport laden...",
     "no_data": "Geen tijdboekingen gevonden voor de geselecteerde periode.",

@@ -233,7 +233,9 @@
     "title": "Mensajes directos",
     "search_users": "Buscar usuarios...",
     "no_conversations": "Aún no hay conversaciones. Inicie una con +",
-    "select_conversation": "Seleccione una conversación para comenzar a chatear"
+    "select_conversation": "Seleccione una conversación para comenzar a chatear",
+    "remove_member": "Eliminar del grupo",
+    "remove_member_confirm": "¿Eliminar a esta persona del chat grupal?"
   },
   "sidebar": {
     "starred": "Proyectos destacados",
@@ -280,6 +282,8 @@
     "week": "Semana",
     "project_filter": "Proyecto",
     "all_projects": "Todos los proyectos",
+    "assignee_filter": "Responsables",
+    "all_assignees": "Todos los responsables",
     "run": "Generar informe",
     "loading": "Cargando informe...",
     "no_data": "No se encontraron entradas de tiempo para el período seleccionado.",

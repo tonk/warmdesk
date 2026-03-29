@@ -240,6 +240,46 @@ func DeleteConversationMessage(c *gin.Context) {
 	c.JSON(http.StatusOK, msg)
 }
 
+// RemoveConversationMember DELETE /conversations/:id/members/:userId
+func RemoveConversationMember(c *gin.Context) {
+	me := middleware.GetUserID(c)
+	convID, _ := strconv.Atoi(c.Param("id"))
+	targetID, _ := strconv.Atoi(c.Param("userId"))
+
+	if !isMember(uint(convID), me) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "not a member"})
+		return
+	}
+	if uint(targetID) == me {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "cannot remove yourself"})
+		return
+	}
+	if !isMember(uint(convID), uint(targetID)) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "user is not a member"})
+		return
+	}
+
+	database.DB.Where("conversation_id = ? AND user_id = ?", convID, targetID).
+		Delete(&models.ConversationMember{})
+
+	// Notify all remaining members
+	var memberIDs []uint
+	database.DB.Model(&models.ConversationMember{}).
+		Where("conversation_id = ?", convID).
+		Pluck("user_id", &memberIDs)
+	for _, uid := range memberIDs {
+		appws.BroadcastToUser(uid, appws.Message{
+			Type: "dm.member_removed",
+			Payload: map[string]interface{}{
+				"conversation_id": convID,
+				"user_id":         targetID,
+			},
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "removed"})
+}
+
 // AddConversationMember POST /conversations/:id/members
 func AddConversationMember(c *gin.Context) {
 	me := middleware.GetUserID(c)

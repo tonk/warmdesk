@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -56,7 +57,7 @@ func isoWeekStart(year, week int) time.Time {
 }
 
 // GetTimeReport returns time report data as JSON.
-// Query params: period=all|year|month|week, year, month, week, project (slug)
+// Query params: period=all|year|month|week, year, month, week, project (slug), assignees (comma-separated user IDs)
 func GetTimeReport(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	globalRole := middleware.GetGlobalRole(c)
@@ -65,6 +66,7 @@ func GetTimeReport(c *gin.Context) {
 	yearStr := c.Query("year")
 	monthStr := c.Query("month")
 	weekStr := c.Query("week")
+	assigneesStr := c.Query("assignees")
 
 	query := database.DB.Model(&models.Card{}).Where("time_spent_minutes > 0")
 
@@ -135,6 +137,19 @@ func GetTimeReport(c *gin.Context) {
 		end := start.AddDate(0, 0, 7)
 		periodLabel = fmt.Sprintf("Week %d / %d", week, year)
 		query = query.Where("updated_at >= ? AND updated_at < ?", start, end)
+	}
+
+	// Filter by assignees if specified
+	if assigneesStr != "" {
+		var assigneeIDs []uint
+		for _, s := range strings.Split(assigneesStr, ",") {
+			if id, err := strconv.ParseUint(strings.TrimSpace(s), 10, 64); err == nil {
+				assigneeIDs = append(assigneeIDs, uint(id))
+			}
+		}
+		if len(assigneeIDs) > 0 {
+			query = query.Where("id IN (SELECT card_id FROM card_assignees WHERE user_id IN ?)", assigneeIDs)
+		}
 	}
 
 	var cards []models.Card

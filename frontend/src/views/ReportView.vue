@@ -44,6 +44,28 @@
             </select>
           </div>
 
+          <!-- Assignee multi-select -->
+          <div class="filter-group assignee-filter-group" ref="assigneeDropdownRef">
+            <label class="filter-label">{{ $t('report.assignee_filter') }}</label>
+            <div class="assignee-select" @click="showAssigneeDropdown = !showAssigneeDropdown">
+              <span class="assignee-select-label">
+                <template v-if="filters.assignees.length === 0">{{ $t('report.all_assignees') }}</template>
+                <template v-else>{{ selectedAssigneeNames }}</template>
+              </span>
+              <svg class="select-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div v-if="showAssigneeDropdown" class="assignee-dropdown">
+              <label class="assignee-option">
+                <input type="checkbox" :checked="filters.assignees.length === 0" @change="filters.assignees = []" />
+                {{ $t('report.all_assignees') }}
+              </label>
+              <label v-for="u in allUsers" :key="u.id" class="assignee-option">
+                <input type="checkbox" :value="u.id" v-model="filters.assignees" />
+                {{ u.display_name || u.username }}
+              </label>
+            </div>
+          </div>
+
           <div class="filter-group filter-actions">
             <button class="btn btn-primary" @click="loadReport" :disabled="loading">
               {{ loading ? $t('report.loading') : $t('report.run') }}
@@ -131,16 +153,20 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { projectsApi } from '@/api/projects'
 import { reportsApi } from '@/api/reports'
+import { messagesApi } from '@/api/messages'
 
 const { t } = useI18n()
 
 const loading = ref(false)
 const report = ref(null)
 const projects = ref([])
+const allUsers = ref([])
+const showAssigneeDropdown = ref(false)
+const assigneeDropdownRef = ref(null)
 
 const now = new Date()
 const filters = ref({
@@ -148,7 +174,8 @@ const filters = ref({
   year: now.getFullYear(),
   month: now.getMonth() + 1,
   week: getISOWeek(now),
-  project: 'all'
+  project: 'all',
+  assignees: []
 })
 
 function getISOWeek(date) {
@@ -163,6 +190,22 @@ const yearOptions = computed(() => {
   return Array.from({ length: 5 }, (_, i) => y - i)
 })
 
+const selectedAssigneeNames = computed(() => {
+  if (!filters.value.assignees.length) return t('report.all_assignees')
+  return filters.value.assignees
+    .map(id => {
+      const u = allUsers.value.find(u => u.id === id)
+      return u ? (u.display_name || u.username) : id
+    })
+    .join(', ')
+})
+
+function onClickOutsideAssignee(e) {
+  if (assigneeDropdownRef.value && !assigneeDropdownRef.value.contains(e.target)) {
+    showAssigneeDropdown.value = false
+  }
+}
+
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December']
 
@@ -174,12 +217,14 @@ function formatMinutes(minutes) {
 
 async function loadReport() {
   loading.value = true
+  showAssigneeDropdown.value = false
   try {
     const params = { period: filters.value.period }
     if (filters.value.period !== 'all') params.year = filters.value.year
     if (filters.value.period === 'month') params.month = filters.value.month
     if (filters.value.period === 'week') params.week = filters.value.week
     if (filters.value.project !== 'all') params.project = filters.value.project
+    if (filters.value.assignees.length) params.assignees = filters.value.assignees.join(',')
     const { data } = await reportsApi.getTimeReport(params)
     report.value = data
   } catch (e) {
@@ -238,9 +283,18 @@ async function exportXLSX() {
 
 onMounted(async () => {
   try {
-    const { data } = await projectsApi.list()
-    projects.value = data.filter(p => !p.is_archived)
+    const [projRes, userRes] = await Promise.all([
+      projectsApi.list(),
+      messagesApi.listUsers()
+    ])
+    projects.value = (projRes.data || []).filter(p => !p.is_archived)
+    allUsers.value = userRes.data || []
   } catch {}
+  document.addEventListener('click', onClickOutsideAssignee)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', onClickOutsideAssignee)
 })
 </script>
 
@@ -287,6 +341,51 @@ onMounted(async () => {
   letter-spacing: 0.04em;
 }
 .filter-actions { justify-content: flex-end; padding-top: 2px; }
+
+.assignee-filter-group { position: relative; min-width: 160px; }
+.assignee-select {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.assignee-select:hover { border-color: var(--color-primary); }
+.assignee-select-label { overflow: hidden; text-overflow: ellipsis; flex: 1; }
+.select-chevron { flex-shrink: 0; color: var(--color-text-muted); }
+.assignee-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 100%;
+  max-height: 220px;
+  overflow-y: auto;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.12);
+  z-index: 100;
+  padding: 4px 0;
+}
+.assignee-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+}
+.assignee-option:hover { background: var(--color-surface-hover); }
+.assignee-option input[type="checkbox"] { accent-color: var(--color-primary); cursor: pointer; }
 .export-row {
   display: flex;
   gap: 10px;

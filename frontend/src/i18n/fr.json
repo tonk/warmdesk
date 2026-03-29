@@ -233,7 +233,9 @@
     "title": "Messages directs",
     "search_users": "Rechercher des utilisateurs...",
     "no_conversations": "Pas encore de conversations. Commencez-en une avec +",
-    "select_conversation": "Sélectionnez une conversation pour commencer à discuter"
+    "select_conversation": "Sélectionnez une conversation pour commencer à discuter",
+    "remove_member": "Retirer du groupe",
+    "remove_member_confirm": "Retirer cette personne de la conversation de groupe ?"
   },
   "sidebar": {
     "starred": "Projets marqués",
@@ -280,6 +282,8 @@
     "week": "Semaine",
     "project_filter": "Projet",
     "all_projects": "Tous les projets",
+    "assignee_filter": "Responsables",
+    "all_assignees": "Tous les responsables",
     "run": "Générer le rapport",
     "loading": "Chargement du rapport...",
     "no_data": "Aucune entrée de temps trouvée pour la période sélectionnée.",

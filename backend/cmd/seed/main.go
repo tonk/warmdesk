@@ -670,7 +670,145 @@ I'll move us to "go" once all boxes are checked. Please comment here with your s
 	}
 	fmt.Printf("   Created %d topics\n", totalTopics)
 
-	// ── 5. Summary ────────────────────────────────────────────────────────────
+	// ── 5. Conversations (DMs + group chat) ──────────────────────────────────
+	fmt.Println("→ Creating conversations…")
+
+	type msgSpec struct {
+		author string
+		body   string
+		ago    time.Duration // how long ago the message was sent
+	}
+	type convSpec struct {
+		members  []string // user keys; first member is "created by"
+		isGroup  bool
+		name     string // only for group chats
+		messages []msgSpec
+	}
+
+	now := time.Now()
+
+	convSpecs := []convSpec{
+		// 1-on-1: Alex ↔ Sarah
+		{
+			members: []string{"admin", "sarah"},
+			messages: []msgSpec{
+				{"admin", "Hey Sarah, quick question — are you planning to push the dark mode PR today or should I move the card to Review?", 72 * time.Hour},
+				{"sarah", "Hey! Yes, I'll open the PR this afternoon once I've sorted the Safari flicker bug.", 71*time.Hour + 45*time.Minute},
+				{"admin", "Perfect, no rush. Let me know if you need a second pair of eyes on the CSS.", 71*time.Hour + 30*time.Minute},
+				{"sarah", "Will do. Also — did you see Marc's comment about `prefers-color-scheme`? Good catch from him.", 71*time.Hour + 10*time.Minute},
+				{"admin", "Yeah, I replied there. Totally agree, saves a flash on first load. Classic progressive enhancement.", 71 * time.Hour},
+				{"sarah", "PR is up! Assigned you as reviewer 🎉", 48 * time.Hour},
+				{"admin", "Reviewed — two minor nits but nothing blocking. LGTM overall 👍", 47*time.Hour + 30*time.Minute},
+				{"sarah", "Thanks, fixed both. Merging now.", 47 * time.Hour},
+			},
+		},
+		// 1-on-1: Marc ↔ Lisa
+		{
+			members: []string{"marc", "lisa"},
+			messages: []msgSpec{
+				{"lisa", "Marc, I spotted something weird in the Postgres migration script — it's not handling NULL values in the `description` column correctly.", 36 * time.Hour},
+				{"marc", "Oh no — can you paste the exact row that's failing?", 35*time.Hour + 50*time.Minute},
+				{"lisa", "It's any card where description was never set. The column is NOT NULL in the Postgres schema but nullable in SQLite, so rows come over as empty string and then the constraint fires.", 35*time.Hour + 40*time.Minute},
+				{"marc", "Good catch. I'll add a COALESCE in the export query to default to '' and change the Postgres column to allow NULL. Give me 20 min.", 35*time.Hour + 30*time.Minute},
+				{"lisa", "Sounds good. I'll keep an eye on the slow-query log in the meantime.", 35*time.Hour + 25*time.Minute},
+				{"marc", "Fixed! New script is in the `migration/` branch. Can you run a test against the staging copy?", 35 * time.Hour},
+				{"lisa", "Running now… ✅ All 4.2 M rows migrated cleanly. Zero errors.", 34*time.Hour + 30*time.Minute},
+				{"marc", "Legend. I'll update the checklist topic and schedule the prod window for Saturday at 02:00.", 34*time.Hour + 15*time.Minute},
+			},
+		},
+		// 1-on-1: Sarah ↔ Lisa
+		{
+			members: []string{"sarah", "lisa"},
+			messages: []msgSpec{
+				{"lisa", "Sarah, do you have five minutes for a quick call? The Android dark mode is looking off on the Pixel 7 emulator.", 24 * time.Hour},
+				{"sarah", "Sure! Give me 10 min — in a standup right now.", 23*time.Hour + 55*time.Minute},
+				{"sarah", "Ready when you are.", 23*time.Hour + 45*time.Minute},
+				{"lisa", "I think it's the `StatusBar` style not switching — it stays light even when the theme flips to dark.", 23*time.Hour + 30*time.Minute},
+				{"sarah", "Ah yes! You need to call `StatusBar.setStyle(Style.Dark)` explicitly inside the `ionViewWillEnter` hook — the automatic detection doesn't work on Capacitor 5.", 23*time.Hour + 20*time.Minute},
+				{"lisa", "That's exactly it! Works perfectly now. Thanks for the quick fix 🙌", 23*time.Hour + 10*time.Minute},
+				{"sarah", "No problem. I'll add a note to the mobile dev guide so the next person doesn't hit the same thing.", 23 * time.Hour},
+			},
+		},
+		// 1-on-1: Admin ↔ Marc
+		{
+			members: []string{"admin", "marc"},
+			messages: []msgSpec{
+				{"admin", "Marc — heads up, the quarterly security audit is due next week. Have you started the vulnerability scan?", 5 * 24 * time.Hour},
+				{"marc", "Not yet, I've been deep in the Postgres migration. Can I start it Thursday?", 5*24*time.Hour - 30*time.Minute},
+				{"admin", "Thursday is fine, just make sure it's done before Friday EOD. Legal needs the report by Monday.", 5*24*time.Hour - 1*time.Hour},
+				{"marc", "Understood. I'll use the same toolchain as last quarter — nmap + OWASP ZAP + a manual headers review.", 5*24*time.Hour - 2*time.Hour},
+				{"admin", "Perfect. Ping me if you find anything critical.", 5*24*time.Hour - 2*time.Hour - 15*time.Minute},
+				{"marc", "Scan complete — no critical findings, two mediums. Both are missing security headers (X-Frame-Options and Referrer-Policy).", 2 * 24 * time.Hour},
+				{"admin", "Easy fixes. Can you open cards for both and assign to yourself?", 2*24*time.Hour - 10*time.Minute},
+				{"marc", "Done. Cards INF-22 and INF-23. Should have patches deployed by tomorrow.", 2*24*time.Hour - 20*time.Minute},
+			},
+		},
+		// Group chat: Website Redesign team
+		{
+			members: []string{"admin", "sarah", "marc"},
+			isGroup:  true,
+			name:     "Website Redesign Team",
+			messages: []msgSpec{
+				{"admin", "Morning everyone! Quick sync on the redesign — where are we blocking?", 3 * 24 * time.Hour},
+				{"sarah", "The image optimisation PR is in review and should be merged today. LCP is looking great 🚀", 3*24*time.Hour - 15*time.Minute},
+				{"marc", "I'm finishing up the mobile nav fix. Should be done by EOD.", 3*24*time.Hour - 20*time.Minute},
+				{"admin", "Great. After those land, the only thing blocking staging deploy is the accessibility audit. Marc, are you planning to pick that up?", 3*24*time.Hour - 30*time.Minute},
+				{"marc", "Yes, I've blocked out Thursday afternoon for it.", 3*24*time.Hour - 35*time.Minute},
+				{"sarah", "I can pair on the ARIA side if you want — I've done a few of these before.", 3*24*time.Hour - 40*time.Minute},
+				{"marc", "That would be really helpful actually, thanks Sarah 🙏", 3*24*time.Hour - 45*time.Minute},
+				{"admin", "Awesome. I'll push the staging deploy for Friday then. Any blockers I should know about?", 2 * 24 * time.Hour},
+				{"sarah", "None from my side. Image PR just got merged 🎉", 2*24*time.Hour - 5*time.Minute},
+				{"marc", "All clear. Nav fix is deployed to staging already.", 2*24*time.Hour - 10*time.Minute},
+				{"admin", "Perfect. Friday deploy is on. I'll send a calendar invite for the staging review.", 2*24*time.Hour - 15*time.Minute},
+			},
+		},
+	}
+
+	totalConvs := 0
+	totalConvMsgs := 0
+	for _, cs := range convSpecs {
+		conv := &models.Conversation{
+			Name:        cs.name,
+			IsGroup:     cs.isGroup,
+			CreatedByID: users[cs.members[0]].ID,
+		}
+		must(db.Create(conv).Error)
+
+		for _, key := range cs.members {
+			must(db.Create(&models.ConversationMember{
+				ConversationID: conv.ID,
+				UserID:         users[key].ID,
+				JoinedAt:       now.Add(-7 * 24 * time.Hour),
+			}).Error)
+		}
+
+		for _, ms := range cs.messages {
+			sentAt := now.Add(-ms.ago)
+			msg := &models.ConversationMessage{
+				ConversationID: conv.ID,
+				SenderID:       users[ms.author].ID,
+				Body:           ms.body,
+			}
+			must(db.Create(msg).Error)
+			// Set realistic created_at timestamps
+			must(db.Model(msg).Updates(map[string]interface{}{
+				"created_at": sentAt,
+				"updated_at": sentAt,
+			}).Error)
+			totalConvMsgs++
+		}
+
+		// Bump updated_at to the last message time so conversations sort correctly
+		if len(cs.messages) > 0 {
+			lastMsgTime := now.Add(-cs.messages[len(cs.messages)-1].ago)
+			must(db.Model(conv).Update("updated_at", lastMsgTime).Error)
+		}
+
+		totalConvs++
+	}
+	fmt.Printf("   Created %d conversations (%d messages)\n", totalConvs, totalConvMsgs)
+
+	// ── 6. Summary ────────────────────────────────────────────────────────────
 	fmt.Println()
 	fmt.Println("✅ Demo data seeded successfully!")
 	fmt.Println()
@@ -685,9 +823,10 @@ I'll move us to "go" once all boxes are checked. Please comment here with your s
 	fmt.Println("  │ demo.viewer         │ Victor Viewer   │ viewer │")
 	fmt.Println("  └─────────────────────┴─────────────────┴────────┘")
 	fmt.Println()
-	fmt.Printf("  Projects  : %d\n", len(demoProjects))
-	fmt.Printf("  Cards     : %d\n", totalCards)
-	fmt.Printf("  Topics    : %d\n", totalTopics)
+	fmt.Printf("  Projects      : %d\n", len(demoProjects))
+	fmt.Printf("  Cards         : %d\n", totalCards)
+	fmt.Printf("  Topics        : %d\n", totalTopics)
+	fmt.Printf("  Conversations : %d (%d messages)\n", totalConvs, totalConvMsgs)
 	fmt.Println()
 	fmt.Println("  Start the server and log in at http://localhost:8080")
 }
@@ -734,7 +873,17 @@ func removeDemoData(db *gorm.DB) {
 		db.Unscoped().Where("id IN ?", projectIDs).Delete(&models.Project{})
 	}
 
+	// Conversations created by or involving demo users
 	if len(userIDs) > 0 {
+		var convIDs []uint
+		db.Model(&models.ConversationMember{}).
+			Where("user_id IN ?", userIDs).
+			Pluck("conversation_id", &convIDs)
+		if len(convIDs) > 0 {
+			db.Unscoped().Where("conversation_id IN ?", convIDs).Delete(&models.ConversationMessage{})
+			db.Where("conversation_id IN ?", convIDs).Delete(&models.ConversationMember{})
+			db.Unscoped().Where("id IN ?", convIDs).Delete(&models.Conversation{})
+		}
 		db.Unscoped().Where("id IN ?", userIDs).Delete(&models.User{})
 	}
 

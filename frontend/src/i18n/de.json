@@ -233,7 +233,9 @@
     "title": "Direktnachrichten",
     "search_users": "Benutzer suchen...",
     "no_conversations": "Noch keine Gespräche. Starten Sie eines mit +",
-    "select_conversation": "Wählen Sie ein Gespräch aus, um zu chatten"
+    "select_conversation": "Wählen Sie ein Gespräch aus, um zu chatten",
+    "remove_member": "Aus Gruppe entfernen",
+    "remove_member_confirm": "Diese Person aus dem Gruppenchat entfernen?"
   },
   "sidebar": {
     "starred": "Markierte Projekte",
@@ -280,6 +282,8 @@
     "week": "Woche",
     "project_filter": "Projekt",
     "all_projects": "Alle Projekte",
+    "assignee_filter": "Bearbeiter",
+    "all_assignees": "Alle Bearbeiter",
     "run": "Bericht erstellen",
     "loading": "Bericht wird geladen...",
     "no_data": "Keine Zeiteinträge für den gewählten Zeitraum gefunden.",

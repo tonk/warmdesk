@@ -10,6 +10,21 @@ This is an experiment, and a biggie :-)
 I haven't written a single line of code, I only created and updated `what.md`
 and asked Claude Code to generate the app.
 
+## Screenshots
+
+| | |
+|---|---|
+| ![Login](screenshots/01-login.png) | ![Dashboard](screenshots/02-dashboard.png) |
+| *Login* | *Dashboard* |
+| ![Kanban board](screenshots/03-board.png) | ![Card detail](screenshots/04-card-detail.png) |
+| *Kanban board* | *Card detail with checklist, comments and time tracking* |
+| ![Topics](screenshots/05-topics.png) | ![Direct messages](screenshots/06-messages.png) |
+| *Threaded project discussions* | *Direct messages and group chat* |
+| ![Time report](screenshots/07-report.png) | ![Admin panel](screenshots/08-admin-users.png) |
+| *Time report with PDF/Excel export* | *Admin panel — user management* |
+| ![Admin settings](screenshots/09-admin-settings.png) | ![User settings](screenshots/10-user-settings.png) |
+| *Admin settings* | *User settings* |
+
 ## Features
 
 - **Kanban boards** — columns, cards, drag-and-drop reorder, labels, priorities, due dates, assignees, watchers, markdown descriptions and comments

@@ -192,6 +192,8 @@
     "period_week": "Week",
     "project_filter": "Project",
     "all_projects": "All Projects",
+    "assignee_filter": "Assignees",
+    "all_assignees": "All Assignees",
     "year": "Year",
     "month": "Month",
     "week": "Week",
@@ -260,7 +262,9 @@
     "title": "Direct Messages",
     "search_users": "Search users...",
     "no_conversations": "No conversations yet. Start one by clicking +",
-    "select_conversation": "Select a conversation to start chatting"
+    "select_conversation": "Select a conversation to start chatting",
+    "remove_member": "Remove from group",
+    "remove_member_confirm": "Remove this person from the group chat?"
   },
   "sidebar": {
     "starred": "Starred Projects",
