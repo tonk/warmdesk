@@ -21,6 +21,13 @@ var (
 	hubsMu     sync.Mutex
 )
 
+// GetOrCreateUserHub returns a dedicated notification hub for a specific user.
+// The hub is stored in globalHubs under (userID | 0x80000000) to avoid
+// collisions with real project IDs, and is found automatically by BroadcastToUser.
+func GetOrCreateUserHub(userID uint) *Hub {
+	return GetOrCreateHub(userID | 0x80000000)
+}
+
 // GetOrCreateHub returns the hub for a project, creating it if needed.
 func GetOrCreateHub(projectID uint) *Hub {
 	hubsMu.Lock()

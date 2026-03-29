@@ -32,5 +32,9 @@ export const useNotificationsStore = defineStore('notifications', () => {
     localStorage.setItem(STORAGE_KEY, String(lastSeenAt.value))
   }
 
-  return { hasUnread, checkUnread, markSeen }
+  function isConvUnread(conv) {
+    return new Date(conv.updated_at).getTime() > lastSeenAt.value
+  }
+
+  return { hasUnread, conversations, isConvUnread, checkUnread, markSeen }
 })

@@ -299,27 +299,39 @@
         <!-- Compose -->
         <div class="dm-compose">
           <AttachmentList v-if="pendingFiles.length" :attachments="pendingFiles" :can-delete="true" @remove="removePending" />
-          <div class="compose-body">
-            <div class="compose-avatar" :style="avatarBg(auth.user)">
-              <img v-if="getAvatar(auth.user)" :src="getAvatar(auth.user)" class="avatar-img" @error="e => e.target.style.display='none'" />
-              <span v-else class="avatar-initials avatar-initials-sm">{{ initials(auth.user) }}</span>
+          <div class="compose-outer" style="position:relative">
+            <InlineEmojiPicker v-if="emojiOpen" @pick="onEmojiPick" @close="emojiOpen = false" />
+            <MentionDropdown
+              v-if="mentionUsers.length"
+              :users="mentionUsers"
+              :active-index="mentionIndex"
+              @pick="pickMention"
+              @update:activeIndex="mentionIndex = $event"
+            />
+            <div class="compose-body">
+              <div class="compose-avatar" :style="avatarBg(auth.user)">
+                <img v-if="getAvatar(auth.user)" :src="getAvatar(auth.user)" class="avatar-img" @error="e => e.target.style.display='none'" />
+                <span v-else class="avatar-initials avatar-initials-sm">{{ initials(auth.user) }}</span>
+              </div>
+              <FileUploadButton @files-selected="onFilesSelected" />
+              <button class="emoji-trigger-btn" @click="emojiOpen = !emojiOpen" title="Emoji" type="button">😊</button>
+              <textarea
+                class="compose-textarea"
+                v-model="newMessage"
+                :placeholder="$t('chat.placeholder')"
+                rows="1"
+                :disabled="sending"
+                ref="textareaEl"
+                @keydown.enter.exact="onEnter"
+                @keydown="onKeydown"
+                @input="onInput"
+              ></textarea>
+              <button class="compose-send-btn" @click="send" :disabled="(!newMessage.trim() && !pendingFiles.length) || sending" :title="$t('chat.send')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </button>
             </div>
-            <FileUploadButton @files-selected="onFilesSelected" />
-            <textarea
-              class="compose-textarea"
-              v-model="newMessage"
-              :placeholder="$t('chat.placeholder')"
-              rows="1"
-              :disabled="sending"
-              ref="textareaEl"
-              @keydown.enter.exact.prevent="send"
-              @input="autoResize"
-            ></textarea>
-            <button class="compose-send-btn" @click="send" :disabled="(!newMessage.trim() && !pendingFiles.length) || sending" :title="$t('chat.send')">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-            </button>
           </div>
-          <div class="compose-hint">Press Enter to send</div>
+          <div class="compose-hint">Enter to send · Markdown · @mention</div>
         </div>
 
       </template>
@@ -340,8 +352,11 @@ import { attachmentsApi } from '@/api/attachments'
 import { useNotificationsStore } from '@/stores/notifications'
 import { useDateFormat } from '@/composables/useDateFormat'
 import { avatarUrl } from '@/composables/useAvatar'
+import { useCompose } from '@/composables/useCompose'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
+import InlineEmojiPicker from '@/components/common/InlineEmojiPicker.vue'
+import MentionDropdown from '@/components/common/MentionDropdown.vue'
 import AttachmentList from '@/components/common/AttachmentList.vue'
 import FileUploadButton from '@/components/common/FileUploadButton.vue'
 import MessageReactions from '@/components/common/MessageReactions.vue'
@@ -372,6 +387,39 @@ const sending = ref(false)
 const messagesEl = ref(null)
 const textareaEl = ref(null)
 let pollTimer = null
+
+// Emoji + mention
+const emojiOpen = ref(false)
+
+const { mentionUsers, mentionIndex, insertText, onTextareaInput, onTextareaKeydown, pickMention } = useCompose({
+  textareaEl,
+  getValue: () => newMessage.value,
+  setValue: (v) => { newMessage.value = v },
+  users: allUsers,
+})
+
+function onEmojiPick(emoji) {
+  insertText(emoji)
+  emojiOpen.value = false
+}
+
+function onInput(e) {
+  autoResize(e)
+  onTextareaInput()
+}
+
+function onEnter(e) {
+  if (mentionUsers.value.length) {
+    onTextareaKeydown(e)
+  } else {
+    e.preventDefault()
+    send()
+  }
+}
+
+function onKeydown(e) {
+  if (e.key !== 'Enter') onTextareaKeydown(e)
+}
 
 // Edit state
 const editingMsgId = ref(null)
@@ -420,8 +468,13 @@ onMounted(async () => {
     allProjects.value = projRes.data || []
   } catch {}
 
-  const targetId = route.query.user ? Number(route.query.user) : null
-  if (targetId) await openOrCreateDM(targetId)
+  const targetUserId = route.query.user ? Number(route.query.user) : null
+  if (targetUserId) await openOrCreateDM(targetUserId)
+  const targetConvId = route.query.conv ? Number(route.query.conv) : null
+  if (targetConvId) {
+    const conv = conversations.value.find(c => c.id === targetConvId)
+    if (conv) openConversation(conv)
+  }
 })
 
 // Sidebar click navigation
@@ -441,6 +494,16 @@ watch(() => route.query.user, async (userId) => {
   }
   if (loads.length) await Promise.all(loads)
   await openOrCreateDM(Number(userId))
+})
+
+watch(() => route.query.conv, async (convId) => {
+  if (!convId) return
+  if (!conversations.value.length) {
+    const { data } = await messagesApi.getConversations().catch(() => ({ data: [] }))
+    conversations.value = data || []
+  }
+  const conv = conversations.value.find(c => c.id === Number(convId))
+  if (conv) openConversation(conv)
 })
 
 // Open an existing 1-on-1 with this user, or create one
@@ -1431,4 +1494,21 @@ function dayLabel(dateStr) {
   text-align: right;
   padding-right: 2px;
 }
+
+.emoji-trigger-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 2px 3px;
+  border-radius: 5px;
+  line-height: 1;
+  flex-shrink: 0;
+  opacity: .55;
+  transition: opacity .1s;
+  margin-bottom: 2px;
+}
+.emoji-trigger-btn:hover { opacity: 1; }
+
+.compose-outer { position: relative; }
 </style>

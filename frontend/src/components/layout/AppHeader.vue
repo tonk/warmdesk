@@ -37,7 +37,7 @@
           <div class="dropdown-item" @click="router.push('/settings')">{{ $t('nav.settings') }}</div>
           <div class="dropdown-item" v-if="auth.isAdmin" @click="router.push('/admin')">{{ $t('nav.admin') }}</div>
           <div class="dropdown-divider"></div>
-          <div class="dropdown-item" @click="router.push('/messages')">
+          <div class="dropdown-item" @click="router.push('/chats')">
             {{ $t('nav.messages') }}
             <span v-if="notificationsStore.hasUnread" class="msg-unread-dot"></span>
           </div>

@@ -72,6 +72,11 @@ func CreateComment(c *gin.Context) {
 	database.DB.Preload("User").First(&comment, comment.ID)
 
 	ws.BroadcastToProject(project.ID, ws.Message{Type: ws.TypeBoardCommentCreated, Payload: comment})
+
+	if notifSvc != nil {
+		go notifSvc.NotifyMentions(req.Body, userID, "card comment")
+	}
+
 	c.JSON(http.StatusCreated, comment)
 }
 

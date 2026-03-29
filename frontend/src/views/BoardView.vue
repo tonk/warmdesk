@@ -14,16 +14,13 @@
         <RouterLink :to="`/projects/${slug}/topics`" class="btn btn-ghost btn-sm">
           💬 {{ $t('topics.title') }}
         </RouterLink>
-        <button class="btn btn-ghost btn-sm" @click="chatOpen = !chatOpen">
-          💬 {{ $t('chat.title') }}
-        </button>
         <button v-if="canManageColumns" class="btn btn-secondary btn-sm" @click="showAddColumn = true">
           + {{ $t('board.add_column') }}
         </button>
       </div>
     </div>
 
-    <div class="board-body" :style="{ marginRight: chatOpen ? '340px' : '0' }">
+    <div class="board-body">
       <div class="board-columns-wrap">
         <div v-if="boardStore.loading" class="board-loading">
           <div class="spinner" style="width:40px;height:40px;border-width:3px"></div>
@@ -45,13 +42,6 @@
         </div>
       </div>
     </div>
-
-    <ChatPanel
-      :open="chatOpen"
-      :project-slug="slug"
-      :ws-send="wsSend"
-      @close="chatOpen = false"
-    />
 
     <!-- Add card modal -->
     <BaseModal v-if="showAddCard" :title="$t('board.add_card')" @close="showAddCard = false">
@@ -105,7 +95,6 @@ import { useI18n } from 'vue-i18n'
 import Sortable from 'sortablejs'
 import BoardColumn from '@/components/board/BoardColumn.vue'
 import CardDetail from '@/components/board/CardDetail.vue'
-import ChatPanel from '@/components/chat/ChatPanel.vue'
 import BaseModal from '@/components/common/BaseModal.vue'
 import { useBoardStore } from '@/stores/board'
 import { useProjectStore } from '@/stores/project'
@@ -125,7 +114,6 @@ const ui = useUIStore()
 const sidebarStore = useSidebarStore()
 const auth = useAuthStore()
 
-const chatOpen = ref(false)
 const showAddCard = ref(false)
 const showAddColumn = ref(false)
 const selectedCard = ref(null)

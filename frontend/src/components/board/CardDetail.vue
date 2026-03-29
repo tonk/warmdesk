@@ -10,7 +10,7 @@
 
       <div class="form-group">
         <label class="form-label">{{ $t('board.description') }}</label>
-        <CardEditor v-if="!locked" v-model="form.description" />
+        <CardEditor v-if="!locked" v-model="form.description" :users="memberUsers" />
         <div v-else class="description-text comment-text" v-html="renderMarkdown(form.description)"></div>
       </div>
 
@@ -189,7 +189,7 @@
         </div>
 
         <div class="add-comment">
-          <CardEditor v-model="newComment" :min-height="'80px'" :placeholder="$t('board.add_comment')" />
+          <CardEditor v-model="newComment" :min-height="'80px'" :placeholder="$t('board.add_comment')" :users="memberUsers" />
           <button class="btn btn-primary btn-sm" @click="submitComment" :disabled="!newComment.trim()">
             {{ $t('board.add_comment') }}
           </button>
@@ -242,6 +242,9 @@ const props = defineProps({
   projectSlug: { type: String, required: true }
 })
 const emit = defineEmits(['close', 'deleted'])
+
+// Flat user list for @mention in editors
+const memberUsers = computed(() => props.members.map(m => m.user).filter(Boolean))
 
 const boardStore = useBoardStore()
 const projectStore = useProjectStore()

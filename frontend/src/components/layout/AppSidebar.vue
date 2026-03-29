@@ -64,7 +64,7 @@
           <RouterLink
             v-for="user in favoritedUsers"
             :key="user.id"
-            :to="{ name: 'messages', query: { user: user.id } }"
+            :to="{ name: 'chats', query: { user: user.id } }"
             class="user-row"
           >
             <span class="presence-dot" :class="{ online: isOnline(user.id) }" :title="isOnline(user.id) ? $t('sidebar.online') : $t('sidebar.offline')"></span>
@@ -75,12 +75,37 @@
       </div>
     </section>
 
+    <!-- Chats -->
+    <section class="sidebar-section">
+      <button class="section-header" @click="toggle('chats')">
+        <span class="section-title">{{ $t('nav.messages') }}</span>
+        <span v-if="notificationsStore.hasUnread" class="unread-dot" :title="$t('sidebar.unread_messages')"></span>
+        <span class="chevron" :class="{ open: open.chats }">›</span>
+      </button>
+      <div v-show="open.chats" class="section-body">
+        <nav class="sidebar-nav">
+          <RouterLink
+            v-for="conv in recentConversations"
+            :key="conv.id"
+            :to="convLink(conv)"
+            class="sidebar-link conv-link"
+          >
+            <span class="conv-indicator" :class="{ unread: notificationsStore.isConvUnread(conv) }"></span>
+            <span class="link-text">{{ convSidebarName(conv) }}</span>
+          </RouterLink>
+          <RouterLink v-if="!recentConversations.length" to="/chats" class="sidebar-link">
+            <span class="link-text">{{ $t('dm.no_conversations') }}</span>
+          </RouterLink>
+        </nav>
+        <RouterLink to="/chats" class="sidebar-link sidebar-link-all">{{ $t('sidebar.all_chats') }}</RouterLink>
+      </div>
+    </section>
+
     <!-- All People -->
     <section class="sidebar-section">
       <button class="section-header" @click="toggle('people')">
         <span class="section-title">{{ $t('sidebar.users') }}</span>
         <span class="badge-count" v-if="onlineCount">{{ onlineCount }}</span>
-        <span v-if="notificationsStore.hasUnread" class="unread-dot" title="Unread messages"></span>
         <span class="chevron" :class="{ open: open.people }">›</span>
       </button>
       <div v-show="open.people" class="section-body">
@@ -88,7 +113,7 @@
           <RouterLink
             v-for="user in sortedUsers"
             :key="user.id"
-            :to="{ name: 'messages', query: { user: user.id } }"
+            :to="{ name: 'chats', query: { user: user.id } }"
             class="user-row"
           >
             <span class="presence-dot" :class="{ online: user.online }" :title="user.online ? $t('sidebar.online') : $t('sidebar.offline')"></span>
@@ -123,7 +148,7 @@ const notificationsStore = useNotificationsStore()
 
 // Collapse state — persisted in localStorage
 const STORAGE_KEY = 'sidebar_open'
-const defaults = { starred: true, projects: true, favorites: true, people: true }
+const defaults = { starred: true, projects: true, favorites: true, chats: true, people: true }
 const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || defaults
 const open = ref({ ...defaults, ...saved })
 
@@ -169,6 +194,33 @@ const sortedUsers = computed(() => {
   const offline = others.filter(u => !isOnline(u.id)).map(u => ({ ...u, online: false }))
   return [...online, ...offline]
 })
+
+// Chats section — most recently active conversations, capped at 8
+const recentConversations = computed(() =>
+  [...notificationsStore.conversations]
+    .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
+    .slice(0, 8)
+)
+
+function convSidebarName(conv) {
+  if (conv.name) return conv.name
+  if (conv.is_group) {
+    return conv.members
+      ?.filter(m => m.user_id !== auth.user?.id)
+      .map(m => m.user?.display_name || m.user?.username)
+      .join(', ') || 'Group'
+  }
+  const other = conv.members?.find(m => m.user_id !== auth.user?.id)
+  return other?.user?.display_name || other?.user?.username || 'Chat'
+}
+
+function convLink(conv) {
+  if (!conv.is_group) {
+    const other = conv.members?.find(m => m.user_id !== auth.user?.id)
+    if (other) return { name: 'chats', query: { user: other.user_id } }
+  }
+  return { name: 'chats', query: { conv: conv.id } }
+}
 
 async function toggleFavorite(user) {
   if (sidebarStore.isFavorite(user.id)) {
@@ -373,4 +425,28 @@ onUnmounted(() => {
   opacity: 1;
 }
 .fav-btn:hover { color: #f59e0b; }
+
+/* Chats section */
+.conv-link { gap: 8px; }
+
+.conv-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+.conv-indicator.unread {
+  background: var(--color-danger, #ef4444);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.sidebar-link-all {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-top: 1px solid var(--color-border);
+  margin-top: 2px;
+}
 </style>

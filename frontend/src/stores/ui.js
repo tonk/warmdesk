@@ -17,5 +17,13 @@ export const useUIStore = defineStore('ui', () => {
   function error(message) { toast(message, 'error', 5000) }
   function info(message) { toast(message, 'info') }
 
-  return { toasts, toast, success, error, info }
+  function mention(senderName, body, context) {
+    const id = ++nextId
+    toasts.value.push({ id, type: 'mention', senderName, body, context })
+    setTimeout(() => {
+      toasts.value = toasts.value.filter(t => t.id !== id)
+    }, 6000)
+  }
+
+  return { toasts, toast, success, error, info, mention }
 })

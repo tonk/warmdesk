@@ -3,12 +3,14 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"net/smtp"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/tonk/coworker/config"
 	"github.com/tonk/coworker/database"
 	"github.com/tonk/coworker/models"
+	"gorm.io/gorm/clause"
 )
 
 const (
@@ -148,62 +150,98 @@ func AdminUpdateSystemSettings(c *gin.Context) {
 		if !*req.RegistrationEnabled {
 			val = "false"
 		}
-		database.DB.Save(&models.SystemSetting{Key: settingRegistrationEnabled, Value: val})
+		saveSetting(settingRegistrationEnabled, val)
 	}
 	if req.DefaultDateTimeFormat != "" {
-		database.DB.Save(&models.SystemSetting{Key: settingDefaultDateTimeFormat, Value: req.DefaultDateTimeFormat})
+		saveSetting(settingDefaultDateTimeFormat, req.DefaultDateTimeFormat)
 	}
 	if req.DefaultTimezone != "" {
-		database.DB.Save(&models.SystemSetting{Key: settingDefaultTimezone, Value: req.DefaultTimezone})
+		saveSetting(settingDefaultTimezone, req.DefaultTimezone)
 	}
 	if req.DefaultTheme == "light" || req.DefaultTheme == "dark" || req.DefaultTheme == "system" {
-		database.DB.Save(&models.SystemSetting{Key: settingDefaultTheme, Value: req.DefaultTheme})
+		saveSetting(settingDefaultTheme, req.DefaultTheme)
 	}
 	if req.DefaultFont != "" {
-		database.DB.Save(&models.SystemSetting{Key: settingDefaultFont, Value: req.DefaultFont})
+		saveSetting(settingDefaultFont, req.DefaultFont)
 	}
 	if req.DefaultFontSize != "" {
-		database.DB.Save(&models.SystemSetting{Key: settingDefaultFontSize, Value: req.DefaultFontSize})
+		saveSetting(settingDefaultFontSize, req.DefaultFontSize)
 	}
 	validLocales := map[string]bool{"en": true, "nl": true, "de": true, "fr": true, "es": true}
 	if validLocales[req.DefaultLocale] {
-		database.DB.Save(&models.SystemSetting{Key: settingDefaultLocale, Value: req.DefaultLocale})
+		saveSetting(settingDefaultLocale, req.DefaultLocale)
 	}
 	// SMTP — only save fields that were explicitly included in the request
 	// (pointer fields: nil means "not sent", so don't overwrite; empty string clears)
 	if req.SMTPHost != nil {
-		database.DB.Save(&models.SystemSetting{Key: settingSMTPHost, Value: *req.SMTPHost})
+		saveSetting(settingSMTPHost, *req.SMTPHost)
 	}
 	if req.SMTPPort != "" {
-		database.DB.Save(&models.SystemSetting{Key: settingSMTPPort, Value: req.SMTPPort})
+		saveSetting(settingSMTPPort, req.SMTPPort)
 	}
 	if req.SMTPFrom != nil {
-		database.DB.Save(&models.SystemSetting{Key: settingSMTPFrom, Value: *req.SMTPFrom})
+		saveSetting(settingSMTPFrom, *req.SMTPFrom)
 	}
 	if req.SMTPUsername != nil {
-		database.DB.Save(&models.SystemSetting{Key: settingSMTPUsername, Value: *req.SMTPUsername})
+		saveSetting(settingSMTPUsername, *req.SMTPUsername)
 	}
 	if req.SMTPPassword != nil {
-		database.DB.Save(&models.SystemSetting{Key: settingSMTPPassword, Value: *req.SMTPPassword})
+		saveSetting(settingSMTPPassword, *req.SMTPPassword)
 	}
 	if req.SessionTimeoutMinutes != nil {
 		timeout := *req.SessionTimeoutMinutes
 		if timeout < 0 {
 			timeout = 0
 		}
-		database.DB.Save(&models.SystemSetting{Key: settingSessionTimeoutMinutes, Value: fmt.Sprintf("%d", timeout)})
+		saveSetting(settingSessionTimeoutMinutes, fmt.Sprintf("%d", timeout))
 	}
 	if req.CompanyName != nil {
-		database.DB.Save(&models.SystemSetting{Key: settingCompanyName, Value: *req.CompanyName})
+		saveSetting(settingCompanyName, *req.CompanyName)
 	}
 	if req.CompanyLogo != nil {
-		database.DB.Save(&models.SystemSetting{Key: settingCompanyLogo, Value: *req.CompanyLogo})
+		saveSetting(settingCompanyLogo, *req.CompanyLogo)
 	}
 	if req.DefaultColumns != nil {
-		database.DB.Save(&models.SystemSetting{Key: settingDefaultColumns, Value: *req.DefaultColumns})
+		saveSetting(settingDefaultColumns, *req.DefaultColumns)
 	}
 
 	AdminGetSystemSettings(c)
+}
+
+// AdminSendTestEmail sends a test email to verify the current SMTP configuration.
+func AdminSendTestEmail(c *gin.Context) {
+	var req struct {
+		To string `json:"to" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "email address is required"})
+		return
+	}
+
+	cfg := GetSMTPSettings()
+	if cfg.Host == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "SMTP host is not configured"})
+		return
+	}
+
+	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+	from := cfg.From
+	if from == "" {
+		from = "coworker@localhost"
+	}
+	body := "This is a test email from Coworker. Your SMTP configuration is working correctly."
+	msg := fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: Coworker SMTP test\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n%s",
+		from, req.To, body)
+
+	var auth smtp.Auth
+	if cfg.Username != "" {
+		auth = smtp.PlainAuth("", cfg.Username, cfg.Password, cfg.Host)
+	}
+	if err := smtp.SendMail(addr, auth, from, []string{req.To}, []byte(msg)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Test email sent to " + req.To})
 }
 
 // IsRegistrationEnabled is a helper used by the Register handler.
@@ -227,6 +265,16 @@ func GetGlobalDefaults() map[string]string {
 		"font_size":        all[settingDefaultFontSize],
 		"locale":           all[settingDefaultLocale],
 	}
+}
+
+// saveSetting upserts a system setting by key (INSERT … ON CONFLICT UPDATE).
+// GORM's plain Save() with a non-zero string primary key issues only an UPDATE,
+// which silently does nothing when the row doesn't exist yet.
+func saveSetting(key, value string) {
+	database.DB.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "key"}},
+		DoUpdates: clause.AssignmentColumns([]string{"value"}),
+	}).Create(&models.SystemSetting{Key: key, Value: value})
 }
 
 // loadAllSettings reads all system settings from DB and fills in defaults for missing keys.

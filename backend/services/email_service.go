@@ -90,11 +90,23 @@ func ExtractMentions(body string) []string {
 	return names
 }
 
-// NotifyMentions sends email notifications to users mentioned in a message body.
+// NotifyMentions sends real-time WS notifications to online users and emails to offline users.
 func (ns *NotificationService) NotifyMentions(body string, senderID uint, context string) {
 	usernames := ExtractMentions(body)
 	if len(usernames) == 0 {
 		return
+	}
+
+	var sender models.User
+	database.DB.First(&sender, senderID)
+	senderName := sender.DisplayName
+	if senderName == "" {
+		senderName = sender.Username
+	}
+
+	preview := body
+	if len(preview) > 120 {
+		preview = preview[:120] + "..."
 	}
 
 	var users []models.User
@@ -104,14 +116,22 @@ func (ns *NotificationService) NotifyMentions(body string, senderID uint, contex
 		if u.ID == senderID {
 			continue
 		}
+		if appws.IsUserOnline(u.ID) {
+			appws.BroadcastToUser(u.ID, appws.Message{
+				Type: appws.TypeMentionNotification,
+				Payload: map[string]interface{}{
+					"sender_name": senderName,
+					"body":        preview,
+					"context":     context,
+				},
+			})
+			continue
+		}
 		if !u.EmailNotifications {
 			continue
 		}
-		if appws.IsUserOnline(u.ID) {
-			continue
-		}
 		go ns.email.Send(u.Email, "You were mentioned in "+context,
-			fmt.Sprintf("You were mentioned:\n\n%s", body))
+			fmt.Sprintf("You were mentioned by %s:\n\n%s", senderName, body))
 	}
 }
 

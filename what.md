@@ -158,3 +158,11 @@ Create an application that has all these features and requirements
 - Start a group chat from a project team in Direct Messages (Teams tab)
 - More demo users in seed (Priya, James, Elena, Raj) with project admin roles
 - Persistent system admin (tonk) in seed, not affected by --reset
+- Emoji picker in all chat inputs and card editors (EasyMDE toolbar button)
+- @mention autocomplete in all chat inputs and card editors with dropdown navigation
+- Real-time popup notifications for @mentions when the user is online; email for offline
+- Chats sidebar section with per-conversation unread indicators
+- SMTP test email in admin settings
+- "Direct Messages" renamed to "Chats" throughout; /messages redirects to /chats
+- Team Chat removed from project board page
+- Card comments now trigger @mention notifications (email + real-time WS)

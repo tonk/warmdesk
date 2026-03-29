@@ -47,6 +47,9 @@ const (
 	TypeTopicReplyUpdated = "topic.reply.updated"
 	TypeTopicReplyDeleted = "topic.reply.deleted"
 
+	// Server -> Client: personal notifications
+	TypeMentionNotification = "mention.notification"
+
 	// System
 	TypePong  = "pong"
 	TypeError = "error"

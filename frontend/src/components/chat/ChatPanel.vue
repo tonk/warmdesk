@@ -102,26 +102,38 @@
     <!-- Compose area -->
     <div class="chat-compose">
       <AttachmentList v-if="pendingFiles.length" :attachments="pendingFiles" :can-delete="true" @remove="removePending" />
-      <div class="compose-body">
-        <div class="compose-avatar">
-          <img v-if="getAvatar(authUser)" :src="getAvatar(authUser)" class="avatar-img" @error="e => e.target.style.display='none'" />
-          <span v-else class="avatar-initials avatar-initials-sm">{{ initials(authUser) }}</span>
+      <div class="compose-outer" style="position:relative">
+        <InlineEmojiPicker v-if="emojiOpen" @pick="onEmojiPick" @close="emojiOpen = false" />
+        <MentionDropdown
+          v-if="mentionUsers.length"
+          :users="mentionUsers"
+          :active-index="mentionIndex"
+          @pick="pickMention"
+          @update:activeIndex="mentionIndex = $event"
+        />
+        <div class="compose-body">
+          <div class="compose-avatar">
+            <img v-if="getAvatar(authUser)" :src="getAvatar(authUser)" class="avatar-img" @error="e => e.target.style.display='none'" />
+            <span v-else class="avatar-initials avatar-initials-sm">{{ initials(authUser) }}</span>
+          </div>
+          <FileUploadButton @files-selected="onFilesSelected" />
+          <button class="emoji-trigger-btn" @click="emojiOpen = !emojiOpen" title="Emoji" type="button">😊</button>
+          <textarea
+            class="compose-textarea"
+            v-model="draft"
+            :placeholder="$t('chat.placeholder')"
+            rows="1"
+            ref="textareaEl"
+            @keydown.enter.exact="onEnter"
+            @keydown="onKeydown"
+            @input="onInput"
+          ></textarea>
+          <button class="compose-send-btn" @click="sendMessage" :disabled="!draft.trim() && !pendingFiles.length" :title="$t('chat.send')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
         </div>
-        <FileUploadButton @files-selected="onFilesSelected" />
-        <textarea
-          class="compose-textarea"
-          v-model="draft"
-          :placeholder="$t('chat.placeholder')"
-          rows="1"
-          ref="textareaEl"
-          @keydown.enter.exact.prevent="sendMessage"
-          @input="autoResize"
-        ></textarea>
-        <button class="compose-send-btn" @click="sendMessage" :disabled="!draft.trim() && !pendingFiles.length" :title="$t('chat.send')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        </button>
       </div>
-      <div class="compose-hint">Enter to send · Markdown supported</div>
+      <div class="compose-hint">Enter to send · Markdown · @mention</div>
     </div>
 
   </div>
@@ -137,9 +149,12 @@ import { useDateFormat } from '@/composables/useDateFormat'
 import { avatarUrl } from '@/composables/useAvatar'
 import { attachmentsApi } from '@/api/attachments'
 import { projectsApi } from '@/api/projects'
+import { useCompose } from '@/composables/useCompose'
 import AttachmentList from '@/components/common/AttachmentList.vue'
 import FileUploadButton from '@/components/common/FileUploadButton.vue'
 import MessageReactions from '@/components/common/MessageReactions.vue'
+import InlineEmojiPicker from '@/components/common/InlineEmojiPicker.vue'
+import MentionDropdown from '@/components/common/MentionDropdown.vue'
 
 const props = defineProps({
   open: Boolean,
@@ -162,6 +177,40 @@ const editBody = ref('')
 
 // Pending file attachments
 const pendingFiles = ref([]) // [{name, size, mime_type, _file}]
+
+// Emoji + mention
+const emojiOpen = ref(false)
+const projectUsers = ref([])
+
+const { mentionUsers, mentionIndex, insertText, onTextareaInput, onTextareaKeydown, pickMention } = useCompose({
+  textareaEl,
+  getValue: () => draft.value,
+  setValue: (v) => { draft.value = v },
+  users: projectUsers,
+})
+
+function onEmojiPick(emoji) {
+  insertText(emoji)
+  emojiOpen.value = false
+}
+
+function onInput(e) {
+  autoResize(e)
+  onTextareaInput()
+}
+
+function onEnter(e) {
+  if (mentionUsers.value.length) {
+    onTextareaKeydown(e)
+  } else {
+    e.preventDefault()
+    sendMessage()
+  }
+}
+
+function onKeydown(e) {
+  if (e.key !== 'Enter') onTextareaKeydown(e)
+}
 
 // ── Resize logic ───────────────────────────────────────────
 const panelWidth = ref(360)
@@ -193,6 +242,9 @@ onMounted(async () => {
   if (props.projectSlug) {
     await chatStore.loadMessages(props.projectSlug)
     scrollToBottom()
+    projectsApi.listMembers(props.projectSlug)
+      .then(({ data }) => { projectUsers.value = (data || []).map(m => m.user).filter(Boolean) })
+      .catch(() => {})
   }
 })
 
@@ -667,4 +719,21 @@ function dayLabel(dateStr) {
   text-align: right;
   padding-right: 2px;
 }
+
+.emoji-trigger-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 2px 3px;
+  border-radius: 5px;
+  line-height: 1;
+  flex-shrink: 0;
+  opacity: .55;
+  transition: opacity .1s;
+  margin-bottom: 2px;
+}
+.emoji-trigger-btn:hover { opacity: 1; }
+
+.compose-outer { position: relative; }
 </style>

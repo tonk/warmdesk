@@ -65,6 +65,7 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webDir string, 
 			admin.DELETE("/projects/:id", handlers.AdminDeleteProject)
 			admin.GET("/system", handlers.AdminGetSystemSettings)
 			admin.PUT("/system", handlers.AdminUpdateSystemSettings)
+			admin.POST("/system/test-email", handlers.AdminSendTestEmail)
 		}
 
 		// Users (for direct messages / user lookup)
@@ -211,6 +212,7 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webDir string, 
 	v1.POST("/gitea-webhook/:token", handlers.IncomingGiteaWebhook)
 
 	// WebSocket (auth via ?token= query param)
+	v1.GET("/ws/user", wsHandler.HandleUserWS)
 	v1.GET("/ws/:projectSlug", wsHandler.HandleWS)
 
 	// Ticket API — authenticated via X-API-Key header or ?api_key= query param

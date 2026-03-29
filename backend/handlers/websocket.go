@@ -79,6 +79,40 @@ func (h *WSHandler) HandleWS(c *gin.Context) {
 	go client.ReadPump()
 }
 
+// HandleUserWS establishes a personal WebSocket connection for receiving user-scoped
+// notifications (e.g. @mention alerts) even when not viewing a specific project.
+func (h *WSHandler) HandleUserWS(c *gin.Context) {
+	tokenStr := c.Query("token")
+	if tokenStr == "" {
+		tokenStr = c.GetHeader("Authorization")
+		if len(tokenStr) > 7 {
+			tokenStr = tokenStr[7:]
+		}
+	}
+
+	claims, err := h.authSvc.ValidateToken(tokenStr)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+		return
+	}
+
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		log.Printf("ws user upgrade error: %v", err)
+		return
+	}
+
+	var user models.User
+	database.DB.First(&user, claims.UserID)
+
+	hub := appws.GetOrCreateUserHub(user.ID)
+	client := appws.NewClient(hub, conn, user.ID, user.Username, user.DisplayName, user.AvatarURL, 0, claims.GlobalRole, nil)
+	hub.Register(client)
+
+	go client.WritePump()
+	go client.ReadPump()
+}
+
 func handleIncoming(client *appws.Client, raw []byte) {
 	var msg appws.Message
 	if err := json.Unmarshal(raw, &msg); err != nil {

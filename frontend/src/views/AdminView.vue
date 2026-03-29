@@ -239,6 +239,16 @@
               <button class="btn btn-primary" @click="saveSmtpSettings">{{ $t('common.save') }}</button>
             </div>
 
+            <div class="form-group" style="max-width:500px;margin-top:16px">
+              <label class="form-label">{{ $t('admin.smtp_test_title') }}</label>
+              <div style="display:flex;gap:8px">
+                <input class="form-input" v-model="smtpTestEmail" type="email" :placeholder="$t('admin.smtp_test_placeholder')" style="flex:1" />
+                <button class="btn btn-secondary" :disabled="smtpTestSending || !smtpTestEmail" @click="sendSmtpTest">
+                  {{ smtpTestSending ? $t('admin.smtp_test_sending') : $t('admin.smtp_test_send') }}
+                </button>
+              </div>
+            </div>
+
             <h3 class="settings-subsection">{{ $t('admin.branding_title') }}</h3>
             <p class="form-hint" style="margin-bottom:16px">{{ $t('admin.branding_hint') }}</p>
 
@@ -471,6 +481,8 @@ const systemSettings = ref({
 // True when the server has a password saved (so we show a placeholder instead of the value)
 const smtpPasswordSet = ref(false)
 const smtpPasswordPlaceholder = computed(() => smtpPasswordSet.value ? '••••••••' : '')
+const smtpTestEmail = ref('')
+const smtpTestSending = ref(false)
 let settingsLoaded = false
 
 const timezones = [
@@ -596,8 +608,21 @@ async function saveSmtpSettings() {
       systemSettings.value.smtp_password = ''
     }
     ui.success('Settings saved')
-  } catch {
-    ui.error('Failed to save settings')
+  } catch (e) {
+    ui.error(e.response?.data?.error || 'Failed to save settings')
+  }
+}
+
+async function sendSmtpTest() {
+  smtpTestSending.value = true
+  try {
+    await adminApi.sendTestEmail(smtpTestEmail.value)
+    ui.success('Test email sent to ' + smtpTestEmail.value)
+    smtpTestEmail.value = ''
+  } catch (e) {
+    ui.error(e.response?.data?.error || 'Failed to send test email')
+  } finally {
+    smtpTestSending.value = false
   }
 }
 

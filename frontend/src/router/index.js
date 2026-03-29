@@ -11,7 +11,8 @@ const routes = [
   { path: '/projects/:slug/settings', name: 'project-settings', component: () => import('@/views/ProjectSettingsView.vue') },
   { path: '/projects/:slug/topics', name: 'topics', component: () => import('@/views/TopicsView.vue') },
   { path: '/settings', name: 'settings', component: () => import('@/views/SettingsView.vue') },
-  { path: '/messages', name: 'messages', component: () => import('@/views/DirectMessagesView.vue') },
+  { path: '/chats', name: 'chats', component: () => import('@/views/DirectMessagesView.vue') },
+  { path: '/messages', redirect: '/chats' },
   { path: '/admin', name: 'admin', component: () => import('@/views/AdminView.vue'), meta: { adminOnly: true } },
   { path: '/reports', name: 'reports', component: () => import('@/views/ReportView.vue') },
   { path: '/:pathMatch(.*)*', redirect: '/' }

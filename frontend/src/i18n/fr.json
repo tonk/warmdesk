@@ -8,7 +8,7 @@
     "admin": "Administration",
     "logout": "Déconnexion",
     "profile": "Profil",
-    "messages": "Messages directs"
+    "messages": "Chats"
   },
   "auth": {
     "login": "Connexion",
@@ -174,6 +174,10 @@
     "smtp_from": "Adresse expéditeur",
     "smtp_username": "Nom d'utilisateur",
     "smtp_password": "Mot de passe",
+    "smtp_test_title": "Envoyer un e-mail de test",
+    "smtp_test_placeholder": "destinataire@exemple.fr",
+    "smtp_test_send": "Envoyer le test",
+    "smtp_test_sending": "Envoi en cours…",
     "branding_title": "Image de marque",
     "branding_hint": "Configurez le nom et le logo de votre entreprise. Ils apparaissent sur les rapports de temps.",
     "company_name": "Nom de l'entreprise",
@@ -231,7 +235,7 @@
     "sidebar_right": "Droite"
   },
   "dm": {
-    "title": "Messages directs",
+    "title": "Chats",
     "search_users": "Rechercher des utilisateurs...",
     "no_conversations": "Pas encore de conversations. Commencez-en une avec +",
     "select_conversation": "Sélectionnez une conversation pour commencer à discuter",
@@ -258,7 +262,9 @@
     "users": "Personnes",
     "no_users": "Aucun utilisateur",
     "online": "En ligne",
-    "offline": "Hors ligne"
+    "offline": "Hors ligne",
+    "all_chats": "Tous les chats…",
+    "unread_messages": "Messages non lus"
   },
   "apikeys": {
     "tab": "Clés API",

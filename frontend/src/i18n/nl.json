@@ -8,7 +8,7 @@
     "admin": "Beheer",
     "logout": "Uitloggen",
     "profile": "Profiel",
-    "messages": "Directe berichten"
+    "messages": "Chats"
   },
   "auth": {
     "login": "Inloggen",
@@ -174,6 +174,10 @@
     "smtp_from": "Afzenderadres",
     "smtp_username": "Gebruikersnaam",
     "smtp_password": "Wachtwoord",
+    "smtp_test_title": "Testmail versturen",
+    "smtp_test_placeholder": "ontvanger@voorbeeld.nl",
+    "smtp_test_send": "Stuur test",
+    "smtp_test_sending": "Versturen…",
     "branding_title": "Huisstijl",
     "branding_hint": "Stel de bedrijfsnaam en het logo in. Deze verschijnen op tijdrapporten.",
     "company_name": "Bedrijfsnaam",
@@ -231,7 +235,7 @@
     "sidebar_right": "Rechts"
   },
   "dm": {
-    "title": "Directe berichten",
+    "title": "Chats",
     "search_users": "Gebruikers zoeken...",
     "no_conversations": "Nog geen gesprekken. Begin er een door op + te klikken",
     "select_conversation": "Selecteer een gesprek om te beginnen",
@@ -258,7 +262,9 @@
     "users": "Mensen",
     "no_users": "Geen gebruikers",
     "online": "Online",
-    "offline": "Offline"
+    "offline": "Offline",
+    "all_chats": "Alle chats…",
+    "unread_messages": "Ongelezen berichten"
   },
   "apikeys": {
     "tab": "API-sleutels",

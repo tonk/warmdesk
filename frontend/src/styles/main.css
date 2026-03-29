@@ -159,9 +159,10 @@ input, textarea, select {
   animation: slideIn .2s ease;
 }
 
-.toast-success { background: #16a34a; }
-.toast-error   { background: var(--color-danger); }
-.toast-info    { background: var(--color-primary); }
+.toast-success  { background: #16a34a; }
+.toast-error    { background: var(--color-danger); }
+.toast-info     { background: var(--color-primary); }
+.toast-mention  { background: #7c3aed; max-width: 320px; font-weight: normal; }
 
 @keyframes slideIn {
   from { transform: translateX(100%); opacity: 0; }
