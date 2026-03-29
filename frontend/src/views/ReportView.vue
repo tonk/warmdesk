@@ -169,9 +169,7 @@ const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
 function formatMinutes(minutes) {
   const h = Math.floor(minutes / 60)
   const m = minutes % 60
-  if (h === 0) return `${m}m`
-  if (m === 0) return `${h}h`
-  return `${h}h ${m}m`
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
 }
 
 async function loadReport() {
