@@ -11,6 +11,7 @@
  *   - users      : ref/computed of user objects { id, username, display_name }
  */
 import { ref, computed, nextTick } from 'vue'
+import { detectEmoticon } from '@/utils/emoticons'
 
 export function useCompose({ textareaEl, getValue, setValue, users }) {
   const mentionQuery = ref(null)   // null = no active mention; string = partial after @
@@ -45,8 +46,25 @@ export function useCompose({ textareaEl, getValue, setValue, users }) {
     const el = textareaEl.value
     if (!el) return
     const pos    = el.selectionStart
-    const before = getValue().slice(0, pos)
-    const m      = before.match(/@(\w*)$/)
+    const val    = getValue()
+    const before = val.slice(0, pos)
+
+    // Emoticon replacement
+    const hit = detectEmoticon(before)
+    if (hit) {
+      const { pattern, emoji } = hit
+      const newVal = val.slice(0, pos - pattern.length) + emoji + val.slice(pos)
+      setValue(newVal)
+      nextTick(() => {
+        el.selectionStart = el.selectionEnd = pos - pattern.length + [...emoji].length
+        el.focus()
+      })
+      mentionQuery.value = null
+      return
+    }
+
+    // Mention detection
+    const m = before.match(/@(\w*)$/)
     if (m) {
       mentionQuery.value = m[1]
       mentionStart.value = pos - m[0].length

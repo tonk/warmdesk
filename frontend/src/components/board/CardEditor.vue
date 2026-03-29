@@ -27,6 +27,7 @@ import EasyMDE from 'easymde'
 import 'easymde/dist/easymde.min.css'
 import MentionDropdown from '@/components/common/MentionDropdown.vue'
 import InlineEmojiPicker from '@/components/common/InlineEmojiPicker.vue'
+import { detectEmoticon } from '@/utils/emoticons'
 
 const props = defineProps({
   modelValue: { type: String, default: '' },
@@ -135,7 +136,20 @@ onMounted(() => {
     ]
   })
 
-  mde.codemirror.on('change', () => {
+  mde.codemirror.on('change', (cm, changeObj) => {
+    // Only replace on regular character input (not undo/redo/paste)
+    if (changeObj.origin === '+input') {
+      const cursor = cm.getCursor()
+      const line   = cm.getLine(cursor.line)
+      const before = line.slice(0, cursor.ch)
+      const hit    = detectEmoticon(before)
+      if (hit) {
+        const { pattern, emoji } = hit
+        const from = { line: cursor.line, ch: cursor.ch - pattern.length }
+        cm.replaceRange(emoji, from, cursor)
+        return // skip emit/detectMention — the replacement triggers another change event
+      }
+    }
     emit('update:modelValue', mde.value())
     detectMention()
   })
