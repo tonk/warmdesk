@@ -11,6 +11,11 @@ const pinia = createPinia()
 app.use(pinia)
 app.use(router)
 app.use(i18n)
+
+app.config.errorHandler = (err, _instance, info) => {
+  console.error('[Vue error]', info, err)
+}
+
 app.mount('#app')
 
 useSystemStore().fetchSettings()
