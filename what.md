@@ -138,3 +138,11 @@ Create an application that has all these features and requirements
 - Create a Github actions file to build a new release when a new tag is
   pushed in the main branch
 - Add CLAUDE.md developer guide for AI-assisted development
+- Show version number on the login page
+- Frontend version number must follow the git tag automatically (no manual updates)
+- All projects visible to admins in the sidebar
+- PDF time report must print only the report content (no sidebar, header, or footer)
+- Time in reports displayed as H:MM (hours unbounded, minutes zero-padded)
+- Default initial project column renamed from "Inbox" to "Backlog"
+- Configurable initial columns per new project (admin setting, one name per line)
+- Delete empty columns from the board view

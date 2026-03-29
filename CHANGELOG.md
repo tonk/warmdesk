@@ -2,6 +2,22 @@
 
 All notable changes to Coworker are documented here.
 
+## v0.2.2 — 2026-03-29
+
+### Added
+- **Configurable initial columns** — admin can define which columns are created automatically when a new project is made (Admin → Settings → New Project Defaults); one column name per line; defaults to "Backlog"
+- **Delete empty column** — a trash icon appears on any column that has no cards; clicking it asks for confirmation and removes the column
+
+### Fixed
+- **Version number on login page** — app version is now shown below the login card, matching the footer
+- **Frontend version follows git tag** — `__APP_VERSION__` is now derived from `git describe --tags --always` at build time instead of the static `package.json` version; the update-available banner no longer appears falsely after a release
+- **Admin sidebar shows all projects** — admins now see all projects in the sidebar, not only the ones they were explicitly added to as a member
+- **PDF report shows only the report** — the browser print dialog now hides the sidebar, header, and footer so only the time report content is printed
+- **Time format in reports** — changed from "1h 30m" to `H:MM` (e.g. `1:30`, `100:05`); hours are unbounded, minutes are always zero-padded to two digits
+
+### Changed
+- Default initial column renamed from "Inbox" to "Backlog"
+
 ## v0.2.0 — 2026-03-29
 
 ### Added
