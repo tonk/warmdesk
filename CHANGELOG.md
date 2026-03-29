@@ -2,6 +2,15 @@
 
 All notable changes to Coworker are documented here.
 
+## v0.2.9 — 2026-03-29
+
+### Fixed
+- **Admin Settings tab blank** — `@` in the SMTP test email placeholder was parsed by vue-i18n as a linked-message prefix, throwing `Invalid linked format` on first render and wiping the admin panel; escaped with `{'@'}` in all five language files
+- **JWT token lost on LocalStorage eviction** — access token is now also kept in the axios default header so API calls succeed even if another tab or the browser clears LocalStorage between requests
+- **Admin settings errors hidden** — the `loadSettings` error handler was a silent `catch {}`; errors are now shown as toast notifications
+- **SMTP password placeholder always shown** — `!!data.smtp_password_set` evaluated a non-empty string `"false"` as truthy; fixed with strict `=== 'true'` comparison
+- **Reports menu hidden for admins with stale session** — cached user objects without `can_view_reports` no longer hide the Reports link for admins
+
 ## v0.2.8 — 2026-03-29
 
 ### Added

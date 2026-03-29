@@ -176,3 +176,8 @@ Create an application that has all these features and requirements
 - Documentation: user guide, API reference, and admin guide shipped with every release in docs/
 - Reports restricted to project admins/owners and system admins; hidden from regular members and viewers
 - Webhook setup docs show the real token in the URL immediately after creating a webhook
+- Fix admin Settings tab blank (vue-i18n @ in SMTP placeholder)
+- Fix JWT token lost on LocalStorage eviction (keep token in axios default header)
+- Fix admin settings errors silently swallowed (now shown as toast)
+- Fix SMTP password placeholder always shown due to truthy string "false"
+- Fix Reports menu hidden for admins with stale cached user object
