@@ -26,6 +26,7 @@ function processQueue(error, token = null) {
 client.interceptors.request.use(config => {
   config.baseURL = apiBase()
   const token = localStorage.getItem('access_token')
+    || (client.defaults.headers.common.Authorization || '').replace('Bearer ', '')
   if (token) config.headers.Authorization = `Bearer ${token}`
   return config
 })

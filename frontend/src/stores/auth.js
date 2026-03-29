@@ -2,10 +2,17 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { authApi } from '@/api/auth'
 import { setLocale } from '@/i18n'
+import client from '@/api/client'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(JSON.parse(localStorage.getItem('user') || 'null'))
   const accessToken = ref(localStorage.getItem('access_token') || null)
+
+  // Seed the axios default header from the stored token so requests never miss
+  // the token even if localStorage is cleared after initialization.
+  if (accessToken.value) {
+    client.defaults.headers.common.Authorization = `Bearer ${accessToken.value}`
+  }
 
   const isLoggedIn = computed(() => !!accessToken.value && !!user.value)
   const isAdmin = computed(() => user.value?.global_role === 'admin')
@@ -58,6 +65,7 @@ export const useAuthStore = defineStore('auth', () => {
     accessToken.value = access
     localStorage.setItem('access_token', access)
     localStorage.setItem('refresh_token', refresh)
+    client.defaults.headers.common.Authorization = `Bearer ${access}`
   }
 
   function logout() {
@@ -67,6 +75,7 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
     localStorage.removeItem('user')
+    delete client.defaults.headers.common.Authorization
   }
 
   async function updateProfile(data) {
