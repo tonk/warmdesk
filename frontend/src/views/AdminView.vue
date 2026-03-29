@@ -540,13 +540,15 @@ async function loadSettings() {
     systemSettings.value.smtp_from                = data.smtp_from || ''
     systemSettings.value.smtp_username            = data.smtp_username || ''
     // Password is never sent back from the server — show placeholder if one is set
-    smtpPasswordSet.value = !!(data.smtp_password_set)
+    smtpPasswordSet.value = data.smtp_password_set === 'true'
     systemSettings.value.smtp_password            = ''
     systemSettings.value.company_name             = data.company_name || ''
     systemSettings.value.company_logo             = data.company_logo || ''
     systemSettings.value.default_columns          = data.default_columns || 'Backlog'
     settingsLoaded = true
-  } catch {}
+  } catch (e) {
+    ui.error(e.response?.data?.error || 'Failed to load settings')
+  }
 }
 
 function onLogoFileSelected(e) {
