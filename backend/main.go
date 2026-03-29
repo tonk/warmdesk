@@ -28,6 +28,8 @@ func main() {
 		os.Exit(0)
 	}
 
+	log.Printf("Starting Coworker %s", version)
+
 	cfg := config.Load(*configFile)
 	handlers.InitSystemDefaults(cfg)
 	handlers.InitAttachments(cfg)

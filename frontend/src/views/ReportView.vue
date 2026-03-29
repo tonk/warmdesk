@@ -310,6 +310,8 @@ onUnmounted(() => {
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
   padding: 20px 0;
+  position: relative;
+  z-index: 10;
 }
 .filters-inner {
   max-width: 1100px;

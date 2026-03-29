@@ -643,6 +643,162 @@ I'll move us to "go" once all boxes are checked. Please comment here with your s
 				{"marc", "Schema migration tested — 4.2 M rows, completed in 8 minutes. Well within our maintenance window. ✓"},
 			},
 		},
+		// ── Additional website-redesign topics ────────────────────────────────
+		{
+			project: "website-redesign",
+			author:  "sarah",
+			title:   "Font and typography choices",
+			body: `I've been evaluating typefaces for the redesign. Here are my top three candidates:
+
+1. **Inter** — clean, very legible at small sizes, used widely in SaaS products. Free via Google Fonts.
+2. **Geist** — Vercel's typeface, feels modern and technical. Good for a developer-adjacent audience.
+3. **DM Sans** — friendly and approachable, good contrast with a geometric headline font.
+
+I'm leaning toward **Inter for body** and **Sora for headings** — the contrast between them works really well in the mockups.
+
+Thoughts? Any strong opinions before I finalise the Figma components?`,
+			replies: []struct{ author, body string }{
+				{"marc", "Inter is a safe and excellent choice — I've used it on three projects and it always looks sharp. Sora pairs nicely."},
+				{"admin", "Agreed on Inter. Whatever we pick, make sure it's self-hosted or loaded with `font-display: swap` so it doesn't block rendering."},
+				{"sarah", "Good point — I'll self-host both via Fontsource so we have full control over loading strategy. Will update the Figma file this week."},
+			},
+		},
+		{
+			project: "website-redesign",
+			author:  "marc",
+			title:   "Cookie consent and GDPR compliance",
+			body: `Legal asked us to review our cookie consent implementation before launch. A few things we need to address:
+
+**Current state**
+- We drop a _ga analytics cookie on page load with no prior consent — this is non-compliant in the EU.
+- No consent management platform (CMP) is in place.
+
+**Proposed approach**
+1. Add a lightweight CMP (I'm looking at **Klaro** — open source, no SaaS fees).
+2. Gate analytics and marketing scripts behind consent categories.
+3. Add a "Cookie settings" link in the footer.
+4. Store consent choice in localStorage so the banner only appears once.
+
+This needs to be done before we go live. I'll open a card for it.`,
+			replies: []struct{ author, body string }{
+				{"admin", "Klaro looks good — I've seen it used well before. Make sure the default state for analytics is **opt-out**, not opt-in, to be safe."},
+				{"sarah", "Agreed. Also worth checking if we need a cookie policy page — some regulators want a dedicated URL linked from the banner."},
+				{"marc", "I'll draft both the implementation card and a short cookie policy page. Will share for review before merging."},
+			},
+		},
+		// ── Additional mobile-app-v2 topics ───────────────────────────────────
+		{
+			project: "mobile-app-v2",
+			author:  "lisa",
+			title:   "Testing strategy for v2",
+			body: `Now that the main features are taking shape, we should agree on a testing strategy before we hit Testing column on the board.
+
+**What I'm proposing:**
+
+| Layer | Tool | Owner |
+|---|---|---|
+| Unit tests | Jest + React Native Testing Library | All devs |
+| Integration | Detox (E2E on simulator) | Lisa |
+| Manual exploratory | Checklist per feature | Rotating |
+| Performance | Flashlight (Android) + Instruments (iOS) | Sarah |
+
+**Devices to cover as a minimum:**
+- iPhone SE (small screen)
+- iPhone 15 (latest)
+- Pixel 7 (Android 13)
+- Samsung Galaxy A54 (mid-range Android)
+
+Does this look reasonable? Anything missing?`,
+			replies: []struct{ author, body string }{
+				{"sarah", "Looks solid. I'd add a tablet pass (iPad mini at minimum) since our analytics show ~12% of users are on tablets."},
+				{"marc", "Detox can be flaky on CI — worth adding retry logic in the pipeline. Happy to set that up."},
+				{"lisa", "Good points both. I'll update the strategy doc and open a board card for the CI Detox config."},
+			},
+		},
+		{
+			project: "mobile-app-v2",
+			author:  "marc",
+			title:   "App store submission checklist",
+			pinned:  true,
+			body: `Tracking what we need before we can submit to the App Store and Google Play.
+
+**App Store (iOS)**
+- [ ] App icon (all required sizes via Xcode asset catalogue)
+- [ ] Screenshots for 6.7" and 5.5" displays
+- [ ] Privacy policy URL
+- [ ] Age rating questionnaire filled in
+- [ ] In-app purchase declarations (none for v1 — confirm)
+- [ ] TestFlight beta round completed
+
+**Google Play**
+- [ ] Feature graphic (1024 × 500)
+- [ ] Screenshots for phone and 7" tablet
+- [ ] Privacy policy URL
+- [ ] Data safety form completed
+- [ ] Internal testing track approved before production rollout
+
+Tag me here when your section is done.`,
+			replies: []struct{ author, body string }{
+				{"sarah", "Privacy policy is drafted — waiting for legal sign-off. Should have it by end of week."},
+				{"lisa", "TestFlight build is up. Three external testers invited. Feedback so far: login flow is smooth, settings screen needs larger tap targets."},
+				{"marc", "Noted on tap targets — I'll fix that before the next build. Good progress everyone 🚀"},
+			},
+		},
+		// ── Additional devops-infra topics ────────────────────────────────────
+		{
+			project: "devops-infra",
+			author:  "lisa",
+			title:   "Incident review — staging outage 2026-03-21",
+			body: `**Summary**
+Staging was down for 47 minutes on 2026-03-21 between 14:12 and 14:59 UTC due to a misconfigured Nginx upstream after the load balancer update.
+
+**Timeline**
+- 14:12 — deploy of Nginx config v2.4 triggered automatically via CI
+- 14:15 — first alerts fired (5xx rate > 5%)
+- 14:22 — Marc acknowledged alert and began investigation
+- 14:51 — root cause identified: upstream block pointed to old container name
+- 14:59 — config corrected and reloaded, traffic restored
+
+**Root cause**
+The container name changed as part of the Docker Compose refactor but the Nginx template was not updated.
+
+**Action items**
+- [ ] Add integration test that validates Nginx upstream names match running containers
+- [ ] Add staging smoke test to CI pipeline (runs after every deploy)
+- [ ] Update runbook with "check upstream names" as first step in 5xx incidents`,
+			replies: []struct{ author, body string }{
+				{"marc", "I've opened cards for the integration test and smoke test. Both are in the Todo column."},
+				{"admin", "Good write-up. Let's also add a 5-minute grace period to the alert so we don't page on brief deploy blips — 47 minutes is a real incident, a 30-second blip during a rolling restart is not."},
+				{"lisa", "Agreed. I'll update the alert threshold in Grafana. Will post the updated config here for review."},
+			},
+		},
+		{
+			project: "devops-infra",
+			author:  "admin",
+			title:   "On-call rota — Q2 2026",
+			body: `Setting up the on-call schedule for Q2. We'll use a weekly rotation.
+
+| Week | Primary | Secondary |
+|---|---|---|
+| Apr 1–7 | Marc | Lisa |
+| Apr 8–14 | Lisa | Alex |
+| Apr 15–21 | Alex | Marc |
+| Apr 22–28 | Marc | Lisa |
+| May 1–7 | Lisa | Alex |
+| May 8–14 | Alex | Marc |
+
+**Expectations**
+- Primary is first responder; target acknowledgement within 15 minutes during business hours, 30 minutes outside.
+- Secondary is backup if primary is unreachable.
+- Swap requests: post here at least 48 hours in advance and confirm with the person covering for you.
+
+Pagerduty schedules will be updated to match this by Friday.`,
+			replies: []struct{ author, body string }{
+				{"marc", "Works for me. Can I swap Apr 22–28 with Lisa? I have a conference that week."},
+				{"lisa", "Fine by me — I'll take Apr 22–28 primary, Marc takes May 1–7 primary. Alex stays as secondary both weeks."},
+				{"admin", "Updated the table and will sync Pagerduty. Thanks for coordinating quickly."},
+			},
+		},
 	}
 
 	totalTopics := 0
