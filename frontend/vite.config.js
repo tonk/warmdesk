@@ -5,7 +5,7 @@ import { execSync } from 'node:child_process'
 
 const gitVersion = (() => {
   try {
-    return execSync('git describe --tags --always', { encoding: 'utf8' }).trim()
+    return execSync('git describe --tags --always', { encoding: 'utf8' }).trim().replace(/^v/, '')
   } catch {
     return 'dev'
   }
