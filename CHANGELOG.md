@@ -2,6 +2,11 @@
 
 All notable changes to Coworker are documented here.
 
+## v0.2.6 — 2026-03-29
+
+### Fixed
+- **Windows build** — Tauri v2 removed `zip` as a valid `--bundles` value on Windows (only `msi` and `nsis` are supported); the CI workflow and `make windows-portable` target now build with `--bundles nsis` and create the portable zip from the compiled binary using PowerShell's `Compress-Archive`
+
 ## v0.2.5 — 2026-03-29
 
 ### Added
