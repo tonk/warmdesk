@@ -115,7 +115,10 @@
     "sort_assignee": "Zugewiesene Person",
     "sort_priority": "Priorität",
     "sort_asc": "Aufsteigend",
-    "sort_desc": "Absteigend"
+    "sort_desc": "Absteigend",
+    "time_spent": "Aufgewendete Zeit",
+    "time_hours": "Std",
+    "time_minutes": "Min"
   },
   "chat": {
     "title": "Team-Chat",
@@ -169,7 +172,15 @@
     "smtp_port": "Port",
     "smtp_from": "Absenderadresse",
     "smtp_username": "Benutzername",
-    "smtp_password": "Passwort"
+    "smtp_password": "Passwort",
+    "branding_title": "Branding",
+    "branding_hint": "Firmenname und Logo konfigurieren. Diese erscheinen auf Zeitberichten.",
+    "company_name": "Firmenname",
+    "company_name_placeholder": "Ihr Unternehmen",
+    "company_logo": "Firmenlogo",
+    "company_logo_hint": "URL einfügen oder Bilddatei hochladen.",
+    "company_logo_upload": "Bild hochladen",
+    "company_logo_preview": "Vorschau"
   },
   "update": {
     "available": "Eine neue Version von Coworker ist verfügbar: v{version}.",
@@ -255,5 +266,32 @@
     "docs_add": "Ticket hinzufügen",
     "docs_comment": "Kommentar hinzufügen",
     "docs_move": "Ticket verschieben"
+  },
+  "report": {
+    "title": "Zeitbericht",
+    "nav": "Berichte",
+    "period": "Zeitraum",
+    "period_all": "Gesamte Zeit",
+    "period_year": "Jahr",
+    "period_month": "Monat",
+    "period_week": "Woche",
+    "year": "Jahr",
+    "month": "Monat",
+    "week": "Woche",
+    "project_filter": "Projekt",
+    "all_projects": "Alle Projekte",
+    "run": "Bericht erstellen",
+    "loading": "Bericht wird geladen...",
+    "no_data": "Keine Zeiteinträge für den gewählten Zeitraum gefunden.",
+    "generated_at": "Erstellt",
+    "col_ref": "Ref",
+    "col_title": "Aufgabe",
+    "col_assignees": "Bearbeiter",
+    "col_updated": "Datum",
+    "col_time": "Aufgewendete Zeit",
+    "subtotal": "Zwischensumme",
+    "grand_total": "Gesamtsumme",
+    "export_pdf": "Als PDF exportieren",
+    "export_xlsx": "Als Excel exportieren"
   }
 }

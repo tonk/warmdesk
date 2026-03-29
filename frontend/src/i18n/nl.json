@@ -115,7 +115,10 @@
     "sort_assignee": "Toegewezene",
     "sort_priority": "Prioriteit",
     "sort_asc": "Oplopend",
-    "sort_desc": "Aflopend"
+    "sort_desc": "Aflopend",
+    "time_spent": "Bestede tijd",
+    "time_hours": "u",
+    "time_minutes": "m"
   },
   "chat": {
     "title": "Teamchat",
@@ -169,7 +172,15 @@
     "smtp_port": "Poort",
     "smtp_from": "Afzenderadres",
     "smtp_username": "Gebruikersnaam",
-    "smtp_password": "Wachtwoord"
+    "smtp_password": "Wachtwoord",
+    "branding_title": "Huisstijl",
+    "branding_hint": "Stel de bedrijfsnaam en het logo in. Deze verschijnen op tijdrapporten.",
+    "company_name": "Bedrijfsnaam",
+    "company_name_placeholder": "Uw bedrijf",
+    "company_logo": "Bedrijfslogo",
+    "company_logo_hint": "Plak een URL of upload een afbeelding.",
+    "company_logo_upload": "Afbeelding uploaden",
+    "company_logo_preview": "Voorbeeld"
   },
   "update": {
     "available": "Er is een nieuwe versie van Coworker beschikbaar: v{version}.",
@@ -255,5 +266,32 @@
     "docs_add": "Ticket toevoegen",
     "docs_comment": "Reactie toevoegen",
     "docs_move": "Ticket verplaatsen"
+  },
+  "report": {
+    "title": "Tijdrapport",
+    "nav": "Rapporten",
+    "period": "Periode",
+    "period_all": "Alle tijd",
+    "period_year": "Jaar",
+    "period_month": "Maand",
+    "period_week": "Week",
+    "year": "Jaar",
+    "month": "Maand",
+    "week": "Week",
+    "project_filter": "Project",
+    "all_projects": "Alle projecten",
+    "run": "Rapport genereren",
+    "loading": "Rapport laden...",
+    "no_data": "Geen tijdboekingen gevonden voor de geselecteerde periode.",
+    "generated_at": "Gegenereerd",
+    "col_ref": "Ref",
+    "col_title": "Taak",
+    "col_assignees": "Toegewezen",
+    "col_updated": "Datum",
+    "col_time": "Bestede tijd",
+    "subtotal": "Subtotaal",
+    "grand_total": "Eindtotaal",
+    "export_pdf": "Exporteren als PDF",
+    "export_xlsx": "Exporteren als Excel"
   }
 }

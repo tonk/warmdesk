@@ -115,7 +115,10 @@
     "sort_assignee": "Asignado",
     "sort_priority": "Prioridad",
     "sort_asc": "Ascendente",
-    "sort_desc": "Descendente"
+    "sort_desc": "Descendente",
+    "time_spent": "Tiempo dedicado",
+    "time_hours": "h",
+    "time_minutes": "m"
   },
   "chat": {
     "title": "Chat del equipo",
@@ -169,7 +172,15 @@
     "smtp_port": "Puerto",
     "smtp_from": "Dirección de origen",
     "smtp_username": "Usuario",
-    "smtp_password": "Contraseña"
+    "smtp_password": "Contraseña",
+    "branding_title": "Identidad corporativa",
+    "branding_hint": "Configure el nombre y el logotipo de su empresa. Aparecen en los informes de tiempo.",
+    "company_name": "Nombre de la empresa",
+    "company_name_placeholder": "Su empresa",
+    "company_logo": "Logotipo de la empresa",
+    "company_logo_hint": "Pegue una URL o suba una imagen.",
+    "company_logo_upload": "Subir imagen",
+    "company_logo_preview": "Vista previa"
   },
   "update": {
     "available": "Hay una nueva versión de Coworker disponible: v{version}.",
@@ -255,5 +266,32 @@
     "docs_add": "Agregar ticket",
     "docs_comment": "Agregar comentario",
     "docs_move": "Mover ticket"
+  },
+  "report": {
+    "title": "Informe de tiempo",
+    "nav": "Informes",
+    "period": "Período",
+    "period_all": "Todo el tiempo",
+    "period_year": "Año",
+    "period_month": "Mes",
+    "period_week": "Semana",
+    "year": "Año",
+    "month": "Mes",
+    "week": "Semana",
+    "project_filter": "Proyecto",
+    "all_projects": "Todos los proyectos",
+    "run": "Generar informe",
+    "loading": "Cargando informe...",
+    "no_data": "No se encontraron entradas de tiempo para el período seleccionado.",
+    "generated_at": "Generado el",
+    "col_ref": "Ref",
+    "col_title": "Tarea",
+    "col_assignees": "Asignados",
+    "col_updated": "Fecha",
+    "col_time": "Tiempo dedicado",
+    "subtotal": "Subtotal",
+    "grand_total": "Total general",
+    "export_pdf": "Exportar como PDF",
+    "export_xlsx": "Exportar como Excel"
   }
 }

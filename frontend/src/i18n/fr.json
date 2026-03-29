@@ -115,7 +115,10 @@
     "sort_assignee": "Responsable",
     "sort_priority": "Priorité",
     "sort_asc": "Croissant",
-    "sort_desc": "Décroissant"
+    "sort_desc": "Décroissant",
+    "time_spent": "Temps passé",
+    "time_hours": "h",
+    "time_minutes": "m"
   },
   "chat": {
     "title": "Chat d'équipe",
@@ -169,7 +172,15 @@
     "smtp_port": "Port",
     "smtp_from": "Adresse expéditeur",
     "smtp_username": "Nom d'utilisateur",
-    "smtp_password": "Mot de passe"
+    "smtp_password": "Mot de passe",
+    "branding_title": "Image de marque",
+    "branding_hint": "Configurez le nom et le logo de votre entreprise. Ils apparaissent sur les rapports de temps.",
+    "company_name": "Nom de l'entreprise",
+    "company_name_placeholder": "Votre entreprise",
+    "company_logo": "Logo de l'entreprise",
+    "company_logo_hint": "Collez une URL ou téléchargez une image.",
+    "company_logo_upload": "Télécharger une image",
+    "company_logo_preview": "Aperçu"
   },
   "update": {
     "available": "Une nouvelle version de Coworker est disponible : v{version}.",
@@ -255,5 +266,32 @@
     "docs_add": "Ajouter un ticket",
     "docs_comment": "Ajouter un commentaire",
     "docs_move": "Déplacer un ticket"
+  },
+  "report": {
+    "title": "Rapport de temps",
+    "nav": "Rapports",
+    "period": "Période",
+    "period_all": "Tout le temps",
+    "period_year": "Année",
+    "period_month": "Mois",
+    "period_week": "Semaine",
+    "year": "Année",
+    "month": "Mois",
+    "week": "Semaine",
+    "project_filter": "Projet",
+    "all_projects": "Tous les projets",
+    "run": "Générer le rapport",
+    "loading": "Chargement du rapport...",
+    "no_data": "Aucune entrée de temps trouvée pour la période sélectionnée.",
+    "generated_at": "Généré le",
+    "col_ref": "Réf",
+    "col_title": "Tâche",
+    "col_assignees": "Assignés",
+    "col_updated": "Date",
+    "col_time": "Temps passé",
+    "subtotal": "Sous-total",
+    "grand_total": "Total général",
+    "export_pdf": "Exporter en PDF",
+    "export_xlsx": "Exporter en Excel"
   }
 }
