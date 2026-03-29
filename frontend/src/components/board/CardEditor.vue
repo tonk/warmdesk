@@ -1,5 +1,5 @@
 <template>
-  <div class="editor-wrapper">
+  <div class="editor-wrapper" @keydown.escape.stop>
     <textarea ref="editorEl"></textarea>
     <!-- Mention dropdown — positioned over the editor -->
     <MentionDropdown
@@ -167,6 +167,7 @@ onBeforeUnmount(() => {
   mde?.codemirror.off('change')
   mde?.codemirror.off('cursorActivity', detectMention)
   mde?.codemirror.off('keydown', handleCmKeydown)
+  mde?.cleanup()      // removes EasyMDE's document-level keydown listener
   mde?.toTextArea()
   mde = null
 })
