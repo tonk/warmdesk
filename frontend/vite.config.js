@@ -1,14 +1,20 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { fileURLToPath, URL } from 'node:url'
-import { readFileSync } from 'node:fs'
+import { execSync } from 'node:child_process'
 
-const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'))
+const gitVersion = (() => {
+  try {
+    return execSync('git describe --tags --always', { encoding: 'utf8' }).trim()
+  } catch {
+    return 'dev'
+  }
+})()
 
 export default defineConfig({
   plugins: [vue()],
   define: {
-    __APP_VERSION__: JSON.stringify(pkg.version)
+    __APP_VERSION__: JSON.stringify(gitVersion)
   },
   resolve: {
     alias: {
