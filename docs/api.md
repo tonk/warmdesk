@@ -1,0 +1,425 @@
+# Coworker — API Reference
+
+## Contents
+
+1. [Authentication](#1-authentication)
+2. [Ticket API](#2-ticket-api)
+3. [Generic Webhook](#3-generic-webhook)
+4. [Git Platform Webhooks](#4-git-platform-webhooks)
+   - [Gitea / Forgejo](#41-gitea--forgejo)
+   - [GitHub](#42-github)
+   - [GitLab](#43-gitlab)
+5. [Card References](#5-card-references)
+6. [Response Formats](#6-response-formats)
+
+---
+
+## 1. Authentication
+
+### JWT (browser / SPA)
+
+Most endpoints require a valid JWT access token passed as a Bearer token in the
+`Authorization` header:
+
+```
+Authorization: Bearer <access_token>
+```
+
+Tokens are issued by `POST /api/v1/auth/login` and expire after 15 minutes.
+The frontend refreshes them silently via `POST /api/v1/auth/refresh` using the
+7-day refresh token.
+
+### API Keys (automation / CI-CD)
+
+For server-to-server calls, generate a personal API key under
+**Project Settings → API Keys**. Pass it in one of two ways:
+
+```
+X-API-Key: <key>
+```
+or as a query parameter:
+```
+GET /api/v1/ticket/my-project/cards?api_key=<key>
+```
+
+API keys have access to the [Ticket API](#2-ticket-api) endpoints only.
+
+---
+
+## 2. Ticket API
+
+The Ticket API lets CI/CD pipelines and external tools create cards, add
+comments, and move cards without a user account. All endpoints sit under
+`/api/v1/ticket/` and require API key authentication.
+
+### Create a card
+
+```
+POST /api/v1/ticket/{projectSlug}/cards
+```
+
+**Body**
+
+```json
+{
+  "title":       "Deploy v1.2.3 to production",
+  "description": "Automated deploy triggered by tag v1.2.3",
+  "column_id":   5,
+  "priority":    "high"
+}
+```
+
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| `title` | string | yes | Card title |
+| `description` | string | no | Markdown body |
+| `column_id` | number | no | Target column; defaults to first column |
+| `priority` | string | no | `none` / `low` / `medium` / `high` / `critical` |
+
+**Response** `201 Created`
+
+```json
+{
+  "id":          42,
+  "card_number": 17,
+  "title":       "Deploy v1.2.3 to production",
+  "column_id":   5,
+  "project_id":  3
+}
+```
+
+### Add a comment
+
+```
+POST /api/v1/ticket/{projectSlug}/cards/{cardId}/comments
+```
+
+**Body**
+
+```json
+{
+  "body": "Pipeline passed all tests. Deployment started."
+}
+```
+
+**Response** `201 Created` — the created comment object.
+
+### Move a card to a column
+
+```
+PATCH /api/v1/ticket/{projectSlug}/cards/{cardId}/move
+```
+
+**Body**
+
+```json
+{
+  "column_id": 8,
+  "position":  1000
+}
+```
+
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| `column_id` | number | yes | Target column ID |
+| `position` | number | no | Sort order within the column; omit to append at the end |
+
+**Response** `200 OK`
+
+```json
+{ "ok": true }
+```
+
+### Example: full CI pipeline workflow
+
+```bash
+API_KEY="cwk_live_xxxxxxxxxxxx"
+BASE="https://coworker.example.com/api/v1/ticket"
+PROJECT="my-project"
+
+# 1. Create a deploy card
+CARD=$(curl -s -X POST "$BASE/$PROJECT/cards" \
+  -H "X-API-Key: $API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Deploy v1.2.3","priority":"high"}')
+
+CARD_ID=$(echo $CARD | jq .id)
+
+# 2. Move it to "In Progress"
+curl -s -X PATCH "$BASE/$PROJECT/cards/$CARD_ID/move" \
+  -H "X-API-Key: $API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"column_id": 5}'
+
+# 3. After tests pass, comment and move to Done
+curl -s -X POST "$BASE/$PROJECT/cards/$CARD_ID/comments" \
+  -H "X-API-Key: $API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"body":"All tests passed. Deployed to production."}'
+
+curl -s -X PATCH "$BASE/$PROJECT/cards/$CARD_ID/move" \
+  -H "X-API-Key: $API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"column_id": 8}'
+```
+
+---
+
+## 3. Generic Webhook
+
+The generic webhook accepts plain JSON and posts a formatted message to the
+project chat. Use it for any custom automation that doesn't fit a specific git
+platform.
+
+### Setup
+
+1. In **Project Settings → Webhooks**, click **Create Webhook**, set the type
+   to **Generic (plain JSON)**, and give it a name.
+2. Copy the token shown once on creation.
+
+### Sending a message
+
+```
+POST /api/v1/webhooks/{token}
+Content-Type: application/json
+```
+
+**Body**
+
+```json
+{
+  "text":     "Build #42 passed in 2m 13s",
+  "username": "CI Bot"
+}
+```
+
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| `text` | string | yes | Message body; Markdown is supported |
+| `username` | string | no | Bot display name; defaults to the webhook name |
+
+**Response** `201 Created`
+
+```json
+{ "ok": true }
+```
+
+### Example: send from a shell script
+
+```bash
+curl -s -X POST https://coworker.example.com/api/v1/webhooks/TOKEN \
+  -H "Content-Type: application/json" \
+  -d '{"text":"**Build passed** — [view run](https://ci.example.com/build/42)","username":"GitHub Actions"}'
+```
+
+---
+
+## 4. Git Platform Webhooks
+
+Git platform webhooks do two things simultaneously:
+
+1. **Post a formatted chat message** to the project chat whenever a push,
+   pull request, merge request, or issue event arrives.
+2. **Create card links** when a commit message, PR title, or issue title
+   contains a card reference (e.g. `PRJ-42`). The linked event appears in the
+   **Git Links** section of the card detail.
+
+### 4.1 Gitea / Forgejo
+
+**Endpoint**
+
+```
+POST /api/v1/gitea-webhook/{token}
+```
+
+**Setup**
+
+1. Create a webhook of type **Gitea / Forgejo** in Project Settings.
+2. In your Gitea or Forgejo repository, go to
+   **Settings → Webhooks → Add Webhook → Gitea** and set:
+   - Target URL: `https://coworker.example.com/api/v1/gitea-webhook/{token}`
+   - Content type: `application/json`
+   - Secret: leave empty (the token in the URL is sufficient)
+   - Trigger: select all events, or at minimum: *Push*, *Issues*,
+     *Pull Request*, *Issue Comment*, *Pull Request Review Comment*,
+     *Create*, *Delete*, *Release*
+
+**Supported events**
+
+| `X-Gitea-Event` | Chat message content |
+|-----------------|----------------------|
+| `push` | Pusher, branch, commit list (up to 5) |
+| `issues` | Author, action (opened/closed/etc.), issue title |
+| `issue_comment` | Commenter, issue reference, comment preview |
+| `pull_request` | Author, action, PR title |
+| `pull_request_review_comment` | Reviewer, PR title, comment preview |
+| `create` | Author, ref type, ref name |
+| `delete` | Author, ref type, ref name |
+| `release` | Author, release name |
+| `fork` | Forker |
+
+**Signature verification**
+
+Gitea/Forgejo optionally sign payloads with HMAC-SHA256 in the
+`X-Gitea-Signature` / `X-Forgejo-Signature` header. If no signature header is
+present the request is still accepted (the URL token authenticates it). If a
+signature is present it is verified against the webhook token.
+
+---
+
+### 4.2 GitHub
+
+**Endpoint**
+
+```
+POST /api/v1/github-webhook/{token}
+```
+
+**Setup**
+
+1. Create a webhook of type **GitHub** in Project Settings.
+2. In your GitHub repository, go to
+   **Settings → Webhooks → Add webhook** and set:
+   - Payload URL: `https://coworker.example.com/api/v1/github-webhook/{token}`
+   - Content type: `application/json`
+   - Secret: leave empty (or enter any string — currently not validated)
+   - Events: choose **Let me select individual events** and enable at minimum:
+     - Pushes
+     - Pull requests
+     - Issues
+
+**Supported events**
+
+| `X-GitHub-Event` | Chat message content |
+|------------------|----------------------|
+| `push` | Pusher, branch, commit list (up to 5) |
+| `pull_request` | Author, action (opened / closed / merged), PR title |
+| `issues` | Author, action (opened / closed / etc.), issue title |
+| `create` | Author, ref type, ref name |
+| `delete` | Author, ref type, ref name |
+| `ping` | Acknowledged silently (no chat message) |
+
+**Card link extraction**
+
+Card links are created from:
+- Each commit message in a `push` event
+- The PR title in a `pull_request` event
+- The issue title in an `issues` event
+
+The PR status is set to `merged` if `pull_request.merged` is `true`; otherwise
+`open` or `closed` reflects `pull_request.state`.
+
+---
+
+### 4.3 GitLab
+
+**Endpoint**
+
+```
+POST /api/v1/gitlab-webhook/{token}
+```
+
+**Setup**
+
+1. Create a webhook of type **GitLab** in Project Settings.
+2. In your GitLab repository, go to **Settings → Webhooks** and set:
+   - URL: `https://coworker.example.com/api/v1/gitlab-webhook/{token}`
+   - Secret token: leave empty, or set it to the Coworker webhook token for
+     extra validation (GitLab sends it in `X-Gitlab-Token`)
+   - Trigger: enable at minimum **Push events**, **Merge request events**, and
+     **Issues events**
+
+**Supported events**
+
+| `object_kind` | Chat message content |
+|---------------|----------------------|
+| `push` | Pusher, branch, commit list (up to 5) |
+| `merge_request` | Author, action (open / close / merge), MR title |
+| `issue` | Author, action (open / close / reopen), issue title |
+
+**Card link extraction**
+
+Card links are created from:
+- Each commit message in a `push` event
+- The merge request title (`object_attributes.title`) in a `merge_request` event
+- The issue title (`object_attributes.title`) in an `issue` event
+
+The merge request reference uses the internal IID (`!42`); issues use `#42`.
+
+---
+
+## 5. Card References
+
+A card reference is a string in the format `PREFIX-NUMBER` where:
+
+- `PREFIX` is the project's 2–8 uppercase letter key (e.g. `PRJ`, `WEB`, `API`)
+- `NUMBER` is the card's sequential number within the project (e.g. `42`)
+
+Examples: `PRJ-1`, `WEBAPP-99`, `API-200`
+
+The prefix is auto-generated from the project name when the project is created
+(first letters of each word, padded to 3 characters). It is visible in the card
+reference badge at the top of the card detail.
+
+### Using references in git
+
+Include a card reference anywhere in a commit message, PR title, or issue title
+and Coworker will create a link automatically when the webhook event arrives:
+
+```
+git commit -m "Fix login redirect loop — closes PRJ-42"
+git commit -m "WIP: PRJ-55 add pagination"
+```
+
+Multiple references in the same message are all linked:
+
+```
+git commit -m "PRJ-10 PRJ-11: refactor auth middleware"
+```
+
+### Card link data
+
+Each linked event stores:
+
+| Field | Contents |
+|-------|----------|
+| `platform` | `github`, `gitlab`, `gitea`, or `forgejo` |
+| `link_type` | `commit`, `pr`, or `issue` |
+| `reference` | Commit SHA (full) or PR/issue number |
+| `title` | Commit first line or PR/issue title |
+| `url` | Direct link to the event on the platform |
+| `author` | Display name or username of the author |
+| `status` | `open`, `closed`, or `merged` |
+| `repo_name` | `owner/repo` full path |
+
+---
+
+## 6. Response Formats
+
+### Success
+
+All successful responses return JSON. Creation responses use `201 Created`;
+queries and updates use `200 OK`.
+
+### Errors
+
+All error responses return JSON with an `error` key:
+
+```json
+{ "error": "project not found" }
+```
+
+Common status codes:
+
+| Code | Meaning |
+|------|---------|
+| `400` | Bad request — missing or invalid field |
+| `401` | Unauthorized — missing or invalid token / API key |
+| `403` | Forbidden — insufficient role |
+| `404` | Not found |
+| `500` | Internal server error |
+
+### Dates
+
+All dates and timestamps are returned as ISO 8601 strings in UTC:
+`2026-03-29T14:05:00Z`

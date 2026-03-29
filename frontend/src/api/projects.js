@@ -63,6 +63,9 @@ export const projectsApi = {
   listMessages: (slug, params) => client.get(`/projects/${slug}/chat/messages`, { params }),
   deleteMessage: (slug, msgId) => client.delete(`/projects/${slug}/chat/messages/${msgId}`),
 
+  // Card git links
+  getCardLinks: (slug, cardId) => client.get(`/projects/${slug}/cards/${cardId}/links`),
+
   // Chat reactions
   toggleChatReaction: (slug, msgId, emoji) => client.post(`/projects/${slug}/chat/messages/${msgId}/reactions`, { emoji }),
 

@@ -53,6 +53,7 @@ and asked Claude Code to generate the app.
 - **Company branding** — set a company name and logo that appears on reports
 - **Configurable initial columns** — admin can define which columns are created when a new project is made (defaults to "Backlog")
 - **Ticket API** — create cards, add comments, and move cards via API key (for CI/CD pipelines and external integrations)
+- **Git integration** — connect GitHub, GitLab, Gitea, or Forgejo; commit/PR/issue events post to project chat and automatically link to cards when a card reference (e.g. `PRJ-42`) appears in the message or title
 - **Database support** — SQLite (zero configuration), PostgreSQL, MySQL/MariaDB
 - **Horizontal scaling** — Redis pub/sub for multi-instance WebSocket broadcast
 - **Desktop app** — native Tauri app for Linux (AppImage), macOS (DMG), and Windows (installer)
@@ -160,6 +161,24 @@ PATCH /api/v1/ticket/{slug}/cards/{id}/move          — move to a column
 ```
 
 Pass the key in the `X-API-Key` header or as `?api_key=` query parameter.
+
+## Git Integration
+
+Connect GitHub, GitLab, Gitea, or Forgejo to automatically link commits, pull
+requests, and issues to cards. Any commit message or PR/issue title that
+contains a card reference (e.g. `PRJ-42`) creates a link visible in the card
+detail. Events also post formatted messages to the project chat.
+
+Setup: **Project Settings → Webhooks → Create Webhook** and choose the platform.
+Full instructions in [docs/api.md](docs/api.md#4-git-platform-webhooks).
+
+## Documentation
+
+| Document | Contents |
+|----------|----------|
+| [docs/user-guide.md](docs/user-guide.md) | End-user walkthrough of all features |
+| [docs/api.md](docs/api.md) | Ticket API + webhook integration reference |
+| [docs/admin-guide.md](docs/admin-guide.md) | Installation, configuration, SMTP, scaling, backup |
 
 ## Installation
 

@@ -2,6 +2,18 @@
 
 All notable changes to Coworker are documented here.
 
+## v0.2.7 — 2026-03-29
+
+### Added
+- **Git platform integration** — connect GitHub, GitLab, Gitea, or Forgejo via webhooks; push / PR / issue events post formatted messages to the project chat, and any card reference (e.g. `PRJ-42`) in a commit message or PR / issue title automatically creates a link in the card detail; links show platform badge, type (commit / pull request / issue), short reference, title, and open / closed / merged status
+- **GitHub webhook** — new webhook type with HMAC-SHA256 signature verification; handles `push`, `pull_request`, `issues`, `create`, `delete`, and `ping` events
+- **GitLab webhook** — new webhook type with `X-Gitlab-Token` validation; handles Push Hook, Merge Request Hook, and Issue Hook events
+- **Gitea / Forgejo card links** — existing Gitea webhook now also creates card links from commit messages, PR titles, and issue titles (chat posting was already supported)
+- **Documentation** — three new Markdown documents shipped with every release in `docs/`:
+  - `docs/user-guide.md` — end-user walkthrough of all features
+  - `docs/api.md` — Ticket API and all webhook integration reference
+  - `docs/admin-guide.md` — installation, configuration, SMTP, scaling, backup, and security checklist
+
 ## v0.2.6 — 2026-03-29
 
 ### Fixed

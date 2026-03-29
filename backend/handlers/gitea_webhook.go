@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/tonk/coworker/database"
 	"github.com/tonk/coworker/models"
+	"github.com/tonk/coworker/services"
 	appws "github.com/tonk/coworker/ws"
 )
 
@@ -299,5 +300,90 @@ func IncomingGiteaWebhook(c *gin.Context) {
 		Payload: msg,
 	})
 
+	// Extract card links from commits/PR/issue titles.
+	linkGiteaCards(hook, event, payload)
+
 	c.JSON(http.StatusCreated, gin.H{"ok": true})
+}
+
+func linkGiteaCards(hook models.ProjectWebhook, event string, p giteaPayload) {
+	platform := "gitea"
+	if strings.Contains(strings.ToLower(hook.Name), "forgejo") {
+		platform = "forgejo"
+	}
+	repo := p.Repository.FullName
+
+	switch event {
+	case "push":
+		for _, commit := range p.Commits {
+			links := services.LinkCardsFromText(commit.Message, models.CardLink{
+				Platform:  platform,
+				LinkType:  "commit",
+				Title:     commit.firstLine(),
+				URL:       commit.URL,
+				Reference: commit.ID,
+				Author:    commit.Author.display(),
+				Status:    "merged",
+				RepoName:  repo,
+			})
+			for _, l := range links {
+				appws.BroadcastToProject(hook.ProjectID, appws.Message{
+					Type:    appws.TypeCardLinkCreated,
+					Payload: l,
+				})
+			}
+		}
+
+	case "pull_request":
+		if p.PullRequest == nil {
+			return
+		}
+		pr := p.PullRequest
+		status := "open"
+		if p.Action == "closed" {
+			status = "merged"
+		}
+		links := services.LinkCardsFromText(pr.Title, models.CardLink{
+			Platform:  platform,
+			LinkType:  "pr",
+			Title:     pr.Title,
+			URL:       pr.HTMLURL,
+			Reference: fmt.Sprintf("%d", pr.Number),
+			Author:    pr.User.display(),
+			Status:    status,
+			RepoName:  repo,
+		})
+		for _, l := range links {
+			appws.BroadcastToProject(hook.ProjectID, appws.Message{
+				Type:    appws.TypeCardLinkCreated,
+				Payload: l,
+			})
+		}
+
+	case "issues":
+		if p.Issue == nil {
+			return
+		}
+		issue := p.Issue
+		status := "open"
+		if p.Action == "closed" {
+			status = "closed"
+		}
+		links := services.LinkCardsFromText(issue.Title, models.CardLink{
+			Platform:  platform,
+			LinkType:  "issue",
+			Title:     issue.Title,
+			URL:       issue.HTMLURL,
+			Reference: fmt.Sprintf("%d", issue.Number),
+			Author:    issue.User.display(),
+			Status:    status,
+			RepoName:  repo,
+		})
+		for _, l := range links {
+			appws.BroadcastToProject(hook.ProjectID, appws.Message{
+				Type:    appws.TypeCardLinkCreated,
+				Payload: l,
+			})
+		}
+	}
 }

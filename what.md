@@ -166,3 +166,11 @@ Create an application that has all these features and requirements
 - "Direct Messages" renamed to "Chats" throughout; /messages redirects to /chats
 - Team Chat removed from project board page
 - Card comments now trigger @mention notifications (email + real-time WS)
+- Auto-replace text emoticons (e.g. :-) ;-) <3) with emoji in all editors and chat inputs
+- Fix Escape key in card comment editor closing the card modal
+- Fix unread indicator showing for messages the current user sent
+- Git platform integration: connect GitHub, GitLab, Gitea, or Forgejo via webhooks
+  - Push / PR / issue events post formatted messages to project chat
+  - Card references (e.g. PRJ-42) in commit messages and PR/issue titles auto-link to cards
+  - Linked events appear in a Git Links section on the card detail
+- Documentation: user guide, API reference, and admin guide shipped with every release in docs/

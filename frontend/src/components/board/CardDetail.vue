@@ -196,6 +196,35 @@
         </div>
       </div>
 
+      <div v-if="gitLinks.length" class="git-links-section">
+        <h4>Git Links</h4>
+        <div class="git-links-list">
+          <a
+            v-for="link in gitLinks"
+            :key="link.id"
+            :href="link.url"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="git-link-row"
+          >
+            <span class="git-link-icon">
+              <template v-if="link.link_type === 'commit'">⬡</template>
+              <template v-else-if="link.link_type === 'pr'">⤵</template>
+              <template v-else>◎</template>
+            </span>
+            <span class="git-link-meta">
+              <span class="git-link-platform" :class="'platform-' + link.platform">{{ link.platform }}</span>
+              <span class="git-link-type">{{ link.link_type === 'pr' ? 'Pull Request' : link.link_type === 'commit' ? 'Commit' : 'Issue' }}</span>
+              <span v-if="link.reference" class="git-link-ref">
+                {{ link.link_type === 'commit' ? link.reference.slice(0, 7) : '#' + link.reference }}
+              </span>
+            </span>
+            <span class="git-link-title">{{ link.title }}</span>
+            <span class="git-link-status" :class="'status-' + link.status">{{ link.status }}</span>
+          </a>
+        </div>
+      </div>
+
       <div v-if="history.length" class="history-section">
         <h4>{{ $t('board.column_history') }}</h4>
         <div class="history-list">
@@ -269,6 +298,7 @@ const newChecklistItem = ref('')
 const editingItemId = ref(null)
 const editItemBody = ref('')
 const assignees = ref([...(props.card.assignees || [])])
+const gitLinks = ref([])
 
 const checklistPct = computed(() => {
   if (!checklist.value.length) return 0
@@ -412,12 +442,14 @@ async function deleteAttachment(a) {
 
 onMounted(async () => {
   try {
-    const [histRes, checkRes] = await Promise.all([
+    const [histRes, checkRes, linksRes] = await Promise.all([
       projectsApi.getCardHistory(props.projectSlug, props.card.id),
-      projectsApi.listChecklist(props.projectSlug, props.card.id)
+      projectsApi.listChecklist(props.projectSlug, props.card.id),
+      projectsApi.getCardLinks(props.projectSlug, props.card.id),
     ])
     history.value = histRes.data
     checklist.value = checkRes.data || []
+    gitLinks.value = linksRes.data || []
   } catch {}
 })
 
@@ -699,6 +731,53 @@ function renderMarkdown(text) {
 
 .add-comment { display: flex; flex-direction: column; gap: 8px; }
 .add-comment .btn { align-self: flex-end; }
+
+.git-links-section { margin-top: 24px; border-top: 1px solid var(--color-border); padding-top: 20px; }
+.git-links-section h4 { margin-bottom: 10px; font-size: 14px; }
+.git-links-list { display: flex; flex-direction: column; gap: 4px; }
+.git-link-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 12px;
+  text-decoration: none;
+  color: var(--color-text);
+  background: var(--color-surface);
+  transition: background .12s;
+}
+.git-link-row:hover { background: var(--color-bg); }
+.git-link-icon { font-size: 14px; color: var(--color-text-muted); flex-shrink: 0; }
+.git-link-meta { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.git-link-platform {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 1px 5px;
+  border-radius: 3px;
+  letter-spacing: .04em;
+}
+.platform-github { background: #24292e; color: #fff; }
+.platform-gitlab { background: #e24329; color: #fff; }
+.platform-gitea  { background: #609926; color: #fff; }
+.platform-forgejo { background: #4a8ab5; color: #fff; }
+.git-link-type { color: var(--color-text-muted); }
+.git-link-ref { font-family: monospace; color: var(--color-primary); }
+.git-link-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--color-text); }
+.git-link-status {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  letter-spacing: .03em;
+}
+.status-open   { background: color-mix(in srgb, #22c55e 15%, transparent); color: #16a34a; }
+.status-closed { background: color-mix(in srgb, #ef4444 15%, transparent); color: #dc2626; }
+.status-merged { background: color-mix(in srgb, #8b5cf6 15%, transparent); color: #7c3aed; }
 
 .history-section { margin-top: 24px; border-top: 1px solid var(--color-border); padding-top: 20px; }
 .history-section h4 { margin-bottom: 12px; font-size: 14px; color: var(--color-text-muted); }

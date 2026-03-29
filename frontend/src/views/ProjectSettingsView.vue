@@ -139,6 +139,8 @@
             <select class="form-input" v-model="newWebhookType">
               <option value="generic">Generic (plain JSON)</option>
               <option value="gitea">Gitea / Forgejo</option>
+              <option value="github">GitHub</option>
+              <option value="gitlab">GitLab</option>
             </select>
           </div>
           <button class="btn btn-primary btn-sm" :disabled="!newWebhookName.trim()" @click="createWebhook">Create Webhook</button>
@@ -149,25 +151,46 @@
             <button class="btn btn-secondary btn-sm" @click="copyWebhookToken">Copy</button>
           </div>
 
-          <!-- Generic webhook docs -->
+          <!-- Webhook setup docs -->
           <div class="webhook-docs" style="margin-top:20px">
             <h4 style="margin:0 0 6px">Generic webhook</h4>
-            <p style="font-size:13px;color:var(--color-text-muted);margin:0 0 6px">
+            <p style="font-size:13px;color:var(--color-text-muted);margin:0 0 12px">
               <code>POST /api/v1/webhooks/&lt;token&gt;</code> — body: <code>{"text": "...", "username": "Bot"}</code>
             </p>
-            <h4 style="margin:12px 0 6px">Gitea / Forgejo webhook</h4>
+
+            <h4 style="margin:0 0 6px">Gitea / Forgejo</h4>
             <p style="font-size:13px;color:var(--color-text-muted);margin:0 0 4px">
-              Create a webhook of type <strong>Gitea / Forgejo</strong> above, then in your Gitea/Forgejo repository go to
-              <strong>Settings → Webhooks → Add Webhook → Gitea</strong> and set:
+              In your repository go to <strong>Settings → Webhooks → Add Webhook → Gitea</strong> and set:
             </p>
-            <ul style="font-size:13px;color:var(--color-text-muted);margin:0 0 4px;padding-left:18px">
+            <ul style="font-size:13px;color:var(--color-text-muted);margin:0 0 12px;padding-left:18px">
               <li>Target URL: <code>{{ baseUrl }}/api/v1/gitea-webhook/&lt;token&gt;</code></li>
               <li>Content type: <code>application/json</code></li>
-              <li>Secret: leave empty (the token in the URL authenticates the request)</li>
+              <li>Secret: leave empty</li>
             </ul>
-            <p style="font-size:13px;color:var(--color-text-muted);margin:0">
-              Supported events: push, issues, pull request, comments, create, delete, release, fork.
+
+            <h4 style="margin:0 0 6px">GitHub</h4>
+            <p style="font-size:13px;color:var(--color-text-muted);margin:0 0 4px">
+              In your repository go to <strong>Settings → Webhooks → Add webhook</strong> and set:
             </p>
+            <ul style="font-size:13px;color:var(--color-text-muted);margin:0 0 4px;padding-left:18px">
+              <li>Payload URL: <code>{{ baseUrl }}/api/v1/github-webhook/&lt;token&gt;</code></li>
+              <li>Content type: <code>application/json</code></li>
+              <li>Secret: leave empty (or set to any string — not verified)</li>
+              <li>Events: <em>Push</em>, <em>Pull requests</em>, <em>Issues</em></li>
+            </ul>
+            <p style="font-size:13px;color:var(--color-text-muted);margin:0 0 12px">
+              Card refs in commit messages and PR/issue titles (e.g. <code>PRJ-42</code>) are automatically linked.
+            </p>
+
+            <h4 style="margin:0 0 6px">GitLab</h4>
+            <p style="font-size:13px;color:var(--color-text-muted);margin:0 0 4px">
+              In your repository go to <strong>Settings → Webhooks</strong> and set:
+            </p>
+            <ul style="font-size:13px;color:var(--color-text-muted);margin:0 0 4px;padding-left:18px">
+              <li>URL: <code>{{ baseUrl }}/api/v1/gitlab-webhook/&lt;token&gt;</code></li>
+              <li>Secret token: leave empty (or set to the webhook token for extra validation)</li>
+              <li>Trigger: <em>Push events</em>, <em>Merge request events</em>, <em>Issues events</em></li>
+            </ul>
           </div>
 
           <table class="data-table" style="margin-top:24px">
@@ -186,7 +209,7 @@
               </tr>
               <tr v-for="wh in webhooks" :key="wh.id">
                 <td>{{ wh.name }}</td>
-                <td><span class="webhook-type-badge" :class="wh.type">{{ wh.type === 'gitea' ? 'Gitea/Forgejo' : 'Generic' }}</span></td>
+                <td><span class="webhook-type-badge" :class="wh.type">{{ { gitea: 'Gitea/Forgejo', github: 'GitHub', gitlab: 'GitLab' }[wh.type] || 'Generic' }}</span></td>
                 <td><code>…{{ wh.token_hint }}</code></td>
                 <td>{{ formatDateTime(wh.created_at) }}</td>
                 <td style="display:flex;gap:6px">
@@ -584,7 +607,9 @@ function copyWebhookToken() {
 .method.patch { background: #f59e0b; }
 
 .webhook-type-badge { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 9999px; }
-.webhook-type-badge.gitea { background: #fef3c7; color: #92400e; }
+.webhook-type-badge.gitea   { background: #dcfce7; color: #166534; }
+.webhook-type-badge.github  { background: #f3f4f6; color: #111827; }
+.webhook-type-badge.gitlab  { background: #fce7f3; color: #9d174d; }
 .webhook-type-badge.generic { background: var(--color-surface); color: var(--color-text-muted); border: 1px solid var(--color-border); }
 
 .webhook-docs { padding: 16px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); max-width: 640px; }

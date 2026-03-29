@@ -153,5 +153,6 @@ func autoMigrate(db *gorm.DB) error {
 		&models.Topic{},
 		&models.TopicReply{},
 		&models.FavoriteUser{},
+		&models.CardLink{},
 	)
 }

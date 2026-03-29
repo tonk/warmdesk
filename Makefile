@@ -14,6 +14,7 @@ build: build-frontend build-backend
 	@cp -r deploy $(DIST_DIR)/deploy
 	@cp INSTALL.md $(DIST_DIR)/INSTALL.md
 	@cp README.md $(DIST_DIR)/README.md
+	@cp -r docs $(DIST_DIR)/docs
 	@echo "Build complete. Output: $(DIST_DIR)/"
 
 build-frontend:

@@ -164,6 +164,9 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webDir string, 
 			// Card history
 			projects.GET("/:projectSlug/cards/:cardId/history", handlers.GetCardHistory)
 
+			// Card git links
+			projects.GET("/:projectSlug/cards/:cardId/links", handlers.ListCardLinks)
+
 			// Card comments
 			projects.GET("/:projectSlug/cards/:cardId/comments", handlers.ListComments)
 			projects.POST("/:projectSlug/cards/:cardId/comments", handlers.CreateComment)
@@ -210,6 +213,8 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webDir string, 
 	// Public incoming webhook receivers
 	v1.POST("/webhooks/:token", handlers.IncomingWebhook)
 	v1.POST("/gitea-webhook/:token", handlers.IncomingGiteaWebhook)
+	v1.POST("/github-webhook/:token", handlers.IncomingGitHubWebhook)
+	v1.POST("/gitlab-webhook/:token", handlers.IncomingGitLabWebhook)
 
 	// WebSocket (auth via ?token= query param)
 	v1.GET("/ws/user", wsHandler.HandleUserWS)

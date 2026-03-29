@@ -68,7 +68,10 @@ func CreateWebhook(c *gin.Context) {
 	}
 
 	hookType := req.Type
-	if hookType != "gitea" {
+	switch hookType {
+	case "gitea", "github", "gitlab":
+		// valid git-platform types
+	default:
 		hookType = "generic"
 	}
 

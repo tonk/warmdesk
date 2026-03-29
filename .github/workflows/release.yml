@@ -54,6 +54,7 @@ jobs:
           cp -r deploy dist/deploy
           cp INSTALL.md dist/INSTALL.md
           cp README.md dist/README.md
+          cp -r docs dist/docs
 
       - name: Create archive
         run: tar -czf coworker-${{ github.ref_name }}.tar.gz -C dist .

@@ -50,6 +50,9 @@ const (
 	// Server -> Client: personal notifications
 	TypeMentionNotification = "mention.notification"
 
+	// Server -> Client: git card links
+	TypeCardLinkCreated = "card.link.created"
+
 	// System
 	TypePong  = "pong"
 	TypeError = "error"

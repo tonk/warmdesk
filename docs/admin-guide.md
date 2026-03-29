@@ -1,0 +1,593 @@
+# Coworker — Administrator Guide
+
+## Contents
+
+1. [Installation](#1-installation)
+2. [Configuration Reference](#2-configuration-reference)
+3. [Database Setup](#3-database-setup)
+4. [Running as a Service](#4-running-as-a-service)
+5. [Reverse Proxy](#5-reverse-proxy)
+6. [First Admin Account](#6-first-admin-account)
+7. [Admin Panel](#7-admin-panel)
+8. [SMTP Email](#8-smtp-email)
+9. [Company Branding](#9-company-branding)
+10. [System Settings](#10-system-settings)
+11. [Horizontal Scaling](#11-horizontal-scaling)
+12. [Desktop Apps](#12-desktop-apps)
+13. [Updates](#13-updates)
+14. [Backup and Recovery](#14-backup-and-recovery)
+15. [Demo Data](#15-demo-data)
+16. [Security Checklist](#16-security-checklist)
+
+---
+
+## 1. Installation
+
+For full build-from-source and quick-start instructions see
+[INSTALL.md](../INSTALL.md). This guide assumes the binary is already running
+and focuses on configuration and operations.
+
+### Requirements at runtime
+
+| Component | Minimum |
+|-----------|---------|
+| OS | Linux, macOS, or Windows |
+| CPU | 1 core |
+| RAM | 128 MB (SQLite) / 256 MB (PostgreSQL / MySQL) |
+| Disk | 50 MB for the binary + your database and uploaded files |
+| Network | Outbound SMTP (optional); inbound HTTP on your chosen port |
+
+No external runtime dependencies — Go produces a single statically-linked
+binary (except for SQLite, which requires `glibc` / `musl`).
+
+---
+
+## 2. Configuration Reference
+
+Configuration is loaded in priority order (highest wins):
+
+1. CLI flag `--config /path/to/file.yaml`
+2. Environment variable `CONFIG_FILE=/path/to/file.yaml`
+3. `coworker.yaml` in the current working directory
+4. Built-in defaults
+
+Every YAML key has a matching environment variable. Environment variables
+always override the YAML file.
+
+### Full configuration reference
+
+```yaml
+# ── Server ────────────────────────────────────────────────────────────────────
+port: 8080                        # PORT — HTTP listen port
+allowed_origins: "https://app.example.com"  # ALLOWED_ORIGINS — CORS origins
+
+# ── Security ──────────────────────────────────────────────────────────────────
+jwt_secret: "change-me-in-production"  # JWT_SECRET — HS256 signing key
+                                        # Generate: openssl rand -hex 32
+
+# ── Web assets ────────────────────────────────────────────────────────────────
+web_dir: "./web"                  # WEB_DIR — compiled frontend (required in prod)
+
+# ── Database ──────────────────────────────────────────────────────────────────
+db_driver: "sqlite"               # DB_DRIVER — sqlite | postgres | mysql
+db_dsn: "./coworker.db"           # DB_DSN — file path or connection string
+db_log: "warn"                    # DB_LOG — silent | error | warn | info
+
+# ── File uploads ──────────────────────────────────────────────────────────────
+upload_dir: "./uploads"           # UPLOAD_DIR — where attachments are stored
+max_upload_mb: 25                 # MAX_UPLOAD_MB — per-file upload limit
+
+# ── Logging ───────────────────────────────────────────────────────────────────
+gin_mode: "release"               # GIN_MODE — debug | release
+api_log: false                    # API_LOG — log every HTTP request
+
+# ── Redis (optional — for horizontal scaling) ──────────────────────────────────
+redis_url: ""                     # REDIS_URL — e.g. redis://localhost:6379
+                                  # Leave empty to use in-process pub/sub
+
+# ── Locale defaults (overridden per user) ─────────────────────────────────────
+default_locale: "en"              # DEFAULT_LOCALE — en | nl | de | fr | es
+```
+
+### Generating a strong JWT secret
+
+```bash
+openssl rand -hex 32
+# or
+python3 -c "import secrets; print(secrets.token_hex(32))"
+```
+
+Never use the built-in default `change-me-in-production` in any environment
+that is accessible from a network.
+
+---
+
+## 3. Database Setup
+
+### SQLite (default — recommended for single-server installs)
+
+No setup needed. Coworker creates the file automatically.
+
+```yaml
+db_driver: sqlite
+db_dsn: /var/lib/coworker/coworker.db
+```
+
+Ensure the directory is writable by the process user and is on a volume that is
+included in your backup.
+
+### PostgreSQL
+
+```bash
+# Create database and user
+psql -U postgres -c "CREATE USER coworker WITH PASSWORD 'secret';"
+psql -U postgres -c "CREATE DATABASE coworker OWNER coworker;"
+```
+
+```yaml
+db_driver: postgres
+db_dsn: "host=localhost user=coworker password=secret dbname=coworker port=5432 sslmode=require"
+```
+
+### MySQL / MariaDB
+
+```bash
+mysql -u root -p -e "CREATE DATABASE coworker CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql -u root -p -e "CREATE USER 'coworker'@'localhost' IDENTIFIED BY 'secret';"
+mysql -u root -p -e "GRANT ALL PRIVILEGES ON coworker.* TO 'coworker'@'localhost';"
+```
+
+```yaml
+db_driver: mysql
+db_dsn: "coworker:secret@tcp(localhost:3306)/coworker?charset=utf8mb4&parseTime=True&loc=Local"
+```
+
+### Schema migration
+
+Coworker runs **GORM AutoMigrate** on every startup. New columns and tables are
+created automatically; existing data is never destroyed. There are no separate
+migration files to run.
+
+---
+
+## 4. Running as a Service
+
+### systemd (Linux — recommended)
+
+A ready-made unit file is at `deploy/coworker.service`. Edit it before
+installing — at minimum set `JWT_SECRET` and `ALLOWED_ORIGINS`.
+
+```ini
+[Service]
+Environment="JWT_SECRET=your-secret-here"
+Environment="ALLOWED_ORIGINS=https://coworker.example.com"
+Environment="DB_DSN=/var/lib/coworker/coworker.db"
+```
+
+```bash
+sudo useradd -r -s /bin/false -d /opt/coworker coworker
+sudo mkdir -p /opt/coworker/{data,uploads}
+sudo cp -r dist/. /opt/coworker/
+sudo chown -R coworker:coworker /opt/coworker
+
+sudo cp deploy/coworker.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now coworker
+sudo journalctl -u coworker -f   # follow logs
+```
+
+---
+
+## 5. Reverse Proxy
+
+Always run Coworker behind a reverse proxy in production. Ready-made configs
+are in `deploy/`.
+
+### Nginx (`deploy/nginx.conf`)
+
+Key configuration points:
+
+```nginx
+# Increase timeouts for WebSocket connections
+proxy_read_timeout 3600s;
+proxy_send_timeout 3600s;
+
+# WebSocket upgrade
+proxy_http_version 1.1;
+proxy_set_header Upgrade $http_upgrade;
+proxy_set_header Connection "upgrade";
+
+# Forward real IP
+proxy_set_header X-Real-IP $remote_addr;
+```
+
+```bash
+sudo cp deploy/nginx.conf /etc/nginx/sites-available/coworker
+# Edit: replace yourdomain.com and SSL certificate paths
+sudo ln -s /etc/nginx/sites-available/coworker /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+### Apache (`deploy/apache.conf`)
+
+```bash
+sudo a2enmod proxy proxy_http proxy_wstunnel ssl headers rewrite
+sudo cp deploy/apache.conf /etc/apache2/sites-available/coworker.conf
+# Edit: replace yourdomain.com and SSL certificate paths
+sudo a2ensite coworker
+sudo systemctl reload apache2
+```
+
+### CORS
+
+Set `ALLOWED_ORIGINS` to the **exact** origin that users access Coworker from
+(including scheme and port). A mismatch will prevent the frontend from making
+API calls.
+
+```bash
+# Single domain
+ALLOWED_ORIGINS=https://coworker.example.com
+
+# Multiple domains (comma-separated)
+ALLOWED_ORIGINS=https://coworker.example.com,https://coworker.internal
+```
+
+Use `*` only in development — never in production.
+
+---
+
+## 6. First Admin Account
+
+Register normally through the web interface. Then promote the account to admin:
+
+**SQLite**
+```bash
+sqlite3 /var/lib/coworker/coworker.db \
+  "UPDATE users SET global_role='admin' WHERE username='yourname';"
+```
+
+**PostgreSQL / MySQL**
+```sql
+UPDATE users SET global_role = 'admin' WHERE username = 'yourname';
+```
+
+Once one admin exists, you can promote further users through
+**Admin → Users → Edit** in the web interface without touching the database.
+
+If public registration is not desired, disable it after creating the first
+admin: **Admin → Settings → Allow public registration → Off**.
+
+---
+
+## 7. Admin Panel
+
+Access the admin panel via the **Admin** link in the navigation (visible to
+admin users only).
+
+### Users
+
+| Action | Where |
+|--------|-------|
+| Create a user | Admin → Users → Create User |
+| Edit name, email, role | Admin → Users → (click user) |
+| Reset a password | Admin → Users → Edit → Change Password |
+| Disable / enable | Admin → Users → Edit → Enabled toggle |
+| Assign to projects | Admin → Users → (click user) → Projects tab |
+| Delete a user | Admin → Users → Edit → Delete (permanent) |
+
+**Global roles**
+
+| Role | Access |
+|------|--------|
+| `user` | Can use the application; sees only their own projects |
+| `admin` | Full access to all projects, all admin panel features |
+| `viewer` | Read-only access; cannot create or modify anything |
+
+### Projects
+
+Admins can create, rename, archive, and delete any project regardless of
+project membership. Access via **Admin → Projects**.
+
+### System settings
+
+All settings under **Admin → Settings** take effect **immediately without a
+server restart**. They are stored in the database and loaded at request time.
+
+---
+
+## 8. SMTP Email
+
+Email is used for:
+- @mention notifications when the mentioned user is offline
+- (Future: password reset)
+
+### Configuring SMTP
+
+Go to **Admin → Settings → Email** and fill in:
+
+| Field | Notes |
+|-------|-------|
+| SMTP Host | Hostname of your mail server, e.g. `smtp.gmail.com` |
+| SMTP Port | Typically `587` (STARTTLS), `465` (TLS), or `25` (relay) |
+| Username | Often your email address; leave empty for relay servers |
+| Password | Leave empty for relay servers that don't require auth |
+| From address | The `From:` header, e.g. `coworker@example.com` |
+| From name | Display name, e.g. `Coworker` |
+
+Click **Save** and then use **Send Test Email** to verify the configuration
+before going live. Enter any email address in the test field and click **Send
+Test** — a test message is delivered immediately.
+
+### Gmail example
+
+```
+Host:     smtp.gmail.com
+Port:     587
+Username: youraddress@gmail.com
+Password: (App Password — not your Google account password)
+From:     youraddress@gmail.com
+```
+
+You must enable 2-factor authentication on the Google account and generate an
+**App Password** for Coworker. Standard account passwords will not work.
+
+### Auth-less relay (common in corporate environments)
+
+Leave Username and Password empty. The mail server must be configured to accept
+connections from the Coworker server's IP without authentication.
+
+---
+
+## 9. Company Branding
+
+Go to **Admin → Settings → Branding** to set:
+
+| Setting | Notes |
+|---------|-------|
+| Company name | Appears in the report header |
+| Company logo | URL or uploaded image; displayed on time reports |
+
+Changes take effect immediately and appear on the next report export.
+
+---
+
+## 10. System Settings
+
+### Session timeout
+
+**Admin → Settings → Session → Idle Timeout (minutes)**
+
+Default is `60` minutes. Set to `0` to disable the timeout entirely (sessions
+last until the refresh token expires — 7 days). Fractional values are not
+supported; enter a whole number of minutes.
+
+The timer resets on any user interaction (navigation, clicks, API calls). When
+the timeout expires the user is redirected to the login page.
+
+### Default initial columns
+
+**Admin → Settings → New Project Defaults → Initial Columns**
+
+Enter one column name per line. These columns are created automatically whenever
+a new project is made. The default is a single column named `Backlog`.
+
+Example for a standard scrum board:
+```
+Backlog
+In Progress
+Review
+Done
+```
+
+### Public registration
+
+**Admin → Settings → Allow public registration**
+
+When off, the Register link disappears from the login page. Users can only be
+created by administrators via the admin panel.
+
+### Global defaults (overridden per user)
+
+Admins set global defaults for:
+- Date / time format
+- Timezone
+- Theme (light / dark / system)
+- Language
+- Font and font size
+
+Individual users can override any of these in their own User Settings.
+
+---
+
+## 11. Horizontal Scaling
+
+Coworker uses WebSocket connections for real-time updates. In a single-instance
+setup, connections are managed in memory. When running multiple instances behind
+a load balancer, each instance has its own connection pool — a message broadcast
+by one instance is not seen by clients connected to another.
+
+### Redis pub/sub
+
+Enable Redis to route broadcasts across all instances:
+
+```yaml
+redis_url: redis://localhost:6379
+```
+
+or
+
+```bash
+REDIS_URL=redis://username:password@redis-host:6379/0
+```
+
+When `redis_url` is set, Coworker subscribes to a Redis channel and all
+`BroadcastToProject` calls publish to that channel. Every instance receives the
+message and delivers it to its own connected clients.
+
+### Load balancer requirements
+
+WebSocket connections require **sticky sessions** (a.k.a. session affinity) at
+the load balancer. Without sticky sessions a client's HTTP upgrade request and
+subsequent WebSocket frames may reach different instances and fail.
+
+With Redis enabled, sticky sessions are not strictly required for correctness,
+but they reduce Redis traffic.
+
+### Redis configuration
+
+Coworker uses a single pub/sub channel per subscription scope. A minimal Redis
+install with default settings works. No persistence (AOF/RDB) is required for
+the pub/sub use case.
+
+```bash
+# Test connectivity
+redis-cli -h redis-host ping
+```
+
+---
+
+## 12. Desktop Apps
+
+Coworker ships Tauri-based desktop apps that wrap the web frontend and connect
+to a Coworker server. The apps are standalone — they do not bundle the server.
+
+Users configure the server URL in the app's **Connect** screen on first launch.
+
+### Distributing desktop apps
+
+Pre-built desktop apps are attached to each GitHub release:
+
+| Platform | File | Notes |
+|----------|------|-------|
+| Linux | `Coworker-vX.Y.Z-x86_64.AppImage` | Portable; no installation required |
+| Windows | `Coworker-vX.Y.Z-x64-setup.exe` | NSIS installer |
+| Windows | `Coworker-vX.Y.Z-x64-portable.zip` | Extract and run `Coworker.exe` |
+| macOS | `Coworker-vX.Y.Z-universal.dmg` | Universal binary (Intel + Apple Silicon) |
+
+### Building desktop apps from source
+
+See [INSTALL.md](../INSTALL.md) — the `make appimage`, `make dmg`, and
+`make windows-installer` targets.
+
+---
+
+## 13. Updates
+
+```bash
+# Pull latest source
+git pull
+
+# Rebuild
+make build
+
+# Restart the service
+sudo systemctl restart coworker
+```
+
+AutoMigrate runs on startup and applies any schema changes automatically. No
+manual migration step is needed.
+
+### Zero-downtime update (advanced)
+
+1. Build the new binary on a staging machine.
+2. Copy the binary and `web/` directory to the server.
+3. Send `SIGTERM` to the running process (systemd restart handles this).
+4. The process finishes in-flight requests before exiting.
+
+---
+
+## 14. Backup and Recovery
+
+### What to back up
+
+| Item | Location | Frequency |
+|------|----------|-----------|
+| Database | `coworker.db` (SQLite) or PostgreSQL/MySQL dump | Daily or more |
+| Uploads | `upload_dir` (default `./uploads/`) | Daily or more |
+| Config | `coworker.yaml` | On change |
+
+### SQLite backup
+
+```bash
+# Hot copy — safe while the server is running
+sqlite3 /var/lib/coworker/coworker.db ".backup /backup/coworker-$(date +%Y%m%d).db"
+
+# Or stop the service first and copy directly
+sudo systemctl stop coworker
+cp /var/lib/coworker/coworker.db /backup/coworker-$(date +%Y%m%d).db
+sudo systemctl start coworker
+```
+
+### PostgreSQL backup
+
+```bash
+pg_dump -U coworker coworker | gzip > /backup/coworker-$(date +%Y%m%d).sql.gz
+```
+
+### Restoring
+
+```bash
+# SQLite
+cp /backup/coworker-20260329.db /var/lib/coworker/coworker.db
+
+# PostgreSQL
+gunzip -c /backup/coworker-20260329.sql.gz | psql -U coworker coworker
+```
+
+---
+
+## 15. Demo Data
+
+The `coworker-seed` binary ships alongside `coworker` and populates the
+database with realistic demo content for evaluation and testing.
+
+```bash
+cd dist
+./coworker-seed           # seed (idempotent — safe to run multiple times)
+./coworker-seed --reset   # wipe all demo data and re-seed
+```
+
+**Demo accounts** (password for all: `demo1234`)
+
+| Username | Display name | Role | Notes |
+|----------|--------------|------|-------|
+| `tonk` | Ton Kersten | admin | Persistent — not removed by `--reset` |
+| `demo.admin` | Alex Admin | admin | |
+| `demo.sarah` | Sarah Chen | user | Project admin: Website Redesign |
+| `demo.marc` | Marc Dubois | user | Project admin: Mobile App v2 |
+| `demo.lisa` | Lisa Park | user | Project admin: DevOps & Infra |
+| `demo.priya` | Priya Nair | user | |
+| `demo.james` | James O'Brien | user | |
+| `demo.elena` | Elena Kovač | user | |
+| `demo.raj` | Raj Sharma | user | |
+| `demo.viewer` | Victor Viewer | viewer | Read-only demo account |
+
+**Demo content**
+
+- 3 projects: Website Redesign, Mobile App v2, DevOps & Infra
+- Multiple columns per project with realistic cards
+- Checklists, labels, priorities, due dates, and time entries on cards
+- Threaded topics per project
+- 4 direct message conversations and 1 group chat with realistic history
+
+---
+
+## 16. Security Checklist
+
+Before exposing Coworker to the internet:
+
+- [ ] Changed `JWT_SECRET` to a randomly generated 32-byte hex string
+- [ ] Set `ALLOWED_ORIGINS` to the exact production domain
+- [ ] Running behind HTTPS (TLS termination at the reverse proxy)
+- [ ] `GIN_MODE=release` (suppresses debug output)
+- [ ] `API_LOG=false` (or piped to a log file, not stdout)
+- [ ] Database credentials are strong and not the defaults
+- [ ] Uploads directory (`upload_dir`) is outside the web root
+- [ ] Firewall allows inbound traffic on port 80/443 only; Coworker's port
+      (8080) is not directly exposed
+- [ ] Systemd service runs as a non-root dedicated user (`coworker`)
+- [ ] Backup schedule is in place for the database and uploads
+- [ ] Public registration disabled (`Allow public registration = off`) if only
+      known users should access the instance
+- [ ] SMTP credentials (if used) are an app-specific password, not a primary
+      account password
