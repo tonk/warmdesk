@@ -2,11 +2,26 @@
 
 All notable changes to Coworker are documented here.
 
-## Unreleased
+## v0.2.0 — 2026-03-29
 
 ### Added
-- Configurable idle session timeout (admin setting, default 1 hour); users are automatically logged out after the configured period of inactivity
-- Update check against GitHub releases on login; a dismissable banner is shown when a newer version is available (web and desktop)
+- **Time Spent on cards** — log hours and minutes directly on a card; stored as `time_spent_minutes` and shown in the card detail dialog
+- **Time Report** — new `/reports` page that generates a time overview grouped by project, filterable by period (all time / year / month / ISO week) and by project
+- **Export to PDF** — print-optimised layout with company logo and period header; uses the browser's native print-to-PDF
+- **Export to Excel (XLSX)** — downloads a formatted spreadsheet via SheetJS; includes ref, title, assignees, date, and time columns with subtotals per project and a grand total
+- **Company branding** — admin can set a company name and logo (URL or uploaded image) under Admin → Settings → Branding; both appear on generated reports
+- **Demo seed tool** — `coworker-seed` binary (included in the distribution) populates the database with four demo users, three projects, 32 cards with labels/assignees/checklists/comments/time, and three discussion topics; run with `--reset` to wipe and re-seed; idempotent on repeated runs
+- **CLAUDE.md** — developer guide for AI-assisted development: architecture decisions, conventions, and how to add routes, models, and settings
+- **Configurable idle session timeout** — admin setting (default 60 minutes); users are automatically logged out after the configured period of inactivity; set to 0 to disable
+- **Update check** — on login the server is compared against the latest GitHub release; a dismissable banner is shown when a newer version is available (web and desktop)
+
+### Fixed
+- **SMTP settings could not be saved** — the save button shared a function with all auto-saving dropdowns (theme, timezone, etc.), causing SMTP fields to be sent in every general-settings request and potentially overwriting saved values; SMTP now has its own dedicated save
+- **SMTP username and password made optional** — all SMTP credential fields are now pointer types in the backend; omitting them from a request leaves the stored value untouched, allowing auth-less SMTP relay configurations
+
+### Changed
+- `coworker-seed` is built alongside the main binary by `make build-backend` and included in distribution archives
+- System settings handler splits SMTP saves from general settings saves to prevent cross-contamination
 
 ## 2026-03-28
 

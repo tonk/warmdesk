@@ -1,33 +1,44 @@
 # Coworker
 
-A self-hosted, multi-user Kanban board application with real-time
-collaboration, direct messaging, and a ticket API.
+A self-hosted, multi-user project management tool with Kanban boards, real-time
+collaboration, direct messaging, time tracking, and a ticket API.
 
 ## Experiment
 
 This is an experiment, and a biggie :-)
 
-I haven't written a single line of code, I only created, and changed the
-`what.md` and asked Claude Code to generate the APP.
+I haven't written a single line of code, I only created and updated `what.md`
+and asked Claude Code to generate the app.
 
 ## Features
 
 - **Kanban boards** — columns, cards, drag-and-drop reorder, labels, priorities, due dates, assignees, watchers, markdown descriptions and comments
 - **Card sorting** — sort column cards by date, assignee, or priority (ascending / descending)
 - **Comment replies** — reply to any comment; replies are visually indented
+- **Time tracking** — log hours and minutes spent directly on a card
 - **Multi-project** — each project has its own board, members, and chat
-- **Role-based access** — global roles (admin / user) and per-project roles (owner / member / viewer)
+- **Role-based access** — global roles (admin / user / viewer) and per-project roles (owner / member / viewer)
 - **Real-time** — board changes, card moves, and chat messages sync instantly across all connected users via WebSocket
 - **Internal chat** — per-project team chat and direct messages between users
 - **Unread DM notifications** — pulsing indicator in the sidebar and header when there are unread direct messages
 - **Sidebar** — starred projects, live online-users list, auto-refreshes when users are added or removed
-- **Starred project indicator** — ★ shown next to Project Settings in the board toolbar when a project is starred
 - **Dark / light / system theme** — defaults to light
 - **Multi-language** — English, Dutch (Nederlands), German (Deutsch), Spanish (Español), French (Français)
-- **User settings** — display name, avatar, email, locale, theme, date/time format, timezone, password change
-- **Admin panel** — manage all users (create, edit, assign projects, disable, delete) and all projects; toggle public registration on/off; configure global defaults (theme, locale, date format, timezone, font)
+- **User settings** — display name, avatar, email, locale, theme, date/time format, timezone, font, password change
+- **Admin panel** — manage all users (create, edit, assign projects, disable, delete) and all projects; toggle public registration on/off; configure global defaults (theme, locale, date format, timezone, font); configure SMTP email; set company name and logo
+- **SMTP email** — configurable from the admin panel without a server restart; username and password are optional for relay servers
+- **Session timeout** — configurable idle timeout (default 60 minutes); set to 0 to disable
+- **Topics** — threaded discussions per project with markdown support and replies
+- **Checklists** — add checklist items to cards with completion tracking
+- **Multiple assignees** — assign more than one user to a card
+- **Watchers** — subscribe to card activity
+- **Favourite people** — mark users for quick access
+- **Time reports** — generate a time overview filtered by period (all / year / month / week) and project; export to PDF or Excel (XLSX)
+- **Company branding** — set a company name and logo that appears on reports
 - **Ticket API** — create cards, add comments, and move cards via API key (for CI/CD pipelines and external integrations)
 - **Database support** — SQLite (zero configuration), PostgreSQL, MySQL/MariaDB
+- **Horizontal scaling** — Redis pub/sub for multi-instance WebSocket broadcast
+- **Desktop app** — native Tauri app for Linux (AppImage), macOS (DMG), and Windows (installer)
 
 ## Quick Start
 
@@ -56,6 +67,27 @@ WEB_DIR=./web ./coworker
 
 Open **http://localhost:8080**.
 
+### Load demo data
+
+A seed tool is included in the distribution to populate the database with
+realistic demo content (users, projects, cards, comments, and time entries):
+
+```bash
+cd dist
+./coworker-seed           # seed demo data
+./coworker-seed --reset   # wipe and re-seed
+```
+
+Demo accounts created (password for all: `demo1234`):
+
+| Username | Display name | Role |
+|---|---|---|
+| `demo.admin` | Alex Admin | admin |
+| `demo.sarah` | Sarah Chen | user |
+| `demo.marc` | Marc Dubois | user |
+| `demo.lisa` | Lisa Park | user |
+| `demo.viewer` | Victor Viewer | viewer |
+
 ## Configuration
 
 Copy the example config file and edit it:
@@ -77,6 +109,8 @@ Settings can also be provided as environment variables, which always take preced
 | `gin_mode` | `GIN_MODE` | `debug` | `debug` or `release` |
 | `api_log` | `API_LOG` | `true` | Log incoming HTTP requests |
 | `db_log` | `DB_LOG` | `info` | DB query log level: `silent` / `error` / `warn` / `info` |
+| `upload_dir` | `UPLOAD_DIR` | `./uploads` | Directory for uploaded files |
+| `max_upload_mb` | `MAX_UPLOAD_MB` | `25` | Maximum upload file size in MB |
 
 See [INSTALL.md](INSTALL.md) for full options and deployment instructions.
 
@@ -85,9 +119,10 @@ See [INSTALL.md](INSTALL.md) for full options and deployment instructions.
 | Layer | Technology |
 |-------|-----------|
 | Backend | Go 1.25, Gin, GORM, gorilla/websocket |
-| Frontend | Vue 3, Vite, Pinia, vue-router, vue-i18n, EasyMDE |
+| Frontend | Vue 3, Vite, Pinia, vue-router, vue-i18n, EasyMDE, SheetJS |
 | Database | SQLite / PostgreSQL / MySQL |
 | Auth | JWT (access + refresh tokens), bcrypt |
+| Desktop | Tauri 2 (Rust) |
 
 ## Ticket API
 

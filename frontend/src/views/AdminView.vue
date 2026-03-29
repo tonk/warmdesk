@@ -117,7 +117,7 @@
             <div class="form-group" style="max-width:400px">
               <label class="toggle-row">
                 <span>{{ $t('admin.registration_enabled') }}</span>
-                <input type="checkbox" v-model="systemSettings.registration_enabled" @change="saveSettings" />
+                <input type="checkbox" v-model="systemSettings.registration_enabled" @change="saveGeneralSettings" />
               </label>
               <p class="form-hint">{{ $t('admin.registration_hint') }}</p>
             </div>
@@ -125,7 +125,7 @@
             <div class="form-group" style="max-width:400px">
               <label class="form-label">{{ $t('admin.session_timeout') }}</label>
               <div class="form-row" style="align-items:center;gap:8px;max-width:240px">
-                <input class="form-input" type="number" min="0" v-model.number="systemSettings.session_timeout_minutes" @change="saveSettings" style="width:100px" />
+                <input class="form-input" type="number" min="0" v-model.number="systemSettings.session_timeout_minutes" @change="saveGeneralSettings" style="width:100px" />
                 <span class="form-hint" style="margin:0">{{ $t('admin.session_timeout_unit') }}</span>
               </div>
               <p class="form-hint">{{ $t('admin.session_timeout_hint') }}</p>
@@ -136,7 +136,7 @@
 
             <div class="form-group" style="max-width:400px">
               <label class="form-label">{{ $t('settings.date_time_format') }}</label>
-              <select class="form-input" v-model="systemSettings.default_date_time_format" @change="saveSettings">
+              <select class="form-input" v-model="systemSettings.default_date_time_format" @change="saveGeneralSettings">
                 <option value="YYYY-MM-DD HH:mm">YYYY-MM-DD HH:mm (ISO)</option>
                 <option value="DD/MM/YYYY HH:mm">DD/MM/YYYY HH:mm</option>
                 <option value="MM/DD/YYYY hh:mm a">MM/DD/YYYY hh:mm a</option>
@@ -147,14 +147,14 @@
 
             <div class="form-group" style="max-width:400px">
               <label class="form-label">{{ $t('settings.timezone') }}</label>
-              <select class="form-input" v-model="systemSettings.default_timezone" @change="saveSettings">
+              <select class="form-input" v-model="systemSettings.default_timezone" @change="saveGeneralSettings">
                 <option v-for="tz in timezones" :key="tz" :value="tz">{{ tz }}</option>
               </select>
             </div>
 
             <div class="form-group" style="max-width:400px">
               <label class="form-label">{{ $t('settings.theme') }}</label>
-              <select class="form-input" v-model="systemSettings.default_theme" @change="saveSettings">
+              <select class="form-input" v-model="systemSettings.default_theme" @change="saveGeneralSettings">
                 <option value="light">{{ $t('settings.theme_light') }}</option>
                 <option value="dark">{{ $t('settings.theme_dark') }}</option>
                 <option value="system">{{ $t('settings.theme_system') }}</option>
@@ -163,7 +163,7 @@
 
             <div class="form-group" style="max-width:400px">
               <label class="form-label">{{ $t('settings.font') }}</label>
-              <select class="form-input" v-model="systemSettings.default_font" @change="saveSettings">
+              <select class="form-input" v-model="systemSettings.default_font" @change="saveGeneralSettings">
                 <option value="system">{{ $t('settings.font_system') }}</option>
                 <option value="Inter, sans-serif">Inter</option>
                 <option value="'Roboto', sans-serif">Roboto</option>
@@ -175,7 +175,7 @@
 
             <div class="form-group" style="max-width:400px">
               <label class="form-label">{{ $t('settings.font_size') }}</label>
-              <select class="form-input" v-model="systemSettings.default_font_size" @change="saveSettings">
+              <select class="form-input" v-model="systemSettings.default_font_size" @change="saveGeneralSettings">
                 <option value="12">12px</option>
                 <option value="13">13px</option>
                 <option value="14">14px</option>
@@ -187,7 +187,7 @@
 
             <div class="form-group" style="max-width:400px">
               <label class="form-label">{{ $t('common.language') }}</label>
-              <select class="form-input" v-model="systemSettings.default_locale" @change="saveSettings">
+              <select class="form-input" v-model="systemSettings.default_locale" @change="saveGeneralSettings">
                 <option value="en">English</option>
                 <option value="nl">Nederlands</option>
                 <option value="de">Deutsch</option>
@@ -227,7 +227,35 @@
             </div>
 
             <div class="form-actions" style="max-width:500px">
-              <button class="btn btn-primary" @click="saveSettings">{{ $t('common.save') }}</button>
+              <button class="btn btn-primary" @click="saveSmtpSettings">{{ $t('common.save') }}</button>
+            </div>
+
+            <h3 class="settings-subsection">{{ $t('admin.branding_title') }}</h3>
+            <p class="form-hint" style="margin-bottom:16px">{{ $t('admin.branding_hint') }}</p>
+
+            <div class="form-group" style="max-width:400px">
+              <label class="form-label">{{ $t('admin.company_name') }}</label>
+              <input class="form-input" v-model="systemSettings.company_name" :placeholder="$t('admin.company_name_placeholder')" />
+            </div>
+
+            <div class="form-group" style="max-width:400px">
+              <label class="form-label">{{ $t('admin.company_logo') }}</label>
+              <input class="form-input" v-model="systemSettings.company_logo" :placeholder="'https://...'" style="margin-bottom:8px" />
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+                <button class="btn btn-secondary btn-sm" @click="$refs.logoFileInput.click()">{{ $t('admin.company_logo_upload') }}</button>
+                <span class="form-hint" style="margin:0">{{ $t('admin.company_logo_hint') }}</span>
+              </div>
+              <input ref="logoFileInput" type="file" accept="image/*" style="display:none" @change="onLogoFileSelected" />
+              <div v-if="systemSettings.company_logo" style="margin-top:8px">
+                <span class="form-hint">{{ $t('admin.company_logo_preview') }}</span>
+                <div style="margin-top:6px;padding:8px;border:1px solid var(--color-border);border-radius:var(--radius);display:inline-block;background:var(--color-bg)">
+                  <img :src="systemSettings.company_logo" alt="Logo preview" style="max-height:60px;max-width:200px;object-fit:contain" @error="systemSettings.company_logo=''" />
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions" style="max-width:400px">
+              <button class="btn btn-primary" @click="saveBrandingSettings">{{ $t('common.save') }}</button>
             </div>
           </div>
         </div>
@@ -426,7 +454,9 @@ const systemSettings = ref({
   smtp_port: '587',
   smtp_from: '',
   smtp_username: '',
-  smtp_password: ''
+  smtp_password: '',
+  company_name: '',
+  company_logo: ''
 })
 // True when the server has a password saved (so we show a placeholder instead of the value)
 const smtpPasswordSet = ref(false)
@@ -490,11 +520,34 @@ async function loadSettings() {
     // Password is never sent back from the server — show placeholder if one is set
     smtpPasswordSet.value = !!(data.smtp_password_set)
     systemSettings.value.smtp_password            = ''
+    systemSettings.value.company_name             = data.company_name || ''
+    systemSettings.value.company_logo             = data.company_logo || ''
     settingsLoaded = true
   } catch {}
 }
 
-async function saveSettings() {
+function onLogoFileSelected(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = (ev) => { systemSettings.value.company_logo = ev.target.result }
+  reader.readAsDataURL(file)
+  e.target.value = ''
+}
+
+async function saveBrandingSettings() {
+  try {
+    await adminApi.updateSystemSettings({
+      company_name: systemSettings.value.company_name,
+      company_logo: systemSettings.value.company_logo,
+    })
+    ui.success('Settings saved')
+  } catch {
+    ui.error('Failed to save settings')
+  }
+}
+
+async function saveGeneralSettings() {
   try {
     const payload = {
       registration_enabled:     systemSettings.value.registration_enabled,
@@ -505,10 +558,21 @@ async function saveSettings() {
       default_font:             systemSettings.value.default_font,
       default_font_size:        systemSettings.value.default_font_size,
       default_locale:           systemSettings.value.default_locale,
-      smtp_host:                systemSettings.value.smtp_host,
-      smtp_port:                systemSettings.value.smtp_port,
-      smtp_from:                systemSettings.value.smtp_from,
-      smtp_username:            systemSettings.value.smtp_username
+    }
+    await adminApi.updateSystemSettings(payload)
+    ui.success('Settings saved')
+  } catch {
+    ui.error('Failed to save settings')
+  }
+}
+
+async function saveSmtpSettings() {
+  try {
+    const payload = {
+      smtp_host:     systemSettings.value.smtp_host,
+      smtp_port:     systemSettings.value.smtp_port,
+      smtp_from:     systemSettings.value.smtp_from,
+      smtp_username: systemSettings.value.smtp_username,
     }
     // Only include password if the admin typed something new
     if (systemSettings.value.smtp_password) {

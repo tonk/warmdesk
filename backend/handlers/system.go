@@ -25,6 +25,8 @@ const (
 	settingSMTPUsername           = "smtp_username"
 	settingSMTPPassword           = "smtp_password"
 	settingSessionTimeoutMinutes  = "session_timeout_minutes"
+	settingCompanyName            = "company_name"
+	settingCompanyLogo            = "company_logo"
 )
 
 var systemSettingDefaults = map[string]string{
@@ -41,6 +43,8 @@ var systemSettingDefaults = map[string]string{
 	settingSMTPUsername:           "",
 	settingSMTPPassword:           "",
 	settingSessionTimeoutMinutes:  "60",
+	settingCompanyName:            "",
+	settingCompanyLogo:            "",
 }
 
 // InitSystemDefaults seeds the in-memory defaults from the config file so that
@@ -96,6 +100,8 @@ func GetSystemSettings(c *gin.Context) {
 		"default_font_size":           all[settingDefaultFontSize],
 		"default_locale":              all[settingDefaultLocale],
 		"session_timeout_minutes":     timeoutMinutes,
+		"company_name":                all[settingCompanyName],
+		"company_logo":                all[settingCompanyLogo],
 	})
 }
 
@@ -120,12 +126,14 @@ func AdminUpdateSystemSettings(c *gin.Context) {
 		DefaultFont            string  `json:"default_font"`
 		DefaultFontSize        string  `json:"default_font_size"`
 		DefaultLocale          string  `json:"default_locale"`
-		SMTPHost               string  `json:"smtp_host"`
+		SMTPHost               *string `json:"smtp_host"`
 		SMTPPort               string  `json:"smtp_port"`
-		SMTPFrom               string  `json:"smtp_from"`
-		SMTPUsername           string  `json:"smtp_username"`
+		SMTPFrom               *string `json:"smtp_from"`
+		SMTPUsername           *string `json:"smtp_username"` // pointer so empty string clears it
 		SMTPPassword           *string `json:"smtp_password"` // pointer so empty string clears it
 		SessionTimeoutMinutes  *int    `json:"session_timeout_minutes"`
+		CompanyName            *string `json:"company_name"`
+		CompanyLogo            *string `json:"company_logo"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -158,13 +166,20 @@ func AdminUpdateSystemSettings(c *gin.Context) {
 	if validLocales[req.DefaultLocale] {
 		database.DB.Save(&models.SystemSetting{Key: settingDefaultLocale, Value: req.DefaultLocale})
 	}
-	// SMTP — always save (empty string is a valid value to clear a setting)
-	database.DB.Save(&models.SystemSetting{Key: settingSMTPHost, Value: req.SMTPHost})
+	// SMTP — only save fields that were explicitly included in the request
+	// (pointer fields: nil means "not sent", so don't overwrite; empty string clears)
+	if req.SMTPHost != nil {
+		database.DB.Save(&models.SystemSetting{Key: settingSMTPHost, Value: *req.SMTPHost})
+	}
 	if req.SMTPPort != "" {
 		database.DB.Save(&models.SystemSetting{Key: settingSMTPPort, Value: req.SMTPPort})
 	}
-	database.DB.Save(&models.SystemSetting{Key: settingSMTPFrom, Value: req.SMTPFrom})
-	database.DB.Save(&models.SystemSetting{Key: settingSMTPUsername, Value: req.SMTPUsername})
+	if req.SMTPFrom != nil {
+		database.DB.Save(&models.SystemSetting{Key: settingSMTPFrom, Value: *req.SMTPFrom})
+	}
+	if req.SMTPUsername != nil {
+		database.DB.Save(&models.SystemSetting{Key: settingSMTPUsername, Value: *req.SMTPUsername})
+	}
 	if req.SMTPPassword != nil {
 		database.DB.Save(&models.SystemSetting{Key: settingSMTPPassword, Value: *req.SMTPPassword})
 	}
@@ -174,6 +189,12 @@ func AdminUpdateSystemSettings(c *gin.Context) {
 			timeout = 0
 		}
 		database.DB.Save(&models.SystemSetting{Key: settingSessionTimeoutMinutes, Value: fmt.Sprintf("%d", timeout)})
+	}
+	if req.CompanyName != nil {
+		database.DB.Save(&models.SystemSetting{Key: settingCompanyName, Value: *req.CompanyName})
+	}
+	if req.CompanyLogo != nil {
+		database.DB.Save(&models.SystemSetting{Key: settingCompanyLogo, Value: *req.CompanyLogo})
 	}
 
 	AdminGetSystemSettings(c)

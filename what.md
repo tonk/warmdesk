@@ -93,6 +93,7 @@ Create an application that has all these features and requirements
   * Allow watching a card to receive notifications
   * Allow sorting cards within a column by due date, assignee or priority
   * Add a checklist to a card
+  * Add a "Time Spent" field (hours and minutes) to log effort on a card
 - Add topics (threaded discussions) per project
   * Create, edit and delete topics
   * Reply to topics with markdown support
@@ -108,6 +109,23 @@ Create an application that has all these features and requirements
 - Allow admin to reset user passwords
 - Build a desktop app using Tauri
   * Distribute as AppImage (Linux), DMG (macOS) and installer (Windows)
+- SMTP email configuration through the admin web interface
+  * Username and password are optional (support auth-less relay servers)
+  * Settings take effect without a server restart
+- Time reports
+  * Generate a time report filtered by period (all time, year, month, ISO week)
+    and optionally by project
+  * Export to PDF (print-optimised layout)
+  * Export to Excel (XLSX)
+  * Report header shows configurable company name and logo
+- Company branding
+  * Admin can set a company name and logo (URL or uploaded image)
+  * Used in report headers
+- Demo seed tool
+  * A standalone `coworker-seed` binary included in the distribution
+  * Populates the database with demo users (admin, members, viewer), projects,
+    cards, checklists, comments, time entries, and discussion topics
+  * Idempotent — safe to run multiple times; supports --reset flag
 
 - Add README.md with explanation of Coworker
 - Add systemd example service files
@@ -119,3 +137,4 @@ Create an application that has all these features and requirements
 - Create distribution package containing everything needed
 - Create a Github actions file to build a new release when a new tag is
   pushed in the main branch
+- Add CLAUDE.md developer guide for AI-assisted development

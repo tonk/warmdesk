@@ -98,6 +98,9 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webDir string, 
 		// Global search
 		protected.GET("/search", handlers.GlobalSearch)
 
+		// Reports
+		protected.GET("/reports/time", handlers.GetTimeReport)
+
 		// Conversations (1-on-1 and group)
 		convs := protected.Group("/conversations")
 		{

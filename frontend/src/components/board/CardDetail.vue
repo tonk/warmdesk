@@ -28,6 +28,18 @@
         </div>
       </div>
 
+      <div class="detail-row">
+        <div class="form-group half">
+          <label class="form-label">{{ $t('board.time_spent') }}</label>
+          <div class="time-input-row">
+            <input class="form-input time-input" type="number" min="0" v-model.number="timeHours" />
+            <span class="time-sep">{{ $t('board.time_hours') }}</span>
+            <input class="form-input time-input" type="number" min="0" max="59" v-model.number="timeMinutes" />
+            <span class="time-sep">{{ $t('board.time_minutes') }}</span>
+          </div>
+        </div>
+      </div>
+
       <div class="form-group">
         <label class="form-label">{{ $t('board.assignee') }}</label>
         <select class="form-input" v-model="form.assignee_id">
@@ -415,7 +427,17 @@ const form = ref({
   description: props.card.description || '',
   priority: props.card.priority || 'none',
   due_date: props.card.due_date ? props.card.due_date.slice(0, 10) : todayISO,
-  assignee_id: props.card.assignee_id || null
+  assignee_id: props.card.assignee_id || null,
+  time_spent_minutes: props.card.time_spent_minutes || 0
+})
+
+const timeHours = computed({
+  get: () => Math.floor(form.value.time_spent_minutes / 60),
+  set: (v) => { form.value.time_spent_minutes = (parseInt(v) || 0) * 60 + (form.value.time_spent_minutes % 60) }
+})
+const timeMinutes = computed({
+  get: () => form.value.time_spent_minutes % 60,
+  set: (v) => { form.value.time_spent_minutes = Math.floor(form.value.time_spent_minutes / 60) * 60 + (parseInt(v) || 0) }
 })
 
 function hasLabel(labelId) {
@@ -463,7 +485,8 @@ async function save() {
       description: form.value.description,
       priority: form.value.priority,
       due_date: form.value.due_date || null,
-      assignee_id: form.value.assignee_id
+      assignee_id: form.value.assignee_id,
+      time_spent_minutes: form.value.time_spent_minutes
     }
     await boardStore.updateCardData(props.card.id, payload)
     locked.value = true
@@ -529,6 +552,9 @@ function renderMarkdown(text) {
 
 .detail-row { display: flex; gap: 16px; }
 .half { flex: 1; }
+.time-input-row { display: flex; align-items: center; gap: 6px; }
+.time-input { width: 70px; }
+.time-sep { font-size: 13px; color: var(--color-text-muted); }
 
 .tags-editor { display: flex; flex-direction: column; gap: 8px; }
 .tags-list { display: flex; flex-wrap: wrap; gap: 6px; }

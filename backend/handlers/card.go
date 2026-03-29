@@ -169,11 +169,12 @@ func UpdateCard(c *gin.Context) {
 	}
 
 	var req struct {
-		Title       string          `json:"title"`
-		Description string          `json:"description"`
-		Priority    string          `json:"priority"`
-		DueDate     json.RawMessage `json:"due_date"` // "YYYY-MM-DD" string or null
-		AssigneeID  *uint           `json:"assignee_id"`
+		Title            string          `json:"title"`
+		Description      string          `json:"description"`
+		Priority         string          `json:"priority"`
+		DueDate          json.RawMessage `json:"due_date"` // "YYYY-MM-DD" string or null
+		AssigneeID       *uint           `json:"assignee_id"`
+		TimeSpentMinutes *int            `json:"time_spent_minutes"`
 	}
 	c.ShouldBindJSON(&req)
 
@@ -201,6 +202,9 @@ func UpdateCard(c *gin.Context) {
 	}
 	if req.AssigneeID != nil {
 		updates["assignee_id"] = req.AssigneeID
+	}
+	if req.TimeSpentMinutes != nil {
+		updates["time_spent_minutes"] = *req.TimeSpentMinutes
 	}
 
 	database.DB.Model(&card).Updates(updates)

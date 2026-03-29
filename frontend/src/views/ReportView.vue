@@ -1,0 +1,498 @@
+<template>
+  <div class="report-page">
+    <!-- Filter panel (hidden when printing) -->
+    <div class="report-filters no-print">
+      <div class="filters-inner">
+        <h2 class="filters-title">{{ $t('report.title') }}</h2>
+        <div class="filters-row">
+          <div class="filter-group">
+            <label class="filter-label">{{ $t('report.period') }}</label>
+            <select class="form-input" v-model="filters.period">
+              <option value="all">{{ $t('report.period_all') }}</option>
+              <option value="year">{{ $t('report.period_year') }}</option>
+              <option value="month">{{ $t('report.period_month') }}</option>
+              <option value="week">{{ $t('report.period_week') }}</option>
+            </select>
+          </div>
+
+          <div class="filter-group" v-if="filters.period === 'year' || filters.period === 'month' || filters.period === 'week'">
+            <label class="filter-label">{{ $t('report.year') }}</label>
+            <select class="form-input" v-model.number="filters.year">
+              <option v-for="y in yearOptions" :key="y" :value="y">{{ y }}</option>
+            </select>
+          </div>
+
+          <div class="filter-group" v-if="filters.period === 'month'">
+            <label class="filter-label">{{ $t('report.month') }}</label>
+            <select class="form-input" v-model.number="filters.month">
+              <option v-for="(name, idx) in monthNames" :key="idx" :value="idx + 1">{{ name }}</option>
+            </select>
+          </div>
+
+          <div class="filter-group" v-if="filters.period === 'week'">
+            <label class="filter-label">{{ $t('report.week') }}</label>
+            <select class="form-input" v-model.number="filters.week">
+              <option v-for="w in 53" :key="w" :value="w">{{ $t('report.week') }} {{ w }}</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label">{{ $t('report.project_filter') }}</label>
+            <select class="form-input" v-model="filters.project">
+              <option value="all">{{ $t('report.all_projects') }}</option>
+              <option v-for="p in projects" :key="p.id" :value="p.slug">{{ p.name }}</option>
+            </select>
+          </div>
+
+          <div class="filter-group filter-actions">
+            <button class="btn btn-primary" @click="loadReport" :disabled="loading">
+              {{ loading ? $t('report.loading') : $t('report.run') }}
+            </button>
+          </div>
+        </div>
+
+        <div class="export-row" v-if="report">
+          <button class="btn btn-secondary" @click="exportPDF">{{ $t('report.export_pdf') }}</button>
+          <button class="btn btn-secondary" @click="exportXLSX">{{ $t('report.export_xlsx') }}</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Report content (visible on screen and when printing) -->
+    <div class="report-content" v-if="report">
+      <!-- Report Header -->
+      <div class="report-header">
+        <div class="report-header-left">
+          <img v-if="report.company_logo" :src="report.company_logo" alt="Logo" class="report-logo" @error="report.company_logo = ''" />
+        </div>
+        <div class="report-header-center">
+          <div class="report-company-name">{{ report.company_name || 'Time Report' }}</div>
+          <div class="report-title">{{ $t('report.title') }}</div>
+          <div class="report-period-label">{{ report.period_label }}</div>
+        </div>
+        <div class="report-header-right">
+          <div class="report-meta">{{ $t('report.generated_at') }}: {{ report.generated_at }}</div>
+        </div>
+      </div>
+
+      <div v-if="report.projects.length === 0" class="report-empty">
+        {{ $t('report.no_data') }}
+      </div>
+
+      <!-- Project sections -->
+      <div v-for="proj in report.projects" :key="proj.project_id" class="report-project">
+        <div class="project-header">
+          <span class="project-name">{{ proj.project_name }}</span>
+          <span class="project-total">{{ formatMinutes(proj.total_minutes) }}</span>
+        </div>
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th class="col-ref">{{ $t('report.col_ref') }}</th>
+              <th class="col-title">{{ $t('report.col_title') }}</th>
+              <th class="col-assignees">{{ $t('report.col_assignees') }}</th>
+              <th class="col-updated">{{ $t('report.col_updated') }}</th>
+              <th class="col-time">{{ $t('report.col_time') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="card in proj.cards" :key="card.card_id">
+              <td class="col-ref">
+                <span class="card-ref-badge" v-if="card.card_ref">{{ card.card_ref }}</span>
+              </td>
+              <td class="col-title">{{ card.title }}</td>
+              <td class="col-assignees">{{ card.assignees.join(', ') || '—' }}</td>
+              <td class="col-updated">{{ card.updated_at }}</td>
+              <td class="col-time time-value">{{ formatMinutes(card.time_spent_minutes) }}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="subtotal-row">
+              <td colspan="4" class="subtotal-label">{{ $t('report.subtotal') }}</td>
+              <td class="col-time time-value">{{ formatMinutes(proj.total_minutes) }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- Grand Total -->
+      <div class="grand-total-row" v-if="report.projects.length > 0">
+        <span class="grand-total-label">{{ $t('report.grand_total') }}</span>
+        <span class="grand-total-value">{{ formatMinutes(report.total_minutes) }}</span>
+      </div>
+    </div>
+
+    <!-- Empty state before first load -->
+    <div class="report-placeholder no-print" v-if="!report && !loading">
+      <div class="placeholder-icon">📊</div>
+      <p>{{ $t('report.run') }} to generate the report.</p>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { projectsApi } from '@/api/projects'
+import { reportsApi } from '@/api/reports'
+
+const { t } = useI18n()
+
+const loading = ref(false)
+const report = ref(null)
+const projects = ref([])
+
+const now = new Date()
+const filters = ref({
+  period: 'month',
+  year: now.getFullYear(),
+  month: now.getMonth() + 1,
+  week: getISOWeek(now),
+  project: 'all'
+})
+
+function getISOWeek(date) {
+  const tmp = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+  tmp.setUTCDate(tmp.getUTCDate() + 4 - (tmp.getUTCDay() || 7))
+  const yearStart = new Date(Date.UTC(tmp.getUTCFullYear(), 0, 1))
+  return Math.ceil((((tmp - yearStart) / 86400000) + 1) / 7)
+}
+
+const yearOptions = computed(() => {
+  const y = now.getFullYear()
+  return Array.from({ length: 5 }, (_, i) => y - i)
+})
+
+const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December']
+
+function formatMinutes(minutes) {
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  if (h === 0) return `${m}m`
+  if (m === 0) return `${h}h`
+  return `${h}h ${m}m`
+}
+
+async function loadReport() {
+  loading.value = true
+  try {
+    const params = { period: filters.value.period }
+    if (filters.value.period !== 'all') params.year = filters.value.year
+    if (filters.value.period === 'month') params.month = filters.value.month
+    if (filters.value.period === 'week') params.week = filters.value.week
+    if (filters.value.project !== 'all') params.project = filters.value.project
+    const { data } = await reportsApi.getTimeReport(params)
+    report.value = data
+  } catch (e) {
+    console.error(e)
+  } finally {
+    loading.value = false
+  }
+}
+
+function exportPDF() {
+  window.print()
+}
+
+async function exportXLSX() {
+  if (!report.value) return
+  const XLSX = await import('xlsx')
+  const wb = XLSX.utils.book_new()
+
+  // Summary sheet
+  const summaryData = [
+    [(report.value.company_name || 'Time Report') + ' — ' + report.value.period_label],
+    ['Generated: ' + report.value.generated_at],
+    [],
+    ['Project', 'Task', 'Ref', 'Assignees', 'Date', 'Time (min)', 'Time']
+  ]
+
+  for (const proj of report.value.projects) {
+    for (const card of proj.cards) {
+      summaryData.push([
+        proj.project_name,
+        card.title,
+        card.card_ref || '',
+        card.assignees.join(', '),
+        card.updated_at,
+        card.time_spent_minutes,
+        formatMinutes(card.time_spent_minutes)
+      ])
+    }
+    summaryData.push(['', '', '', '', 'Subtotal', proj.total_minutes, formatMinutes(proj.total_minutes)])
+    summaryData.push([])
+  }
+
+  summaryData.push(['', '', '', '', 'Grand Total', report.value.total_minutes, formatMinutes(report.value.total_minutes)])
+
+  const ws = XLSX.utils.aoa_to_sheet(summaryData)
+
+  // Column widths
+  ws['!cols'] = [
+    { wch: 25 }, { wch: 45 }, { wch: 10 }, { wch: 30 }, { wch: 12 }, { wch: 12 }, { wch: 10 }
+  ]
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Time Report')
+  const filename = `time-report-${report.value.period_label.replace(/\s+/g, '-').toLowerCase()}.xlsx`
+  XLSX.writeFile(wb, filename)
+}
+
+onMounted(async () => {
+  try {
+    const { data } = await projectsApi.list()
+    projects.value = data.filter(p => !p.is_archived)
+  } catch {}
+})
+</script>
+
+<style scoped>
+.report-page {
+  min-height: 100vh;
+  background: var(--color-bg);
+  font-family: inherit;
+}
+
+/* Filters */
+.report-filters {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: 20px 0;
+}
+.filters-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.filters-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 16px;
+  color: var(--color-text);
+}
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+}
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.filter-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.filter-actions { justify-content: flex-end; padding-top: 2px; }
+.export-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+/* Report content */
+.report-content {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.report-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 3px solid var(--color-primary);
+}
+.report-header-left {
+  flex: 0 0 auto;
+  min-width: 80px;
+}
+.report-logo {
+  max-height: 64px;
+  max-width: 180px;
+  object-fit: contain;
+}
+.report-header-center {
+  flex: 1;
+  text-align: center;
+}
+.report-company-name {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+.report-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 4px;
+}
+.report-period-label {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-top: 6px;
+}
+.report-header-right {
+  flex: 0 0 auto;
+  text-align: right;
+}
+.report-meta {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-top: 4px;
+}
+
+/* Project sections */
+.report-project {
+  margin-bottom: 36px;
+}
+.project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--color-primary);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.project-name {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.project-total {
+  font-size: 14px;
+  font-weight: 700;
+  background: rgba(255,255,255,0.2);
+  padding: 2px 10px;
+  border-radius: 9999px;
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  border: 1px solid var(--color-border);
+  border-top: none;
+}
+.report-table th {
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}
+.report-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  vertical-align: middle;
+}
+.report-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.report-table tbody tr:hover {
+  background: var(--color-bg);
+}
+
+.col-ref { width: 80px; }
+.col-time { width: 100px; text-align: right; }
+.col-updated { width: 100px; }
+.col-assignees { width: 160px; }
+.time-value { font-weight: 700; color: var(--color-primary); }
+
+.card-ref-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 25%, transparent);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+.subtotal-row td {
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface));
+  font-weight: 700;
+  border-top: 2px solid var(--color-border);
+  border-bottom: none;
+}
+.subtotal-label { text-align: right; color: var(--color-text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+.grand-total-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 24px;
+  margin-top: 20px;
+  padding: 14px 20px;
+  background: var(--color-surface);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius);
+}
+.grand-total-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.grand-total-value {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.report-empty {
+  text-align: center;
+  padding: 48px;
+  color: var(--color-text-muted);
+  font-size: 15px;
+}
+
+.report-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  color: var(--color-text-muted);
+}
+.placeholder-icon { font-size: 48px; margin-bottom: 16px; }
+.report-placeholder p { font-size: 15px; }
+
+/* Print styles */
+@media print {
+  .no-print { display: none !important; }
+  .report-page { background: #fff; }
+  .report-content { max-width: 100%; padding: 0; margin: 0; }
+  .report-header { border-bottom: 3px solid #6366f1; }
+  .report-company-name { color: #1e293b; }
+  .report-period-label { color: #6366f1; }
+  .project-header { background: #6366f1; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .report-table th { background: #f8fafc; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .subtotal-row td { background: #f0f4ff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .report-project { break-inside: avoid; }
+  .grand-total-row { border: 2px solid #6366f1; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .time-value { color: #6366f1; }
+  .card-ref-badge { color: #6366f1; border-color: #6366f1; }
+}
+</style>

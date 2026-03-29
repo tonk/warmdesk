@@ -27,6 +27,7 @@ build-backend:
 	@echo "Building backend..."
 	mkdir -p $(DIST_DIR)
 	cd $(BACKEND) && go build -ldflags="-s -w" -o ../$(DIST_DIR)/$(BINARY) .
+	cd $(BACKEND) && go build -ldflags="-s -w" -o ../$(DIST_DIR)/$(BINARY)-seed ./cmd/seed
 
 # Run in development mode (two terminals needed)
 dev-backend:
