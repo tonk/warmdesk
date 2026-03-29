@@ -55,6 +55,7 @@
                 <td>
                   <select class="form-input" style="width:auto" v-model="m.role" @change="updateRole(m)">
                     <option value="owner">{{ $t('project.roles.owner') }}</option>
+                    <option value="admin">{{ $t('project.roles.admin') }}</option>
                     <option value="member">{{ $t('project.roles.member') }}</option>
                     <option value="viewer">{{ $t('project.roles.viewer') }}</option>
                   </select>
@@ -238,9 +239,10 @@
       <div class="form-group">
         <label class="form-label">{{ $t('project.role') }}</label>
         <select class="form-input" v-model="invite.role">
+          <option value="owner">{{ $t('project.roles.owner') }}</option>
+          <option value="admin">{{ $t('project.roles.admin') }}</option>
           <option value="member">{{ $t('project.roles.member') }}</option>
           <option value="viewer">{{ $t('project.roles.viewer') }}</option>
-          <option value="owner">{{ $t('project.roles.owner') }}</option>
         </select>
       </div>
       <template #footer>

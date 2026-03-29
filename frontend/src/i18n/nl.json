@@ -47,6 +47,7 @@
     "role": "Rol",
     "roles": {
       "owner": "Eigenaar",
+      "admin": "Projectbeheerder",
       "member": "Lid",
       "viewer": "Kijker"
     }

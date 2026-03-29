@@ -16,7 +16,7 @@
         <button class="btn btn-ghost btn-sm" @click="chatOpen = !chatOpen">
           💬 {{ $t('chat.title') }}
         </button>
-        <button class="btn btn-secondary btn-sm" @click="showAddColumn = true">
+        <button v-if="canManageColumns" class="btn btn-secondary btn-sm" @click="showAddColumn = true">
           + {{ $t('board.add_column') }}
         </button>
       </div>
@@ -34,6 +34,7 @@
             :key="col.id"
             :column="col"
             :data-column-id="col.id"
+            :can-manage-columns="canManageColumns"
             @add-card="openAddCard"
             @open-card="openCardDetail"
             @card-moved="onCardMoved"
@@ -109,6 +110,7 @@ import { useBoardStore } from '@/stores/board'
 import { useProjectStore } from '@/stores/project'
 import { useUIStore } from '@/stores/ui'
 import { useSidebarStore } from '@/stores/sidebar'
+import { useAuthStore } from '@/stores/auth'
 import { useWebSocket } from '@/composables/useWebSocket'
 import { projectsApi } from '@/api/projects'
 
@@ -120,6 +122,7 @@ const boardStore = useBoardStore()
 const projectStore = useProjectStore()
 const ui = useUIStore()
 const sidebarStore = useSidebarStore()
+const auth = useAuthStore()
 
 const chatOpen = ref(false)
 const showAddCard = ref(false)
@@ -158,6 +161,14 @@ async function loadMembers() {
     projectMembers.value = data
   } catch {}
 }
+
+// Global admins and project admins/owners can manage columns
+const ADMIN_RANKS = { admin: 3, owner: 4 }
+const canManageColumns = computed(() => {
+  if (auth.user?.global_role === 'admin') return true
+  const me = projectMembers.value.find(m => m.user_id === auth.user?.id)
+  return me ? (ADMIN_RANKS[me.role] ?? 0) >= 3 : false
+})
 
 async function toggleStar() {
   if (!slug.value) return
@@ -212,6 +223,7 @@ function initColumnSortable() {
     handle: '.column-header',
     ghostClass: 'column-ghost',
     dragClass: 'column-drag',
+    disabled: !canManageColumns.value,
     onEnd(evt) {
       if (evt.oldIndex === evt.newIndex) return
       onColumnReordered(evt.oldIndex, evt.newIndex)

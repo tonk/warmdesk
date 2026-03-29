@@ -47,6 +47,7 @@
     "role": "Role",
     "roles": {
       "owner": "Owner",
+      "admin": "Project Admin",
       "member": "Member",
       "viewer": "Viewer"
     }

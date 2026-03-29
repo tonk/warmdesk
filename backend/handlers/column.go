@@ -40,7 +40,7 @@ func CreateColumn(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "project not found"})
 		return
 	}
-	if err := services.RequireProjectRole(project.ID, userID, middleware.GetGlobalRole(c), "member"); err != nil {
+	if err := services.RequireProjectRole(project.ID, userID, middleware.GetGlobalRole(c), "admin"); err != nil {
 		c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
 		return
 	}
@@ -86,7 +86,7 @@ func UpdateColumn(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "project not found"})
 		return
 	}
-	if err := services.RequireProjectRole(project.ID, userID, middleware.GetGlobalRole(c), "member"); err != nil {
+	if err := services.RequireProjectRole(project.ID, userID, middleware.GetGlobalRole(c), "admin"); err != nil {
 		c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
 		return
 	}
@@ -134,7 +134,7 @@ func DeleteColumn(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "project not found"})
 		return
 	}
-	if err := services.RequireProjectRole(project.ID, userID, middleware.GetGlobalRole(c), "owner"); err != nil {
+	if err := services.RequireProjectRole(project.ID, userID, middleware.GetGlobalRole(c), "admin"); err != nil {
 		c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
 		return
 	}
@@ -166,7 +166,7 @@ func ReorderColumns(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "project not found"})
 		return
 	}
-	if err := services.RequireProjectRole(project.ID, userID, middleware.GetGlobalRole(c), "member"); err != nil {
+	if err := services.RequireProjectRole(project.ID, userID, middleware.GetGlobalRole(c), "admin"); err != nil {
 		c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
 		return
 	}

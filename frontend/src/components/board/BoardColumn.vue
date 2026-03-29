@@ -15,8 +15,8 @@
         <span
           v-else
           class="column-name"
-          @dblclick="startEdit"
-          :title="$t('board.double_click_rename')"
+          @dblclick="canManageColumns ? startEdit() : null"
+          :title="canManageColumns ? $t('board.double_click_rename') : ''"
         >{{ column.name }}</span>
         <span class="card-count">{{ column.cards.length }}</span>
         <span v-if="column.wip_limit" :class="['wip-badge', { 'wip-over': column.cards.length >= column.wip_limit }]">
@@ -26,7 +26,7 @@
       <div class="column-header-actions">
         <button class="btn btn-ghost btn-sm" @click="$emit('add-card', column.id)" :title="$t('board.add_card')">+</button>
         <button
-          v-if="column.cards.length === 0"
+          v-if="canManageColumns && column.cards.length === 0"
           class="btn btn-ghost btn-sm delete-col-btn"
           @click="$emit('delete-column', column.id)"
           :title="$t('board.delete_column')"
@@ -68,7 +68,10 @@ import { ref, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import Sortable from 'sortablejs'
 import BoardCard from './BoardCard.vue'
 
-const props = defineProps({ column: { type: Object, required: true } })
+const props = defineProps({
+  column: { type: Object, required: true },
+  canManageColumns: { type: Boolean, default: false }
+})
 const emit = defineEmits(['add-card', 'open-card', 'card-moved', 'rename-column', 'delete-column'])
 
 const listEl = ref(null)

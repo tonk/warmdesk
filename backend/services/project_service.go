@@ -17,7 +17,8 @@ var (
 var roleRank = map[string]int{
 	"viewer": 1,
 	"member": 2,
-	"owner":  3,
+	"admin":  3,
+	"owner":  4,
 }
 
 // GetProjectBySlug returns the project with the given slug.
