@@ -25,11 +25,14 @@
         <RouterLink to="/register">{{ $t('auth.register') }}</RouterLink>
       </p>
     </div>
+    <div class="auth-version">Coworker {{ appVersion }}</div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
+
+const appVersion = __APP_VERSION__
 import { RouterLink, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { systemApi } from '@/api/system'
@@ -100,4 +103,11 @@ async function handleSubmit() {
 
 .auth-error { color: var(--color-danger); font-size: 13px; margin-bottom: 12px; }
 .auth-link { text-align: center; margin-top: 20px; font-size: 13px; color: var(--color-text-muted); }
+
+.auth-version {
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  opacity: 0.6;
+}
 </style>
