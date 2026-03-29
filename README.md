@@ -32,9 +32,10 @@ and asked Claude Code to generate the app.
 - **Comment replies** — reply to any comment; replies are visually indented
 - **Time tracking** — log hours and minutes spent directly on a card
 - **Multi-project** — each project has its own board, members, and chat
-- **Role-based access** — global roles (admin / user / viewer) and per-project roles (owner / member / viewer)
+- **Role-based access** — global roles (admin / user / viewer) and per-project roles (owner / admin / member / viewer); project admins can manage columns
 - **Real-time** — board changes, card moves, and chat messages sync instantly across all connected users via WebSocket
-- **Internal chat** — per-project team chat and direct messages between users
+- **Internal chat** — per-project team chat and direct messages between users; group chats support custom avatars and member management
+- **Start team chat from DM** — open the Teams tab in Direct Messages to instantly start a group chat with all members of a project
 - **Unread DM notifications** — pulsing indicator in the sidebar and header when there are unread direct messages
 - **Sidebar** — starred projects, live online-users list, auto-refreshes when users are added or removed
 - **Dark / light / system theme** — defaults to light
@@ -97,13 +98,18 @@ cd dist
 
 Demo accounts created (password for all: `demo1234`):
 
-| Username | Display name | Role |
-|---|---|---|
-| `demo.admin` | Alex Admin | admin |
-| `demo.sarah` | Sarah Chen | user |
-| `demo.marc` | Marc Dubois | user |
-| `demo.lisa` | Lisa Park | user |
-| `demo.viewer` | Victor Viewer | viewer |
+| Username | Display name | Global role | Notes |
+|---|---|---|---|
+| `tonk` | Ton Kersten | admin | Persistent — not removed by `--reset` |
+| `demo.admin` | Alex Admin | admin | |
+| `demo.sarah` | Sarah Chen | user | Project admin: Website Redesign |
+| `demo.marc` | Marc Dubois | user | Project admin: Mobile App v2 |
+| `demo.lisa` | Lisa Park | user | Project admin: DevOps & Infra |
+| `demo.priya` | Priya Nair | user | |
+| `demo.james` | James O'Brien | user | |
+| `demo.elena` | Elena Kovač | user | |
+| `demo.raj` | Raj Sharma | user | |
+| `demo.viewer` | Victor Viewer | viewer | |
 
 ## Configuration
 

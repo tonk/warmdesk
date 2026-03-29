@@ -151,3 +151,10 @@ Create an application that has all these features and requirements
 - Remove a member from a group chat
 - Demo conversations in the seed tool (4 DMs + 1 group chat with realistic message history)
 - Screenshots of all main views, referenced in the README
+- Project admin role (column management) separate from member and owner
+- Board toolbar shows project name; settings gear visible only to admins
+- Upload an avatar image for group chats
+- Auto-delete empty group chat when last non-creator member is removed
+- Start a group chat from a project team in Direct Messages (Teams tab)
+- More demo users in seed (Priya, James, Elena, Raj) with project admin roles
+- Persistent system admin (tonk) in seed, not affected by --reset

@@ -2,6 +2,22 @@
 
 All notable changes to Coworker are documented here.
 
+## v0.2.4 — 2026-03-29
+
+### Added
+- **Project teams in Direct Messages** — new "Teams" tab in the new-conversation panel lists all projects the user belongs to; clicking a project pre-fills all its members and the project name as the group name, ready to start a team chat with one click
+- **Project admin role** — new `admin` role between `member` and `owner`; project admins can create, rename, reorder, and delete columns; regular members cannot; board toolbar shows settings gear only to project admins and global admins
+- **Group chat avatar** — group conversations can have a custom avatar image; click the group icon in the chat header to upload one
+- **Auto-delete empty group chat** — when removing the last non-creator member from a group chat that has no messages, the conversation is deleted automatically and all participants are notified
+- **Persistent system admin in seed** — `coworker-seed` now creates `tonk` (Ton Kersten) as a system admin account that is never removed by `--reset`
+- **More demo users in seed** — four additional demo users (Priya Nair, James O'Brien, Elena Kovač, Raj Sharma) are created; project admin roles are demonstrated across the three demo projects
+
+### Fixed
+- **Report assignee dropdown z-index** — placeholder text was visible through the open dropdown; fixed by establishing a stacking context on the filters row
+
+### Changed
+- **Board toolbar** — project name replaces the "Project Settings" text link; the settings gear icon is only shown to users who can manage the project
+
 ## v0.2.3 — 2026-03-29
 
 ### Added
