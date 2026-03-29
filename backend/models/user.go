@@ -35,7 +35,8 @@ type User struct {
 	EmailNotifications bool       `gorm:"default:true" json:"email_notifications"`
 
 	// Computed — not stored in DB
-	GravatarURL string `gorm:"-" json:"gravatar_url"`
+	GravatarURL    string `gorm:"-" json:"gravatar_url"`
+	CanViewReports bool   `gorm:"-" json:"can_view_reports"`
 }
 
 // AfterFind populates the computed GravatarURL field after every DB read.

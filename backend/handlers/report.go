@@ -61,6 +61,12 @@ func isoWeekStart(year, week int) time.Time {
 func GetTimeReport(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	globalRole := middleware.GetGlobalRole(c)
+
+	if !userCanViewReports(userID, globalRole) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "reports are only available to project admins and system admins"})
+		return
+	}
+
 	period := c.DefaultQuery("period", "all")
 	projectSlug := c.Query("project")
 	yearStr := c.Query("year")

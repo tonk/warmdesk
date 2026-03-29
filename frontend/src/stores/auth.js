@@ -9,6 +9,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isLoggedIn = computed(() => !!accessToken.value && !!user.value)
   const isAdmin = computed(() => user.value?.global_role === 'admin')
+  const canViewReports = computed(() => !!user.value?.can_view_reports)
 
   // ── Idle session timeout ─────────────────────────────────────────────────
   let idleTimer = null
@@ -75,5 +76,5 @@ export const useAuthStore = defineStore('auth', () => {
     if (data.locale) setLocale(data.locale)
   }
 
-  return { user, accessToken, isLoggedIn, isAdmin, login, register, logout, fetchMe, updateProfile, startIdleTimer, resetIdleTimer, stopIdleTimer }
+  return { user, accessToken, isLoggedIn, isAdmin, canViewReports, login, register, logout, fetchMe, updateProfile, startIdleTimer, resetIdleTimer, stopIdleTimer }
 })

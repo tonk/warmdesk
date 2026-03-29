@@ -171,7 +171,21 @@ func (h *AuthHandler) Me(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
 		return
 	}
+	user.CanViewReports = userCanViewReports(userID, user.GlobalRole)
 	c.JSON(http.StatusOK, user)
+}
+
+// userCanViewReports returns true if the user is a global admin or is an
+// admin/owner of at least one project.
+func userCanViewReports(userID uint, globalRole string) bool {
+	if globalRole == "admin" {
+		return true
+	}
+	var count int64
+	database.DB.Model(&models.ProjectMember{}).
+		Where("user_id = ? AND role IN ?", userID, []string{"admin", "owner"}).
+		Count(&count)
+	return count > 0
 }
 
 func (h *AuthHandler) UpdateMe(c *gin.Context) {

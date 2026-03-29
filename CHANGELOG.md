@@ -2,6 +2,14 @@
 
 All notable changes to Coworker are documented here.
 
+## v0.2.8 — 2026-03-29
+
+### Added
+- **Webhook URL with live token** — after creating or regenerating a webhook, the setup docs now show the full ready-to-paste URL with the real token already substituted in; falls back to `<token>` placeholder when no token is in view
+
+### Changed
+- **Reports access restricted** — time report generation is now limited to project admins/owners and system admins; regular members and viewers no longer see the Reports menu item and are redirected if they navigate directly to `/reports`
+
 ## v0.2.7 — 2026-03-29
 
 ### Added

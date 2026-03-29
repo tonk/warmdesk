@@ -174,3 +174,5 @@ Create an application that has all these features and requirements
   - Card references (e.g. PRJ-42) in commit messages and PR/issue titles auto-link to cards
   - Linked events appear in a Git Links section on the card detail
 - Documentation: user guide, API reference, and admin guide shipped with every release in docs/
+- Reports restricted to project admins/owners and system admins; hidden from regular members and viewers
+- Webhook setup docs show the real token in the URL immediately after creating a webhook

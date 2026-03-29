@@ -14,7 +14,7 @@ const routes = [
   { path: '/chats', name: 'chats', component: () => import('@/views/DirectMessagesView.vue') },
   { path: '/messages', redirect: '/chats' },
   { path: '/admin', name: 'admin', component: () => import('@/views/AdminView.vue'), meta: { adminOnly: true } },
-  { path: '/reports', name: 'reports', component: () => import('@/views/ReportView.vue') },
+  { path: '/reports', name: 'reports', component: () => import('@/views/ReportView.vue'), meta: { reportsOnly: true } },
   { path: '/:pathMatch(.*)*', redirect: '/' }
 ]
 
@@ -33,6 +33,7 @@ router.beforeEach((to) => {
   const auth = useAuthStore()
   if (!to.meta.public && !auth.isLoggedIn) return '/login'
   if (to.meta.adminOnly && !auth.isAdmin) return '/'
+  if (to.meta.reportsOnly && !auth.canViewReports) return '/'
   if (to.meta.public && auth.isLoggedIn && (to.name === 'login' || to.name === 'register')) return '/'
   return true
 })

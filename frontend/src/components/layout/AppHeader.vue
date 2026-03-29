@@ -41,7 +41,7 @@
             {{ $t('nav.messages') }}
             <span v-if="notificationsStore.hasUnread" class="msg-unread-dot"></span>
           </div>
-          <div class="dropdown-item" @click="router.push('/reports')">{{ $t('report.nav') }}</div>
+          <div class="dropdown-item" v-if="auth.canViewReports" @click="router.push('/reports')">{{ $t('report.nav') }}</div>
           <div class="dropdown-divider"></div>
           <div class="dropdown-item dropdown-item-danger" @click="handleLogout">{{ $t('nav.logout') }}</div>
         </div>

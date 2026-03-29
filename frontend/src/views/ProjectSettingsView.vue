@@ -153,9 +153,14 @@
 
           <!-- Webhook setup docs -->
           <div class="webhook-docs" style="margin-top:20px">
+            <p style="font-size:13px;color:var(--color-text-muted);margin:0 0 14px">
+              The token is generated when you click <strong>Create Webhook</strong> above and shown once.
+              Use it in the URL for your platform below. You can regenerate a token at any time from the table.
+            </p>
+
             <h4 style="margin:0 0 6px">Generic webhook</h4>
             <p style="font-size:13px;color:var(--color-text-muted);margin:0 0 12px">
-              <code>POST /api/v1/webhooks/&lt;token&gt;</code> — body: <code>{"text": "...", "username": "Bot"}</code>
+              <code>POST {{ baseUrl }}/api/v1/webhooks/{{ createdWebhookToken || '&lt;token&gt;' }}</code> — body: <code>{"text": "...", "username": "Bot"}</code>
             </p>
 
             <h4 style="margin:0 0 6px">Gitea / Forgejo</h4>
@@ -163,7 +168,7 @@
               In your repository go to <strong>Settings → Webhooks → Add Webhook → Gitea</strong> and set:
             </p>
             <ul style="font-size:13px;color:var(--color-text-muted);margin:0 0 12px;padding-left:18px">
-              <li>Target URL: <code>{{ baseUrl }}/api/v1/gitea-webhook/&lt;token&gt;</code></li>
+              <li>Target URL: <code>{{ baseUrl }}/api/v1/gitea-webhook/{{ createdWebhookToken || '&lt;token&gt;' }}</code></li>
               <li>Content type: <code>application/json</code></li>
               <li>Secret: leave empty</li>
             </ul>
@@ -173,7 +178,7 @@
               In your repository go to <strong>Settings → Webhooks → Add webhook</strong> and set:
             </p>
             <ul style="font-size:13px;color:var(--color-text-muted);margin:0 0 4px;padding-left:18px">
-              <li>Payload URL: <code>{{ baseUrl }}/api/v1/github-webhook/&lt;token&gt;</code></li>
+              <li>Payload URL: <code>{{ baseUrl }}/api/v1/github-webhook/{{ createdWebhookToken || '&lt;token&gt;' }}</code></li>
               <li>Content type: <code>application/json</code></li>
               <li>Secret: leave empty (or set to any string — not verified)</li>
               <li>Events: <em>Push</em>, <em>Pull requests</em>, <em>Issues</em></li>
@@ -187,7 +192,7 @@
               In your repository go to <strong>Settings → Webhooks</strong> and set:
             </p>
             <ul style="font-size:13px;color:var(--color-text-muted);margin:0 0 4px;padding-left:18px">
-              <li>URL: <code>{{ baseUrl }}/api/v1/gitlab-webhook/&lt;token&gt;</code></li>
+              <li>URL: <code>{{ baseUrl }}/api/v1/gitlab-webhook/{{ createdWebhookToken || '&lt;token&gt;' }}</code></li>
               <li>Secret token: leave empty (or set to the webhook token for extra validation)</li>
               <li>Trigger: <em>Push events</em>, <em>Merge request events</em>, <em>Issues events</em></li>
             </ul>
