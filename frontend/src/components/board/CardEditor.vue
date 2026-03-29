@@ -76,8 +76,9 @@ function detectMention() {
     mentionQuery.value = m[1]
     mentionStart.value = { line: cursor.line, ch: cursor.ch - m[0].length }
     mentionIndex.value = 0
-    // Position relative to the editor wrapper
-    const coords = cm.cursorCoords(true, 'local')
+    // Use viewport coords + position:fixed so the dropdown renders correctly
+    // regardless of toolbar height, modal scroll, or overflow clipping.
+    const coords = cm.cursorCoords(true, 'window')
     mentionPos.value = { top: (coords.bottom + 4) + 'px', left: coords.left + 'px' }
   } else {
     mentionQuery.value = null
@@ -188,8 +189,8 @@ onBeforeUnmount(() => {
 }
 
 .editor-mention-dropdown {
-  position: absolute !important;
-  z-index: 500;
+  position: fixed !important;
+  z-index: 1100;
 }
 
 /* Anchor the emoji picker to the top-right area of the editor wrapper, near toolbar */
