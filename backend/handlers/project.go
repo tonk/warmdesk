@@ -14,8 +14,8 @@ func ListProjects(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	globalRole := middleware.GetGlobalRole(c)
 
-	// Global viewers can see all non-deleted projects (read-only access)
-	if globalRole == "viewer" {
+	// Admins and global viewers see all non-deleted projects
+	if globalRole == "admin" || globalRole == "viewer" {
 		var projects []models.Project
 		database.DB.Where("deleted_at IS NULL").Find(&projects)
 		c.JSON(http.StatusOK, projects)
