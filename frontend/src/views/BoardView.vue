@@ -2,12 +2,13 @@
   <div class="board-layout">
     <div class="board-toolbar">
       <div class="board-toolbar-left">
-        <RouterLink :to="`/projects/${slug}/settings`" class="btn btn-ghost btn-sm">
-          ⚙ {{ $t('project.settings') }}<span v-if="sidebarStore.isStarred(slug)" class="settings-star">★</span>
-        </RouterLink>
+        <span class="board-project-name">{{ projectStore.currentProject?.name }}</span>
         <button class="btn btn-ghost btn-sm star-btn" :class="{ starred: sidebarStore.isStarred(slug) }" @click="toggleStar" :title="sidebarStore.isStarred(slug) ? $t('board.unstar') : $t('board.star')">
           {{ sidebarStore.isStarred(slug) ? '★' : '☆' }}
         </button>
+        <RouterLink v-if="canManageColumns" :to="`/projects/${slug}/settings`" class="btn btn-ghost btn-sm settings-link" :title="$t('project.settings')">
+          ⚙
+        </RouterLink>
       </div>
       <div class="board-toolbar-right">
         <RouterLink :to="`/projects/${slug}/topics`" class="btn btn-ghost btn-sm">
@@ -303,9 +304,10 @@ async function onCardMoved({ cardId, fromColumnId, toColumnId, newIndex }) {
   justify-content: space-between;
 }
 .board-toolbar-left, .board-toolbar-right { display: flex; gap: 8px; align-items: center; }
+.board-project-name { font-size: 15px; font-weight: 600; color: var(--color-text); padding: 0 4px; }
 .star-btn { font-size: 18px; line-height: 1; color: var(--color-text-muted); }
 .star-btn.starred { color: #f59e0b; }
-.settings-star { color: #f59e0b; margin-left: 4px; font-size: 13px; }
+.settings-link { font-size: 15px; color: var(--color-text-muted); }
 
 .board-body {
   flex: 1;
