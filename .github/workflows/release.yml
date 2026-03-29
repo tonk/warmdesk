@@ -137,7 +137,7 @@ jobs:
 
       - name: Build desktop app (Windows)
         if: matrix.os == 'windows-latest'
-        run: cd frontend && npm run tauri:build -- --bundles nsis,zip
+        run: cd frontend && npm run tauri:build -- --bundles nsis
 
       - name: Build desktop app (macOS universal)
         if: matrix.os == 'macos-latest'
@@ -156,8 +156,7 @@ jobs:
         run: |
           $installer = Get-ChildItem frontend/src-tauri/target/release/bundle/nsis/*.exe | Select-Object -First 1
           Copy-Item $installer.FullName "Coworker-${{ github.ref_name }}-x64-setup.exe"
-          $portable = Get-ChildItem frontend/src-tauri/target/release/bundle/zip/*.zip | Select-Object -First 1
-          Copy-Item $portable.FullName "Coworker-${{ github.ref_name }}-x64-portable.zip"
+          Compress-Archive -Path "frontend/src-tauri/target/release/Coworker.exe" -DestinationPath "Coworker-${{ github.ref_name }}-x64-portable.zip"
 
       - name: Collect and rename artifact (macOS)
         if: matrix.os == 'macos-latest'

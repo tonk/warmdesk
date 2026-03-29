@@ -69,8 +69,9 @@ windows-installer:
 # WebView2 is pre-installed on Windows 10 (2018+) and Windows 11.
 windows-portable:
 	@echo "Building Coworker desktop app (Windows portable zip)..."
-	cd $(FRONTEND) && npm run tauri:build -- --bundles zip
-	@echo "Portable zip: $(FRONTEND)/src-tauri/target/release/bundle/zip/Coworker_*_x64.zip"
+	cd $(FRONTEND) && npm run tauri:build -- --bundles nsis
+	powershell -Command "Compress-Archive -Path '$(FRONTEND)/src-tauri/target/release/Coworker.exe' -DestinationPath 'Coworker-portable.zip' -Force"
+	@echo "Portable zip: Coworker-portable.zip"
 
 # Remove build artifacts
 clean:
