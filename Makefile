@@ -4,8 +4,7 @@ BACKEND  := backend
 FRONTEND := frontend
 VERSION  := $(shell git -C $(BACKEND) describe --tags --always 2>/dev/null || echo "dev")
 ARCHIVE  := coworker-$(VERSION).tar.gz
-
-.PHONY: all build build-frontend build-backend clean dev-backend dev-frontend run package appimage dmg windows-installer
+.PHONY: all build build-frontend build-backend clean dev-backend dev-frontend run package appimage dmg windows-installer windows-portable
 
 # Build everything into dist/
 all: build
@@ -64,6 +63,14 @@ windows-installer:
 	@echo "Building Coworker desktop app (Windows installer)..."
 	cd $(FRONTEND) && npm run tauri:build -- --bundles nsis
 	@echo "Installer: $(FRONTEND)/src-tauri/target/release/bundle/nsis/Coworker_*_x64-setup.exe"
+
+# Build the Tauri desktop client as a portable Windows zip — extract and run, no installation.
+# Must be run on Windows. Requires: Rust, WebView2 (pre-installed on Windows 11).
+# WebView2 is pre-installed on Windows 10 (2018+) and Windows 11.
+windows-portable:
+	@echo "Building Coworker desktop app (Windows portable zip)..."
+	cd $(FRONTEND) && npm run tauri:build -- --bundles zip
+	@echo "Portable zip: $(FRONTEND)/src-tauri/target/release/bundle/zip/Coworker_*_x64.zip"
 
 # Remove build artifacts
 clean:

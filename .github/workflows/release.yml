@@ -137,7 +137,7 @@ jobs:
 
       - name: Build desktop app (Windows)
         if: matrix.os == 'windows-latest'
-        run: cd frontend && npm run tauri:build -- --bundles nsis
+        run: cd frontend && npm run tauri:build -- --bundles nsis,zip
 
       - name: Build desktop app (macOS universal)
         if: matrix.os == 'macos-latest'
@@ -154,8 +154,10 @@ jobs:
         if: matrix.os == 'windows-latest'
         shell: pwsh
         run: |
-          $src = Get-ChildItem frontend/src-tauri/target/release/bundle/nsis/*.exe | Select-Object -First 1
-          Copy-Item $src.FullName "Coworker-${{ github.ref_name }}-x64-setup.exe"
+          $installer = Get-ChildItem frontend/src-tauri/target/release/bundle/nsis/*.exe | Select-Object -First 1
+          Copy-Item $installer.FullName "Coworker-${{ github.ref_name }}-x64-setup.exe"
+          $portable = Get-ChildItem frontend/src-tauri/target/release/bundle/zip/*.zip | Select-Object -First 1
+          Copy-Item $portable.FullName "Coworker-${{ github.ref_name }}-x64-portable.zip"
 
       - name: Collect and rename artifact (macOS)
         if: matrix.os == 'macos-latest'
@@ -173,7 +175,9 @@ jobs:
         if: matrix.os == 'windows-latest'
         uses: softprops/action-gh-release@v2
         with:
-          files: Coworker-${{ github.ref_name }}-x64-setup.exe
+          files: |
+            Coworker-${{ github.ref_name }}-x64-setup.exe
+            Coworker-${{ github.ref_name }}-x64-portable.zip
 
       - name: Upload to GitHub Release (macOS)
         if: matrix.os == 'macos-latest'
