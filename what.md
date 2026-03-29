@@ -146,3 +146,8 @@ Create an application that has all these features and requirements
 - Default initial project column renamed from "Inbox" to "Backlog"
 - Configurable initial columns per new project (admin setting, one name per line)
 - Delete empty columns from the board view
+- Assignee filter on time reports (select one, multiple, or all assignees)
+- Direct message history loads from database when opening a conversation
+- Remove a member from a group chat
+- Demo conversations in the seed tool (4 DMs + 1 group chat with realistic message history)
+- Screenshots of all main views, referenced in the README

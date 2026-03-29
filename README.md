@@ -48,7 +48,7 @@ and asked Claude Code to generate the app.
 - **Multiple assignees** — assign more than one user to a card
 - **Watchers** — subscribe to card activity
 - **Favourite people** — mark users for quick access
-- **Time reports** — generate a time overview filtered by period (all / year / month / week) and project; export to PDF (report only, no sidebar) or Excel (XLSX); time displayed as H:MM
+- **Time reports** — generate a time overview filtered by period (all / year / month / week), project, and one or more assignees; export to PDF (report only, no sidebar) or Excel (XLSX); time displayed as H:MM
 - **Company branding** — set a company name and logo that appears on reports
 - **Configurable initial columns** — admin can define which columns are created when a new project is made (defaults to "Backlog")
 - **Ticket API** — create cards, add comments, and move cards via API key (for CI/CD pipelines and external integrations)
@@ -86,7 +86,8 @@ Open **http://localhost:8080**.
 ### Load demo data
 
 A seed tool is included in the distribution to populate the database with
-realistic demo content (users, projects, cards, comments, and time entries):
+realistic demo content (users, projects, cards, comments, time entries, topics,
+and conversations):
 
 ```bash
 cd dist
