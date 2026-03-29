@@ -175,7 +175,7 @@
     "smtp_username": "Gebruikersnaam",
     "smtp_password": "Wachtwoord",
     "smtp_test_title": "Testmail versturen",
-    "smtp_test_placeholder": "ontvanger@voorbeeld.nl",
+    "smtp_test_placeholder": "ontvanger{'@'}voorbeeld.nl",
     "smtp_test_send": "Stuur test",
     "smtp_test_sending": "Versturen…",
     "branding_title": "Huisstijl",

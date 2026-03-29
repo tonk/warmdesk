@@ -175,7 +175,7 @@
     "smtp_username": "Benutzername",
     "smtp_password": "Passwort",
     "smtp_test_title": "Test-E-Mail senden",
-    "smtp_test_placeholder": "empfaenger@beispiel.de",
+    "smtp_test_placeholder": "empfaenger{'@'}beispiel.de",
     "smtp_test_send": "Test senden",
     "smtp_test_sending": "Wird gesendet…",
     "branding_title": "Branding",

@@ -175,7 +175,7 @@
     "smtp_username": "Nom d'utilisateur",
     "smtp_password": "Mot de passe",
     "smtp_test_title": "Envoyer un e-mail de test",
-    "smtp_test_placeholder": "destinataire@exemple.fr",
+    "smtp_test_placeholder": "destinataire{'@'}exemple.fr",
     "smtp_test_send": "Envoyer le test",
     "smtp_test_sending": "Envoi en cours…",
     "branding_title": "Image de marque",
