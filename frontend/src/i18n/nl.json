@@ -236,7 +236,15 @@
     "no_conversations": "Nog geen gesprekken. Begin er een door op + te klikken",
     "select_conversation": "Selecteer een gesprek om te beginnen",
     "remove_member": "Verwijderen uit groep",
-    "remove_member_confirm": "Deze persoon uit de groepschat verwijderen?"
+    "remove_member_confirm": "Deze persoon uit de groepschat verwijderen?",
+    "tab_people": "Personen",
+    "tab_teams": "Teams",
+    "group_name_placeholder": "Groepsnaam (optioneel)",
+    "start_group_chat": "Groepsgesprek starten",
+    "open_chat": "Chat openen",
+    "no_users_found": "Geen gebruikers gevonden",
+    "no_teams": "Geen projecten gevonden",
+    "team_members_count": "{count} leden"
   },
   "sidebar": {
     "starred": "Gemarkeerde projecten",

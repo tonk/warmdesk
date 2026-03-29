@@ -236,7 +236,15 @@
     "no_conversations": "Noch keine Gespräche. Starten Sie eines mit +",
     "select_conversation": "Wählen Sie ein Gespräch aus, um zu chatten",
     "remove_member": "Aus Gruppe entfernen",
-    "remove_member_confirm": "Diese Person aus dem Gruppenchat entfernen?"
+    "remove_member_confirm": "Diese Person aus dem Gruppenchat entfernen?",
+    "tab_people": "Personen",
+    "tab_teams": "Teams",
+    "group_name_placeholder": "Gruppenname (optional)",
+    "start_group_chat": "Gruppenchat starten",
+    "open_chat": "Chat öffnen",
+    "no_users_found": "Keine Benutzer gefunden",
+    "no_teams": "Keine Projekte gefunden",
+    "team_members_count": "{count} Mitglieder"
   },
   "sidebar": {
     "starred": "Markierte Projekte",

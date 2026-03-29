@@ -125,6 +125,21 @@ func main() {
 	// ── 1. Users ──────────────────────────────────────────────────────────────
 	fmt.Println("→ Creating users…")
 
+	// Ton Kersten — real system admin, excluded from --reset
+	var tonk models.User
+	if err := db.Where("username = ?", "tonk").First(&tonk).Error; err != nil {
+		tonk = models.User{
+			Email: "tonk@smartowl.nl", Username: "tonk",
+			PasswordHash: hashPassword("demo1234"), GlobalRole: "admin",
+			FirstName: "Ton", LastName: "Kersten", DisplayName: "Ton Kersten",
+			IsActive: true, EmailNotifications: true,
+		}
+		must(db.Create(&tonk).Error)
+		fmt.Println("   Created system admin: tonk (tonk@smartowl.nl)")
+	} else {
+		fmt.Println("   System admin 'tonk' already exists — skipping")
+	}
+
 	users := map[string]*models.User{
 		"admin": {
 			Email: "admin@demo.example", Username: "demo.admin",
@@ -156,12 +171,37 @@ func main() {
 			FirstName: "Victor", LastName: "Viewer", DisplayName: "Victor Viewer",
 			IsActive: true, EmailNotifications: false,
 		},
+		// Additional demo users
+		"priya": {
+			Email: "priya@demo.example", Username: "demo.priya",
+			PasswordHash: hashPassword("demo1234"), GlobalRole: "user",
+			FirstName: "Priya", LastName: "Nair", DisplayName: "Priya Nair",
+			IsActive: true, EmailNotifications: true,
+		},
+		"james": {
+			Email: "james@demo.example", Username: "demo.james",
+			PasswordHash: hashPassword("demo1234"), GlobalRole: "user",
+			FirstName: "James", LastName: "O'Brien", DisplayName: "James O'Brien",
+			IsActive: true, EmailNotifications: true,
+		},
+		"elena": {
+			Email: "elena@demo.example", Username: "demo.elena",
+			PasswordHash: hashPassword("demo1234"), GlobalRole: "user",
+			FirstName: "Elena", LastName: "Kovač", DisplayName: "Elena Kovač",
+			IsActive: true, EmailNotifications: true,
+		},
+		"raj": {
+			Email: "raj@demo.example", Username: "demo.raj",
+			PasswordHash: hashPassword("demo1234"), GlobalRole: "user",
+			FirstName: "Raj", LastName: "Sharma", DisplayName: "Raj Sharma",
+			IsActive: true, EmailNotifications: false,
+		},
 	}
 
 	for _, u := range users {
 		must(db.Create(u).Error)
 	}
-	fmt.Printf("   Created %d users (password for all: demo1234)\n", len(users))
+	fmt.Printf("   Created %d demo users (password for all: demo1234)\n", len(users))
 
 	// ── 2. Projects + columns + labels + members ──────────────────────────────
 	fmt.Println("→ Creating projects…")
@@ -178,13 +218,16 @@ func main() {
 		role string
 	}{
 		"website-redesign": {
-			{"admin", "owner"}, {"sarah", "member"}, {"marc", "member"}, {"viewer", "viewer"},
+			{"admin", "owner"}, {"sarah", "admin"}, {"marc", "member"},
+			{"priya", "member"}, {"james", "member"}, {"viewer", "viewer"},
 		},
 		"mobile-app-v2": {
-			{"sarah", "owner"}, {"marc", "member"}, {"lisa", "member"}, {"viewer", "viewer"},
+			{"sarah", "owner"}, {"marc", "admin"}, {"lisa", "member"},
+			{"elena", "member"}, {"priya", "member"}, {"viewer", "viewer"},
 		},
 		"devops-infra": {
-			{"marc", "owner"}, {"admin", "member"}, {"lisa", "member"}, {"viewer", "viewer"},
+			{"marc", "owner"}, {"lisa", "admin"}, {"admin", "member"},
+			{"james", "member"}, {"raj", "member"}, {"viewer", "viewer"},
 		},
 	}
 
@@ -969,15 +1012,20 @@ Pagerduty schedules will be updated to match this by Friday.`,
 	fmt.Println("✅ Demo data seeded successfully!")
 	fmt.Println()
 	fmt.Println("  Accounts (password: demo1234)")
-	fmt.Println("  ┌─────────────────────┬─────────────────┬────────┐")
-	fmt.Println("  │ Username            │ Display name    │ Role   │")
-	fmt.Println("  ├─────────────────────┼─────────────────┼────────┤")
-	fmt.Println("  │ demo.admin          │ Alex Admin      │ admin  │")
-	fmt.Println("  │ demo.sarah          │ Sarah Chen      │ user   │")
-	fmt.Println("  │ demo.marc           │ Marc Dubois     │ user   │")
-	fmt.Println("  │ demo.lisa           │ Lisa Park       │ user   │")
-	fmt.Println("  │ demo.viewer         │ Victor Viewer   │ viewer │")
-	fmt.Println("  └─────────────────────┴─────────────────┴────────┘")
+	fmt.Println("  ┌─────────────────────┬─────────────────────┬────────┐")
+	fmt.Println("  │ Username            │ Display name        │ Role   │")
+	fmt.Println("  ├─────────────────────┼─────────────────────┼────────┤")
+	fmt.Println("  │ tonk                │ Ton Kersten         │ admin  │  ← system admin (not reset)")
+	fmt.Println("  │ demo.admin          │ Alex Admin          │ admin  │")
+	fmt.Println("  │ demo.sarah          │ Sarah Chen          │ user   │  ← project admin: website-redesign")
+	fmt.Println("  │ demo.marc           │ Marc Dubois         │ user   │  ← project admin: mobile-app-v2")
+	fmt.Println("  │ demo.lisa           │ Lisa Park           │ user   │  ← project admin: devops-infra")
+	fmt.Println("  │ demo.priya          │ Priya Nair          │ user   │")
+	fmt.Println("  │ demo.james          │ James O'Brien       │ user   │")
+	fmt.Println("  │ demo.elena          │ Elena Kovač         │ user   │")
+	fmt.Println("  │ demo.raj            │ Raj Sharma          │ user   │")
+	fmt.Println("  │ demo.viewer         │ Victor Viewer       │ viewer │")
+	fmt.Println("  └─────────────────────┴─────────────────────┴────────┘")
 	fmt.Println()
 	fmt.Printf("  Projects      : %d\n", len(demoProjects))
 	fmt.Printf("  Cards         : %d\n", totalCards)
@@ -990,7 +1038,7 @@ Pagerduty schedules will be updated to match this by Friday.`,
 // removeDemoData deletes all records created by the seed (identified by the
 // demo users and projects), then the users themselves.
 func removeDemoData(db *gorm.DB) {
-	demoUsernames := []string{"demo.admin", "demo.sarah", "demo.marc", "demo.lisa", "demo.viewer"}
+	demoUsernames := []string{"demo.admin", "demo.sarah", "demo.marc", "demo.lisa", "demo.viewer", "demo.priya", "demo.james", "demo.elena", "demo.raj"}
 	demoSlugs := []string{"website-redesign", "mobile-app-v2", "devops-infra"}
 
 	// Collect user IDs

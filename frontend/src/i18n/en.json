@@ -265,7 +265,15 @@
     "no_conversations": "No conversations yet. Start one by clicking +",
     "select_conversation": "Select a conversation to start chatting",
     "remove_member": "Remove from group",
-    "remove_member_confirm": "Remove this person from the group chat?"
+    "remove_member_confirm": "Remove this person from the group chat?",
+    "tab_people": "People",
+    "tab_teams": "Teams",
+    "group_name_placeholder": "Group name (optional)",
+    "start_group_chat": "Start group chat",
+    "open_chat": "Open chat",
+    "no_users_found": "No users found",
+    "no_teams": "No projects found",
+    "team_members_count": "{count} members"
   },
   "sidebar": {
     "starred": "Starred Projects",

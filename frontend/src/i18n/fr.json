@@ -236,7 +236,15 @@
     "no_conversations": "Pas encore de conversations. Commencez-en une avec +",
     "select_conversation": "Sélectionnez une conversation pour commencer à discuter",
     "remove_member": "Retirer du groupe",
-    "remove_member_confirm": "Retirer cette personne de la conversation de groupe ?"
+    "remove_member_confirm": "Retirer cette personne de la conversation de groupe ?",
+    "tab_people": "Personnes",
+    "tab_teams": "Équipes",
+    "group_name_placeholder": "Nom du groupe (optionnel)",
+    "start_group_chat": "Démarrer la conversation de groupe",
+    "open_chat": "Ouvrir le chat",
+    "no_users_found": "Aucun utilisateur trouvé",
+    "no_teams": "Aucun projet trouvé",
+    "team_members_count": "{count} membres"
   },
   "sidebar": {
     "starred": "Projets marqués",

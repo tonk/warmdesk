@@ -13,60 +13,96 @@
 
       <!-- New conversation panel: multi-select users -->
       <div v-if="showNewConv" class="new-conv-panel">
-        <div class="search-wrap">
-          <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input
-            class="search-input"
-            v-model="userSearch"
-            :placeholder="$t('dm.search_users')"
-            @input="filterUsers"
-            autofocus
-          />
+
+        <!-- Tab bar: People / Teams -->
+        <div class="new-conv-tabs">
+          <button :class="['new-conv-tab', { active: newConvTab === 'people' }]" @click="newConvTab = 'people'">
+            {{ $t('dm.tab_people') }}
+          </button>
+          <button :class="['new-conv-tab', { active: newConvTab === 'teams' }]" @click="newConvTab = 'teams'">
+            {{ $t('dm.tab_teams') }}
+          </button>
         </div>
 
-        <!-- Selected user chips -->
-        <div v-if="selectedUsers.length" class="selected-chips">
-          <span v-for="u in selectedUsers" :key="u.id" class="chip">
-            {{ u.display_name || u.username }}
-            <button class="chip-remove" @click="toggleUser(u)">×</button>
-          </span>
-        </div>
-
-        <!-- Group name field (only when 2+ users selected) -->
-        <input
-          v-if="selectedUsers.length > 1"
-          class="group-name-input"
-          v-model="newGroupName"
-          placeholder="Group name (optional)"
-        />
-
-        <div class="user-search-results">
-          <div
-            v-for="u in filteredUsers"
-            :key="u.id"
-            :class="['user-result', { selected: isSelected(u) }]"
-            @click="toggleUser(u)"
-          >
-            <div class="conv-avatar" :style="avatarBg(u)">
-              <img v-if="getAvatar(u)" :src="getAvatar(u)" class="avatar-img" @error="e => e.target.style.display='none'" />
-              <span v-else class="avatar-initials">{{ initials(u) }}</span>
-            </div>
-            <div class="conv-info">
-              <div class="conv-name">{{ u.display_name || u.username }}</div>
-              <div class="conv-handle">@{{ u.username }}</div>
-            </div>
-            <svg v-if="isSelected(u)" class="check-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <!-- ── People tab ── -->
+        <template v-if="newConvTab === 'people'">
+          <div class="search-wrap">
+            <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input
+              class="search-input"
+              v-model="userSearch"
+              :placeholder="$t('dm.search_users')"
+              @input="filterUsers"
+              autofocus
+            />
           </div>
-          <div v-if="!filteredUsers.length" class="search-empty">No users found</div>
-        </div>
 
-        <button
-          class="start-conv-btn"
-          :disabled="!selectedUsers.length"
-          @click="startConversation"
-        >
-          {{ selectedUsers.length > 1 ? 'Start group chat' : 'Open chat' }}
-        </button>
+          <!-- Selected user chips -->
+          <div v-if="selectedUsers.length" class="selected-chips">
+            <span v-for="u in selectedUsers" :key="u.id" class="chip">
+              {{ u.display_name || u.username }}
+              <button class="chip-remove" @click="toggleUser(u)">×</button>
+            </span>
+          </div>
+
+          <!-- Group name field (only when 2+ users selected) -->
+          <input
+            v-if="selectedUsers.length > 1"
+            class="group-name-input"
+            v-model="newGroupName"
+            :placeholder="$t('dm.group_name_placeholder')"
+          />
+
+          <div class="user-search-results">
+            <div
+              v-for="u in filteredUsers"
+              :key="u.id"
+              :class="['user-result', { selected: isSelected(u) }]"
+              @click="toggleUser(u)"
+            >
+              <div class="conv-avatar" :style="avatarBg(u)">
+                <img v-if="getAvatar(u)" :src="getAvatar(u)" class="avatar-img" @error="e => e.target.style.display='none'" />
+                <span v-else class="avatar-initials">{{ initials(u) }}</span>
+              </div>
+              <div class="conv-info">
+                <div class="conv-name">{{ u.display_name || u.username }}</div>
+                <div class="conv-handle">@{{ u.username }}</div>
+              </div>
+              <svg v-if="isSelected(u)" class="check-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div v-if="!filteredUsers.length" class="search-empty">{{ $t('dm.no_users_found') }}</div>
+          </div>
+
+          <button
+            class="start-conv-btn"
+            :disabled="!selectedUsers.length"
+            @click="startConversation"
+          >
+            {{ selectedUsers.length > 1 ? $t('dm.start_group_chat') : $t('dm.open_chat') }}
+          </button>
+        </template>
+
+        <!-- ── Teams tab ── -->
+        <template v-else>
+          <div v-if="loadingTeams" class="search-empty" style="padding:16px 12px">{{ $t('common.loading') }}</div>
+          <div v-else class="user-search-results">
+            <div
+              v-for="p in allProjects"
+              :key="p.id"
+              class="user-result team-result"
+              @click="selectProjectTeam(p)"
+            >
+              <div class="team-dot" :style="{ background: p.color || '#94a3b8' }"></div>
+              <div class="conv-info">
+                <div class="conv-name">{{ p.name }}</div>
+                <div class="conv-handle">{{ $t('dm.team_members_count', { count: p.member_count ?? '…' }) }}</div>
+              </div>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="team-arrow"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+            <div v-if="!allProjects.length" class="search-empty">{{ $t('dm.no_teams') }}</div>
+          </div>
+        </template>
+
       </div>
 
       <!-- Conversation list -->
@@ -299,6 +335,7 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useUIStore } from '@/stores/ui'
 import { messagesApi } from '@/api/messages'
+import { projectsApi } from '@/api/projects'
 import { attachmentsApi } from '@/api/attachments'
 import { useNotificationsStore } from '@/stores/notifications'
 import { useDateFormat } from '@/composables/useDateFormat'
@@ -321,8 +358,11 @@ const allUsers = ref([])
 const filteredUsers = ref([])
 const userSearch = ref('')
 const showNewConv = ref(false)
+const newConvTab = ref('people')
 const selectedUsers = ref([])
 const newGroupName = ref('')
+const allProjects = ref([])
+const loadingTeams = ref(false)
 
 const activeConv = ref(null)
 const activeConvId = ref(null)
@@ -369,13 +409,15 @@ async function onAvatarSelected(e) {
 onMounted(async () => {
   notificationsStore.markSeen()
   try {
-    const [convRes, userRes] = await Promise.all([
+    const [convRes, userRes, projRes] = await Promise.all([
       messagesApi.getConversations(),
-      messagesApi.listUsers()
+      messagesApi.listUsers(),
+      projectsApi.list()
     ])
     conversations.value = convRes.data || []
     allUsers.value = (userRes.data || []).filter(u => u.id !== auth.user?.id)
     filteredUsers.value = allUsers.value
+    allProjects.value = projRes.data || []
   } catch {}
 
   const targetId = route.query.user ? Number(route.query.user) : null
@@ -430,7 +472,28 @@ function toggleNewConv() {
     selectedUsers.value = []
     newGroupName.value = ''
     userSearch.value = ''
+    newConvTab.value = 'people'
     filteredUsers.value = allUsers.value
+  }
+}
+
+async function selectProjectTeam(project) {
+  loadingTeams.value = true
+  try {
+    const { data } = await projectsApi.listMembers(project.slug)
+    const members = (data || [])
+      .filter(m => m.user_id !== auth.user?.id)
+      .map(m => m.user)
+      .filter(Boolean)
+    selectedUsers.value = members
+    newGroupName.value = project.name
+    newConvTab.value = 'people'
+    userSearch.value = ''
+    filteredUsers.value = allUsers.value
+  } catch {
+    ui.error('Failed to load project members')
+  } finally {
+    loadingTeams.value = false
   }
 }
 
@@ -799,6 +862,36 @@ function dayLabel(dateStr) {
   flex-direction: column;
   gap: 8px;
 }
+
+.new-conv-tabs {
+  display: flex;
+  gap: 2px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+}
+.new-conv-tab {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border: none;
+  border-radius: calc(var(--radius-sm) - 2px);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all .15s;
+}
+.new-conv-tab.active {
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: 0 1px 2px rgba(0,0,0,.08);
+}
+
+.team-result { cursor: pointer; gap: 10px; }
+.team-dot { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; }
+.team-arrow { color: var(--color-text-muted); flex-shrink: 0; }
 .search-wrap {
   position: relative;
   display: flex;
