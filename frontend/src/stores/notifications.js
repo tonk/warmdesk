@@ -3,20 +3,21 @@ import { ref, computed } from 'vue'
 import { messagesApi } from '@/api/messages'
 import { useAuthStore } from '@/stores/auth'
 
-const STORAGE_KEY = 'messages_last_seen_at'
+const STORAGE_KEY = 'conv_last_seen'
+
+function loadSeen() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') } catch { return {} }
+}
 
 export const useNotificationsStore = defineStore('notifications', () => {
-  // Timestamp (ms) when the user last had the messages view open
-  const lastSeenAt = ref(parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10))
+  // Per-conversation last-seen timestamps: { [convId]: ms }
+  const convLastSeen = ref(loadSeen())
   const conversations = ref([])
 
   const auth = useAuthStore()
 
   const hasUnread = computed(() =>
-    conversations.value.some(c => {
-      const updatedAt = new Date(c.updated_at).getTime()
-      return updatedAt > lastSeenAt.value
-    })
+    conversations.value.some(c => isConvUnread(c))
   )
 
   async function checkUnread() {
@@ -27,14 +28,25 @@ export const useNotificationsStore = defineStore('notifications', () => {
     } catch {}
   }
 
+  // Call when the user opens a conversation or sends a message in it
+  function markConvSeen(convId) {
+    convLastSeen.value[convId] = Date.now()
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(convLastSeen.value))
+  }
+
+  // Legacy: mark all current conversations as seen at once
   function markSeen() {
-    lastSeenAt.value = Date.now()
-    localStorage.setItem(STORAGE_KEY, String(lastSeenAt.value))
+    const now = Date.now()
+    for (const c of conversations.value) {
+      convLastSeen.value[c.id] = now
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(convLastSeen.value))
   }
 
   function isConvUnread(conv) {
-    return new Date(conv.updated_at).getTime() > lastSeenAt.value
+    const seen = convLastSeen.value[conv.id] || 0
+    return new Date(conv.updated_at).getTime() > seen
   }
 
-  return { hasUnread, conversations, isConvUnread, checkUnread, markSeen }
+  return { hasUnread, conversations, isConvUnread, checkUnread, markSeen, markConvSeen }
 })

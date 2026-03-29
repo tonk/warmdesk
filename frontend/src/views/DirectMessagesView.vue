@@ -455,7 +455,6 @@ async function onAvatarSelected(e) {
 }
 
 onMounted(async () => {
-  notificationsStore.markSeen()
   try {
     const [convRes, userRes, projRes] = await Promise.all([
       messagesApi.getConversations(),
@@ -606,6 +605,7 @@ async function openConversation(conv) {
   activeConv.value = conv
   activeConvId.value = conv.id
   showAddMember.value = false
+  notificationsStore.markConvSeen(conv.id)
   // Stop polling the previous conversation
   clearInterval(pollTimer)
   await fetchMessages(true)
@@ -671,6 +671,8 @@ async function send() {
       const [c] = conversations.value.splice(idx, 1)
       conversations.value.unshift(c)
     }
+    // Sending counts as reading — don't show your own message as unread
+    notificationsStore.markConvSeen(activeConv.value.id)
     await nextTick()
     scrollToBottom()
     // Refresh to pick up any concurrent messages from others
