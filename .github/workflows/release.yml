@@ -45,7 +45,8 @@ jobs:
         run: |
           mkdir -p dist
           cd backend
-          go build -ldflags="-s -w -X main.Version=${{ github.ref_name }}" -o ../dist/coworker .
+          go build -ldflags="-s -w -X main.version=${{ github.ref_name }}" -o ../dist/coworker .
+          go build -ldflags="-s -w" -o ../dist/coworker-seed ./cmd/seed
 
       - name: Assemble distribution
         run: |
