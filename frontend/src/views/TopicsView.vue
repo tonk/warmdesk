@@ -195,7 +195,7 @@ const editReplyBody = ref('')
 const { connect, disconnect } = useWebSocket(slug.value)
 
 onMounted(async () => {
-  await projectStore.loadProject(slug.value)
+  await projectStore.fetchProject(slug.value)
   await topicsStore.loadTopics(slug.value)
   connect()
 })
