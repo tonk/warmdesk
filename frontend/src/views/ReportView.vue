@@ -481,7 +481,16 @@ onMounted(async () => {
 
 /* Print styles */
 @media print {
+  /* Hide everything outside the report content */
+  :global(.app-shell-header),
+  :global(.app-sidebar),
+  :global(.app-footer),
   .no-print { display: none !important; }
+
+  /* Make the shell fill the page without sidebar layout */
+  :global(.app-shell-body) { display: block !important; }
+  :global(.app-shell-content) { overflow: visible !important; }
+
   .report-page { background: #fff; }
   .report-content { max-width: 100%; padding: 0; margin: 0; }
   .report-header { border-bottom: 3px solid #6366f1; }
