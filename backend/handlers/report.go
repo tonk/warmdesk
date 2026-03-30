@@ -56,8 +56,20 @@ func isoWeekStart(year, week int) time.Time {
 	return monday.AddDate(0, 0, (week-jan4Week)*7)
 }
 
-// GetTimeReport returns time report data as JSON.
-// Query params: period=all|year|month|week, year, month, week, project (slug), assignees (comma-separated user IDs)
+// GetTimeReport godoc
+// @Summary      Get time report data
+// @Tags         reports
+// @Produce      json
+// @Security     BearerAuth
+// @Param        period query string false "all|year|month|week"
+// @Param        year query int false "Year filter"
+// @Param        month query int false "Month filter"
+// @Param        week query int false "Week filter"
+// @Param        project query string false "Project slug filter"
+// @Param        assignees query string false "Comma-separated user IDs"
+// @Success      200 {object} map[string]interface{}
+// @Failure      403 {object} map[string]string
+// @Router       /reports/time [get]
 func GetTimeReport(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	globalRole := middleware.GetGlobalRole(c)

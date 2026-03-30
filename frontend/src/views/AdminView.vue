@@ -205,6 +205,12 @@
               <p class="form-hint">{{ $t('admin.default_columns_each_line') }}</p>
             </div>
 
+            <div class="form-group" style="max-width:400px">
+              <label class="form-label">{{ $t('admin.default_labels') }}</label>
+              <textarea class="form-input" v-model="systemSettings.default_labels" rows="4" style="font-family:monospace;resize:vertical" :placeholder="'Bug\nFeature\nDesign\nContent'" @change="saveGeneralSettings"></textarea>
+              <p class="form-hint">{{ $t('admin.default_labels_each_line') }}</p>
+            </div>
+
             <h3 class="settings-subsection">{{ $t('admin.smtp_title') }}</h3>
             <p class="form-hint" style="margin-bottom:16px">{{ $t('admin.smtp_hint') }}</p>
 
@@ -476,7 +482,8 @@ const systemSettings = ref({
   smtp_password: '',
   company_name: '',
   company_logo: '',
-  default_columns: 'Backlog'
+  default_columns: 'Backlog',
+  default_labels: 'Bug\nFeature\nDesign\nContent'
 })
 // True when the server has a password saved (so we show a placeholder instead of the value)
 const smtpPasswordSet = ref(false)
@@ -545,6 +552,7 @@ async function loadSettings() {
     systemSettings.value.company_name             = data.company_name || ''
     systemSettings.value.company_logo             = data.company_logo || ''
     systemSettings.value.default_columns          = data.default_columns || 'Backlog'
+    systemSettings.value.default_labels           = data.default_labels || 'Bug\nFeature\nDesign\nContent'
     settingsLoaded = true
   } catch (e) {
     ui.error(e.response?.data?.error || 'Failed to load settings')
@@ -584,6 +592,7 @@ async function saveGeneralSettings() {
       default_font_size:        systemSettings.value.default_font_size,
       default_locale:           systemSettings.value.default_locale,
       default_columns:          systemSettings.value.default_columns,
+      default_labels:           systemSettings.value.default_labels,
     }
     await adminApi.updateSystemSettings(payload)
     ui.success('Settings saved')

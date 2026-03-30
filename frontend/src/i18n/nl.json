@@ -166,6 +166,8 @@
     "default_columns": "Standaard kolommen",
     "default_columns_hint": "Deze kolommen worden automatisch aangemaakt bij een nieuw project.",
     "default_columns_each_line": "Één kolomnaam per regel.",
+    "default_labels": "Standaard labels",
+    "default_labels_each_line": "Één labelnaam per regel. Kleuren worden automatisch toegewezen.",
     "smtp_title": "E-mail (SMTP)",
     "smtp_hint": "Configureer een SMTP-server om e-mailmeldingen in te schakelen voor vermeldingen, DM's en kaarttoewijzingen.",
     "smtp_host": "SMTP-server",

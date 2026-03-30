@@ -28,6 +28,7 @@ import 'easymde/dist/easymde.min.css'
 import MentionDropdown from '@/components/common/MentionDropdown.vue'
 import InlineEmojiPicker from '@/components/common/InlineEmojiPicker.vue'
 import { detectEmoticon } from '@/utils/emoticons'
+import { useAuthStore } from '@/stores/auth'
 
 const props = defineProps({
   modelValue: { type: String, default: '' },
@@ -37,6 +38,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['update:modelValue'])
 
+const auth = useAuthStore()
 const editorEl = ref(null)
 let mde = null
 
@@ -136,6 +138,11 @@ onMounted(() => {
       'guide'
     ]
   })
+
+  // Enable browser spellcheck using the user's locale
+  const inputEl = mde.codemirror.getInputField()
+  inputEl.setAttribute('spellcheck', 'true')
+  inputEl.setAttribute('lang', auth.user?.locale || 'en')
 
   mde.codemirror.on('change', (cm, changeObj) => {
     // Only replace on regular character input (not undo/redo/paste)

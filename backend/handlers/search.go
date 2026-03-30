@@ -14,7 +14,15 @@ type SearchResult struct {
 	Item interface{} `json:"item"`
 }
 
-// GlobalSearch GET /api/v1/search?q=<query>
+// GlobalSearch godoc
+// @Summary      Search cards, topics, and projects
+// @Tags         search
+// @Produce      json
+// @Security     BearerAuth
+// @Param        q query string true "Search query (min 2 characters)"
+// @Success      200 {object} map[string]interface{}
+// @Failure      400 {object} map[string]string
+// @Router       /search [get]
 func GlobalSearch(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	q := c.Query("q")

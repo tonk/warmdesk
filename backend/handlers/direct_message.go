@@ -124,7 +124,13 @@ func ListConversations(c *gin.Context) {
 	c.JSON(http.StatusOK, convs)
 }
 
-// ListUsers returns all active users (for starting new conversations).
+// ListAllUsers godoc
+// @Summary      List all active users
+// @Tags         users
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200 {array}  models.User
+// @Router       /users [get]
 func ListAllUsers(c *gin.Context) {
 	var users []models.User
 	database.DB.Where("is_active = ?", true).Find(&users)

@@ -166,6 +166,8 @@
     "default_columns": "Colonnes initiales",
     "default_columns_hint": "Ces colonnes sont créées automatiquement lors de la création d'un nouveau projet.",
     "default_columns_each_line": "Un nom de colonne par ligne.",
+    "default_labels": "Labels initiaux",
+    "default_labels_each_line": "Un nom de label par ligne. Les couleurs sont attribuées automatiquement.",
     "smtp_title": "E-mail (SMTP)",
     "smtp_hint": "Configurez un serveur SMTP pour activer les notifications par e-mail pour les mentions, DMs et attributions de cartes.",
     "smtp_host": "Serveur SMTP",

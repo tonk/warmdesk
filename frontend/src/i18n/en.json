@@ -166,6 +166,8 @@
     "default_columns": "Initial Columns",
     "default_columns_hint": "These columns are created automatically when a new project is made.",
     "default_columns_each_line": "One column name per line.",
+    "default_labels": "Initial Labels",
+    "default_labels_each_line": "One label name per line. Colors are assigned automatically.",
     "smtp_title": "Email (SMTP)",
     "smtp_hint": "Configure an SMTP server to enable email notifications for mentions, DMs, and card assignments.",
     "smtp_host": "SMTP Host",

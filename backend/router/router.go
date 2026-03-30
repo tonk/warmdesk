@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/tonk/coworker/handlers"
 	"github.com/tonk/coworker/middleware"
 	"github.com/tonk/coworker/services"
@@ -22,6 +24,9 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webDir string, 
 	wsHandler := handlers.NewWSHandler(authSvc)
 
 	v1 := r.Group("/api/v1")
+
+	// Swagger UI
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Public system settings (e.g. registration enabled)
 	v1.GET("/system/settings", handlers.GetSystemSettings)

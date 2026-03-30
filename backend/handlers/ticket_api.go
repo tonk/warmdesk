@@ -13,9 +13,19 @@ import (
 	"gorm.io/gorm"
 )
 
-// TicketAdd creates a card via API key authentication.
-// POST /api/v1/ticket/:projectSlug/cards
-// Body: { "title": "...", "description": "...", "column_id": 1 }
+// TicketAdd godoc
+// @Summary      Create a card via API key (CI/CD integration)
+// @Tags         ticket
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        projectSlug path string true "Project slug"
+// @Param        body body map[string]interface{} true "Card details (title required)"
+// @Success      201 {object} models.Card
+// @Failure      400 {object} map[string]string
+// @Failure      403 {object} map[string]string
+// @Failure      404 {object} map[string]string
+// @Router       /ticket/{projectSlug}/cards [post]
 func TicketAdd(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	slug := c.Param("projectSlug")
@@ -75,8 +85,19 @@ func TicketAdd(c *gin.Context) {
 }
 
 // TicketComment adds a comment to a card via API key authentication.
-// POST /api/v1/ticket/:projectSlug/cards/:cardId/comments
-// Body: { "body": "..." }
+// TicketComment godoc
+// @Summary      Add a comment to a card via API key
+// @Tags         ticket
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        projectSlug path string true "Project slug"
+// @Param        cardId path int true "Card ID"
+// @Param        body body map[string]string true "Comment body"
+// @Success      201 {object} models.CardComment
+// @Failure      400 {object} map[string]string
+// @Failure      404 {object} map[string]string
+// @Router       /ticket/{projectSlug}/cards/{cardId}/comments [post]
 func TicketComment(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	slug := c.Param("projectSlug")
@@ -124,7 +145,19 @@ func TicketComment(c *gin.Context) {
 
 // TicketMove moves a card to another column via API key authentication.
 // PATCH /api/v1/ticket/:projectSlug/cards/:cardId/move
-// Body: { "column_id": 2, "position": 1000 }
+// TicketMove godoc
+// @Summary      Move a card to a different column via API key
+// @Tags         ticket
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        projectSlug path string true "Project slug"
+// @Param        cardId path int true "Card ID"
+// @Param        body body map[string]interface{} true "column_id and optional position"
+// @Success      200 {object} models.Card
+// @Failure      400 {object} map[string]string
+// @Failure      404 {object} map[string]string
+// @Router       /ticket/{projectSlug}/cards/{cardId}/move [patch]
 func TicketMove(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	slug := c.Param("projectSlug")

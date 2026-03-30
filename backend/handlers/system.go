@@ -31,6 +31,7 @@ const (
 	settingCompanyName            = "company_name"
 	settingCompanyLogo            = "company_logo"
 	settingDefaultColumns         = "default_columns"
+	settingDefaultLabels          = "default_labels"
 )
 
 var systemSettingDefaults = map[string]string{
@@ -50,6 +51,7 @@ var systemSettingDefaults = map[string]string{
 	settingCompanyName:            "",
 	settingCompanyLogo:            "",
 	settingDefaultColumns:         "Backlog",
+	settingDefaultLabels:          "Bug\nFeature\nDesign\nContent",
 }
 
 // InitSystemDefaults seeds the in-memory defaults from the config file so that
@@ -92,7 +94,12 @@ func GetSMTPSettings() config.SMTPConfig {
 	}
 }
 
-// GetSystemSettings returns public system settings (registration + global UI defaults).
+// GetSystemSettings godoc
+// @Summary      Get public system settings (registration enabled, locale defaults)
+// @Tags         system
+// @Produce      json
+// @Success      200 {object} map[string]interface{}
+// @Router       /system/settings [get]
 func GetSystemSettings(c *gin.Context) {
 	all := loadAllSettings()
 	timeoutMinutes, _ := strconv.Atoi(all[settingSessionTimeoutMinutes])
@@ -140,6 +147,7 @@ func AdminUpdateSystemSettings(c *gin.Context) {
 		CompanyName            *string `json:"company_name"`
 		CompanyLogo            *string `json:"company_logo"`
 		DefaultColumns         *string `json:"default_columns"`
+		DefaultLabels          *string `json:"default_labels"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -204,6 +212,9 @@ func AdminUpdateSystemSettings(c *gin.Context) {
 	}
 	if req.DefaultColumns != nil {
 		saveSetting(settingDefaultColumns, *req.DefaultColumns)
+	}
+	if req.DefaultLabels != nil {
+		saveSetting(settingDefaultLabels, *req.DefaultLabels)
 	}
 
 	AdminGetSystemSettings(c)

@@ -56,7 +56,7 @@
 
             <!-- Edit mode -->
             <template v-if="editingId === msg.id">
-              <textarea class="edit-textarea" v-model="editBody" rows="2" @keydown.enter.exact.prevent="saveEdit(msg)" @keydown.escape="editingId = null"></textarea>
+              <textarea class="edit-textarea" v-model="editBody" rows="2" spellcheck="true" :lang="auth.user?.locale || 'en'" @keydown.enter.exact.prevent="saveEdit(msg)" @keydown.escape="editingId = null"></textarea>
               <div class="edit-actions">
                 <button class="btn btn-primary btn-sm" @click="saveEdit(msg)">Save</button>
                 <button class="btn btn-ghost btn-sm" @click="editingId = null">Cancel</button>
@@ -124,6 +124,8 @@
             :placeholder="$t('chat.placeholder')"
             rows="1"
             ref="textareaEl"
+            spellcheck="true"
+            :lang="auth.user?.locale || 'en'"
             @keydown.enter.exact="onEnter"
             @keydown="onKeydown"
             @input="onInput"

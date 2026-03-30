@@ -1,3 +1,26 @@
+// Package main is the entry point for the Coworker server.
+//
+// @title           Coworker API
+// @version         1.0
+// @description     Self-hosted project management tool — Kanban boards, team chat, discussions, and time reporting.
+//
+// @contact.name    Coworker
+// @contact.url     https://github.com/tonk/coworker
+//
+// @license.name    MIT
+//
+// @host            localhost:8080
+// @BasePath        /api/v1
+//
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer " followed by your JWT access token.
+//
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name X-API-Key
+// @description API key for the Ticket API (CI/CD automation).
 package main
 
 import (
@@ -9,6 +32,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/tonk/coworker/config"
 	"github.com/tonk/coworker/database"
+	_ "github.com/tonk/coworker/docs"
 	"github.com/tonk/coworker/handlers"
 	"github.com/tonk/coworker/router"
 	"github.com/tonk/coworker/services"

@@ -15,6 +15,17 @@ import (
 	"gorm.io/gorm"
 )
 
+// ListCards godoc
+// @Summary      List cards in a column
+// @Tags         cards
+// @Produce      json
+// @Security     BearerAuth
+// @Param        projectSlug path string true "Project slug"
+// @Param        columnId path int true "Column ID"
+// @Success      200 {array}  models.Card
+// @Failure      403 {object} map[string]string
+// @Failure      404 {object} map[string]string
+// @Router       /projects/{projectSlug}/columns/{columnId}/cards [get]
 func ListCards(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	slug := c.Param("projectSlug")
@@ -39,6 +50,19 @@ func ListCards(c *gin.Context) {
 	c.JSON(http.StatusOK, cards)
 }
 
+// CreateCard godoc
+// @Summary      Create a new card in a column
+// @Tags         cards
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        projectSlug path string true "Project slug"
+// @Param        columnId path int true "Column ID"
+// @Param        body body map[string]interface{} true "Card details (title required)"
+// @Success      201 {object} models.Card
+// @Failure      400 {object} map[string]string
+// @Failure      403 {object} map[string]string
+// @Router       /projects/{projectSlug}/columns/{columnId}/cards [post]
 func CreateCard(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	slug := c.Param("projectSlug")
@@ -113,6 +137,17 @@ func CreateCard(c *gin.Context) {
 	c.JSON(http.StatusCreated, card)
 }
 
+// GetCard godoc
+// @Summary      Get a single card with full details
+// @Tags         cards
+// @Produce      json
+// @Security     BearerAuth
+// @Param        projectSlug path string true "Project slug"
+// @Param        cardId path int true "Card ID"
+// @Success      200 {object} models.Card
+// @Failure      403 {object} map[string]string
+// @Failure      404 {object} map[string]string
+// @Router       /projects/{projectSlug}/cards/{cardId} [get]
 func GetCard(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	slug := c.Param("projectSlug")
@@ -143,6 +178,19 @@ func GetCard(c *gin.Context) {
 	c.JSON(http.StatusOK, card)
 }
 
+// UpdateCard godoc
+// @Summary      Update a card's fields
+// @Tags         cards
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        projectSlug path string true "Project slug"
+// @Param        cardId path int true "Card ID"
+// @Param        body body map[string]interface{} true "Fields to update"
+// @Success      200 {object} models.Card
+// @Failure      403 {object} map[string]string
+// @Failure      404 {object} map[string]string
+// @Router       /projects/{projectSlug}/cards/{cardId} [put]
 func UpdateCard(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	slug := c.Param("projectSlug")
@@ -214,6 +262,17 @@ func UpdateCard(c *gin.Context) {
 	c.JSON(http.StatusOK, card)
 }
 
+// DeleteCard godoc
+// @Summary      Delete a card
+// @Tags         cards
+// @Produce      json
+// @Security     BearerAuth
+// @Param        projectSlug path string true "Project slug"
+// @Param        cardId path int true "Card ID"
+// @Success      204
+// @Failure      403 {object} map[string]string
+// @Failure      404 {object} map[string]string
+// @Router       /projects/{projectSlug}/cards/{cardId} [delete]
 func DeleteCard(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	slug := c.Param("projectSlug")
@@ -247,6 +306,19 @@ func DeleteCard(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "deleted"})
 }
 
+// MoveCard godoc
+// @Summary      Move a card to a different column or position
+// @Tags         cards
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        projectSlug path string true "Project slug"
+// @Param        cardId path int true "Card ID"
+// @Param        body body map[string]interface{} true "column_id and position"
+// @Success      200 {object} models.Card
+// @Failure      403 {object} map[string]string
+// @Failure      404 {object} map[string]string
+// @Router       /projects/{projectSlug}/cards/{cardId}/move [patch]
 func MoveCard(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	slug := c.Param("projectSlug")

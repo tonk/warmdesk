@@ -245,7 +245,7 @@
                 </div>
                 <!-- Edit mode -->
                 <template v-if="editingMsgId === msg.id">
-                  <textarea class="edit-textarea" v-model="editBody" rows="2" @keydown.enter.exact.prevent="saveEdit(msg)" @keydown.escape="editingMsgId = null"></textarea>
+                  <textarea class="edit-textarea" v-model="editBody" rows="2" spellcheck="true" :lang="auth.user?.locale || 'en'" @keydown.enter.exact.prevent="saveEdit(msg)" @keydown.escape="editingMsgId = null"></textarea>
                   <div class="edit-actions">
                     <button class="btn btn-primary btn-sm" @click="saveEdit(msg)">Save</button>
                     <button class="btn btn-ghost btn-sm" @click="editingMsgId = null">Cancel</button>
@@ -322,6 +322,8 @@
                 rows="1"
                 :disabled="sending"
                 ref="textareaEl"
+                spellcheck="true"
+                :lang="auth.user?.locale || 'en'"
                 @keydown.enter.exact="onEnter"
                 @keydown="onKeydown"
                 @input="onInput"

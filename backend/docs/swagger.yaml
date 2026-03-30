@@ -1,0 +1,1331 @@
+basePath: /api/v1
+definitions:
+  handlers.loginRequest:
+    properties:
+      login:
+        description: email or username
+        type: string
+      password:
+        type: string
+    required:
+    - login
+    - password
+    type: object
+  handlers.registerRequest:
+    properties:
+      display_name:
+        type: string
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      username:
+        maxLength: 50
+        minLength: 3
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  handlers.tokenResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  models.APIKey:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      key_prefix:
+        description: e.g. "cwk_abc123" first 12 chars shown in UI
+        type: string
+      last_used_at:
+        type: string
+      name:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  models.Attachment:
+    properties:
+      created_at:
+        type: string
+      filename:
+        type: string
+      id:
+        type: integer
+      mime_type:
+        type: string
+      owner_id:
+        type: integer
+      owner_type:
+        description: '"chat_message" | "conv_message" | "card_comment"'
+        type: string
+      size_bytes:
+        type: integer
+      uploader_id:
+        type: integer
+    type: object
+  models.Card:
+    properties:
+      assignee:
+        $ref: '#/definitions/models.User'
+      assignee_id:
+        type: integer
+      assignees:
+        items:
+          $ref: '#/definitions/models.User'
+        type: array
+      attachments:
+        items:
+          $ref: '#/definitions/models.Attachment'
+        type: array
+      card_number:
+        type: integer
+      column_id:
+        type: integer
+      comments:
+        items:
+          $ref: '#/definitions/models.CardComment'
+        type: array
+      created_at:
+        type: string
+      created_by:
+        $ref: '#/definitions/models.User'
+      created_by_id:
+        type: integer
+      description:
+        type: string
+      due_date:
+        type: string
+      id:
+        type: integer
+      labels:
+        items:
+          $ref: '#/definitions/models.Label'
+        type: array
+      position:
+        type: number
+      priority:
+        type: string
+      project_id:
+        type: integer
+      tags:
+        items:
+          $ref: '#/definitions/models.CardTag'
+        type: array
+      time_spent_minutes:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: string
+      watchers:
+        items:
+          $ref: '#/definitions/models.User'
+        type: array
+    type: object
+  models.CardComment:
+    properties:
+      body:
+        type: string
+      card_id:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      is_edited:
+        type: boolean
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/models.User'
+      user_id:
+        type: integer
+    type: object
+  models.CardTag:
+    properties:
+      card_id:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  models.ChatMessage:
+    properties:
+      body:
+        type: string
+      bot_name:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      is_bot:
+        type: boolean
+      is_deleted:
+        type: boolean
+      is_edited:
+        type: boolean
+      project_id:
+        type: integer
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/models.User'
+      user_id:
+        type: integer
+    type: object
+  models.Column:
+    properties:
+      cards:
+        items:
+          $ref: '#/definitions/models.Card'
+        type: array
+      color:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      position:
+        type: number
+      project_id:
+        type: integer
+      updated_at:
+        type: string
+      wip_limit:
+        type: integer
+    type: object
+  models.Label:
+    properties:
+      color:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      project_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  models.Project:
+    properties:
+      chat_messages:
+        items:
+          $ref: '#/definitions/models.ChatMessage'
+        type: array
+      color:
+        type: string
+      columns:
+        items:
+          $ref: '#/definitions/models.Column'
+        type: array
+      created_at:
+        type: string
+      created_by:
+        $ref: '#/definitions/models.User'
+      created_by_id:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      is_archived:
+        type: boolean
+      key_prefix:
+        type: string
+      labels:
+        items:
+          $ref: '#/definitions/models.Label'
+        type: array
+      members:
+        items:
+          $ref: '#/definitions/models.ProjectMember'
+        type: array
+      name:
+        type: string
+      slug:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.ProjectMember:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      invited_by:
+        type: integer
+      project_id:
+        type: integer
+      role:
+        description: '"owner" | "member" | "viewer"'
+        type: string
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/models.User'
+      user_id:
+        type: integer
+    type: object
+  models.User:
+    properties:
+      avatar_url:
+        type: string
+      can_view_reports:
+        type: boolean
+      created_at:
+        type: string
+      date_time_format:
+        type: string
+      display_name:
+        type: string
+      email:
+        type: string
+      email_notifications:
+        type: boolean
+      first_name:
+        type: string
+      font:
+        type: string
+      font_size:
+        type: string
+      global_role:
+        description: '"admin" | "user" | "viewer"'
+        type: string
+      gravatar_url:
+        description: Computed — not stored in DB
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      last_login_at:
+        type: string
+      last_name:
+        type: string
+      locale:
+        type: string
+      settings_updated_at:
+        type: string
+      sidebar_position:
+        type: string
+      theme:
+        description: '"light" | "dark" | "system"'
+        type: string
+      timezone:
+        type: string
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    name: Coworker
+    url: https://github.com/tonk/coworker
+  description: Self-hosted project management tool — Kanban boards, team chat, discussions,
+    and time reporting.
+  license:
+    name: MIT
+  title: Coworker API
+  version: "1.0"
+paths:
+  /auth/api-keys:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.APIKey'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List the current user's API keys
+      tags:
+      - api-keys
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Key name
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new API key
+      tags:
+      - api-keys
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Login credentials
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.loginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.tokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login with email/username and password
+      tags:
+      - auth
+  /auth/me:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get current user profile
+      tags:
+      - auth
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Profile fields to update
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update current user profile and preferences
+      tags:
+      - auth
+  /auth/me/password:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Current and new password
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Change current user password
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Refresh token
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.tokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Refresh access token
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Registration details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.registerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.tokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Registration disabled
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Email or username already exists
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - auth
+  /projects:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Project'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List projects accessible to the current user
+      tags:
+      - projects
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Project name, description, color
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Project'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new project
+      tags:
+      - projects
+  /projects/{projectSlug}:
+    delete:
+      parameters:
+      - description: Project slug
+        in: path
+        name: projectSlug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a project (owner/admin only)
+      tags:
+      - projects
+    get:
+      parameters:
+      - description: Project slug
+        in: path
+        name: projectSlug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Project'
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get a project with its columns, cards, labels and members
+      tags:
+      - projects
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Project slug
+        in: path
+        name: projectSlug
+        required: true
+        type: string
+      - description: Fields to update
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Project'
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a project (owner/admin only)
+      tags:
+      - projects
+  /projects/{projectSlug}/cards/{cardId}:
+    delete:
+      parameters:
+      - description: Project slug
+        in: path
+        name: projectSlug
+        required: true
+        type: string
+      - description: Card ID
+        in: path
+        name: cardId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a card
+      tags:
+      - cards
+    get:
+      parameters:
+      - description: Project slug
+        in: path
+        name: projectSlug
+        required: true
+        type: string
+      - description: Card ID
+        in: path
+        name: cardId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Card'
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get a single card with full details
+      tags:
+      - cards
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Project slug
+        in: path
+        name: projectSlug
+        required: true
+        type: string
+      - description: Card ID
+        in: path
+        name: cardId
+        required: true
+        type: integer
+      - description: Fields to update
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Card'
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a card's fields
+      tags:
+      - cards
+  /projects/{projectSlug}/cards/{cardId}/comments:
+    get:
+      parameters:
+      - description: Project slug
+        in: path
+        name: projectSlug
+        required: true
+        type: string
+      - description: Card ID
+        in: path
+        name: cardId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.CardComment'
+            type: array
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List comments on a card
+      tags:
+      - comments
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Project slug
+        in: path
+        name: projectSlug
+        required: true
+        type: string
+      - description: Card ID
+        in: path
+        name: cardId
+        required: true
+        type: integer
+      - description: Comment body
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.CardComment'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add a comment to a card
+      tags:
+      - comments
+  /projects/{projectSlug}/cards/{cardId}/move:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Project slug
+        in: path
+        name: projectSlug
+        required: true
+        type: string
+      - description: Card ID
+        in: path
+        name: cardId
+        required: true
+        type: integer
+      - description: column_id and position
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Card'
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Move a card to a different column or position
+      tags:
+      - cards
+  /projects/{projectSlug}/columns/{columnId}/cards:
+    get:
+      parameters:
+      - description: Project slug
+        in: path
+        name: projectSlug
+        required: true
+        type: string
+      - description: Column ID
+        in: path
+        name: columnId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Card'
+            type: array
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List cards in a column
+      tags:
+      - cards
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Project slug
+        in: path
+        name: projectSlug
+        required: true
+        type: string
+      - description: Column ID
+        in: path
+        name: columnId
+        required: true
+        type: integer
+      - description: Card details (title required)
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Card'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new card in a column
+      tags:
+      - cards
+  /reports/time:
+    get:
+      parameters:
+      - description: all|year|month|week
+        in: query
+        name: period
+        type: string
+      - description: Year filter
+        in: query
+        name: year
+        type: integer
+      - description: Month filter
+        in: query
+        name: month
+        type: integer
+      - description: Week filter
+        in: query
+        name: week
+        type: integer
+      - description: Project slug filter
+        in: query
+        name: project
+        type: string
+      - description: Comma-separated user IDs
+        in: query
+        name: assignees
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get time report data
+      tags:
+      - reports
+  /search:
+    get:
+      parameters:
+      - description: Search query (min 2 characters)
+        in: query
+        name: q
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Search cards, topics, and projects
+      tags:
+      - search
+  /system/settings:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get public system settings (registration enabled, locale defaults)
+      tags:
+      - system
+  /ticket/{projectSlug}/cards:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Project slug
+        in: path
+        name: projectSlug
+        required: true
+        type: string
+      - description: Card details (title required)
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Card'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a card via API key (CI/CD integration)
+      tags:
+      - ticket
+  /ticket/{projectSlug}/cards/{cardId}/comments:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Project slug
+        in: path
+        name: projectSlug
+        required: true
+        type: string
+      - description: Card ID
+        in: path
+        name: cardId
+        required: true
+        type: integer
+      - description: Comment body
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.CardComment'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Add a comment to a card via API key
+      tags:
+      - ticket
+  /ticket/{projectSlug}/cards/{cardId}/move:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Project slug
+        in: path
+        name: projectSlug
+        required: true
+        type: string
+      - description: Card ID
+        in: path
+        name: cardId
+        required: true
+        type: integer
+      - description: column_id and optional position
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Card'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Move a card to a different column via API key
+      tags:
+      - ticket
+  /users:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List all active users
+      tags:
+      - users
+securityDefinitions:
+  ApiKeyAuth:
+    description: API key for the Ticket API (CI/CD automation).
+    in: header
+    name: X-API-Key
+    type: apiKey
+  BearerAuth:
+    description: Type "Bearer " followed by your JWT access token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

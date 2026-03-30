@@ -12,6 +12,17 @@ import (
 	"github.com/tonk/coworker/ws"
 )
 
+// ListComments godoc
+// @Summary      List comments on a card
+// @Tags         comments
+// @Produce      json
+// @Security     BearerAuth
+// @Param        projectSlug path string true "Project slug"
+// @Param        cardId path int true "Card ID"
+// @Success      200 {array}  models.CardComment
+// @Failure      403 {object} map[string]string
+// @Failure      404 {object} map[string]string
+// @Router       /projects/{projectSlug}/cards/{cardId}/comments [get]
 func ListComments(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	slug := c.Param("projectSlug")
@@ -36,6 +47,19 @@ func ListComments(c *gin.Context) {
 	c.JSON(http.StatusOK, comments)
 }
 
+// CreateComment godoc
+// @Summary      Add a comment to a card
+// @Tags         comments
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        projectSlug path string true "Project slug"
+// @Param        cardId path int true "Card ID"
+// @Param        body body map[string]string true "Comment body"
+// @Success      201 {object} models.CardComment
+// @Failure      400 {object} map[string]string
+// @Failure      403 {object} map[string]string
+// @Router       /projects/{projectSlug}/cards/{cardId}/comments [post]
 func CreateComment(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	slug := c.Param("projectSlug")

@@ -37,6 +37,17 @@ type tokenResponse struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
+// Register godoc
+// @Summary      Register a new user
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body body registerRequest true "Registration details"
+// @Success      201 {object} tokenResponse
+// @Failure      400 {object} map[string]string
+// @Failure      403 {object} map[string]string "Registration disabled"
+// @Failure      409 {object} map[string]string "Email or username already exists"
+// @Router       /auth/register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
 	if !IsRegistrationEnabled() {
 		c.JSON(http.StatusForbidden, gin.H{"error": "registration is disabled"})
@@ -100,6 +111,16 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	c.JSON(http.StatusCreated, tokens)
 }
 
+// Login godoc
+// @Summary      Login with email/username and password
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body body loginRequest true "Login credentials"
+// @Success      200 {object} tokenResponse
+// @Failure      400 {object} map[string]string
+// @Failure      401 {object} map[string]string
+// @Router       /auth/login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req loginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -135,6 +156,16 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, tokens)
 }
 
+// Refresh godoc
+// @Summary      Refresh access token
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body body map[string]string true "Refresh token"
+// @Success      200 {object} tokenResponse
+// @Failure      400 {object} map[string]string
+// @Failure      401 {object} map[string]string
+// @Router       /auth/refresh [post]
 func (h *AuthHandler) Refresh(c *gin.Context) {
 	var req struct {
 		RefreshToken string `json:"refresh_token" binding:"required"`
@@ -164,6 +195,14 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 	c.JSON(http.StatusOK, tokens)
 }
 
+// Me godoc
+// @Summary      Get current user profile
+// @Tags         auth
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200 {object} models.User
+// @Failure      404 {object} map[string]string
+// @Router       /auth/me [get]
 func (h *AuthHandler) Me(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	var user models.User
@@ -188,6 +227,16 @@ func userCanViewReports(userID uint, globalRole string) bool {
 	return count > 0
 }
 
+// UpdateMe godoc
+// @Summary      Update current user profile and preferences
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        body body map[string]interface{} true "Profile fields to update"
+// @Success      200 {object} models.User
+// @Failure      400 {object} map[string]string
+// @Router       /auth/me [put]
 func (h *AuthHandler) UpdateMe(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	var req struct {
@@ -265,6 +314,17 @@ func (h *AuthHandler) UpdateMe(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// ChangePassword godoc
+// @Summary      Change current user password
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        body body map[string]string true "Current and new password"
+// @Success      200 {object} map[string]string
+// @Failure      400 {object} map[string]string
+// @Failure      401 {object} map[string]string
+// @Router       /auth/me/password [put]
 func (h *AuthHandler) ChangePassword(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	var req struct {

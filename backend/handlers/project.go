@@ -11,6 +11,40 @@ import (
 	"github.com/tonk/coworker/services"
 )
 
+// labelPalette is cycled through when assigning colors to default labels.
+var labelPalette = []string{
+	"#ef4444", // red
+	"#3b82f6", // blue
+	"#8b5cf6", // purple
+	"#10b981", // green
+	"#f59e0b", // amber
+	"#06b6d4", // cyan
+	"#ec4899", // pink
+	"#84cc16", // lime
+}
+
+type labelDef struct {
+	Name  string
+	Color string
+}
+
+// getDefaultLabelDefs reads the configured initial label names from system settings
+// and pairs them with colors from the palette.
+func getDefaultLabelDefs() []labelDef {
+	all := loadAllSettings()
+	raw := all[settingDefaultLabels]
+	var defs []labelDef
+	for i, line := range strings.Split(raw, "\n") {
+		name := strings.TrimSpace(line)
+		if name == "" {
+			continue
+		}
+		color := labelPalette[i%len(labelPalette)]
+		defs = append(defs, labelDef{Name: name, Color: color})
+	}
+	return defs
+}
+
 // getDefaultColumnNames reads the configured initial column names from system settings.
 func getDefaultColumnNames() []string {
 	all := loadAllSettings()
@@ -28,6 +62,13 @@ func getDefaultColumnNames() []string {
 	return names
 }
 
+// ListProjects godoc
+// @Summary      List projects accessible to the current user
+// @Tags         projects
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200 {array}  models.Project
+// @Router       /projects [get]
 func ListProjects(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	globalRole := middleware.GetGlobalRole(c)
@@ -53,6 +94,17 @@ func ListProjects(c *gin.Context) {
 	c.JSON(http.StatusOK, projects)
 }
 
+// CreateProject godoc
+// @Summary      Create a new project
+// @Tags         projects
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        body body map[string]string true "Project name, description, color"
+// @Success      201 {object} models.Project
+// @Failure      400 {object} map[string]string
+// @Failure      403 {object} map[string]string
+// @Router       /projects [post]
 func CreateProject(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	if middleware.GetGlobalRole(c) == "viewer" {
@@ -97,9 +149,24 @@ func CreateProject(c *gin.Context) {
 		database.DB.Create(&models.Column{ProjectID: project.ID, Name: name, Position: float64((i + 1) * 1000)})
 	}
 
+	// Default labels from system settings
+	for _, def := range getDefaultLabelDefs() {
+		database.DB.Create(&models.Label{ProjectID: project.ID, Name: def.Name, Color: def.Color})
+	}
+
 	c.JSON(http.StatusCreated, project)
 }
 
+// GetProject godoc
+// @Summary      Get a project with its columns, cards, labels and members
+// @Tags         projects
+// @Produce      json
+// @Security     BearerAuth
+// @Param        projectSlug path string true "Project slug"
+// @Success      200 {object} models.Project
+// @Failure      403 {object} map[string]string
+// @Failure      404 {object} map[string]string
+// @Router       /projects/{projectSlug} [get]
 func GetProject(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	slug := c.Param("projectSlug")
@@ -120,6 +187,18 @@ func GetProject(c *gin.Context) {
 	c.JSON(http.StatusOK, project)
 }
 
+// UpdateProject godoc
+// @Summary      Update a project (owner/admin only)
+// @Tags         projects
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        projectSlug path string true "Project slug"
+// @Param        body body map[string]interface{} true "Fields to update"
+// @Success      200 {object} models.Project
+// @Failure      403 {object} map[string]string
+// @Failure      404 {object} map[string]string
+// @Router       /projects/{projectSlug} [put]
 func UpdateProject(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	slug := c.Param("projectSlug")
@@ -165,6 +244,16 @@ func UpdateProject(c *gin.Context) {
 	c.JSON(http.StatusOK, project)
 }
 
+// DeleteProject godoc
+// @Summary      Delete a project (owner/admin only)
+// @Tags         projects
+// @Produce      json
+// @Security     BearerAuth
+// @Param        projectSlug path string true "Project slug"
+// @Success      204
+// @Failure      403 {object} map[string]string
+// @Failure      404 {object} map[string]string
+// @Router       /projects/{projectSlug} [delete]
 func DeleteProject(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	slug := c.Param("projectSlug")

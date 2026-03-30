@@ -29,6 +29,13 @@ func generateAPIKey() (plain, hash, prefix string, err error) {
 	return
 }
 
+// ListAPIKeys godoc
+// @Summary      List the current user's API keys
+// @Tags         api-keys
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200 {array}  models.APIKey
+// @Router       /auth/api-keys [get]
 func ListAPIKeys(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	var keys []models.APIKey
@@ -36,6 +43,16 @@ func ListAPIKeys(c *gin.Context) {
 	c.JSON(http.StatusOK, keys)
 }
 
+// CreateAPIKey godoc
+// @Summary      Create a new API key
+// @Tags         api-keys
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        body body map[string]string true "Key name"
+// @Success      201 {object} map[string]interface{}
+// @Failure      400 {object} map[string]string
+// @Router       /auth/api-keys [post]
 func CreateAPIKey(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	var req struct {
