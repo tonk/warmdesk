@@ -201,14 +201,18 @@
 
             <div class="form-group" style="max-width:400px">
               <label class="form-label">{{ $t('admin.default_columns') }}</label>
-              <textarea class="form-input" v-model="systemSettings.default_columns" rows="4" style="font-family:monospace;resize:vertical" :placeholder="'Backlog\nIn Progress\nDone'" @change="saveGeneralSettings"></textarea>
+              <textarea class="form-input" v-model="systemSettings.default_columns" rows="4" style="font-family:monospace;resize:vertical" :placeholder="'Backlog\nIn Progress\nDone'"></textarea>
               <p class="form-hint">{{ $t('admin.default_columns_each_line') }}</p>
             </div>
 
             <div class="form-group" style="max-width:400px">
               <label class="form-label">{{ $t('admin.default_labels') }}</label>
-              <textarea class="form-input" v-model="systemSettings.default_labels" rows="4" style="font-family:monospace;resize:vertical" :placeholder="'Bug\nFeature\nDesign\nContent'" @change="saveGeneralSettings"></textarea>
+              <textarea class="form-input" v-model="systemSettings.default_labels" rows="4" style="font-family:monospace;resize:vertical" :placeholder="'Bug\nFeature\nDesign\nContent'"></textarea>
               <p class="form-hint">{{ $t('admin.default_labels_each_line') }}</p>
+            </div>
+
+            <div style="max-width:400px;margin-top:8px">
+              <button class="btn btn-primary btn-sm" @click="saveGeneralSettings">{{ $t('common.save') }}</button>
             </div>
 
             <h3 class="settings-subsection">{{ $t('admin.smtp_title') }}</h3>

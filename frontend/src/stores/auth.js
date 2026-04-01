@@ -5,11 +5,11 @@ import { setLocale } from '@/i18n'
 import client from '@/api/client'
 
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref(JSON.parse(localStorage.getItem('user') || 'null'))
-  const accessToken = ref(localStorage.getItem('access_token') || null)
+  const user = ref(JSON.parse(sessionStorage.getItem('user') || 'null'))
+  const accessToken = ref(sessionStorage.getItem('access_token') || null)
 
   // Seed the axios default header from the stored token so requests never miss
-  // the token even if localStorage is cleared after initialization.
+  // the token even if sessionStorage is cleared after initialization.
   if (accessToken.value) {
     client.defaults.headers.common.Authorization = `Bearer ${accessToken.value}`
   }
@@ -57,14 +57,14 @@ export const useAuthStore = defineStore('auth', () => {
   async function fetchMe() {
     const { data } = await authApi.me()
     user.value = data
-    localStorage.setItem('user', JSON.stringify(data))
+    sessionStorage.setItem('user', JSON.stringify(data))
     if (data.locale) setLocale(data.locale)
   }
 
   function setTokens(access, refresh) {
     accessToken.value = access
-    localStorage.setItem('access_token', access)
-    localStorage.setItem('refresh_token', refresh)
+    sessionStorage.setItem('access_token', access)
+    sessionStorage.setItem('refresh_token', refresh)
     client.defaults.headers.common.Authorization = `Bearer ${access}`
   }
 
@@ -72,16 +72,16 @@ export const useAuthStore = defineStore('auth', () => {
     stopIdleTimer()
     user.value = null
     accessToken.value = null
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('refresh_token')
-    localStorage.removeItem('user')
+    sessionStorage.removeItem('access_token')
+    sessionStorage.removeItem('refresh_token')
+    sessionStorage.removeItem('user')
     delete client.defaults.headers.common.Authorization
   }
 
   async function updateProfile(data) {
     const { data: updated } = await authApi.updateMe(data)
     user.value = updated
-    localStorage.setItem('user', JSON.stringify(updated))
+    sessionStorage.setItem('user', JSON.stringify(updated))
     if (data.locale) setLocale(data.locale)
   }
 

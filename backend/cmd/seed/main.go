@@ -122,6 +122,17 @@ func main() {
 	fmt.Println("🌱 Seeding demo data…")
 	fmt.Println()
 
+	// ── 0. System settings ────────────────────────────────────────────────────
+	fmt.Println("→ Configuring system settings…")
+	defaultColumns := "Backlog\nIn Progress\nTest & Review\nTo Production"
+	if r := db.Model(&models.SystemSetting{}).Where("key = ?", "default_columns").Update("value", defaultColumns); r.RowsAffected == 0 {
+		must(db.Create(&models.SystemSetting{Key: "default_columns", Value: defaultColumns}).Error)
+	}
+	defaultLabels := "Bug\nFeature\nDesign\nContent"
+	if r := db.Model(&models.SystemSetting{}).Where("key = ?", "default_labels").Update("value", defaultLabels); r.RowsAffected == 0 {
+		must(db.Create(&models.SystemSetting{Key: "default_labels", Value: defaultLabels}).Error)
+	}
+
 	// ── 1. Users ──────────────────────────────────────────────────────────────
 	fmt.Println("→ Creating users…")
 

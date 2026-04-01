@@ -4,13 +4,15 @@
       <div v-if="cardRef" class="card-ref-badge">{{ cardRef }}</div>
       <div class="form-group">
         <label class="form-label">{{ $t('board.card_title') }}</label>
-        <input v-if="!locked" class="form-input" v-model="form.title" />
+        <input v-if="!locked" class="form-input" v-model="form.title" spellcheck="true" :lang="auth.user?.locale || 'en'" />
         <div v-else class="description-text">{{ form.title }}</div>
       </div>
 
       <div class="form-group">
         <label class="form-label">{{ $t('board.description') }}</label>
-        <CardEditor v-if="!locked" v-model="form.description" :users="memberUsers" />
+        <textarea v-if="!locked" class="form-input description-textarea" v-model="form.description"
+                  spellcheck="true" :lang="auth.user?.locale || 'en'"
+                  :placeholder="$t('board.description')" rows="8"></textarea>
         <div v-else class="description-text comment-text" v-html="renderMarkdown(form.description)"></div>
       </div>
 
@@ -23,8 +25,24 @@
         </div>
         <div class="form-group half">
           <label class="form-label">{{ $t('board.due_date') }}</label>
-          <input class="form-input" type="date" v-model="form.due_date" />
-          <span v-if="form.due_date" class="form-hint">{{ formatDate(form.due_date) }}</span>
+          <div class="date-input-row">
+            <input
+              class="form-input"
+              type="text"
+              v-model="displayDueDate"
+              :placeholder="dateOnlyFormat()"
+              @blur="parseDueDate"
+            />
+            <input
+              ref="datePickerRef"
+              type="date"
+              style="display:none"
+              :value="form.due_date"
+              @change="onDatePickerChange"
+            />
+            <button class="btn-icon-xs" @click="datePickerRef.showPicker()" title="Pick date">&#128197;</button>
+            <button v-if="displayDueDate" class="btn-icon-xs" @click="displayDueDate = ''; form.due_date = ''" title="Clear">×</button>
+          </div>
         </div>
       </div>
 
@@ -189,7 +207,14 @@
         </div>
 
         <div class="add-comment">
-          <CardEditor v-model="newComment" :min-height="'80px'" :placeholder="$t('board.add_comment')" :users="memberUsers" />
+          <textarea
+            class="form-input comment-textarea"
+            v-model="newComment"
+            :placeholder="$t('board.add_comment')"
+            spellcheck="true"
+            :lang="auth.user?.locale || 'en'"
+            rows="3"
+          ></textarea>
           <button class="btn btn-primary btn-sm" @click="submitComment" :disabled="!newComment.trim()">
             {{ $t('board.add_comment') }}
           </button>
@@ -243,6 +268,7 @@
 
     <template #footer>
       <button class="btn btn-danger btn-sm" @click="confirmDelete">{{ $t('board.delete_card') }}</button>
+      <button class="btn btn-secondary btn-sm" @click="toggleClose">{{ isClosed ? $t('board.reopen_card') : $t('board.close_card') }}</button>
       <button class="btn btn-secondary" @click="$emit('close')">{{ $t('common.cancel') }}</button>
       <button class="btn btn-primary" @click="save" :disabled="saving">{{ saving ? $t('common.loading') : $t('common.save') }}</button>
     </template>
@@ -254,10 +280,10 @@ import { ref, computed, onMounted } from 'vue'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import BaseModal from '@/components/common/BaseModal.vue'
-import CardEditor from './CardEditor.vue'
 import AttachmentList from '@/components/common/AttachmentList.vue'
 import { useBoardStore } from '@/stores/board'
 import { useProjectStore } from '@/stores/project'
+import { useAuthStore } from '@/stores/auth'
 import { projectsApi } from '@/api/projects'
 import { attachmentsApi } from '@/api/attachments'
 import { useUIStore } from '@/stores/ui'
@@ -283,8 +309,40 @@ const cardRef = computed(() => {
   const prefix = projectStore.currentProject?.key_prefix
   return prefix && props.card.card_number ? `${prefix}-${props.card.card_number}` : null
 })
-const { formatDateTime, formatDate } = useDateFormat()
+const auth = useAuthStore()
+const { formatDateTime, formatDate, dateOnlyFormat } = useDateFormat()
+
+function parseDueDate() {
+  const val = displayDueDate.value.trim()
+  if (!val) {
+    form.value.due_date = ''
+    return
+  }
+  const fmt = dateOnlyFormat()
+  const yPos = fmt.indexOf('YYYY')
+  const mPos = fmt.indexOf('MM')
+  const dPos = fmt.indexOf('DD')
+  const y = parseInt(val.slice(yPos, yPos + 4))
+  const m = parseInt(val.slice(mPos, mPos + 2))
+  const d = parseInt(val.slice(dPos, dPos + 2))
+  if (!y || m < 1 || m > 12 || d < 1 || d > 31) {
+    displayDueDate.value = form.value.due_date ? formatDate(form.value.due_date) : ''
+    return
+  }
+  const iso = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+  form.value.due_date = iso
+  displayDueDate.value = formatDate(iso)
+}
+const datePickerRef = ref(null)
+
+function onDatePickerChange(e) {
+  const iso = e.target.value  // always YYYY-MM-DD
+  form.value.due_date = iso
+  displayDueDate.value = iso ? formatDate(iso) : ''
+}
+
 const locked = ref(!!props.card.description)
+const isClosed = ref(!!props.card.closed)
 const newComment = ref('')
 const history = ref([])
 const saving = ref(false)
@@ -455,16 +513,19 @@ onMounted(async () => {
 
 const priorities = ['none', 'low', 'medium', 'high', 'critical']
 
-const todayISO = new Date().toISOString().slice(0, 10)
+const _today = new Date()
+const todayISO = `${_today.getFullYear()}-${String(_today.getMonth() + 1).padStart(2, '0')}-${String(_today.getDate()).padStart(2, '0')}`
 
 const form = ref({
   title: props.card.title,
   description: props.card.description || '',
   priority: props.card.priority || 'none',
-  due_date: props.card.due_date ? props.card.due_date.slice(0, 10) : todayISO,
+  due_date: props.card.due_date ? props.card.due_date.slice(0, 10) : '',
   assignee_id: props.card.assignee_id || null,
   time_spent_minutes: props.card.time_spent_minutes || 0
 })
+
+const displayDueDate = ref(form.value.due_date ? formatDate(form.value.due_date) : '')
 
 const timeHours = computed({
   get: () => Math.floor(form.value.time_spent_minutes / 60),
@@ -560,6 +621,16 @@ async function confirmDelete() {
     emit('close')
   } catch (e) {
     ui.error('Failed to delete card')
+  }
+}
+
+async function toggleClose() {
+  try {
+    await boardStore.updateCardData(props.card.id, { closed: !isClosed.value })
+    isClosed.value = !isClosed.value
+    emit('close')
+  } catch (e) {
+    ui.error('Failed to update card')
   }
 }
 
@@ -787,4 +858,10 @@ function renderMarkdown(text) {
 .history-who { font-weight: 600; flex-shrink: 0; }
 .history-move { display: flex; align-items: center; gap: 6px; color: var(--color-text-muted); }
 .history-col { background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 1px 6px; color: var(--color-text); font-size: 11px; }
+
+.date-input-row { display: flex; align-items: center; gap: 6px; }
+.date-input-row .form-input { flex: 1; }
+
+.comment-textarea { resize: vertical; min-height: 80px; font-family: inherit; }
+.description-textarea { resize: vertical; min-height: 160px; font-family: monospace; font-size: 13px; }
 </style>

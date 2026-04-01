@@ -87,5 +87,9 @@ export function useDateFormat() {
     return `${pad(d.getHours())}:${pad(d.getMinutes())}`
   }
 
-  return { formatDateTime, formatDate, formatTime }
+  function dateOnlyFormat() {
+    return dateOnlyFmt(userFmt())
+  }
+
+  return { formatDateTime, formatDate, formatTime, dateOnlyFormat }
 }

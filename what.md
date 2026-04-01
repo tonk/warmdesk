@@ -181,3 +181,14 @@ Create an application that has all these features and requirements
 - Fix admin settings errors silently swallowed (now shown as toast)
 - Fix SMTP password placeholder always shown due to truthy string "false"
 - Fix Reports menu hidden for admins with stale cached user object
+- Close / reopen cards: Close Card button in card detail; closed cards shown with strikethrough and muted opacity on board; closed cards appear in time reports with a "Closed" badge
+- Fix due date on board cards showing wrong date in negative-UTC timezones (UTC vs local date slice)
+- Due date field replaced from browser date picker to text input following user's configured date format, with clear button
+- Spellcheck in card description, comments, and title (plain textarea replaces CodeMirror for editing; markdown preview unchanged)
+- Auth tokens moved to sessionStorage so closing the browser ends the session
+- Fix project switching in sidebar not reloading board content (watch route slug; useWebSocket accepts reactive ref)
+- Due date calendar picker: hidden native `<input type="date">` triggered by a calendar icon button (📅) in the card detail; preserves configured date format display while allowing picker-based input
+- Fix default labels not automatically added to new projects created via Admin → Projects (AdminCreateProject was missing the getDefaultLabelDefs() seeding loop)
+- Fix custom default columns not applied to new projects: replaced unreliable @change on textarea (destroyed by v-if before event fired) with an explicit Save button in the Project Defaults settings section
+- Fix saveSetting not updating existing rows: replaced GORM clause.OnConflict upsert (silently failed to UPDATE for string PKs in SQLite) with explicit UPDATE + RowsAffected == 0 → CREATE pattern
+- Demo seed tool now configures default system settings: 4 columns (Backlog, In Progress, Test & Review, To Production) and 4 labels (Bug, Feature, Design, Content)

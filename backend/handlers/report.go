@@ -20,6 +20,7 @@ type ReportCard struct {
 	CardNumber       int      `json:"card_number"`
 	CardRef          string   `json:"card_ref"`
 	Title            string   `json:"title"`
+	Closed           bool     `json:"closed"`
 	Assignees        []string `json:"assignees"`
 	TimeSpentMinutes int      `json:"time_spent_minutes"`
 	UpdatedAt        string   `json:"updated_at"`
@@ -229,6 +230,7 @@ func GetTimeReport(c *gin.Context) {
 			CardNumber:       card.CardNumber,
 			CardRef:          cardRef,
 			Title:            card.Title,
+			Closed:           card.Closed,
 			Assignees:        names,
 			TimeSpentMinutes: card.TimeSpentMinutes,
 			UpdatedAt:        card.UpdatedAt.Format("2006-01-02"),

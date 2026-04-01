@@ -2,6 +2,21 @@
 
 All notable changes to Coworker are documented here.
 
+## v0.3.0 — 2026-04-01
+
+### Added
+- **Close / reopen cards** — a Close Card button in the card detail footer marks a card as closed; closed cards appear on the board with a strikethrough title and reduced opacity and can be reopened at any time; closed cards are included in time reports with a "Closed" badge and strikethrough in the title column
+- **Closed cards in time reports** — the report response now carries a `closed` flag per card; closed cards are visually distinguished in the report table (strikethrough + red "Closed" badge) without being excluded from totals
+
+### Fixed
+- **Date format on board cards** — due dates were rendered using the UTC date from the ISO timestamp, causing an off-by-one in negative-UTC timezones; the date portion is now sliced before formatting so it matches the user's local calendar date
+- **Due date picker ignored configured format** — `<input type="date">` always displays in the OS/browser locale regardless of user settings; replaced with a plain text input that parses and displays dates using the user's configured format (e.g. `DD/MM/YYYY`); a clear button appears when a date is set
+- **Spellcheck in card description** — EasyMDE/CodeMirror renders text in its own span-based DOM layer so the browser's native spellchecker cannot reach it regardless of settings; the description editor is now a plain `<textarea>` (markdown is still rendered in preview/read-only mode)
+- **Spellcheck in card comments** — same root cause as description; the comment editor is now a plain `<textarea>` with `spellcheck="true"` and the user's locale set as the `lang` attribute
+- **Spellcheck on card title** — added `spellcheck="true"` and `lang` to the title input field
+- **Session lost on browser close** — auth tokens (access + refresh) and the cached user object were stored in `localStorage`, surviving browser restarts; moved to `sessionStorage` so closing the browser or tab ends the session as expected
+- **Project switching in sidebar not updating board** — Vue Router reuses the `BoardView` component when navigating between projects so `onMounted` never fires again; fixed by watching `route.params.slug` and reloading board data, project info, members, and the WebSocket connection when the slug changes; `useWebSocket` now accepts a reactive ref so the connection URL updates correctly
+
 ## v0.2.10 — 2026-03-29
 
 ### Fixed

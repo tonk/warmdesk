@@ -369,15 +369,34 @@ the timeout expires the user is redirected to the login page.
 **Admin → Settings → New Project Defaults → Initial Columns**
 
 Enter one column name per line. These columns are created automatically whenever
-a new project is made. The default is a single column named `Backlog`.
+a new project is made. The built-in default is:
 
-Example for a standard scrum board:
 ```
 Backlog
 In Progress
-Review
-Done
+Test & Review
+To Production
 ```
+
+### Default initial labels
+
+**Admin → Settings → New Project Defaults → Initial Labels**
+
+Enter one label name per line. These labels are created automatically for every
+new project. The built-in default is:
+
+```
+Bug
+Feature
+Design
+Content
+```
+
+> **Note:** Changes to Initial Columns and Initial Labels only affect
+> **new** projects created after saving. Existing projects are not modified.
+>
+> Click the **Save** button that appears below the textareas to persist your
+> changes before switching to another settings tab.
 
 ### Public registration
 

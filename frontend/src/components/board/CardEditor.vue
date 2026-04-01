@@ -119,6 +119,7 @@ onMounted(() => {
     initialValue: props.modelValue,
     placeholder: props.placeholder,
     spellChecker: false,
+    nativeSpellcheck: true,
     autofocus: false,
     minHeight: props.minHeight,
     toolbar: [

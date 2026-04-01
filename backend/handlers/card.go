@@ -223,6 +223,7 @@ func UpdateCard(c *gin.Context) {
 		DueDate          json.RawMessage `json:"due_date"` // "YYYY-MM-DD" string or null
 		AssigneeID       *uint           `json:"assignee_id"`
 		TimeSpentMinutes *int            `json:"time_spent_minutes"`
+		Closed           *bool           `json:"closed"`
 	}
 	c.ShouldBindJSON(&req)
 
@@ -253,6 +254,9 @@ func UpdateCard(c *gin.Context) {
 	}
 	if req.TimeSpentMinutes != nil {
 		updates["time_spent_minutes"] = *req.TimeSpentMinutes
+	}
+	if req.Closed != nil {
+		updates["closed"] = *req.Closed
 	}
 
 	database.DB.Model(&card).Updates(updates)

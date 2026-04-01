@@ -11,7 +11,6 @@ import (
 	"github.com/tonk/coworker/config"
 	"github.com/tonk/coworker/database"
 	"github.com/tonk/coworker/models"
-	"gorm.io/gorm/clause"
 )
 
 const (
@@ -279,14 +278,13 @@ func GetGlobalDefaults() map[string]string {
 	}
 }
 
-// saveSetting upserts a system setting by key (INSERT … ON CONFLICT UPDATE).
-// GORM's plain Save() with a non-zero string primary key issues only an UPDATE,
-// which silently does nothing when the row doesn't exist yet.
+// saveSetting upserts a system setting by key.
+// Uses update-or-create to work reliably with all DB drivers and SQLite versions.
 func saveSetting(key, value string) {
-	database.DB.Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "key"}},
-		DoUpdates: clause.AssignmentColumns([]string{"value"}),
-	}).Create(&models.SystemSetting{Key: key, Value: value})
+	result := database.DB.Model(&models.SystemSetting{}).Where("key = ?", key).Update("value", value)
+	if result.RowsAffected == 0 {
+		database.DB.Create(&models.SystemSetting{Key: key, Value: value})
+	}
 }
 
 // loadAllSettings reads all system settings from DB and fills in defaults for missing keys.

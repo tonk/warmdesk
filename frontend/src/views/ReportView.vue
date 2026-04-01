@@ -118,11 +118,14 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="card in proj.cards" :key="card.card_id">
+            <tr v-for="card in proj.cards" :key="card.card_id" :class="{ 'row-closed': card.closed }">
               <td class="col-ref">
                 <span class="card-ref-badge" v-if="card.card_ref">{{ card.card_ref }}</span>
               </td>
-              <td class="col-title">{{ card.title }}</td>
+              <td class="col-title">
+                <span :class="{ 'title-closed': card.closed }">{{ card.title }}</span>
+                <span v-if="card.closed" class="closed-badge">{{ $t('board.closed') }}</span>
+              </td>
               <td class="col-assignees">{{ card.assignees.join(', ') || '—' }}</td>
               <td class="col-updated">{{ card.updated_at }}</td>
               <td class="col-time time-value">{{ formatMinutes(card.time_spent_minutes) }}</td>
@@ -526,6 +529,22 @@ onUnmounted(() => {
   border: 1px solid color-mix(in srgb, var(--color-primary) 25%, transparent);
   border-radius: 4px;
   padding: 1px 5px;
+}
+
+.title-closed { text-decoration: line-through; color: var(--color-text-muted); }
+.closed-badge {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #dc2626;
+  background: color-mix(in srgb, #ef4444 12%, transparent);
+  border: 1px solid color-mix(in srgb, #ef4444 30%, transparent);
+  border-radius: 4px;
+  padding: 1px 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
 }
 
 .subtotal-row td {

@@ -44,6 +44,11 @@ func AdminCreateProject(c *gin.Context) {
 		database.DB.Create(&models.Column{ProjectID: project.ID, Name: name, Position: float64((i + 1) * 1000)})
 	}
 
+	// Default labels from system settings
+	for _, def := range getDefaultLabelDefs() {
+		database.DB.Create(&models.Label{ProjectID: project.ID, Name: def.Name, Color: def.Color})
+	}
+
 	database.DB.Preload("CreatedBy").First(&project, project.ID)
 	c.JSON(http.StatusCreated, project)
 }

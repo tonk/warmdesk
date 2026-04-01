@@ -1,10 +1,10 @@
-import { ref, onUnmounted } from 'vue'
+import { ref, isRef, onUnmounted } from 'vue'
 import { useBoardStore } from '@/stores/board'
 import { useChatStore } from '@/stores/chat'
 import { useTopicsStore } from '@/stores/topics'
 import { getWsUrl } from '@/api/serverConfig'
 
-export function useWebSocket(projectSlug) {
+export function useWebSocket(projectSlugOrRef) {
   const ws = ref(null)
   const connected = ref(false)
   const presenceUsers = ref([])
@@ -16,9 +16,10 @@ export function useWebSocket(projectSlug) {
   const topicsStore = useTopicsStore()
 
   function connect() {
-    const token = localStorage.getItem('access_token')
+    const token = sessionStorage.getItem('access_token')
     if (!token) return
 
+    const projectSlug = isRef(projectSlugOrRef) ? projectSlugOrRef.value : projectSlugOrRef
     // Use the configured server URL when available (Tauri/desktop mode),
     // otherwise fall back to the current page's origin (browser mode).
     const wsUrlFromConfig = getWsUrl(`/api/v1/ws/${projectSlug}?token=${token}`)

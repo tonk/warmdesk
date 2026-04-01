@@ -170,7 +170,7 @@ Click a card to open its detail panel. The panel is resizable. Fields:
 | **Title** | Plain text |
 | **Description** | Markdown editor with toolbar, emoji picker, and @mention autocomplete |
 | **Priority** | None / Low / Medium / High / Critical |
-| **Due date** | Displayed in your locale date format |
+| **Due date** | Displayed in your configured date format. Type a date directly or click the calendar icon (📅) to open the native date picker. Clear the field to remove the due date. |
 | **Time Spent** | Hours and minutes; contributes to time reports |
 | **Assignee** | Single primary assignee (legacy) |
 | **Assignees** | Multiple assignees — click a name to toggle |

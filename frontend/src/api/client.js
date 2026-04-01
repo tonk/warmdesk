@@ -25,7 +25,7 @@ function processQueue(error, token = null) {
 
 client.interceptors.request.use(config => {
   config.baseURL = apiBase()
-  const token = localStorage.getItem('access_token')
+  const token = sessionStorage.getItem('access_token')
     || (client.defaults.headers.common.Authorization || '').replace('Bearer ', '')
   if (token) config.headers.Authorization = `Bearer ${token}`
   return config
@@ -48,27 +48,27 @@ client.interceptors.response.use(
       original._retry = true
       isRefreshing = true
 
-      const refreshToken = localStorage.getItem('refresh_token')
+      const refreshToken = sessionStorage.getItem('refresh_token')
       if (!refreshToken) {
         isRefreshing = false
-        localStorage.removeItem('access_token')
-        localStorage.removeItem('refresh_token')
+        sessionStorage.removeItem('access_token')
+        sessionStorage.removeItem('refresh_token')
         window.location.href = '/login'
         return Promise.reject(error)
       }
 
       try {
         const { data } = await axios.post(`${apiBase()}/auth/refresh`, { refresh_token: refreshToken })
-        localStorage.setItem('access_token', data.access_token)
-        localStorage.setItem('refresh_token', data.refresh_token)
+        sessionStorage.setItem('access_token', data.access_token)
+        sessionStorage.setItem('refresh_token', data.refresh_token)
         client.defaults.headers.common.Authorization = `Bearer ${data.access_token}`
         processQueue(null, data.access_token)
         original.headers.Authorization = `Bearer ${data.access_token}`
         return client(original)
       } catch (err) {
         processQueue(err, null)
-        localStorage.removeItem('access_token')
-        localStorage.removeItem('refresh_token')
+        sessionStorage.removeItem('access_token')
+        sessionStorage.removeItem('refresh_token')
         window.location.href = '/login'
         return Promise.reject(err)
       } finally {

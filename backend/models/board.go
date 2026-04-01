@@ -39,6 +39,7 @@ type Card struct {
 	CreatedBy   User           `json:"created_by"`
 	CardNumber        int            `gorm:"default:0" json:"card_number"`
 	TimeSpentMinutes  int            `gorm:"default:0" json:"time_spent_minutes"`
+	Closed            bool           `gorm:"default:false" json:"closed"`
 	Labels      []Label        `gorm:"many2many:card_labels" json:"labels,omitempty"`
 	Tags        []CardTag      `json:"tags,omitempty"`
 	Assignees   []User         `gorm:"many2many:card_assignees" json:"assignees,omitempty"`

@@ -1,5 +1,5 @@
 <template>
-  <div class="board-card" @click="$emit('open', card)">
+  <div class="board-card" :class="{ 'board-card--closed': card.closed }" @click="$emit('open', card)">
     <!-- Assignee avatars — top right (shows multi-assignees if present, else primary) -->
     <div v-if="allAssignees.length" class="card-avatars">
       <div
@@ -42,7 +42,7 @@
     </div>
     <div class="card-footer" v-if="card.due_date">
       <span class="card-due" :class="{ overdue: isOverdue }">
-        📅 {{ formatDate(card.due_date) }}
+        📅 {{ formatDate(card.due_date.slice(0, 10)) }}
       </span>
     </div>
   </div>
@@ -74,7 +74,9 @@ const cardRef = computed(() => {
 
 const isOverdue = computed(() => {
   if (!props.card.due_date) return false
-  return new Date(props.card.due_date) < new Date()
+  const today = new Date()
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+  return props.card.due_date.slice(0, 10) < todayStr
 })
 </script>
 
@@ -169,4 +171,7 @@ const isOverdue = computed(() => {
 .card-footer { display: flex; align-items: center; }
 .card-due { font-size: 11px; color: var(--color-text-muted); }
 .card-due.overdue { color: var(--color-danger); }
+
+.board-card--closed { opacity: 0.6; }
+.board-card--closed .card-title { text-decoration: line-through; color: var(--color-text-muted); }
 </style>

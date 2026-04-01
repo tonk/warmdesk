@@ -89,7 +89,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import Sortable from 'sortablejs'
@@ -125,17 +125,29 @@ let columnSortable = null
 
 const projectMembers = ref([])
 
-const { connected, presenceUsers, connect, disconnect, send: wsSend } = useWebSocket(slug.value)
+const { connected, presenceUsers, connect, disconnect, send: wsSend } = useWebSocket(slug)
 
-onMounted(async () => {
+async function loadBoard(projectSlug) {
+  selectedCard.value = null
   await Promise.all([
-    boardStore.loadBoard(slug.value),
-    projectStore.fetchProject(slug.value),
+    boardStore.loadBoard(projectSlug),
+    projectStore.fetchProject(projectSlug),
     sidebarStore.fetchStarred()
   ])
   loadMembers()
   connect()
+  await nextTick()
   initColumnSortable()
+}
+
+onMounted(() => loadBoard(slug.value))
+
+watch(slug, async (newSlug) => {
+  disconnect()
+  boardStore.reset()
+  columnSortable?.destroy()
+  columnSortable = null
+  await loadBoard(newSlug)
 })
 
 onUnmounted(() => {
