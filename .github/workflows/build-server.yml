@@ -1,0 +1,75 @@
+name: Build server (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build from'
+        required: false
+        default: 'main'
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build:
+    name: Build server tarball
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache-dependency-path: backend/go.sum
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build frontend
+        run: cd frontend && npm ci && npm run build
+
+      - name: Copy frontend assets
+        run: mkdir -p dist/web && cp -r frontend/dist/. dist/web/
+
+      - name: Build backend
+        run: |
+          SHA=$(git rev-parse --short HEAD)
+          mkdir -p dist
+          cd backend
+          go build -ldflags="-s -w -X main.version=dev-${SHA}" -o ../dist/warmdesk .
+          go build -ldflags="-s -w" -o ../dist/warmdesk-seed ./cmd/seed
+          go build -ldflags="-s -w" -o ../dist/warmdesk-export ./cmd/export
+          go build -ldflags="-s -w" -o ../dist/warmdesk-import ./cmd/importer
+
+      - name: Assemble distribution
+        run: |
+          cp warmdesk.yaml.example dist/warmdesk.yaml.example
+          cp warmdesk-migrate.yaml.example dist/warmdesk-migrate.yaml.example
+          cp -r deploy dist/deploy
+          cp INSTALL.md dist/INSTALL.md
+          cp README.md dist/README.md
+          cp -r docs dist/docs
+
+      - name: Create archive
+        run: |
+          SHA=$(git rev-parse --short HEAD)
+          tar -czf "warmdesk-dev-${SHA}.tar.gz" -C dist .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WarmDesk-server
+          path: warmdesk-dev-*.tar.gz

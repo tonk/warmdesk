@@ -1,4 +1,4 @@
-name: Build Linux (manual)
+name: Build client Linux (manual)
 
 on:
   workflow_dispatch:
