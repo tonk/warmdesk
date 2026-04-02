@@ -11,6 +11,7 @@
     "tauri:build": "tauri build"
   },
   "dependencies": {
+    "@tauri-apps/plugin-http": "^2.5.7",
     "axios": "^1.7.7",
     "dompurify": "^3.1.7",
     "easymde": "^2.18.0",
