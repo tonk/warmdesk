@@ -1,4 +1,8 @@
 
+<p align="center">
+  <img src="frontend/public/logo-full.svg" alt="WarmDesk" width="280" style="background:#1a1a2e;padding:24px;border-radius:12px;" />
+</p>
+
 # WarmDesk
 
 A self-hosted, multi-user project management tool with Kanban boards, real-time
