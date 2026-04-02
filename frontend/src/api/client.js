@@ -13,7 +13,14 @@ function apiBase() {
 // on Windows Tauri that proxy is pointed at tauri-plugin-http by main.js,
 // routing every request through the native Rust HTTP client.
 const client = axios.create({
-  headers: { 'Content-Type': 'application/json' },
+  headers: {
+    'Content-Type': 'application/json',
+    // Some WAFs/proxies block non-browser user-agents on POST endpoints.
+    // When running inside Tauri the request goes through tauri-plugin-http
+    // (reqwest) which sets its own UA; override it here so the server sees
+    // a normal browser string instead.
+    'User-Agent': navigator.userAgent,
+  },
   adapter: 'fetch',
 })
 
