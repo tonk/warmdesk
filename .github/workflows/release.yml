@@ -139,15 +139,15 @@ jobs:
 
       - name: Stamp version in tauri.conf.json
         run: |
-          VERSION="${{ github.ref_name }}"
-          VERSION="${VERSION#v}"
           node -e "
             const fs = require('fs');
             const p = 'frontend/src-tauri/tauri.conf.json';
             const c = JSON.parse(fs.readFileSync(p, 'utf8'));
-            c.version = process.env.VERSION;
+            c.version = process.env.VERSION.replace(/^v/, '');
             fs.writeFileSync(p, JSON.stringify(c, null, 2) + '\n');
-          " VERSION="$VERSION"
+          "
+        env:
+          VERSION: ${{ github.ref_name }}
 
       - name: Build desktop app (Linux)
         if: matrix.os == 'ubuntu-22.04'

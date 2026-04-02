@@ -44,14 +44,17 @@ jobs:
         run: cd frontend && npm ci
 
       - name: Stamp version in tauri.conf.json
-        shell: pwsh
         run: |
-          $tag = (git describe --tags --abbrev=0 2>$null) -replace '^v', ''
-          if (-not $tag) { $tag = "0.0.0" }
-          $p = "frontend/src-tauri/tauri.conf.json"
-          $c = Get-Content $p -Raw | ConvertFrom-Json
-          $c.version = $tag
-          $c | ConvertTo-Json -Depth 10 | Set-Content $p
+          node -e "
+            const fs = require('fs');
+            const {execSync} = require('child_process');
+            const p = 'frontend/src-tauri/tauri.conf.json';
+            const c = JSON.parse(fs.readFileSync(p, 'utf8'));
+            let v = '0.0.0';
+            try { v = execSync('git describe --tags --abbrev=0').toString().trim().replace(/^v/, ''); } catch {}
+            c.version = v;
+            fs.writeFileSync(p, JSON.stringify(c, null, 2) + '\n');
+          "
 
       - name: Build
         run: cd frontend && npm run tauri:build -- --bundles nsis
