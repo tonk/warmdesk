@@ -8,8 +8,15 @@ function apiBase() {
   return server ? `${server}/api/v1` : '/api/v1'
 }
 
+// In the Tauri desktop app, Axios defaults to XHR which WebView2 treats as
+// mixed content when the app origin is https://tauri.localhost but the server
+// is plain HTTP.  Switching to the fetch adapter lets tauri-plugin-http
+// intercept the call and use a native HTTP client, bypassing the restriction.
+const isTauri = typeof window !== 'undefined' && !!window.__TAURI_INTERNALS__
+
 const client = axios.create({
-  headers: { 'Content-Type': 'application/json' }
+  headers: { 'Content-Type': 'application/json' },
+  ...(isTauri ? { adapter: 'fetch' } : {})
 })
 
 let isRefreshing = false
