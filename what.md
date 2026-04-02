@@ -209,3 +209,8 @@ Create an application that has all these features and requirements
 - Config file (coworker-migrate.yaml) with column mapping, credential env var overrides, and interactive prompts for missing fields
 - Both binaries included in the server distribution build
 - Rename product from Coworker to WarmDesk: all binaries, config files, documentation, logos, and the application UI renamed; Go module path updated to github.com/tonk/warmdesk
+- Rename migration tool config: YAML section key `coworker:` → `warmdesk:`, env vars `COWORKER_*` → `WARMDESK_*`, default config filename `coworker-migrate.yaml` → `warmdesk-migrate.yaml`, Go type `CoworkerConfig` → `WarmDeskConfig`
+- Show full WarmDesk logo (logo-full.svg) in the app header instead of the icon-only mark
+- Fix logo-full.svg (and any other non-listed static asset) returning index.html in production: register it explicitly as a static route in the backend router
+- Update docs: add Migration Tools section to admin guide, fix header and editor descriptions in user guide, correct API key format example, list all dist binaries in INSTALL.md
+- Exclude .claude/ directory from version control via .gitignore

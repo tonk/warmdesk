@@ -87,7 +87,7 @@ func textToADF(text string) map[string]interface{} {
 
 // ─── Priority mapping ─────────────────────────────────────────────────────────
 
-var coworkerToJiraPriority = map[string]string{
+var warmDeskToJiraPriority = map[string]string{
 	"none":     "Lowest",
 	"low":      "Low",
 	"medium":   "Medium",
@@ -95,7 +95,7 @@ var coworkerToJiraPriority = map[string]string{
 	"critical": "Highest",
 }
 
-var jiraToCoworkerPriority = map[string]string{
+var jiraToWarmDeskPriority = map[string]string{
 	"Lowest":  "none",
 	"Low":     "low",
 	"Medium":  "medium",
@@ -159,7 +159,7 @@ func ExportToJira(cfg PlatformConfig, p *Project, columnMap map[string]string) e
 				fields["description"] = textToADF(card.Description)
 			}
 
-			if p, ok := coworkerToJiraPriority[card.Priority]; ok {
+			if p, ok := warmDeskToJiraPriority[card.Priority]; ok {
 				fields["priority"] = map[string]string{"name": p}
 			}
 
@@ -400,7 +400,7 @@ func ImportFromJira(cfg PlatformConfig, columnMap map[string]string) (*Project, 
 				colIndex[colName] = col
 			}
 
-			priority := jiraToCoworkerPriority[issue.Fields.Priority.Name]
+			priority := jiraToWarmDeskPriority[issue.Fields.Priority.Name]
 			if priority == "" {
 				priority = "none"
 			}

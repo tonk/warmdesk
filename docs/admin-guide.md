@@ -17,7 +17,8 @@
 13. [Updates](#13-updates)
 14. [Backup and Recovery](#14-backup-and-recovery)
 15. [Demo Data](#15-demo-data)
-16. [Security Checklist](#16-security-checklist)
+16. [Migration Tools](#16-migration-tools)
+17. [Security Checklist](#17-security-checklist)
 
 ---
 
@@ -591,7 +592,73 @@ cd dist
 
 ---
 
-## 16. Security Checklist
+## 16. Migration Tools
+
+`warmdesk-export` and `warmdesk-import` are standalone binaries (shipped in
+`dist/` alongside the main server) for moving projects between WarmDesk and
+other platforms.
+
+| Binary | Direction |
+|--------|-----------|
+| `warmdesk-export` | WarmDesk → Jira, Trello, OpenProject, or Ryver |
+| `warmdesk-import` | Jira, Trello, OpenProject, or Ryver → WarmDesk |
+
+Both binaries export / import: columns, cards (with title, description,
+priority, due date, labels, tags, assignees, checklist, comments, time entries,
+attachments), and threaded topics.
+
+### Configuration
+
+Copy `warmdesk-migrate.yaml.example` to `warmdesk-migrate.yaml` and fill in
+the connection details. Sensitive values can be supplied as environment
+variables instead:
+
+```
+WARMDESK_URL        URL of your WarmDesk instance
+WARMDESK_USERNAME   WarmDesk account username
+WARMDESK_PASSWORD   WarmDesk account password
+WARMDESK_PROJECT    Project slug (visible in the URL)
+PLATFORM_API_TOKEN  API token for the target platform
+PLATFORM_API_KEY    API key for the target platform (Trello)
+```
+
+Any field still missing after reading the file and environment is prompted
+interactively.
+
+### Column mapping
+
+The `column_map` section in the config translates WarmDesk column names to the
+corresponding status / list names on the target platform (and back on import):
+
+```yaml
+column_map:
+  Backlog: "To Do"
+  "In Progress": "In Progress"
+  "Test & Review": "In Review"
+  "To Production": Done
+```
+
+Columns not listed are passed through unchanged.
+
+### Usage
+
+```bash
+cd dist
+
+# Export a WarmDesk project to Jira
+./warmdesk-export --config warmdesk-migrate.yaml
+
+# Import a Jira project into WarmDesk
+./warmdesk-import --config warmdesk-migrate.yaml
+
+# Preview what would happen without making any changes
+./warmdesk-export --dry-run
+./warmdesk-import --dry-run
+```
+
+---
+
+## 17. Security Checklist
 
 Before exposing WarmDesk to the internet:
 

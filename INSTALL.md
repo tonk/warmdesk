@@ -52,8 +52,15 @@ Output is placed in `dist/`:
 
 ```
 dist/
-  warmdesk        # server binary (Linux/macOS) or warmdesk.exe (Windows)
-  web/            # compiled frontend assets
+  warmdesk               # server binary (Linux/macOS) or warmdesk.exe (Windows)
+  warmdesk-seed          # demo data seeder
+  warmdesk-export        # migration: WarmDesk → Jira / Trello / OpenProject / Ryver
+  warmdesk-import        # migration: Jira / Trello / OpenProject / Ryver → WarmDesk
+  web/                   # compiled frontend assets
+  warmdesk.yaml.example  # annotated server config template
+  warmdesk-migrate.yaml.example  # migration tool config template
+  deploy/                # systemd / nginx / Apache templates
+  docs/                  # user, API, and admin documentation
 ```
 
 ---

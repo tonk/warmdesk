@@ -247,6 +247,7 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webDir string, 
 		r.StaticFile("/favicon.ico", webDir+"/favicon.ico")
 		r.StaticFile("/favicon.svg", webDir+"/favicon.svg")
 		r.StaticFile("/logo.svg", webDir+"/logo.svg")
+		r.StaticFile("/logo-full.svg", webDir+"/logo-full.svg")
 		r.NoRoute(func(c *gin.Context) {
 			if strings.HasPrefix(c.Request.URL.Path, "/api") {
 				c.JSON(http.StatusNotFound, gin.H{"error": "not found"})

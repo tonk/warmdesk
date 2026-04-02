@@ -51,7 +51,7 @@ func cwDo(method, url string, headers map[string]string, body interface{}) ([]by
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
-// Login authenticates with Coworker and returns the JWT access token.
+// Login authenticates with WarmDesk and returns the JWT access token.
 func Login(baseURL, username, password string) (string, error) {
 	type loginReq struct {
 		Username string `json:"username"`
@@ -84,7 +84,7 @@ func Login(baseURL, username, password string) (string, error) {
 
 // ─── Read project ─────────────────────────────────────────────────────────────
 
-// apiProject matches the Coworker JSON project response.
+// apiProject matches the WarmDesk JSON project response.
 type apiProject struct {
 	ID          uint   `json:"id"`
 	Name        string `json:"name"`
@@ -169,7 +169,7 @@ type apiTopicReply struct {
 	User apiUser `json:"user"`
 }
 
-// ReadProject fetches the full project from Coworker into the canonical types.
+// ReadProject fetches the full project from WarmDesk into the canonical types.
 func ReadProject(baseURL, token, slug string) (*Project, error) {
 	hdrs := map[string]string{"Authorization": "Bearer " + token}
 
@@ -399,7 +399,7 @@ func fetchTopicDetail(baseURL, slug, token string, topicID uint) (*Topic, error)
 
 // ─── Write project ────────────────────────────────────────────────────────────
 
-// WriteProject creates a project and all its content in Coworker using the
+// WriteProject creates a project and all its content in WarmDesk using the
 // REST API.
 func WriteProject(baseURL, token string, p *Project, columnMap map[string]string) error {
 	hdrs := map[string]string{"Authorization": "Bearer " + token}
@@ -437,7 +437,7 @@ func WriteProject(baseURL, token string, p *Project, columnMap map[string]string
 	fmt.Printf("  → created project %q (slug=%s)\n", p.Name, createdProj.Slug)
 
 	// ── collect unique labels ─────────────────────────────────────────────────
-	labelIDMap := map[string]uint{} // label name → id in Coworker
+	labelIDMap := map[string]uint{} // label name → id in WarmDesk
 	uniqueLabels := map[string]Label{}
 	for _, col := range p.Columns {
 		for _, card := range col.Cards {

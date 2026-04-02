@@ -1,16 +1,16 @@
-// coworker-export reads a Coworker project and pushes it to Jira, Trello,
+// warmdesk-export reads a WarmDesk project and pushes it to Jira, Trello,
 // OpenProject, or Ryver.
 //
 // Usage:
 //
-//	coworker-export [--config FILE] [--dry-run]
+//	warmdesk-export [--config FILE] [--dry-run]
 //
 // Required fields can be supplied in the config file, as environment variables,
 // or interactively when the program prompts for them.
 //
 // Environment variable overrides:
 //
-//	COWORKER_URL, COWORKER_USERNAME, COWORKER_PASSWORD, COWORKER_PROJECT
+//	WARMDESK_URL, WARMDESK_USERNAME, WARMDESK_PASSWORD, WARMDESK_PROJECT
 //	PLATFORM_API_TOKEN, PLATFORM_API_KEY
 package main
 
@@ -24,7 +24,7 @@ import (
 )
 
 func main() {
-	configFile := flag.String("config", "coworker-migrate.yaml", "path to migration config file")
+	configFile := flag.String("config", "warmdesk-migrate.yaml", "path to migration config file")
 	dryRun := flag.Bool("dry-run", false, "print what would be exported without making API calls")
 	flag.Parse()
 
@@ -36,20 +36,20 @@ func main() {
 	// Prompt for any required fields still missing
 	cfg.Platform.Name = promptPlatform(cfg.Platform.Name)
 
-	fmt.Printf("Coworker export\n")
-	fmt.Printf("  source  : %s (project: %s)\n", cfg.Coworker.URL, cfg.Coworker.Project)
+	fmt.Printf("WarmDesk export\n")
+	fmt.Printf("  source  : %s (project: %s)\n", cfg.WarmDesk.URL, cfg.WarmDesk.Project)
 	fmt.Printf("  target  : %s\n", strings.ToLower(cfg.Platform.Name))
 
-	// Authenticate with Coworker
-	fmt.Printf("\nConnecting to Coworker...\n")
-	token, err := migrate.Login(cfg.Coworker.URL, cfg.Coworker.Username, cfg.Coworker.Password)
+	// Authenticate with WarmDesk
+	fmt.Printf("\nConnecting to WarmDesk...\n")
+	token, err := migrate.Login(cfg.WarmDesk.URL, cfg.WarmDesk.Username, cfg.WarmDesk.Password)
 	if err != nil {
 		log.Fatalf("login: %v", err)
 	}
 
 	// Read project
-	fmt.Printf("Reading project %q...\n", cfg.Coworker.Project)
-	project, err := migrate.ReadProject(cfg.Coworker.URL, token, cfg.Coworker.Project)
+	fmt.Printf("Reading project %q...\n", cfg.WarmDesk.Project)
+	project, err := migrate.ReadProject(cfg.WarmDesk.URL, token, cfg.WarmDesk.Project)
 	if err != nil {
 		log.Fatalf("read project: %v", err)
 	}

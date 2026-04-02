@@ -1,11 +1,11 @@
 // Package migrate provides canonical in-memory types used as a pivot between
-// Coworker and external project management platforms (Jira, Trello,
+// WarmDesk and external project management platforms (Jira, Trello,
 // OpenProject, Ryver).
 package migrate
 
 import "time"
 
-// Project is the top-level canonical representation of a Coworker project.
+// Project is the top-level canonical representation of a WarmDesk project.
 type Project struct {
 	Name        string
 	Description string

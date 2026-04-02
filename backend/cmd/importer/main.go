@@ -1,16 +1,16 @@
-// coworker-import reads a project from Jira, Trello, OpenProject, or Ryver
-// and creates it in Coworker.
+// warmdesk-import reads a project from Jira, Trello, OpenProject, or Ryver
+// and creates it in WarmDesk.
 //
 // Usage:
 //
-//	coworker-import [--config FILE] [--dry-run]
+//	warmdesk-import [--config FILE] [--dry-run]
 //
 // Required fields can be supplied in the config file, as environment variables,
 // or interactively when the program prompts for them.
 //
 // Environment variable overrides:
 //
-//	COWORKER_URL, COWORKER_USERNAME, COWORKER_PASSWORD, COWORKER_PROJECT
+//	WARMDESK_URL, WARMDESK_USERNAME, WARMDESK_PASSWORD, WARMDESK_PROJECT
 //	PLATFORM_API_TOKEN, PLATFORM_API_KEY
 package main
 
@@ -24,8 +24,8 @@ import (
 )
 
 func main() {
-	configFile := flag.String("config", "coworker-migrate.yaml", "path to migration config file")
-	dryRun := flag.Bool("dry-run", false, "print what would be imported without writing to Coworker")
+	configFile := flag.String("config", "warmdesk-migrate.yaml", "path to migration config file")
+	dryRun := flag.Bool("dry-run", false, "print what would be imported without writing to WarmDesk")
 	flag.Parse()
 
 	cfg, err := migrate.LoadConfig(*configFile)
@@ -36,9 +36,9 @@ func main() {
 	// Prompt for any required fields still missing
 	cfg.Platform.Name = promptPlatform(cfg.Platform.Name)
 
-	fmt.Printf("Coworker import\n")
+	fmt.Printf("WarmDesk import\n")
 	fmt.Printf("  source  : %s\n", strings.ToLower(cfg.Platform.Name))
-	fmt.Printf("  target  : %s (project will be created)\n", cfg.Coworker.URL)
+	fmt.Printf("  target  : %s (project will be created)\n", cfg.WarmDesk.URL)
 
 	// Read project from source platform
 	fmt.Printf("\nReading from %s...\n", strings.Title(strings.ToLower(cfg.Platform.Name)))
@@ -72,22 +72,22 @@ func main() {
 	}
 
 	if *dryRun {
-		fmt.Println("\n[dry-run] no changes made to Coworker")
+		fmt.Println("\n[dry-run] no changes made to WarmDesk")
 		return
 	}
 
-	// Authenticate with Coworker
-	fmt.Printf("\nConnecting to Coworker...\n")
-	token, err := migrate.Login(cfg.Coworker.URL, cfg.Coworker.Username, cfg.Coworker.Password)
+	// Authenticate with WarmDesk
+	fmt.Printf("\nConnecting to WarmDesk...\n")
+	token, err := migrate.Login(cfg.WarmDesk.URL, cfg.WarmDesk.Username, cfg.WarmDesk.Password)
 	if err != nil {
 		log.Fatalf("login: %v", err)
 	}
 
-	// Write to Coworker
-	fmt.Printf("Creating project in Coworker...\n")
+	// Write to WarmDesk
+	fmt.Printf("Creating project in WarmDesk...\n")
 	// For import, ColumnMap is used in reverse: reverse map was already applied
 	// during ReadFrom*, so we pass nil here to preserve the column names as-is.
-	if err := migrate.WriteProject(cfg.Coworker.URL, token, project, nil); err != nil {
+	if err := migrate.WriteProject(cfg.WarmDesk.URL, token, project, nil); err != nil {
 		log.Fatalf("write project: %v", err)
 	}
 

@@ -11,15 +11,15 @@ import (
 
 // Config holds all configuration for both export and import operations.
 type Config struct {
-	Coworker CoworkerConfig `yaml:"coworker"`
-	Platform PlatformConfig `yaml:"platform"`
-	// ColumnMap maps Coworker column names → external platform column/status names.
-	// If empty or a name is not found, the Coworker column name is used as-is.
+	WarmDesk  WarmDeskConfig    `yaml:"warmdesk"`
+	Platform  PlatformConfig    `yaml:"platform"`
+	// ColumnMap maps WarmDesk column names → external platform column/status names.
+	// If empty or a name is not found, the WarmDesk column name is used as-is.
 	ColumnMap map[string]string `yaml:"column_map"`
 }
 
-// CoworkerConfig holds connection details for the Coworker server.
-type CoworkerConfig struct {
+// WarmDeskConfig holds connection details for the WarmDesk server.
+type WarmDeskConfig struct {
 	URL      string `yaml:"url"`
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
@@ -66,18 +66,18 @@ func LoadConfig(path string) (*Config, error) {
 	}
 
 	// Environment variable overrides.
-	applyEnv(&cfg.Coworker.URL, "COWORKER_URL")
-	applyEnv(&cfg.Coworker.Username, "COWORKER_USERNAME")
-	applyEnv(&cfg.Coworker.Password, "COWORKER_PASSWORD")
-	applyEnv(&cfg.Coworker.Project, "COWORKER_PROJECT")
+	applyEnv(&cfg.WarmDesk.URL, "WARMDESK_URL")
+	applyEnv(&cfg.WarmDesk.Username, "WARMDESK_USERNAME")
+	applyEnv(&cfg.WarmDesk.Password, "WARMDESK_PASSWORD")
+	applyEnv(&cfg.WarmDesk.Project, "WARMDESK_PROJECT")
 	applyEnv(&cfg.Platform.APIToken, "PLATFORM_API_TOKEN")
 	applyEnv(&cfg.Platform.APIKey, "PLATFORM_API_KEY")
 
 	// Interactive prompts for required fields.
-	promptIfEmpty(&cfg.Coworker.URL, "Coworker URL")
-	promptIfEmpty(&cfg.Coworker.Username, "Coworker username")
-	promptIfEmpty(&cfg.Coworker.Password, "Coworker password")
-	promptIfEmpty(&cfg.Coworker.Project, "Coworker project slug")
+	promptIfEmpty(&cfg.WarmDesk.URL, "WarmDesk URL")
+	promptIfEmpty(&cfg.WarmDesk.Username, "WarmDesk username")
+	promptIfEmpty(&cfg.WarmDesk.Password, "WarmDesk password")
+	promptIfEmpty(&cfg.WarmDesk.Project, "WarmDesk project slug")
 
 	if cfg.Platform.IssueType == "" {
 		cfg.Platform.IssueType = "Task"
@@ -86,7 +86,7 @@ func LoadConfig(path string) (*Config, error) {
 	return cfg, nil
 }
 
-// ReverseColumnMap returns a map from external platform names → Coworker column
+// ReverseColumnMap returns a map from external platform names → WarmDesk column
 // names (the inverse of cfg.ColumnMap).
 func ReverseColumnMap(m map[string]string) map[string]string {
 	rev := make(map[string]string, len(m))
@@ -96,7 +96,7 @@ func ReverseColumnMap(m map[string]string) map[string]string {
 	return rev
 }
 
-// MapColumn translates a Coworker column name to the external name using the
+// MapColumn translates a WarmDesk column name to the external name using the
 // column map. If no mapping exists the original name is returned unchanged.
 func MapColumn(name string, columnMap map[string]string) string {
 	if columnMap == nil {
@@ -109,7 +109,7 @@ func MapColumn(name string, columnMap map[string]string) string {
 }
 
 // MapColumnReverse translates an external column/status name back to a
-// Coworker column name using the reversed column map.
+// WarmDesk column name using the reversed column map.
 func MapColumnReverse(name string, reverseMap map[string]string) string {
 	if reverseMap == nil {
 		return name

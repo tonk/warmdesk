@@ -54,7 +54,7 @@ func opHref(href string) map[string]interface{} {
 
 // ─── Priority mapping ─────────────────────────────────────────────────────────
 
-var coworkerToOPPriority = map[string]string{
+var warmDeskToOPPriority = map[string]string{
 	"none":     "Low",
 	"low":      "Low",
 	"medium":   "Normal",
@@ -62,7 +62,7 @@ var coworkerToOPPriority = map[string]string{
 	"critical": "Immediate",
 }
 
-var opToCoworkerPriority = map[string]string{
+var opToWarmDeskPriority = map[string]string{
 	"Low":       "low",
 	"Normal":    "medium",
 	"High":      "high",
@@ -121,7 +121,7 @@ func ExportToOpenProject(cfg PlatformConfig, p *Project, columnMap map[string]st
 				links["status"] = opHref(statusHref)
 			}
 
-			opPriority := coworkerToOPPriority[card.Priority]
+			opPriority := warmDeskToOPPriority[card.Priority]
 			if opPriority == "" {
 				opPriority = "Normal"
 			}
@@ -360,7 +360,7 @@ func ImportFromOpenProject(cfg PlatformConfig, columnMap map[string]string) (*Pr
 				colIndex[colName] = col
 			}
 
-			priority := opToCoworkerPriority[wp.Links.Priority.Title]
+			priority := opToWarmDeskPriority[wp.Links.Priority.Title]
 			if priority == "" {
 				priority = "none"
 			}

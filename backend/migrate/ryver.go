@@ -55,7 +55,7 @@ func ryverBase(org string) string {
 
 // ExportToRyver exports a canonical project to Ryver as tasks in a team forum.
 //
-// Ryver does not have columns/statuses natively. The Coworker column name is
+// Ryver does not have columns/statuses natively. The WarmDesk column name is
 // appended as a tag on each task so the mapping can be reconstructed on import.
 func ExportToRyver(cfg PlatformConfig, p *Project, columnMap map[string]string) error {
 	base := ryverBase(cfg.Org)

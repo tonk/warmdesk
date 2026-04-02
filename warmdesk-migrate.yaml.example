@@ -1,19 +1,19 @@
-# coworker-migrate.yaml — configuration for coworker-export and coworker-import
+# warmdesk-migrate.yaml — configuration for warmdesk-export and warmdesk-import
 #
 # Sensitive values (passwords, tokens) can be provided as environment variables
 # instead of storing them in this file:
-#   COWORKER_URL, COWORKER_USERNAME, COWORKER_PASSWORD, COWORKER_PROJECT
+#   WARMDESK_URL, WARMDESK_USERNAME, WARMDESK_PASSWORD, WARMDESK_PROJECT
 #   PLATFORM_API_TOKEN, PLATFORM_API_KEY
 #
 # Any field that is still empty after the file and env vars are read will be
 # prompted for interactively.
 
-# ── Coworker connection ────────────────────────────────────────────────────────
+# ── WarmDesk connection ────────────────────────────────────────────────────────
 
-coworker:
-  url: https://coworker.example.com
+warmdesk:
+  url: https://warmdesk.example.com
   username: admin
-  password: ""               # or set COWORKER_PASSWORD
+  password: ""               # or set WARMDESK_PASSWORD
   project: my-project-slug   # project slug (visible in the URL)
 
 # ── Target / source platform ──────────────────────────────────────────────────
@@ -48,13 +48,13 @@ platform:
 
 # ── Column mapping ─────────────────────────────────────────────────────────────
 #
-# Maps Coworker column names (left) to the corresponding status / list name on
+# Maps WarmDesk column names (left) to the corresponding status / list name on
 # the target platform (right).
 #
-# For export: Coworker column → platform status/list
-# For import: platform status/list → Coworker column (mapping is reversed)
+# For export: WarmDesk column → platform status/list
+# For import: platform status/list → WarmDesk column (mapping is reversed)
 #
-# Columns not listed here are created using their Coworker name as-is.
+# Columns not listed here are created using their WarmDesk name as-is.
 
 column_map:
   Backlog: "To Do"

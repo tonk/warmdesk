@@ -133,7 +133,7 @@ PATCH /api/v1/ticket/{projectSlug}/cards/{cardId}/move
 ### Example: full CI pipeline workflow
 
 ```bash
-API_KEY="cwk_live_xxxxxxxxxxxx"
+API_KEY="cwk_a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6"
 BASE="https://warmdesk.example.com/api/v1/ticket"
 PROJECT="my-project"
 

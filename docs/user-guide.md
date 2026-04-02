@@ -58,8 +58,16 @@ contains:
 
 ### Header
 
-The header shows the application name on the left and your display name on the
-right. Click your name to open User Settings.
+The header has three zones:
+
+| Zone | Contents |
+|------|----------|
+| **Left** | WarmDesk logo — click it to go to the dashboard |
+| **Center** | Global search bar |
+| **Right** | Theme toggle (☀️ light / 🌙 dark / 🖥 system), language selector, user avatar |
+
+Click the **avatar** to open a dropdown menu with links to the dashboard,
+settings, admin panel (admins only), chats, time reports, and **Logout**.
 
 ### Footer
 
@@ -185,40 +193,15 @@ Click a card to open its detail panel. The panel is resizable. Fields:
 
 ### Writing in the card editor
 
-The description and comment editors use **EasyMDE**, which supports GitHub
-Flavored Markdown. Useful shortcuts:
+The description and comment fields are plain text areas that support
+**Markdown**. Markdown is rendered in read-only / preview mode. Native browser
+spellcheck is active while typing.
 
-| Action | Shortcut |
-|--------|----------|
-| Bold | Ctrl+B |
-| Italic | Ctrl+I |
-| Heading | Ctrl+H |
-| Unordered list | Ctrl+L |
-| Preview | Ctrl+P |
-| Insert emoji | Click 😊 in the toolbar |
-| @mention | Type `@` followed by a username |
-
-#### Emoticon shortcuts
-
-The editor automatically replaces common text emoticons with emoji as you type:
-
-| Type | Gets replaced with |
-|------|--------------------|
-| `:-)` | 😊 |
-| `:-)` | 😊 |
-| `:-D` | 😄 |
-| `;-)` | 😉 |
-| `:-(` | 😞 |
-| `>:-(` | 😠 |
-| `:'(` | 😢 |
-| `O:-)` | 😇 |
-| `<3` | ❤️ |
-| `:+1:` | 👍 |
-| `:-P` | 😛 |
-| `B-)` | 😎 |
-| `8-)` | 😎 |
-| `:-O` | 😮 |
-| `:-*` | 😘 |
+| Feature | How to use |
+|---------|------------|
+| **Markdown** | Type normally; rendered on save / when another user views the card |
+| **Insert emoji** | Click the 😊 button above the field |
+| **@mention** | Type `@` followed by a username; a dropdown suggests matching members |
 
 ### Checklist
 

@@ -2,6 +2,17 @@
 
 All notable changes to WarmDesk are documented here.
 
+## v0.4.1 — 2026-04-02
+
+### Fixed
+- **`logo-full.svg` not served in production** — the backend SPA catch-all was returning `index.html` for any path not explicitly registered; `logo-full.svg` is now registered as a static route in the router alongside `logo.svg`
+
+### Changed
+- **Migration tool config** — YAML section key renamed from `coworker:` to `warmdesk:`, environment variable overrides renamed from `COWORKER_URL` / `COWORKER_USERNAME` / `COWORKER_PASSWORD` / `COWORKER_PROJECT` to `WARMDESK_URL` / `WARMDESK_USERNAME` / `WARMDESK_PASSWORD` / `WARMDESK_PROJECT`, and the default config filename changed from `coworker-migrate.yaml` to `warmdesk-migrate.yaml`; Go type `CoworkerConfig` renamed to `WarmDeskConfig`; internal priority-map variable names updated to match
+- **Header logo** — the app header now uses the full WarmDesk logo (`logo-full.svg`) instead of the icon-only mark
+- **Documentation** — admin guide gains a Migration Tools section (§16) covering `warmdesk-export` / `warmdesk-import` usage, config, env vars, and column mapping; user guide corrects the header description and replaces the outdated EasyMDE editor reference with the plain-textarea reality; API reference fixes the API key format example; INSTALL.md lists all four distribution binaries
+- **`.gitignore`** — `.claude/` directory excluded from version control
+
 ## v0.4.0 — 2026-04-02
 
 ### Added
@@ -21,11 +32,11 @@ All notable changes to WarmDesk are documented here.
 ## v0.3.3 — 2026-04-02
 
 ### Added
-- **`coworker-export`** — standalone binary that reads a Coworker project (columns, cards, checklists, comments, labels, tags, time entries, attachments, topics and replies) and pushes it to Jira, Trello, OpenProject, or Ryver; supports `--config FILE` and `--dry-run`
-- **`coworker-import`** — standalone binary that reads a project from Jira, Trello, OpenProject, or Ryver and creates it in Coworker; same flags and config format
-- **`coworker-migrate.yaml.example`** — documented config file covering all four platforms; credentials can be supplied via the file, environment variables (`COWORKER_URL`, `COWORKER_USERNAME`, `COWORKER_PASSWORD`, `COWORKER_PROJECT`, `PLATFORM_API_TOKEN`, `PLATFORM_API_KEY`), or interactive prompts
-- **Column mapping** — `column_map` in the config translates Coworker column names to/from platform-specific status/list names; unmapped columns are passed through unchanged
-- Both binaries are built by `make build` and included in the distribution archive alongside `coworker-seed`
+- **`warmdesk-export`** — standalone binary that reads a WarmDesk project (columns, cards, checklists, comments, labels, tags, time entries, attachments, topics and replies) and pushes it to Jira, Trello, OpenProject, or Ryver; supports `--config FILE` and `--dry-run`
+- **`warmdesk-import`** — standalone binary that reads a project from Jira, Trello, OpenProject, or Ryver and creates it in WarmDesk; same flags and config format
+- **`warmdesk-migrate.yaml.example`** — documented config file covering all four platforms; credentials can be supplied via the file, environment variables (`WARMDESK_URL`, `WARMDESK_USERNAME`, `WARMDESK_PASSWORD`, `WARMDESK_PROJECT`, `PLATFORM_API_TOKEN`, `PLATFORM_API_KEY`), or interactive prompts
+- **Column mapping** — `column_map` in the config translates WarmDesk column names to/from platform-specific status/list names; unmapped columns are passed through unchanged
+- Both binaries are built by `make build` and included in the distribution archive alongside `warmdesk-seed`
 
 ### Platform notes
 - **Jira**: issues created via REST API v3; descriptions and comments in Atlassian Document Format; checklist items as Subtasks; time via worklogs; column mapped via workflow transitions
