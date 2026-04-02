@@ -58,15 +58,10 @@ async function handleSubmit() {
     await auth.login(form.value.login, form.value.password)
     router.push('/')
   } catch (e) {
-    const status = e.response?.status
-    const serverMsg = e.response?.data?.error
-    if (serverMsg) {
-      error.value = status ? `${serverMsg} (HTTP ${status})` : serverMsg
-    } else if (e.message) {
-      error.value = `Login failed: ${e.message}`
-    } else {
-      error.value = 'Login failed'
-    }
+    const data = e.response?.data
+    const serverMsg = data?.error
+      ?? (typeof data === 'string' ? (() => { try { return JSON.parse(data).error } catch { return data } })() : null)
+    error.value = serverMsg || e.message || 'Login failed'
   } finally {
     loading.value = false
   }
