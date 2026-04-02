@@ -20,7 +20,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/tonk/coworker/migrate"
+	"github.com/tonk/warmdesk/migrate"
 )
 
 func main() {
