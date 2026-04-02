@@ -58,7 +58,15 @@ async function handleSubmit() {
     await auth.login(form.value.login, form.value.password)
     router.push('/')
   } catch (e) {
-    error.value = e.response?.data?.error || 'Login failed'
+    const status = e.response?.status
+    const serverMsg = e.response?.data?.error
+    if (serverMsg) {
+      error.value = status ? `${serverMsg} (HTTP ${status})` : serverMsg
+    } else if (e.message) {
+      error.value = `Login failed: ${e.message}`
+    } else {
+      error.value = 'Login failed'
+    }
   } finally {
     loading.value = false
   }
