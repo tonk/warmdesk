@@ -8,8 +8,13 @@ function apiBase() {
   return server ? `${server}/api/v1` : '/api/v1'
 }
 
+// Use the fetch adapter so requests go through window.fetch.
+// index.html installs a proxy for window.fetch before the bundle loads;
+// on Windows Tauri that proxy is pointed at tauri-plugin-http by main.js,
+// routing every request through the native Rust HTTP client.
 const client = axios.create({
   headers: { 'Content-Type': 'application/json' },
+  adapter: 'fetch',
 })
 
 let isRefreshing = false

@@ -8,6 +8,21 @@
   </head>
   <body>
     <div id="app"></div>
+    <!--
+      Install a fetch proxy BEFORE the ES module bundle is evaluated.
+      Axios's fetch adapter captures window.fetch at module-load time via a
+      default parameter, so we cannot patch it from inside main.js.
+      The proxy delegates to window.__tauriFetch (set by main.js on Windows)
+      once it is available, and falls back to the native fetch otherwise.
+    -->
+    <script>
+      ;(function () {
+        var _native = window.fetch.bind(window)
+        window.fetch = function warmDeskFetch () {
+          return (window.__tauriFetch || _native).apply(this, arguments)
+        }
+      })()
+    </script>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
