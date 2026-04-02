@@ -33,11 +33,13 @@
         <button class="btn btn-ghost btn-sm" @click="continueWithCurrent">Continue</button>
       </div>
     </div>
+    <div class="connect-version">WarmDesk v{{ appVersion }}</div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
+const appVersion = __APP_VERSION__
 import { useRouter } from 'vue-router'
 import { setServerUrl, getServerUrl } from '@/api/serverConfig'
 
@@ -93,10 +95,17 @@ function continueWithCurrent() {
 .connect-page {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   background: var(--color-bg);
   padding: 24px;
+}
+
+.connect-version {
+  margin-top: 24px;
+  font-size: 12px;
+  color: var(--color-text-muted);
 }
 
 .connect-card {

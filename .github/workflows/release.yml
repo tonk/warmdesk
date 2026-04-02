@@ -137,6 +137,18 @@ jobs:
       - name: Install frontend dependencies
         run: cd frontend && npm ci
 
+      - name: Stamp version in tauri.conf.json
+        run: |
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#v}"
+          node -e "
+            const fs = require('fs');
+            const p = 'frontend/src-tauri/tauri.conf.json';
+            const c = JSON.parse(fs.readFileSync(p, 'utf8'));
+            c.version = process.env.VERSION;
+            fs.writeFileSync(p, JSON.stringify(c, null, 2) + '\n');
+          " VERSION="$VERSION"
+
       - name: Build desktop app (Linux)
         if: matrix.os == 'ubuntu-22.04'
         # NO_STRIP=true: linuxdeploy's bundled strip is too old for newer glibc.

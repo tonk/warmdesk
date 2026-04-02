@@ -43,6 +43,16 @@ jobs:
       - name: Install frontend dependencies
         run: cd frontend && npm ci
 
+      - name: Stamp version in tauri.conf.json
+        shell: pwsh
+        run: |
+          $tag = (git describe --tags --abbrev=0 2>$null) -replace '^v', ''
+          if (-not $tag) { $tag = "0.0.0" }
+          $p = "frontend/src-tauri/tauri.conf.json"
+          $c = Get-Content $p -Raw | ConvertFrom-Json
+          $c.version = $tag
+          $c | ConvertTo-Json -Depth 10 | Set-Content $p
+
       - name: Build
         run: cd frontend && npm run tauri:build -- --bundles nsis
 

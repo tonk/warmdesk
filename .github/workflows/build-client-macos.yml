@@ -46,6 +46,17 @@ jobs:
       - name: Install frontend dependencies
         run: cd frontend && npm ci
 
+      - name: Stamp version in tauri.conf.json
+        run: |
+          VERSION=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "0.0.0")
+          node -e "
+            const fs = require('fs');
+            const p = 'frontend/src-tauri/tauri.conf.json';
+            const c = JSON.parse(fs.readFileSync(p, 'utf8'));
+            c.version = process.env.VERSION;
+            fs.writeFileSync(p, JSON.stringify(c, null, 2) + '\n');
+          " VERSION="$VERSION"
+
       - name: Build universal DMG
         run: cd frontend && npm run tauri:build -- --bundles dmg --target universal-apple-darwin
 
