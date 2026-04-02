@@ -2,6 +2,11 @@
 
 All notable changes to Coworker are documented here.
 
+## v0.3.1 — 2026-04-02
+
+### Fixed
+- **Code blocks unreadable in dark mode** — inline code had a hard-coded `background: #f1f5f9` (the same near-white as dark-mode text), making code invisible; background is now `var(--color-border)` with an explicit `color: var(--color-text)`; fenced code blocks (`pre`) now use `var(--color-bg)` / `var(--color-text)` with a border; `pre code` resets the background to transparent so the outer block colour wins
+
 ## v0.3.0 — 2026-04-02
 
 ### Added

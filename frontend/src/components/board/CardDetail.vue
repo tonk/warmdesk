@@ -866,7 +866,30 @@ function renderMarkdown(text) {
 
 .comment-text { font-size: 13px; line-height: 1.5; }
 .comment-text :deep(p) { margin-bottom: 6px; }
-.comment-text :deep(code) { background: #f1f5f9; padding: 1px 4px; border-radius: 3px; font-size: 12px; }
+.comment-text :deep(code) {
+  background: var(--color-border);
+  color: var(--color-text);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 12px;
+}
+.comment-text :deep(pre) {
+  background: var(--color-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  overflow-x: auto;
+  margin: 6px 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.comment-text :deep(pre code) {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+}
 
 .watcher-chip {
   border-color: var(--color-text-muted) !important;

@@ -200,3 +200,4 @@ Create an application that has all these features and requirements
 - Fix report URL printed at bottom of page (suppressed via @page margin rules)
 - Fix PDF export missing pages (overflow: hidden on shell body clipped print output; overridden in @media print)
 - Fix print header duplicated/cut off across pages (position: fixed replaced with @page margin boxes); Coworker logo on page 1; "Coworker" + page number (n / total) in top margin on pages 2+
+- Fix code blocks unreadable in dark mode: inline code background changed from hard-coded #f1f5f9 to var(--color-border) with explicit text colour; fenced code blocks (pre) styled with var(--color-bg)/var(--color-text) and a border; pre code resets background to transparent
