@@ -1,5 +1,6 @@
 <template>
-  <aside class="app-sidebar">
+  <aside class="app-sidebar" :style="{ width: sidebarWidth + 'px' }">
+    <div class="resize-handle" :class="sidebarPos === 'right' ? 'handle-left' : 'handle-right'" @mousedown="startResize"></div>
 
     <!-- Starred Projects -->
     <section class="sidebar-section">
@@ -137,6 +138,46 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+
+const SIDEBAR_WIDTH_KEY = 'sidebar_width'
+const MIN_WIDTH = 150
+const MAX_WIDTH = 480
+const DEFAULT_WIDTH = 220
+
+const sidebarWidth = ref(
+  Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, parseInt(localStorage.getItem(SIDEBAR_WIDTH_KEY) || DEFAULT_WIDTH)))
+)
+
+let resizing = false
+let startX = 0
+let startWidth = 0
+
+function startResize(e) {
+  resizing = true
+  startX = e.clientX
+  startWidth = sidebarWidth.value
+  document.addEventListener('mousemove', onResize)
+  document.addEventListener('mouseup', stopResize)
+  document.body.style.cursor = 'col-resize'
+  document.body.style.userSelect = 'none'
+}
+
+function onResize(e) {
+  if (!resizing) return
+  const delta = e.clientX - startX
+  const sign = sidebarPos.value === 'right' ? -1 : 1
+  sidebarWidth.value = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth + sign * delta))
+}
+
+function stopResize() {
+  if (!resizing) return
+  resizing = false
+  localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.value)
+  document.removeEventListener('mousemove', onResize)
+  document.removeEventListener('mouseup', stopResize)
+  document.body.style.cursor = ''
+  document.body.style.userSelect = ''
+}
 import { RouterLink } from 'vue-router'
 import { useSidebarStore } from '@/stores/sidebar'
 import { useAuthStore } from '@/stores/auth'
@@ -145,6 +186,8 @@ import { useNotificationsStore } from '@/stores/notifications'
 const sidebarStore = useSidebarStore()
 const auth = useAuthStore()
 const notificationsStore = useNotificationsStore()
+
+const sidebarPos = computed(() => auth.user?.sidebar_position || localStorage.getItem('sidebar_position') || 'left')
 
 // Collapse state — persisted in localStorage
 const STORAGE_KEY = 'sidebar_open'
@@ -252,19 +295,36 @@ onMounted(() => {
 
 onUnmounted(() => {
   clearInterval(pollInterval)
+  stopResize()
 })
 </script>
 
 <style scoped>
 .app-sidebar {
-  width: 220px;
   flex-shrink: 0;
+  position: relative;
   background: var(--color-surface);
   border-right: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   padding: 12px 0;
+}
+
+.resize-handle {
+  position: absolute;
+  top: 0;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 10;
+}
+.resize-handle.handle-right { right: -3px; }
+.resize-handle.handle-left  { left: -3px; }
+.resize-handle:hover,
+.resize-handle:active {
+  background: var(--color-primary);
+  opacity: 0.4;
 }
 
 .sidebar-section {

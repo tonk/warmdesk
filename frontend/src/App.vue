@@ -118,6 +118,33 @@ watch(() => auth.isLoggedIn, (loggedIn) => {
   else disconnectUserWs()
 }, { immediate: true })
 
+// ── Zoom (Ctrl +/-/0) ────────────────────────────────────────────────────────
+const ZOOM_KEY = 'app_zoom'
+const ZOOM_STEP = 0.1
+const ZOOM_MIN = 0.5
+const ZOOM_MAX = 2.0
+
+function applyZoom(level) {
+  document.documentElement.style.zoom = level
+  localStorage.setItem(ZOOM_KEY, level)
+}
+
+function onKeyZoom(e) {
+  if (!e.ctrlKey && !e.metaKey) return
+  if (e.key === '+' || e.key === '=' ) {
+    e.preventDefault()
+    const current = parseFloat(localStorage.getItem(ZOOM_KEY) || 1)
+    applyZoom(Math.min(ZOOM_MAX, Math.round((current + ZOOM_STEP) * 10) / 10))
+  } else if (e.key === '-') {
+    e.preventDefault()
+    const current = parseFloat(localStorage.getItem(ZOOM_KEY) || 1)
+    applyZoom(Math.max(ZOOM_MIN, Math.round((current - ZOOM_STEP) * 10) / 10))
+  } else if (e.key === '0') {
+    e.preventDefault()
+    applyZoom(1)
+  }
+}
+
 // ── Idle session timeout ─────────────────────────────────────────────────────
 const ACTIVITY_EVENTS = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll']
 
@@ -135,10 +162,14 @@ watch([() => auth.isLoggedIn, () => systemStore.sessionTimeoutMinutes], ([logged
 
 onMounted(() => {
   ACTIVITY_EVENTS.forEach(e => window.addEventListener(e, onActivity, { passive: true }))
+  window.addEventListener('keydown', onKeyZoom)
+  const savedZoom = localStorage.getItem(ZOOM_KEY)
+  if (savedZoom) applyZoom(parseFloat(savedZoom))
 })
 
 onUnmounted(() => {
   ACTIVITY_EVENTS.forEach(e => window.removeEventListener(e, onActivity))
+  window.removeEventListener('keydown', onKeyZoom)
   auth.stopIdleTimer()
   disconnectUserWs()
 })
