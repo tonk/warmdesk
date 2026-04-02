@@ -216,3 +216,7 @@ Create an application that has all these features and requirements
 - Exclude .claude/ directory from version control via .gitignore
 - Resizable sidebar: drag the inner edge to set a custom width (150–480px), persisted in localStorage; handle moves to the correct edge when the sidebar is on the right
 - App-wide zoom via Ctrl+/Ctrl-/Ctrl+0 (50%–200%, 10% steps), persisted in localStorage and restored on next load
+- Fix Windows desktop app connection: install @tauri-apps/plugin-http JS package so window.fetch is patched at startup and all requests go through the native Rust HTTP client instead of WebView2 (which blocked them as mixed content)
+- Fix desktop app Axios requests bypassing tauri-plugin-http: switch to fetch adapter in Tauri so Axios calls are also intercepted by the native client
+- Fix GitHub Actions Go cache: point setup-go cache-dependency-path to backend/go.sum
+- Opt GitHub Actions into Node.js 24 via FORCE_JAVASCRIPT_ACTIONS_TO_NODE24

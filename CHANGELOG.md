@@ -2,6 +2,16 @@
 
 All notable changes to WarmDesk are documented here.
 
+## v0.4.3 — 2026-04-02
+
+### Fixed
+- **Windows desktop app cannot connect to server** — the `@tauri-apps/plugin-http` JavaScript package was missing; the Rust crate was present but without the JS counterpart `window.fetch` was never patched, so WebView2 made all HTTP requests itself and blocked them as mixed content (`https://tauri.localhost` → `http://server`); installing the package and importing it at startup routes every request through the native Rust HTTP client
+- **Axios requests in desktop app bypassed `tauri-plugin-http`** — Axios defaults to `XMLHttpRequest`, which is not intercepted by the plugin; the desktop app now uses the `fetch` adapter so Axios requests also go through the native HTTP client
+- **GitHub Actions Go module cache failing** — `setup-go` was searching for `go.sum` in the repo root; path corrected to `backend/go.sum`
+
+### Changed
+- **GitHub Actions now runs on Node.js 24** — opted in via `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24` ahead of the June 2026 forced migration
+
 ## v0.4.2 — 2026-04-02
 
 ### Added
