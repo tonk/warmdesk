@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	appws "github.com/tonk/coworker/ws"
+	appws "github.com/tonk/warmdesk/ws"
 )
 
 func GetOnlineUsers(c *gin.Context) {

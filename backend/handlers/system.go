@@ -8,9 +8,9 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/tonk/coworker/config"
-	"github.com/tonk/coworker/database"
-	"github.com/tonk/coworker/models"
+	"github.com/tonk/warmdesk/config"
+	"github.com/tonk/warmdesk/database"
+	"github.com/tonk/warmdesk/models"
 )
 
 const (
@@ -238,10 +238,10 @@ func AdminSendTestEmail(c *gin.Context) {
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	from := cfg.From
 	if from == "" {
-		from = "coworker@localhost"
+		from = "warmdesk@localhost"
 	}
-	body := "This is a test email from Coworker. Your SMTP configuration is working correctly."
-	msg := fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: Coworker SMTP test\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n%s",
+	body := "This is a test email from WarmDesk. Your SMTP configuration is working correctly."
+	msg := fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: WarmDesk SMTP test\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n%s",
 		from, req.To, body)
 
 	var auth smtp.Auth

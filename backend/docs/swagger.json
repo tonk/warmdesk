@@ -2,10 +2,10 @@
     "swagger": "2.0",
     "info": {
         "description": "Self-hosted project management tool — Kanban boards, team chat, discussions, and time reporting.",
-        "title": "Coworker API",
+        "title": "WarmDesk API",
         "contact": {
-            "name": "Coworker",
-            "url": "https://github.com/tonk/coworker"
+            "name": "WarmDesk",
+            "url": "https://github.com/tonk/warmdesk"
         },
         "license": {
             "name": "MIT"

@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 
-const GITHUB_REPO = 'tonk/coworker'
+const GITHUB_REPO = 'tonk/warmdesk'
 const CACHE_KEY = 'update_check'
 
 // Compare two semver strings (strips leading 'v'). Returns true if b > a.

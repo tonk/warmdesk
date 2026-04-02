@@ -1,7 +1,7 @@
 {
-  "productName": "Coworker",
+  "productName": "WarmDesk",
   "version": "0.3.2",
-  "identifier": "com.coworker.desktop",
+  "identifier": "com.warmdesk.desktop",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
@@ -12,7 +12,7 @@
     "withGlobalTauri": false,
     "windows": [
       {
-        "title": "Coworker",
+        "title": "WarmDesk",
         "width": 1280,
         "height": 800,
         "minWidth": 900,

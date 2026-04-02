@@ -10,8 +10,8 @@ const docTemplate = `{
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
         "contact": {
-            "name": "Coworker",
-            "url": "https://github.com/tonk/coworker"
+            "name": "WarmDesk",
+            "url": "https://github.com/tonk/warmdesk"
         },
         "license": {
             "name": "MIT"
@@ -2069,7 +2069,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8080",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
-	Title:            "Coworker API",
+	Title:            "WarmDesk API",
 	Description:      "Self-hosted project management tool — Kanban boards, team chat, discussions, and time reporting.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

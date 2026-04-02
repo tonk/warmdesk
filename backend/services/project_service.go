@@ -4,8 +4,8 @@ import (
 	"errors"
 	"unicode"
 
-	"github.com/tonk/coworker/database"
-	"github.com/tonk/coworker/models"
+	"github.com/tonk/warmdesk/database"
+	"github.com/tonk/warmdesk/models"
 )
 
 var (
@@ -76,7 +76,7 @@ func GenerateSlug(name string) string {
 }
 
 // GenerateKeyPrefix creates a 3-letter uppercase abbreviation from a project name.
-// Examples: "Coworker" → "COW", "My Project" → "MYP", "My Big Task" → "MBT"
+// Examples: "WarmDesk" → "WAR", "My Project" → "MYP", "My Big Task" → "MBT"
 func GenerateKeyPrefix(name string) string {
 	// Split into words by non-alphanumeric characters
 	var words [][]rune

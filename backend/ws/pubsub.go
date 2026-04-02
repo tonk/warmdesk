@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-const broadcastChannel = "coworker:broadcast"
+const broadcastChannel = "warmdesk:broadcast"
 
 // PubSub is the interface for cross-instance message delivery.
 // The memory implementation handles single-instance deployments;

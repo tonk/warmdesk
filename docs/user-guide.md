@@ -1,4 +1,4 @@
-# Coworker — User Guide
+# WarmDesk — User Guide
 
 ## Contents
 
@@ -20,7 +20,7 @@
 
 ### Registering
 
-Open your Coworker URL in a browser. If public registration is enabled you will
+Open your WarmDesk URL in a browser. If public registration is enabled you will
 see a **Register** link on the login page. Fill in a username, display name,
 email address, and password and click **Register**. You are logged in
 immediately.
@@ -30,7 +30,7 @@ you (see the [Admin Guide](admin-guide.md)).
 
 ### Logging in
 
-Enter your username and password. Coworker issues a short-lived JWT access
+Enter your username and password. WarmDesk issues a short-lived JWT access
 token (15 minutes) and a 7-day refresh token that is used silently to keep you
 logged in as long as your browser tab is open.
 
@@ -68,7 +68,7 @@ display name on the right.
 
 ### Themes
 
-Coworker supports **Light**, **Dark**, and **System** (follows your OS
+WarmDesk supports **Light**, **Dark**, and **System** (follows your OS
 preference) themes. Change the theme in User Settings at any time.
 
 ---
@@ -237,7 +237,7 @@ size.
 ### Git Links
 
 When a commit message or pull request / issue title contains a card reference
-(e.g. `PRJ-42`), Coworker creates a link automatically. Each link shows:
+(e.g. `PRJ-42`), WarmDesk creates a link automatically. Each link shows:
 
 - **Platform badge** — GitHub, GitLab, Gitea, or Forgejo
 - **Type** — Commit, Pull Request, or Issue
@@ -350,7 +350,7 @@ The popup dismisses automatically after 6 seconds.
 
 ### Email notifications
 
-If you are **offline** (no open tab) when someone mentions you, Coworker sends
+If you are **offline** (no open tab) when someone mentions you, WarmDesk sends
 an email to your registered address — provided the administrator has configured
 SMTP. The email contains the sender, context, and message preview.
 

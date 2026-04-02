@@ -1,4 +1,4 @@
-# Coworker
+# WarmDesk
 
 A self-hosted, multi-user project management tool with Kanban boards, real-time
 collaboration, direct messaging, time tracking, and a ticket API.
@@ -83,7 +83,7 @@ Open **http://localhost:5173** in your browser.
 ```bash
 make build
 cd dist
-WEB_DIR=./web ./coworker
+WEB_DIR=./web ./warmdesk
 ```
 
 Open **http://localhost:8080**.
@@ -96,8 +96,8 @@ and conversations):
 
 ```bash
 cd dist
-./coworker-seed           # seed demo data
-./coworker-seed --reset   # wipe and re-seed
+./warmdesk-seed           # seed demo data
+./warmdesk-seed --reset   # wipe and re-seed
 ```
 
 Demo accounts created (password for all: `demo1234`):
@@ -120,7 +120,7 @@ Demo accounts created (password for all: `demo1234`):
 Copy the example config file and edit it:
 
 ```bash
-cp coworker.yaml.example coworker.yaml
+cp warmdesk.yaml.example warmdesk.yaml
 ```
 
 Settings can also be provided as environment variables, which always take precedence over the config file. Key options:
@@ -129,7 +129,7 @@ Settings can also be provided as environment variables, which always take preced
 |--------|---------|---------|-------------|
 | `port` | `PORT` | `8080` | HTTP listen port |
 | `db_driver` | `DB_DRIVER` | `sqlite` | `sqlite` / `postgres` / `mysql` |
-| `db_dsn` | `DB_DSN` | `./coworker.db` | Database connection string |
+| `db_dsn` | `DB_DSN` | `./warmdesk.db` | Database connection string |
 | `jwt_secret` | `JWT_SECRET` | *(change this)* | Secret for signing JWT tokens |
 | `allowed_origins` | `ALLOWED_ORIGINS` | `http://localhost:8080` | CORS allowed origins |
 | `default_locale` | `DEFAULT_LOCALE` | `en` | Default UI language for new users |

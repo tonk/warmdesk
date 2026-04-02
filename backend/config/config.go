@@ -35,11 +35,11 @@ type SMTPConfig struct {
 
 // Load reads configuration with the following priority (highest first):
 //  1. Environment variables
-//  2. Config file (path from --config flag, CONFIG_FILE env var, or coworker.yaml)
+//  2. Config file (path from --config flag, CONFIG_FILE env var, or warmdesk.yaml)
 //  3. Built-in defaults
 //
 // Pass the value of the --config CLI flag as configPath; an empty string
-// falls back to the CONFIG_FILE env var and then to "coworker.yaml".
+// falls back to the CONFIG_FILE env var and then to "warmdesk.yaml".
 func Load(configPath string) *Config {
 	cfg := defaults()
 	loadFile(cfg, configPath)
@@ -51,7 +51,7 @@ func defaults() *Config {
 	return &Config{
 		Port:           "8080",
 		DBDriver:       "sqlite",
-		DBDSN:          "./coworker.db",
+		DBDSN:          "./warmdesk.db",
 		JWTSecret:      "change-me-in-production",
 		AllowedOrigins: "http://localhost:5173",
 		WebDir:         "",
@@ -70,7 +70,7 @@ func loadFile(cfg *Config, flagPath string) {
 		path = os.Getenv("CONFIG_FILE")
 	}
 	if path == "" {
-		path = "coworker.yaml"
+		path = "warmdesk.yaml"
 	}
 
 	data, err := os.ReadFile(path)

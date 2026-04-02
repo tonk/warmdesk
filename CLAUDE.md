@@ -1,6 +1,6 @@
-# Coworker — Developer Guide for Claude
+# WarmDesk — Developer Guide for Claude
 
-Coworker is a self-hosted project management tool (Kanban boards, team chat, discussions, time reporting). It has a Go backend and a Vue 3 frontend; both live in this repository. A Tauri wrapper produces native desktop apps from the same frontend code.
+WarmDesk is a self-hosted project management tool (Kanban boards, team chat, discussions, time reporting). It has a Go backend and a Vue 3 frontend; both live in this repository. A Tauri wrapper produces native desktop apps from the same frontend code.
 
 ---
 
@@ -17,7 +17,7 @@ npm install
 npm run dev
 ```
 
-No database setup required: SQLite is the default and the file (`coworker.db`) is created automatically.
+No database setup required: SQLite is the default and the file (`warmdesk.db`) is created automatically.
 
 ---
 
@@ -34,7 +34,7 @@ make windows-installer  # Windows NSIS installer
 Production:
 ```bash
 cd dist
-WEB_DIR=./web ./coworker
+WEB_DIR=./web ./warmdesk
 ```
 
 ---
@@ -72,15 +72,15 @@ deploy/              # systemd / nginx / apache templates
 
 ## Configuration
 
-Config is loaded in priority order: CLI flag `--config` → `CONFIG_FILE` env var → `coworker.yaml` in CWD → built-in defaults. Every YAML key has a matching environment variable override.
+Config is loaded in priority order: CLI flag `--config` → `CONFIG_FILE` env var → `warmdesk.yaml` in CWD → built-in defaults. Every YAML key has a matching environment variable override.
 
-Key settings (`coworker.yaml.example` has full documentation):
+Key settings (`warmdesk.yaml.example` has full documentation):
 
 | Setting | Env var | Default |
 |---|---|---|
 | `port` | `PORT` | `8080` |
 | `db_driver` | `DB_DRIVER` | `sqlite` |
-| `db_dsn` | `DB_DSN` | `./coworker.db` |
+| `db_dsn` | `DB_DSN` | `./warmdesk.db` |
 | `jwt_secret` | `JWT_SECRET` | *(change in prod)* |
 | `web_dir` | `WEB_DIR` | `dist/web` |
 | `upload_dir` | `UPLOAD_DIR` | `./uploads` |

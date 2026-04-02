@@ -4,8 +4,8 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/tonk/coworker/database"
-	"github.com/tonk/coworker/models"
+	"github.com/tonk/warmdesk/database"
+	"github.com/tonk/warmdesk/models"
 )
 
 // cardRefRe matches card references like PRJ-42 (2-8 uppercase letters, dash, digits).

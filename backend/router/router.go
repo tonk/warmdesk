@@ -7,9 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"github.com/tonk/coworker/handlers"
-	"github.com/tonk/coworker/middleware"
-	"github.com/tonk/coworker/services"
+	"github.com/tonk/warmdesk/handlers"
+	"github.com/tonk/warmdesk/middleware"
+	"github.com/tonk/warmdesk/services"
 )
 
 func Setup(authSvc *services.AuthService, allowedOrigins string, webDir string, apiLog bool, uploadDir string) *gin.Engine {

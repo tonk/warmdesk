@@ -6,10 +6,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/tonk/coworker/config"
-	"github.com/tonk/coworker/database"
-	"github.com/tonk/coworker/models"
-	appws "github.com/tonk/coworker/ws"
+	"github.com/tonk/warmdesk/config"
+	"github.com/tonk/warmdesk/database"
+	"github.com/tonk/warmdesk/models"
+	appws "github.com/tonk/warmdesk/ws"
 )
 
 // smtpConfigReader is set by main to avoid an import cycle
@@ -53,7 +53,7 @@ func (s *EmailService) Send(to, subject, body string) error {
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	from := cfg.From
 	if from == "" {
-		from = "coworker@localhost"
+		from = "warmdesk@localhost"
 	}
 
 	msg := fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: %s\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n%s",

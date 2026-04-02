@@ -122,12 +122,12 @@ Create an application that has all these features and requirements
   * Admin can set a company name and logo (URL or uploaded image)
   * Used in report headers
 - Demo seed tool
-  * A standalone `coworker-seed` binary included in the distribution
+  * A standalone `warmdesk-seed` binary included in the distribution
   * Populates the database with demo users (admin, members, viewer), projects,
     cards, checklists, comments, time entries, and discussion topics
   * Idempotent — safe to run multiple times; supports --reset flag
 
-- Add README.md with explanation of Coworker
+- Add README.md with explanation of WarmDesk
 - Add systemd example service files
 - Add Nginx example configuration file
 - Add Apache example configuration file
@@ -199,7 +199,7 @@ Create an application that has all these features and requirements
 - Fix report date/time not following configured format (was using toLocaleString; now uses useDateFormat composable)
 - Fix report URL printed at bottom of page (suppressed via @page margin rules)
 - Fix PDF export missing pages (overflow: hidden on shell body clipped print output; overridden in @media print)
-- Fix print header duplicated/cut off across pages (position: fixed replaced with @page margin boxes); Coworker logo on page 1; "Coworker" + page number (n / total) in top margin on pages 2+
+- Fix print header duplicated/cut off across pages (position: fixed replaced with @page margin boxes); WarmDesk logo on page 1; "WarmDesk" + page number (n / total) in top margin on pages 2+
 - Fix code blocks unreadable in dark mode: inline code background changed from hard-coded #f1f5f9 to var(--color-border) with explicit text colour; fenced code blocks (pre) styled with var(--color-bg)/var(--color-text) and a border; pre code resets background to transparent
 - Fix desktop app cannot connect to server: add tauri-plugin-http so globalThis.fetch uses a native HTTP client that bypasses CORS (Windows Tauri origin https://tauri.localhost was blocked by server CORS policy)
 - Fix blank screen on Linux desktop app: set WEBKIT_DISABLE_DMABUF_RENDERER=1 before Tauri starts to work around silent WebKitGTK DMA-BUF renderer failure on many GPU configurations

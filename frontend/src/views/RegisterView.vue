@@ -2,7 +2,7 @@
   <div class="auth-page">
     <div class="auth-card">
       <div class="auth-logo">
-        <img src="/logo.svg" alt="Coworker" style="height:36px;width:auto" />
+        <img src="/logo.svg" alt="WarmDesk" style="height:36px;width:auto" />
       </div>
       <h1 class="auth-title">{{ $t('auth.register_title') }}</h1>
       <form @submit.prevent="handleSubmit">

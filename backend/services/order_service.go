@@ -3,8 +3,8 @@ package services
 import (
 	"math"
 
-	"github.com/tonk/coworker/database"
-	"github.com/tonk/coworker/models"
+	"github.com/tonk/warmdesk/database"
+	"github.com/tonk/warmdesk/models"
 )
 
 const minGap = 1e-9

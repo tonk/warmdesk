@@ -1,4 +1,4 @@
-module github.com/tonk/coworker
+module github.com/tonk/warmdesk
 
 go 1.25
 

@@ -1,4 +1,4 @@
-const KEY = 'coworker_server_url'
+const KEY = 'warmdesk_server_url'
 
 export function getServerUrl() {
   return localStorage.getItem(KEY) || ''
@@ -18,7 +18,7 @@ export function isServerConfigured() {
 }
 
 // Convert an HTTP/HTTPS server URL to a WebSocket URL for the given path.
-// e.g. https://coworker.example.com + /api/v1/ws/slug → wss://coworker.example.com/api/v1/ws/slug
+// e.g. https://warmdesk.example.com + /api/v1/ws/slug → wss://warmdesk.example.com/api/v1/ws/slug
 export function getWsUrl(path) {
   const base = getServerUrl()
   if (!base) return null
