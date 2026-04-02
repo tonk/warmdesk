@@ -220,3 +220,5 @@ Create an application that has all these features and requirements
 - Fix desktop app Axios requests bypassing tauri-plugin-http: switch to fetch adapter in Tauri so Axios calls are also intercepted by the native client
 - Fix GitHub Actions Go cache: point setup-go cache-dependency-path to backend/go.sum
 - Opt GitHub Actions into Node.js 24 via FORCE_JAVASCRIPT_ACTIONS_TO_NODE24
+- Fix Linux desktop app blank screen regression (v0.4.3 applied tauri-plugin-http fetch patch on all platforms; now Windows-only)
+- Fix Windows desktop app connection: await plugin-http import before Vue mounts so Axios sees the patched fetch from the first request

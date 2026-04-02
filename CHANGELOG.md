@@ -2,6 +2,12 @@
 
 All notable changes to WarmDesk are documented here.
 
+## v0.4.4 — 2026-04-02
+
+### Fixed
+- **Linux desktop app blank screen (regression in v0.4.3)** — the `tauri-plugin-http` fetch patch was applied on all platforms; on Linux (WebKitGTK, `tauri://` origin) this caused a blank screen on startup; the patch is now scoped to Windows only where the mixed-content restriction actually applies
+- **Windows desktop app still could not connect (v0.4.3 partial fix)** — the plugin import was fire-and-forget; Vue mounted and fired the first API request before `window.fetch` was patched; the app now awaits the import before mounting so Axios sees the patched fetch from the very first request
+
 ## v0.4.3 — 2026-04-02
 
 ### Fixed
