@@ -2,11 +2,15 @@
 
 All notable changes to Coworker are documented here.
 
-## v0.3.0 — 2026-04-01
+## v0.3.0 — 2026-04-02
 
 ### Added
 - **Close / reopen cards** — a Close Card button in the card detail footer marks a card as closed; closed cards appear on the board with a strikethrough title and reduced opacity and can be reopened at any time; closed cards are included in time reports with a "Closed" badge and strikethrough in the title column
 - **Closed cards in time reports** — the report response now carries a `closed` flag per card; closed cards are visually distinguished in the report table (strikethrough + red "Closed" badge) without being excluded from totals
+- **Copy card** — a "Copy Card" button in the card detail footer duplicates the card (title, description, priority, due date, labels, tags) in the same column; the copy is appended below the original with "(copy)" appended to the title; board updates in real time for all connected users
+- **Transfer card** — a "Transfer…" panel in the card detail lets you copy or move a card to any project you have access to; choose a destination project and column, then click "Copy Here" or "Move Here"; labels and assignees are intentionally not copied (they are project-specific); the originating project board updates instantly when a card is moved away
+- **Open card count in Admin → Projects** — the projects table now shows an "Open Cards" column with the number of non-closed cards per project
+- **Open card count on project tiles** — the dashboard project grid shows the open card count below each project description
 
 ### Fixed
 - **Date format on board cards** — due dates were rendered using the UTC date from the ISO timestamp, causing an off-by-one in negative-UTC timezones; the date portion is now sliced before formatting so it matches the user's local calendar date
@@ -16,6 +20,11 @@ All notable changes to Coworker are documented here.
 - **Spellcheck on card title** — added `spellcheck="true"` and `lang` to the title input field
 - **Session lost on browser close** — auth tokens (access + refresh) and the cached user object were stored in `localStorage`, surviving browser restarts; moved to `sessionStorage` so closing the browser or tab ends the session as expected
 - **Project switching in sidebar not updating board** — Vue Router reuses the `BoardView` component when navigating between projects so `onMounted` never fires again; fixed by watching `route.params.slug` and reloading board data, project info, members, and the WebSocket connection when the slug changes; `useWebSocket` now accepts a reactive ref so the connection URL updates correctly
+- **Board cards showing light background in dark mode** — `.board-card` had a hard-coded `background: #fff`; replaced with `var(--color-surface)` so it respects the active theme; priority badge colours now also have explicit `[data-theme="dark"]` overrides
+- **Report date/time not following configured format** — the "Generated" timestamp and card update dates in the time report used `toLocaleString`, producing browser-locale formatting regardless of user settings; now uses the `useDateFormat` composable so the output matches the user's configured date/time format
+- **Report URL printed at bottom of page** — browsers print the page URL in the margin area by default; suppressed via `@page { margin: 0 }` and explicit empty `@top-*` and `@bottom-*` margin box rules
+- **PDF export missing pages** — `.app-shell-body { overflow: hidden }` clipped the print output to the visible viewport, truncating multi-page reports; overridden with `overflow: visible; height: auto` in `@media print`
+- **Print header duplicated/cut off across pages** — the `position: fixed` per-page header was positioned relative to the CSS content area, overlapping content on pages 2 and onwards; replaced with native CSS `@page` margin boxes: the Coworker logo appears inline at the top of page 1, and "Coworker" text + page number (`n / total`) appear in the top margin on subsequent pages via `@page @top-left` and `@page @top-right`
 
 ## v0.2.10 — 2026-03-29
 

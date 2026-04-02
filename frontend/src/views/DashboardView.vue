@@ -25,6 +25,7 @@
             <div class="project-card-body">
               <h3>{{ project.name }}</h3>
               <p v-if="project.description" class="project-desc">{{ project.description }}</p>
+              <p class="project-open-cards">{{ project.open_card_count }} {{ $t('board.open_cards') }}</p>
               <div class="project-actions">
                 <button
                   class="btn btn-ghost btn-sm star-btn"
@@ -138,7 +139,8 @@ async function handleCreate() {
 
 .project-card-body { padding: 16px; }
 .project-card-body h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
-.project-desc { font-size: 13px; color: var(--color-text-muted); margin-bottom: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.project-desc { font-size: 13px; color: var(--color-text-muted); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.project-open-cards { font-size: 12px; color: var(--color-text-muted); margin-bottom: 12px; }
 
 .project-actions { display: flex; justify-content: flex-end; }
 

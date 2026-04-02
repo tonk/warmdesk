@@ -122,7 +122,18 @@
     "sort_desc": "Descendente",
     "time_spent": "Tiempo dedicado",
     "time_hours": "h",
-    "time_minutes": "m"
+    "time_minutes": "m",
+    "copy_card": "Copiar tarjeta",
+    "copy_card_success": "Tarjeta copiada",
+    "move_card_success": "Tarjeta movida",
+    "transfer_card": "Transferir…",
+    "transfer_project": "Proyecto destino",
+    "transfer_column": "Columna destino",
+    "transfer_copy": "Copiar aquí",
+    "transfer_move": "Mover aquí",
+    "select_project": "Seleccionar proyecto",
+    "select_column": "Seleccionar columna",
+    "open_cards": "tarjetas abiertas"
   },
   "chat": {
     "title": "Chat del equipo",
@@ -151,6 +162,7 @@
     "role_viewer": "Visor",
     "last_login": "Último inicio de sesión",
     "owner": "Propietario",
+    "open_cards": "Tarjetas abiertas",
     "edit_user": "Editar usuario",
     "edit_project": "Editar proyecto",
     "unarchive": "Desarchivar",

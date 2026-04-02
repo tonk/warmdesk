@@ -1,6 +1,6 @@
 {
   "productName": "Coworker",
-  "version": "0.2.6",
+  "version": "0.3.0",
   "identifier": "com.coworker.desktop",
   "build": {
     "frontendDist": "../dist",

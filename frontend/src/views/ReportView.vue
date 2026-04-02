@@ -81,6 +81,12 @@
     </div>
 
     <!-- Report content (visible on screen and when printing) -->
+    <!-- Per-page header: hidden on screen, repeats on every printed page via position:fixed -->
+    <div class="print-page-header" v-if="report">
+      <img src="/logo.svg" alt="Coworker" class="print-logo" />
+      <span class="print-app-name">Coworker</span>
+    </div>
+
     <div class="report-content" v-if="report">
       <!-- Report Header -->
       <div class="report-header">
@@ -88,12 +94,12 @@
           <img v-if="report.company_logo" :src="report.company_logo" alt="Logo" class="report-logo" @error="report.company_logo = ''" />
         </div>
         <div class="report-header-center">
-          <div class="report-company-name">{{ report.company_name || 'Time Report' }}</div>
+          <div v-if="report.company_name" class="report-company-name">{{ report.company_name }}</div>
           <div class="report-title">{{ $t('report.title') }}</div>
           <div class="report-period-label">{{ report.period_label }}</div>
         </div>
         <div class="report-header-right">
-          <div class="report-meta">{{ $t('report.generated_at') }}: {{ report.generated_at }}</div>
+          <div class="report-meta">{{ $t('report.generated_at') }}: {{ formatUTCTimestamp(report.generated_at) }}</div>
         </div>
       </div>
 
@@ -161,8 +167,10 @@ import { useI18n } from 'vue-i18n'
 import { projectsApi } from '@/api/projects'
 import { reportsApi } from '@/api/reports'
 import { messagesApi } from '@/api/messages'
+import { useDateFormat } from '@/composables/useDateFormat'
 
 const { t } = useI18n()
+const { formatDateTime } = useDateFormat()
 
 const loading = ref(false)
 const report = ref(null)
@@ -212,6 +220,13 @@ function onClickOutsideAssignee(e) {
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December']
 
+// Backend returns generated_at as a UTC string "YYYY-MM-DD HH:mm" without timezone marker.
+// Append 'Z' so the JS Date constructor treats it as UTC, then format via the user's setting.
+function formatUTCTimestamp(utcStr) {
+  if (!utcStr) return utcStr
+  return formatDateTime(utcStr.replace(' ', 'T') + ':00Z')
+}
+
 function formatMinutes(minutes) {
   const h = Math.floor(minutes / 60)
   const m = minutes % 60
@@ -249,7 +264,7 @@ async function exportXLSX() {
   // Summary sheet
   const summaryData = [
     [(report.value.company_name || 'Time Report') + ' — ' + report.value.period_label],
-    ['Generated: ' + report.value.generated_at],
+    ['Generated: ' + formatUTCTimestamp(report.value.generated_at)],
     [],
     ['Project', 'Task', 'Ref', 'Assignees', 'Date', 'Time (min)', 'Time']
   ]
@@ -597,8 +612,53 @@ onUnmounted(() => {
 .placeholder-icon { font-size: 48px; margin-bottom: 16px; }
 .report-placeholder p { font-size: 15px; }
 
+/* Per-page print header — hidden on screen */
+.print-page-header { display: none; }
+
 /* Print styles */
+@page {
+  margin: 14mm 1cm 12mm 1cm;
+  size: auto;
+  /* App name top-left on pages 2+, page number top-right on all pages */
+  @top-left {
+    content: "Coworker";
+    font-size: 11pt;
+    font-weight: 700;
+    color: #6366f1;
+    vertical-align: middle;
+  }
+  @top-center  { content: ""; }
+  @top-right {
+    content: counter(page) " / " counter(pages);
+    font-size: 9pt;
+    color: #64748b;
+    vertical-align: middle;
+  }
+  @bottom-left   { content: ""; }
+  @bottom-center { content: ""; }
+  @bottom-right  { content: ""; }
+}
+
+/* Page 1: logo banner replaces the margin-box "Coworker" text */
+@page :first {
+  @top-left  { content: ""; }
+}
+
 @media print {
+  /* Logo banner at top of page 1 — in normal flow, not fixed */
+  .print-page-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 4mm;
+    margin-bottom: 6mm;
+    border-bottom: 2px solid #6366f1;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .print-logo { height: 26px; width: auto; }
+  .print-app-name { font-size: 13pt; font-weight: 700; color: #6366f1; letter-spacing: 0.03em; }
+
   /* Hide everything outside the report content */
   :global(.app-shell-header),
   :global(.app-sidebar),
@@ -606,18 +666,28 @@ onUnmounted(() => {
   .no-print { display: none !important; }
 
   /* Make the shell fill the page without sidebar layout */
-  :global(.app-shell-body) { display: block !important; }
-  :global(.app-shell-content) { overflow: visible !important; }
+  :global(.app-shell-body) {
+    display: block !important;
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+  :global(.app-shell-content) {
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
 
   .report-page { background: #fff; }
-  .report-content { max-width: 100%; padding: 0; margin: 0; }
+  .report-content { max-width: 100%; padding: 1cm; margin: 0; }
   .report-header { border-bottom: 3px solid #6366f1; }
   .report-company-name { color: #1e293b; }
   .report-period-label { color: #6366f1; }
   .project-header { background: #6366f1; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .report-table th { background: #f8fafc; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .subtotal-row td { background: #f0f4ff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .report-project { break-inside: avoid; }
+  .report-project { break-inside: auto; }
+  .project-header { break-after: avoid; }
   .grand-total-row { border: 2px solid #6366f1; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .time-value { color: #6366f1; }
   .card-ref-badge { color: #6366f1; border-color: #6366f1; }

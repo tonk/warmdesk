@@ -79,6 +79,7 @@
                 <th>{{ $t('project.project_name') }}</th>
                 <th>{{ $t('admin.owner') }}</th>
                 <th>Status</th>
+                <th>{{ $t('admin.open_cards') }}</th>
                 <th>{{ $t('common.actions') }}</th>
               </tr>
             </thead>
@@ -96,6 +97,9 @@
                   <span :class="['badge', project.is_archived ? 'badge-inactive' : 'badge-active']">
                     {{ project.is_archived ? $t('admin.archived') : $t('admin.active') }}
                   </span>
+                </td>
+                <td>
+                  <span class="open-cards-count">{{ project.open_card_count }}</span>
                 </td>
                 <td class="actions-cell">
                   <button class="btn btn-secondary btn-sm" @click="openEditProject(project)">{{ $t('common.edit') }}</button>
@@ -815,6 +819,9 @@ h1 { font-size: 22px; font-weight: 700; margin-bottom: 24px; }
 }
 .badge-active { background: #dcfce7; color: #166534; }
 .badge-inactive { background: #fee2e2; color: #991b1b; }
+[data-theme="dark"] .badge-active { background: #14532d; color: #86efac; }
+[data-theme="dark"] .badge-inactive { background: #450a0a; color: #fca5a5; }
+.open-cards-count { font-weight: 600; color: var(--color-primary); }
 
 .loading-state { display: flex; justify-content: center; padding: 60px; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }

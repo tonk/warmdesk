@@ -122,7 +122,18 @@
     "sort_desc": "Aflopend",
     "time_spent": "Bestede tijd",
     "time_hours": "u",
-    "time_minutes": "m"
+    "time_minutes": "m",
+    "copy_card": "Kaart kopiëren",
+    "copy_card_success": "Kaart gekopieerd",
+    "move_card_success": "Kaart verplaatst",
+    "transfer_card": "Overzetten…",
+    "transfer_project": "Doelproject",
+    "transfer_column": "Doelkolom",
+    "transfer_copy": "Hier kopiëren",
+    "transfer_move": "Hier verplaatsen",
+    "select_project": "Selecteer project",
+    "select_column": "Selecteer kolom",
+    "open_cards": "openstaande kaarten"
   },
   "chat": {
     "title": "Teamchat",
@@ -151,6 +162,7 @@
     "role_viewer": "Kijker",
     "last_login": "Laatste aanmelding",
     "owner": "Eigenaar",
+    "open_cards": "Openstaande kaarten",
     "edit_user": "Gebruiker bewerken",
     "edit_project": "Project bewerken",
     "unarchive": "Dearchiveren",

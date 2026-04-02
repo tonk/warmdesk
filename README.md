@@ -29,9 +29,12 @@ and asked Claude Code to generate the app.
 
 - **Kanban boards** — columns, cards, drag-and-drop reorder, labels, priorities, due dates, assignees, watchers, markdown descriptions and comments
 - **Card sorting** — sort column cards by date, assignee, or priority (ascending / descending)
+- **Copy card** — duplicate a card within the same column with one click
+- **Transfer card** — copy or move a card to any other project you have access to; choose the destination project and column
+- **Close / reopen cards** — mark cards as closed; closed cards stay on the board with a strikethrough and muted style and can be reopened at any time
 - **Comment replies** — reply to any comment; replies are visually indented
 - **Time tracking** — log hours and minutes spent directly on a card
-- **Multi-project** — each project has its own board, members, and chat
+- **Multi-project** — each project has its own board, members, and chat; open card counts shown on project tiles and in the admin panel
 - **Role-based access** — global roles (admin / user / viewer) and per-project roles (owner / admin / member / viewer); project admins can manage columns
 - **Real-time** — board changes, card moves, and chat messages sync instantly across all connected users via WebSocket
 - **Internal chat** — per-project team chat and direct messages between users; group chats support custom avatars and member management

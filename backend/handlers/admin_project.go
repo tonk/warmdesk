@@ -53,10 +53,22 @@ func AdminCreateProject(c *gin.Context) {
 	c.JSON(http.StatusCreated, project)
 }
 
+type AdminProjectListItem struct {
+	models.Project
+	OpenCardCount int64 `json:"open_card_count"`
+}
+
 func AdminListProjects(c *gin.Context) {
 	var projects []models.Project
 	database.DB.Unscoped().Preload("CreatedBy").Find(&projects)
-	c.JSON(http.StatusOK, projects)
+
+	result := make([]AdminProjectListItem, len(projects))
+	for i, p := range projects {
+		var count int64
+		database.DB.Model(&models.Card{}).Where("project_id = ? AND closed = false", p.ID).Count(&count)
+		result[i] = AdminProjectListItem{Project: p, OpenCardCount: count}
+	}
+	c.JSON(http.StatusOK, result)
 }
 
 func AdminUpdateProject(c *gin.Context) {

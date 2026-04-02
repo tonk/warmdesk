@@ -158,6 +158,8 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webDir string, 
 			projects.PUT("/:projectSlug/cards/:cardId", handlers.UpdateCard)
 			projects.DELETE("/:projectSlug/cards/:cardId", handlers.DeleteCard)
 			projects.PATCH("/:projectSlug/cards/:cardId/move", handlers.MoveCard)
+			projects.POST("/:projectSlug/cards/:cardId/copy", handlers.CopyCard)
+			projects.POST("/:projectSlug/cards/:cardId/transfer", handlers.TransferCard)
 			projects.POST("/:projectSlug/cards/:cardId/labels/:labelId", handlers.AssignLabel)
 			projects.DELETE("/:projectSlug/cards/:cardId/labels/:labelId", handlers.RemoveLabel)
 			projects.PUT("/:projectSlug/cards/:cardId/assignee", handlers.UpdateAssignee)

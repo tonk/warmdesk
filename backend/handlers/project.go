@@ -62,6 +62,21 @@ func getDefaultColumnNames() []string {
 	return names
 }
 
+type ProjectListItem struct {
+	models.Project
+	OpenCardCount int64 `json:"open_card_count"`
+}
+
+func projectsWithCounts(projects []models.Project) []ProjectListItem {
+	result := make([]ProjectListItem, len(projects))
+	for i, p := range projects {
+		var count int64
+		database.DB.Model(&models.Card{}).Where("project_id = ? AND closed = false", p.ID).Count(&count)
+		result[i] = ProjectListItem{Project: p, OpenCardCount: count}
+	}
+	return result
+}
+
 // ListProjects godoc
 // @Summary      List projects accessible to the current user
 // @Tags         projects
@@ -77,7 +92,7 @@ func ListProjects(c *gin.Context) {
 	if globalRole == "admin" || globalRole == "viewer" {
 		var projects []models.Project
 		database.DB.Where("deleted_at IS NULL").Find(&projects)
-		c.JSON(http.StatusOK, projects)
+		c.JSON(http.StatusOK, projectsWithCounts(projects))
 		return
 	}
 
@@ -91,7 +106,7 @@ func ListProjects(c *gin.Context) {
 		}
 		projects = append(projects, m.Project)
 	}
-	c.JSON(http.StatusOK, projects)
+	c.JSON(http.StatusOK, projectsWithCounts(projects))
 }
 
 // CreateProject godoc

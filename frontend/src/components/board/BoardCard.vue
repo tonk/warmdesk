@@ -83,7 +83,7 @@ const isOverdue = computed(() => {
 <style scoped>
 .board-card {
   position: relative;
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   padding: 10px 12px;

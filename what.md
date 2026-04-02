@@ -192,3 +192,11 @@ Create an application that has all these features and requirements
 - Fix custom default columns not applied to new projects: replaced unreliable @change on textarea (destroyed by v-if before event fired) with an explicit Save button in the Project Defaults settings section
 - Fix saveSetting not updating existing rows: replaced GORM clause.OnConflict upsert (silently failed to UPDATE for string PKs in SQLite) with explicit UPDATE + RowsAffected == 0 → CREATE pattern
 - Demo seed tool now configures default system settings: 4 columns (Backlog, In Progress, Test & Review, To Production) and 4 labels (Bug, Feature, Design, Content)
+- Fix board cards showing light background in dark mode (hard-coded #fff replaced with var(--color-surface)); priority badge colours now have explicit dark-mode overrides
+- Open card count shown in Admin → Projects table and on dashboard project tiles
+- Copy card: duplicate a card within the same column via "Copy Card" button in the card detail footer; title gets "(copy)" suffix; labels and tags are copied; board broadcasts in real time
+- Transfer card: copy or move a card to any project via a "Transfer…" panel in card detail; choose destination project and column, then "Copy Here" or "Move Here"; labels/assignees are not copied (project-specific); board updates immediately for all connected users
+- Fix report date/time not following configured format (was using toLocaleString; now uses useDateFormat composable)
+- Fix report URL printed at bottom of page (suppressed via @page margin rules)
+- Fix PDF export missing pages (overflow: hidden on shell body clipped print output; overridden in @media print)
+- Fix print header duplicated/cut off across pages (position: fixed replaced with @page margin boxes); Coworker logo on page 1; "Coworker" + page number (n / total) in top margin on pages 2+

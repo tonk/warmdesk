@@ -250,6 +250,32 @@
         </div>
       </div>
 
+      <!-- Transfer card section -->
+      <div v-if="showTransferPanel" class="transfer-section">
+        <h4>{{ $t('board.transfer_card') }}</h4>
+        <div class="detail-row">
+          <div class="form-group half">
+            <label class="form-label">{{ $t('board.transfer_project') }}</label>
+            <select class="form-input" v-model="transferProjectSlug" @change="loadTransferColumns">
+              <option value="">— {{ $t('board.select_project') }} —</option>
+              <option v-for="p in transferProjects" :key="p.slug" :value="p.slug">{{ p.name }}</option>
+            </select>
+          </div>
+          <div class="form-group half">
+            <label class="form-label">{{ $t('board.transfer_column') }}</label>
+            <select class="form-input" v-model="transferColumnId" :disabled="!transferProjectSlug">
+              <option value="">— {{ $t('board.select_column') }} —</option>
+              <option v-for="col in transferColumns" :key="col.id" :value="col.id">{{ col.name }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="transfer-actions">
+          <button class="btn btn-secondary btn-sm" @click="executeTransfer('copy')" :disabled="!transferColumnId || transferring">{{ $t('board.transfer_copy') }}</button>
+          <button class="btn btn-secondary btn-sm" @click="executeTransfer('move')" :disabled="!transferColumnId || transferring">{{ $t('board.transfer_move') }}</button>
+          <button class="btn btn-ghost btn-sm" @click="showTransferPanel = false">{{ $t('common.cancel') }}</button>
+        </div>
+      </div>
+
       <div v-if="history.length" class="history-section">
         <h4>{{ $t('board.column_history') }}</h4>
         <div class="history-list">
@@ -269,6 +295,8 @@
     <template #footer>
       <button class="btn btn-danger btn-sm" @click="confirmDelete">{{ $t('board.delete_card') }}</button>
       <button class="btn btn-secondary btn-sm" @click="toggleClose">{{ isClosed ? $t('board.reopen_card') : $t('board.close_card') }}</button>
+      <button class="btn btn-secondary btn-sm" @click="copyCard" :disabled="copying">{{ $t('board.copy_card') }}</button>
+      <button class="btn btn-secondary btn-sm" @click="toggleTransferPanel">{{ $t('board.transfer_card') }}</button>
       <button class="btn btn-secondary" @click="$emit('close')">{{ $t('common.cancel') }}</button>
       <button class="btn btn-primary" @click="save" :disabled="saving">{{ saving ? $t('common.loading') : $t('common.save') }}</button>
     </template>
@@ -277,6 +305,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import BaseModal from '@/components/common/BaseModal.vue'
@@ -297,6 +326,8 @@ const props = defineProps({
   projectSlug: { type: String, required: true }
 })
 const emit = defineEmits(['close', 'deleted'])
+
+const { t } = useI18n()
 
 // Flat user list for @mention in editors
 const memberUsers = computed(() => props.members.map(m => m.user).filter(Boolean))
@@ -357,6 +388,13 @@ const editingItemId = ref(null)
 const editItemBody = ref('')
 const assignees = ref([...(props.card.assignees || [])])
 const gitLinks = ref([])
+const copying = ref(false)
+const showTransferPanel = ref(false)
+const transferProjectSlug = ref('')
+const transferColumnId = ref('')
+const transferColumns = ref([])
+const transferProjects = ref([])
+const transferring = ref(false)
 
 const checklistPct = computed(() => {
   if (!checklist.value.length) return 0
@@ -634,6 +672,60 @@ async function toggleClose() {
   }
 }
 
+async function copyCard() {
+  copying.value = true
+  try {
+    const { data } = await projectsApi.copyCard(props.projectSlug, props.card.id)
+    boardStore.addCard(data)
+    ui.success(t('board.copy_card_success'))
+  } catch {
+    ui.error('Failed to copy card')
+  } finally {
+    copying.value = false
+  }
+}
+
+async function toggleTransferPanel() {
+  showTransferPanel.value = !showTransferPanel.value
+  if (showTransferPanel.value && !transferProjects.value.length) {
+    try {
+      const { data } = await projectsApi.list()
+      transferProjects.value = (data || []).filter(p => !p.is_archived)
+    } catch {}
+  }
+}
+
+async function loadTransferColumns() {
+  transferColumnId.value = ''
+  transferColumns.value = []
+  if (!transferProjectSlug.value) return
+  try {
+    const { data } = await projectsApi.listColumns(transferProjectSlug.value)
+    transferColumns.value = data || []
+  } catch {}
+}
+
+async function executeTransfer(action) {
+  if (!transferProjectSlug.value || !transferColumnId.value) return
+  transferring.value = true
+  try {
+    await projectsApi.transferCard(props.projectSlug, props.card.id, {
+      target_project_slug: transferProjectSlug.value,
+      column_id: parseInt(transferColumnId.value),
+      action
+    })
+    if (action === 'move') {
+      boardStore.removeCard({ card_id: props.card.id, column_id: props.card.column_id })
+    }
+    ui.success(action === 'copy' ? t('board.copy_card_success') : t('board.move_card_success'))
+    emit('close')
+  } catch {
+    ui.error(`Failed to ${action} card`)
+  } finally {
+    transferring.value = false
+  }
+}
+
 function renderMarkdown(text) {
   return DOMPurify.sanitize(marked.parse(text || ''))
 }
@@ -849,6 +941,10 @@ function renderMarkdown(text) {
 .status-open   { background: color-mix(in srgb, #22c55e 15%, transparent); color: #16a34a; }
 .status-closed { background: color-mix(in srgb, #ef4444 15%, transparent); color: #dc2626; }
 .status-merged { background: color-mix(in srgb, #8b5cf6 15%, transparent); color: #7c3aed; }
+
+.transfer-section { margin-top: 24px; border-top: 1px solid var(--color-border); padding-top: 20px; }
+.transfer-section h4 { margin-bottom: 12px; font-size: 14px; color: var(--color-text-muted); }
+.transfer-actions { display: flex; gap: 8px; margin-top: 8px; }
 
 .history-section { margin-top: 24px; border-top: 1px solid var(--color-border); padding-top: 20px; }
 .history-section h4 { margin-bottom: 12px; font-size: 14px; color: var(--color-text-muted); }

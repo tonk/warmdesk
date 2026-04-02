@@ -140,6 +140,12 @@ input, textarea, select {
 .priority-high    { background: #fee2e2; color: #991b1b; }
 .priority-critical { background: #581c87; color: #fff; }
 
+[data-theme="dark"] .priority-none    { background: #1e293b; color: #94a3b8; }
+[data-theme="dark"] .priority-low     { background: #14532d; color: #86efac; }
+[data-theme="dark"] .priority-medium  { background: #422006; color: #fcd34d; }
+[data-theme="dark"] .priority-high    { background: #450a0a; color: #fca5a5; }
+[data-theme="dark"] .priority-critical { background: #581c87; color: #e9d5ff; }
+
 .toast-container {
   position: fixed;
   bottom: 24px;

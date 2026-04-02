@@ -122,7 +122,18 @@
     "sort_desc": "Descending",
     "time_spent": "Time Spent",
     "time_hours": "h",
-    "time_minutes": "m"
+    "time_minutes": "m",
+    "copy_card": "Copy Card",
+    "copy_card_success": "Card copied",
+    "move_card_success": "Card moved",
+    "transfer_card": "Transfer…",
+    "transfer_project": "Target Project",
+    "transfer_column": "Target Column",
+    "transfer_copy": "Copy Here",
+    "transfer_move": "Move Here",
+    "select_project": "Select project",
+    "select_column": "Select column",
+    "open_cards": "open cards"
   },
   "chat": {
     "title": "Team Chat",
@@ -151,6 +162,7 @@
     "role_viewer": "Viewer",
     "last_login": "Last Login",
     "owner": "Owner",
+    "open_cards": "Open Cards",
     "edit_user": "Edit User",
     "edit_project": "Edit Project",
     "unarchive": "Unarchive",

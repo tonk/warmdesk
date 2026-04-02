@@ -487,6 +487,163 @@ func RemoveLabel(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "removed"})
 }
 
+// CopyCard creates a duplicate of the card within the same project and column.
+func CopyCard(c *gin.Context) {
+	userID := middleware.GetUserID(c)
+	slug := c.Param("projectSlug")
+	cardID, err := strconv.ParseUint(c.Param("cardId"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid card id"})
+		return
+	}
+
+	project, err := services.GetProjectBySlug(slug)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "project not found"})
+		return
+	}
+	if err := services.RequireProjectRole(project.ID, userID, middleware.GetGlobalRole(c), "member"); err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
+		return
+	}
+
+	var original models.Card
+	if err := database.DB.Preload("Labels").Preload("Tags").Where("id = ? AND project_id = ?", cardID, project.ID).First(&original).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "card not found"})
+		return
+	}
+
+	var maxPos float64
+	database.DB.Model(&models.Card{}).Where("column_id = ?", original.ColumnID).Select("COALESCE(MAX(position), 0)").Scan(&maxPos)
+
+	database.DB.Model(&models.Project{}).Where("id = ?", project.ID).
+		UpdateColumn("card_counter", gorm.Expr("card_counter + 1"))
+	var updatedProject models.Project
+	database.DB.Select("card_counter").First(&updatedProject, project.ID)
+
+	newCard := models.Card{
+		ColumnID:         original.ColumnID,
+		ProjectID:        original.ProjectID,
+		Title:            original.Title + " (copy)",
+		Description:      original.Description,
+		Priority:         original.Priority,
+		DueDate:          original.DueDate,
+		AssigneeID:       original.AssigneeID,
+		CreatedByID:      userID,
+		Position:         maxPos + 1000,
+		CardNumber:       updatedProject.CardCounter,
+		TimeSpentMinutes: 0,
+	}
+	database.DB.Create(&newCard)
+
+	for _, label := range original.Labels {
+		database.DB.Create(&models.CardLabel{CardID: newCard.ID, LabelID: label.ID})
+	}
+	for _, tag := range original.Tags {
+		database.DB.Create(&models.CardTag{CardID: newCard.ID, Name: tag.Name})
+	}
+
+	database.DB.Preload("Labels").Preload("Assignee").Preload("Tags").First(&newCard, newCard.ID)
+	ws.BroadcastToProject(project.ID, ws.Message{Type: ws.TypeBoardCardCreated, Payload: newCard})
+	c.JSON(http.StatusCreated, newCard)
+}
+
+// TransferCard copies or moves a card to a column in another project.
+func TransferCard(c *gin.Context) {
+	userID := middleware.GetUserID(c)
+	slug := c.Param("projectSlug")
+	cardID, err := strconv.ParseUint(c.Param("cardId"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid card id"})
+		return
+	}
+
+	var req struct {
+		TargetProjectSlug string `json:"target_project_slug" binding:"required"`
+		ColumnID          uint   `json:"column_id" binding:"required"`
+		Action            string `json:"action" binding:"required"` // "copy" or "move"
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if req.Action != "copy" && req.Action != "move" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "action must be 'copy' or 'move'"})
+		return
+	}
+
+	sourceProject, err := services.GetProjectBySlug(slug)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "source project not found"})
+		return
+	}
+	if err := services.RequireProjectRole(sourceProject.ID, userID, middleware.GetGlobalRole(c), "member"); err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
+		return
+	}
+
+	targetProject, err := services.GetProjectBySlug(req.TargetProjectSlug)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "target project not found"})
+		return
+	}
+	if err := services.RequireProjectRole(targetProject.ID, userID, middleware.GetGlobalRole(c), "member"); err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": "forbidden in target project"})
+		return
+	}
+
+	// Verify target column belongs to target project
+	var targetColumn models.Column
+	if err := database.DB.Where("id = ? AND project_id = ?", req.ColumnID, targetProject.ID).First(&targetColumn).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "column not found in target project"})
+		return
+	}
+
+	var original models.Card
+	if err := database.DB.Preload("Tags").Where("id = ? AND project_id = ?", cardID, sourceProject.ID).First(&original).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "card not found"})
+		return
+	}
+
+	var maxPos float64
+	database.DB.Model(&models.Card{}).Where("column_id = ?", req.ColumnID).Select("COALESCE(MAX(position), 0)").Scan(&maxPos)
+
+	database.DB.Model(&models.Project{}).Where("id = ?", targetProject.ID).
+		UpdateColumn("card_counter", gorm.Expr("card_counter + 1"))
+	var updatedProject models.Project
+	database.DB.Select("card_counter").First(&updatedProject, targetProject.ID)
+
+	newCard := models.Card{
+		ColumnID:    req.ColumnID,
+		ProjectID:   targetProject.ID,
+		Title:       original.Title,
+		Description: original.Description,
+		Priority:    original.Priority,
+		DueDate:     original.DueDate,
+		CreatedByID: userID,
+		Position:    maxPos + 1000,
+		CardNumber:  updatedProject.CardCounter,
+	}
+	database.DB.Create(&newCard)
+
+	for _, tag := range original.Tags {
+		database.DB.Create(&models.CardTag{CardID: newCard.ID, Name: tag.Name})
+	}
+
+	database.DB.Preload("Labels").Preload("Assignee").Preload("Tags").First(&newCard, newCard.ID)
+	ws.BroadcastToProject(targetProject.ID, ws.Message{Type: ws.TypeBoardCardCreated, Payload: newCard})
+
+	if req.Action == "move" {
+		database.DB.Delete(&original)
+		ws.BroadcastToProject(sourceProject.ID, ws.Message{
+			Type:    ws.TypeBoardCardDeleted,
+			Payload: map[string]uint{"card_id": original.ID, "column_id": original.ColumnID},
+		})
+	}
+
+	c.JSON(http.StatusCreated, newCard)
+}
+
 func UpdateAssignee(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	slug := c.Param("projectSlug")

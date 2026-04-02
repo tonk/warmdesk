@@ -122,7 +122,18 @@
     "sort_desc": "Absteigend",
     "time_spent": "Aufgewendete Zeit",
     "time_hours": "Std",
-    "time_minutes": "Min"
+    "time_minutes": "Min",
+    "copy_card": "Karte kopieren",
+    "copy_card_success": "Karte kopiert",
+    "move_card_success": "Karte verschoben",
+    "transfer_card": "Übertragen…",
+    "transfer_project": "Zielprojekt",
+    "transfer_column": "Zielspalte",
+    "transfer_copy": "Hier kopieren",
+    "transfer_move": "Hier verschieben",
+    "select_project": "Projekt auswählen",
+    "select_column": "Spalte auswählen",
+    "open_cards": "offene Karten"
   },
   "chat": {
     "title": "Team-Chat",
@@ -151,6 +162,7 @@
     "role_viewer": "Betrachter",
     "last_login": "Letzte Anmeldung",
     "owner": "Eigentümer",
+    "open_cards": "Offene Karten",
     "edit_user": "Benutzer bearbeiten",
     "edit_project": "Projekt bearbeiten",
     "unarchive": "Archivierung aufheben",
