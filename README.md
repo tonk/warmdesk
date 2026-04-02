@@ -1,7 +1,12 @@
+
 # WarmDesk
 
 A self-hosted, multi-user project management tool with Kanban boards, real-time
 collaboration, direct messaging, time tracking, and a ticket API.
+
+## Build status
+
+[![Release](https://github.com/tonk/warmdesk/actions/workflows/release.yml/badge.svg)](https://github.com/tonk/warmdesk/actions/workflows/release.yml)
 
 ## Experiment
 
