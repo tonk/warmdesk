@@ -2,6 +2,15 @@
 
 All notable changes to Coworker are documented here.
 
+## v0.3.2 — 2026-04-02
+
+### Fixed
+- **Desktop app cannot connect to server** — `tauri-plugin-http` was never installed, so `globalThis.fetch` fell back to the native WebView browser fetch which is subject to CORS; on Windows the Tauri app origin (`https://tauri.localhost`) was not in the server's `ALLOWED_ORIGINS`, blocking every API call and the ConnectView probe; added `tauri-plugin-http` which patches `globalThis.fetch` with a native HTTP client that bypasses CORS entirely
+- **Blank screen on Linux desktop app** — WebKitGTK's DMA-BUF renderer silently fails on many GPU configurations (Intel/AMD integrated, NVIDIA with certain drivers, VMs, some Wayland compositors), leaving the window completely blank; `WEBKIT_DISABLE_DMABUF_RENDERER=1` is now set automatically on Linux before the Tauri runtime starts to force the reliable compositing fallback; users can override by setting the variable themselves before launching
+
+### Changed
+- **CI: Node.js upgraded to 24** in the GitHub Actions release workflow (Node 20 actions were deprecated)
+
 ## v0.3.1 — 2026-04-02
 
 ### Fixed
