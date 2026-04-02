@@ -2,6 +2,12 @@
 
 All notable changes to WarmDesk are documented here.
 
+## v0.4.2 — 2026-04-02
+
+### Added
+- **Resizable sidebar** — drag the inner edge of the sidebar to set your preferred width (150px–480px); works whether the sidebar is positioned left or right; width is persisted across sessions
+- **App zoom** — `Ctrl +` / `Ctrl -` zoom the entire interface in or out in 10% steps (50%–200%); `Ctrl 0` resets to 100%; zoom level is persisted across sessions
+
 ## v0.4.1 — 2026-04-02
 
 ### Fixed

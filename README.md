@@ -40,7 +40,7 @@ and asked Claude Code to generate the app.
 - **Internal chat** — per-project team chat and direct messages between users; group chats support custom avatars and member management
 - **Start team chat from DM** — open the Teams tab in Direct Messages to instantly start a group chat with all members of a project
 - **Unread DM notifications** — pulsing indicator in the sidebar and header when there are unread direct messages
-- **Sidebar** — starred projects, live online-users list, auto-refreshes when users are added or removed
+- **Sidebar** — starred projects, live online-users list, auto-refreshes when users are added or removed; drag the inner edge to resize (width persisted)
 - **Dark / light / system theme** — defaults to light
 - **Multi-language** — English, Dutch (Nederlands), German (Deutsch), Spanish (Español), French (Français)
 - **User settings** — display name, avatar, email, locale, theme, date/time format, timezone, font, password change
@@ -59,6 +59,7 @@ and asked Claude Code to generate the app.
 - **Git integration** — connect GitHub, GitLab, Gitea, or Forgejo; commit/PR/issue events post to project chat and automatically link to cards when a card reference (e.g. `PRJ-42`) appears in the message or title
 - **Database support** — SQLite (zero configuration), PostgreSQL, MySQL/MariaDB
 - **Horizontal scaling** — Redis pub/sub for multi-instance WebSocket broadcast
+- **App zoom** — `Ctrl +` / `Ctrl -` to zoom in/out; `Ctrl 0` to reset; level persisted across sessions
 - **Desktop app** — native Tauri app for Linux (AppImage), macOS (DMG), and Windows (installer)
 - **Project migration** — `warmdesk-export` and `warmdesk-import` standalone tools to migrate projects to/from Jira, Trello, OpenProject, or Ryver; column mapping via config file
 

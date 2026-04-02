@@ -214,3 +214,5 @@ Create an application that has all these features and requirements
 - Fix logo-full.svg (and any other non-listed static asset) returning index.html in production: register it explicitly as a static route in the backend router
 - Update docs: add Migration Tools section to admin guide, fix header and editor descriptions in user guide, correct API key format example, list all dist binaries in INSTALL.md
 - Exclude .claude/ directory from version control via .gitignore
+- Resizable sidebar: drag the inner edge to set a custom width (150–480px), persisted in localStorage; handle moves to the correct edge when the sidebar is on the right
+- App-wide zoom via Ctrl+/Ctrl-/Ctrl+0 (50%–200%, 10% steps), persisted in localStorage and restored on next load
