@@ -60,6 +60,7 @@ and asked Claude Code to generate the app.
 - **Database support** — SQLite (zero configuration), PostgreSQL, MySQL/MariaDB
 - **Horizontal scaling** — Redis pub/sub for multi-instance WebSocket broadcast
 - **Desktop app** — native Tauri app for Linux (AppImage), macOS (DMG), and Windows (installer)
+- **Project migration** — `warmdesk-export` and `warmdesk-import` standalone tools to migrate projects to/from Jira, Trello, OpenProject, or Ryver; column mapping via config file
 
 ## Quick Start
 
@@ -174,6 +175,17 @@ detail. Events also post formatted messages to the project chat.
 
 Setup: **Project Settings → Webhooks → Create Webhook** and choose the platform.
 Full instructions in [docs/api.md](docs/api.md#4-git-platform-webhooks).
+
+## Project Migration
+
+Import from or export to Jira, Trello, OpenProject, or Ryver using the standalone migration tools included in every distribution:
+
+```bash
+./warmdesk-export --config warmdesk-migrate.yaml   # export WarmDesk → platform
+./warmdesk-import --config warmdesk-migrate.yaml   # import platform → WarmDesk
+```
+
+Both tools support `--dry-run`. Missing credentials are prompted interactively. See `warmdesk-migrate.yaml.example` for full configuration options including column mapping.
 
 ## Documentation
 

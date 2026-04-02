@@ -2,6 +2,22 @@
 
 All notable changes to WarmDesk are documented here.
 
+## v0.4.0 — 2026-04-02
+
+### Added
+- **`warmdesk-export`** — standalone binary that reads a WarmDesk project (columns, cards, checklists, comments, labels, tags, time entries, attachments, topics and replies) and pushes it to Jira, Trello, OpenProject, or Ryver
+- **`warmdesk-import`** — standalone binary that reads a project from Jira, Trello, OpenProject, or Ryver and creates it in WarmDesk
+- **`warmdesk-migrate.yaml.example`** — documented config file covering all four platforms; credentials can be supplied via the file, environment variables, or interactive prompts
+- **Column mapping** — `column_map` in the config translates WarmDesk column names to/from platform-specific status/list names; unmapped columns are passed through unchanged
+- Both migration binaries are built by `make build` and included in the distribution archive alongside `warmdesk-seed`
+
+### Changed
+- **Product renamed to WarmDesk** — all binaries, config files, documentation, and the application UI now use the WarmDesk name and logo; Go module path updated to `github.com/tonk/warmdesk`
+- Config example file renamed from `coworker.yaml.example` to `warmdesk.yaml.example`
+- Default database file is now `warmdesk.db`
+- Distribution archive is now `warmdesk-{version}.tar.gz`
+- Service template renamed to `deploy/warmdesk.service`
+
 ## v0.3.3 — 2026-04-02
 
 ### Added

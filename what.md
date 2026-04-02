@@ -208,3 +208,4 @@ Create an application that has all these features and requirements
 - Add coworker-import: standalone binary to import a project from Jira, Trello, OpenProject, or Ryver into Coworker
 - Config file (coworker-migrate.yaml) with column mapping, credential env var overrides, and interactive prompts for missing fields
 - Both binaries included in the server distribution build
+- Rename product from Coworker to WarmDesk: all binaries, config files, documentation, logos, and the application UI renamed; Go module path updated to github.com/tonk/warmdesk
