@@ -2,6 +2,21 @@
 
 All notable changes to Coworker are documented here.
 
+## v0.3.3 — 2026-04-02
+
+### Added
+- **`coworker-export`** — standalone binary that reads a Coworker project (columns, cards, checklists, comments, labels, tags, time entries, attachments, topics and replies) and pushes it to Jira, Trello, OpenProject, or Ryver; supports `--config FILE` and `--dry-run`
+- **`coworker-import`** — standalone binary that reads a project from Jira, Trello, OpenProject, or Ryver and creates it in Coworker; same flags and config format
+- **`coworker-migrate.yaml.example`** — documented config file covering all four platforms; credentials can be supplied via the file, environment variables (`COWORKER_URL`, `COWORKER_USERNAME`, `COWORKER_PASSWORD`, `COWORKER_PROJECT`, `PLATFORM_API_TOKEN`, `PLATFORM_API_KEY`), or interactive prompts
+- **Column mapping** — `column_map` in the config translates Coworker column names to/from platform-specific status/list names; unmapped columns are passed through unchanged
+- Both binaries are built by `make build` and included in the distribution archive alongside `coworker-seed`
+
+### Platform notes
+- **Jira**: issues created via REST API v3; descriptions and comments in Atlassian Document Format; checklist items as Subtasks; time via worklogs; column mapped via workflow transitions
+- **Trello**: lists created on the board as needed; checklists native; time posted as a comment; labels created per card
+- **OpenProject**: work packages via API v3 HAL+JSON; checklist items as child work packages; time entries posted; status/priority/type resolved by name at export time
+- **Ryver**: tasks posted to a team workroom via the OData API; columns encoded as tags; topics exported as forum posts; falls back to topic post if the task API is unavailable
+
 ## v0.3.2 — 2026-04-02
 
 ### Fixed

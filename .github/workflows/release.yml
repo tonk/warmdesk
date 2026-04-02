@@ -47,10 +47,13 @@ jobs:
           cd backend
           go build -ldflags="-s -w -X main.version=${{ github.ref_name }}" -o ../dist/coworker .
           go build -ldflags="-s -w" -o ../dist/coworker-seed ./cmd/seed
+          go build -ldflags="-s -w" -o ../dist/coworker-export ./cmd/export
+          go build -ldflags="-s -w" -o ../dist/coworker-import ./cmd/importer
 
       - name: Assemble distribution
         run: |
           cp coworker.yaml.example dist/coworker.yaml.example
+          cp coworker-migrate.yaml.example dist/coworker-migrate.yaml.example
           cp -r deploy dist/deploy
           cp INSTALL.md dist/INSTALL.md
           cp README.md dist/README.md

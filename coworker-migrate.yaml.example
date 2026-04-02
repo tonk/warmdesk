@@ -1,0 +1,63 @@
+# coworker-migrate.yaml — configuration for coworker-export and coworker-import
+#
+# Sensitive values (passwords, tokens) can be provided as environment variables
+# instead of storing them in this file:
+#   COWORKER_URL, COWORKER_USERNAME, COWORKER_PASSWORD, COWORKER_PROJECT
+#   PLATFORM_API_TOKEN, PLATFORM_API_KEY
+#
+# Any field that is still empty after the file and env vars are read will be
+# prompted for interactively.
+
+# ── Coworker connection ────────────────────────────────────────────────────────
+
+coworker:
+  url: https://coworker.example.com
+  username: admin
+  password: ""               # or set COWORKER_PASSWORD
+  project: my-project-slug   # project slug (visible in the URL)
+
+# ── Target / source platform ──────────────────────────────────────────────────
+
+platform:
+  name: jira   # jira | trello | openproject | ryver
+
+  # ── Jira Cloud / Jira Server ────────────────────────────────────────────────
+  # Generate an API token at https://id.atlassian.com/manage-profile/security
+  url: https://mycompany.atlassian.net
+  email: user@example.com
+  api_token: ""              # or set PLATFORM_API_TOKEN
+  project_key: MYPROJ        # Jira project key (e.g. "DEV", "OPS")
+  issue_type: Task           # Issue type for cards (default: Task)
+
+  # ── Trello ──────────────────────────────────────────────────────────────────
+  # Get your API key from https://trello.com/app-key
+  # api_key: ""              # or set PLATFORM_API_KEY
+  # token: ""                # generate at https://trello.com/1/authorize?...
+  # board_id: ""             # Trello board ID (24-char hex in the board URL)
+
+  # ── OpenProject ─────────────────────────────────────────────────────────────
+  # Generate an API key under My Account → Access Tokens in OpenProject
+  # url: https://openproject.example.com
+  # api_token: ""            # or set PLATFORM_API_TOKEN
+  # project_id: my-project   # OpenProject project identifier (slug)
+
+  # ── Ryver ───────────────────────────────────────────────────────────────────
+  # org: mycompany           # your Ryver subdomain (mycompany.ryver.com)
+  # api_token: ""            # Ryver API token from the admin console
+  # team: My Team            # Ryver team/workroom name to import from / export to
+
+# ── Column mapping ─────────────────────────────────────────────────────────────
+#
+# Maps Coworker column names (left) to the corresponding status / list name on
+# the target platform (right).
+#
+# For export: Coworker column → platform status/list
+# For import: platform status/list → Coworker column (mapping is reversed)
+#
+# Columns not listed here are created using their Coworker name as-is.
+
+column_map:
+  Backlog: "To Do"
+  "In Progress": "In Progress"
+  "Test & Review": "In Review"
+  "To Production": Done

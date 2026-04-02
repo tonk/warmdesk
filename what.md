@@ -204,3 +204,7 @@ Create an application that has all these features and requirements
 - Fix desktop app cannot connect to server: add tauri-plugin-http so globalThis.fetch uses a native HTTP client that bypasses CORS (Windows Tauri origin https://tauri.localhost was blocked by server CORS policy)
 - Fix blank screen on Linux desktop app: set WEBKIT_DISABLE_DMABUF_RENDERER=1 before Tauri starts to work around silent WebKitGTK DMA-BUF renderer failure on many GPU configurations
 - CI: upgrade Node.js to 24 in GitHub Actions release workflow
+- Add coworker-export: standalone binary to export a Coworker project to Jira, Trello, OpenProject, or Ryver (columns, cards, checklists, comments, labels, tags, time, attachments, topics)
+- Add coworker-import: standalone binary to import a project from Jira, Trello, OpenProject, or Ryver into Coworker
+- Config file (coworker-migrate.yaml) with column mapping, credential env var overrides, and interactive prompts for missing fields
+- Both binaries included in the server distribution build

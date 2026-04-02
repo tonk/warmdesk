@@ -11,6 +11,7 @@ all: build
 
 build: build-frontend build-backend
 	@cp coworker.yaml.example $(DIST_DIR)/coworker.yaml.example
+	@cp coworker-migrate.yaml.example $(DIST_DIR)/coworker-migrate.yaml.example
 	@cp -r deploy $(DIST_DIR)/deploy
 	@cp INSTALL.md $(DIST_DIR)/INSTALL.md
 	@cp README.md $(DIST_DIR)/README.md
@@ -28,6 +29,8 @@ build-backend:
 	mkdir -p $(DIST_DIR)
 	cd $(BACKEND) && go build -ldflags="-s -w -X main.version=$(VERSION)" -o ../$(DIST_DIR)/$(BINARY) .
 	cd $(BACKEND) && go build -ldflags="-s -w" -o ../$(DIST_DIR)/$(BINARY)-seed ./cmd/seed
+	cd $(BACKEND) && go build -ldflags="-s -w" -o ../$(DIST_DIR)/$(BINARY)-export ./cmd/export
+	cd $(BACKEND) && go build -ldflags="-s -w" -o ../$(DIST_DIR)/$(BINARY)-import ./cmd/importer
 
 # Run in development mode (two terminals needed)
 dev-backend:
