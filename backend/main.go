@@ -1,11 +1,11 @@
-// Package main is the entry point for the Coworker server.
+// Package main is the entry point for the WarmDesk server.
 //
-// @title           Coworker API
+// @title           WarmDesk API
 // @version         1.0
 // @description     Self-hosted project management tool — Kanban boards, team chat, discussions, and time reporting.
 //
-// @contact.name    Coworker
-// @contact.url     https://github.com/tonk/coworker
+// @contact.name    WarmDesk
+// @contact.url     https://github.com/tonk/warmdesk
 //
 // @license.name    MIT
 //
@@ -30,13 +30,13 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/tonk/coworker/config"
-	"github.com/tonk/coworker/database"
-	_ "github.com/tonk/coworker/docs"
-	"github.com/tonk/coworker/handlers"
-	"github.com/tonk/coworker/router"
-	"github.com/tonk/coworker/services"
-	"github.com/tonk/coworker/ws"
+	"github.com/tonk/warmdesk/config"
+	"github.com/tonk/warmdesk/database"
+	_ "github.com/tonk/warmdesk/docs"
+	"github.com/tonk/warmdesk/handlers"
+	"github.com/tonk/warmdesk/router"
+	"github.com/tonk/warmdesk/services"
+	"github.com/tonk/warmdesk/ws"
 )
 
 // version is set at build time via -ldflags "-X main.version=<tag>".
@@ -52,7 +52,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	log.Printf("Starting Coworker %s", version)
+	log.Printf("Starting WarmDesk %s", version)
 
 	cfg := config.Load(*configFile)
 	handlers.InitSystemDefaults(cfg)

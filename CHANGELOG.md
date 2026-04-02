@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Coworker are documented here.
+All notable changes to WarmDesk are documented here.
 
 ## v0.3.2 — 2026-04-02
 
@@ -38,7 +38,7 @@ All notable changes to Coworker are documented here.
 - **Report date/time not following configured format** — the "Generated" timestamp and card update dates in the time report used `toLocaleString`, producing browser-locale formatting regardless of user settings; now uses the `useDateFormat` composable so the output matches the user's configured date/time format
 - **Report URL printed at bottom of page** — browsers print the page URL in the margin area by default; suppressed via `@page { margin: 0 }` and explicit empty `@top-*` and `@bottom-*` margin box rules
 - **PDF export missing pages** — `.app-shell-body { overflow: hidden }` clipped the print output to the visible viewport, truncating multi-page reports; overridden with `overflow: visible; height: auto` in `@media print`
-- **Print header duplicated/cut off across pages** — the `position: fixed` per-page header was positioned relative to the CSS content area, overlapping content on pages 2 and onwards; replaced with native CSS `@page` margin boxes: the Coworker logo appears inline at the top of page 1, and "Coworker" text + page number (`n / total`) appear in the top margin on subsequent pages via `@page @top-left` and `@page @top-right`
+- **Print header duplicated/cut off across pages** — the `position: fixed` per-page header was positioned relative to the CSS content area, overlapping content on pages 2 and onwards; replaced with native CSS `@page` margin boxes: the WarmDesk logo appears inline at the top of page 1, and "WarmDesk" text + page number (`n / total`) appear in the top margin on subsequent pages via `@page @top-left` and `@page @top-right`
 
 ## v0.2.10 — 2026-03-29
 
@@ -104,7 +104,7 @@ All notable changes to Coworker are documented here.
 - **Project admin role** — new `admin` role between `member` and `owner`; project admins can create, rename, reorder, and delete columns; regular members cannot; board toolbar shows settings gear only to project admins and global admins
 - **Group chat avatar** — group conversations can have a custom avatar image; click the group icon in the chat header to upload one
 - **Auto-delete empty group chat** — when removing the last non-creator member from a group chat that has no messages, the conversation is deleted automatically and all participants are notified
-- **Persistent system admin in seed** — `coworker-seed` now creates `tonk` (Ton Kersten) as a system admin account that is never removed by `--reset`
+- **Persistent system admin in seed** — `warmdesk-seed` now creates `tonk` (Ton Kersten) as a system admin account that is never removed by `--reset`
 - **More demo users in seed** — four additional demo users (Priya Nair, James O'Brien, Elena Kovač, Raj Sharma) are created; project admin roles are demonstrated across the three demo projects
 
 ### Fixed
@@ -119,7 +119,7 @@ All notable changes to Coworker are documented here.
 - **Assignee filter on time reports** — the report page now has a multi-select dropdown to filter by one, several, or all assignees; selected names are shown as a summary label; passed to the backend as a comma-separated `assignees` query param
 - **Direct message history** — opening a conversation (including via a sidebar user link) now immediately loads all stored messages from the database; history persists across sessions
 - **Remove member from group chat** — any group member can remove another member via the × chip next to their name in the chat header; removal is confirmed and broadcast to remaining members via WebSocket
-- **Demo conversations in seed** — `coworker-seed` now creates 5 conversations with 42 realistic messages (4 one-on-one DMs: Alex↔Sarah, Marc↔Lisa, Sarah↔Lisa, Alex↔Marc; plus a "Website Redesign Team" group chat) with historically-spread timestamps
+- **Demo conversations in seed** — `warmdesk-seed` now creates 5 conversations with 42 realistic messages (4 one-on-one DMs: Alex↔Sarah, Marc↔Lisa, Sarah↔Lisa, Alex↔Marc; plus a "Website Redesign Team" group chat) with historically-spread timestamps
 - **Screenshots in README** — a 2-column screenshot grid has been added to the README covering all main views
 
 ### Fixed
@@ -149,7 +149,7 @@ All notable changes to Coworker are documented here.
 - **Export to PDF** — print-optimised layout with company logo and period header; uses the browser's native print-to-PDF
 - **Export to Excel (XLSX)** — downloads a formatted spreadsheet via SheetJS; includes ref, title, assignees, date, and time columns with subtotals per project and a grand total
 - **Company branding** — admin can set a company name and logo (URL or uploaded image) under Admin → Settings → Branding; both appear on generated reports
-- **Demo seed tool** — `coworker-seed` binary (included in the distribution) populates the database with four demo users, three projects, 32 cards with labels/assignees/checklists/comments/time, and three discussion topics; run with `--reset` to wipe and re-seed; idempotent on repeated runs
+- **Demo seed tool** — `warmdesk-seed` binary (included in the distribution) populates the database with four demo users, three projects, 32 cards with labels/assignees/checklists/comments/time, and three discussion topics; run with `--reset` to wipe and re-seed; idempotent on repeated runs
 - **CLAUDE.md** — developer guide for AI-assisted development: architecture decisions, conventions, and how to add routes, models, and settings
 - **Configurable idle session timeout** — admin setting (default 60 minutes); users are automatically logged out after the configured period of inactivity; set to 0 to disable
 - **Update check** — on login the server is compared against the latest GitHub release; a dismissable banner is shown when a newer version is available (web and desktop)
@@ -159,7 +159,7 @@ All notable changes to Coworker are documented here.
 - **SMTP username and password made optional** — all SMTP credential fields are now pointer types in the backend; omitting them from a request leaves the stored value untouched, allowing auth-less SMTP relay configurations
 
 ### Changed
-- `coworker-seed` is built alongside the main binary by `make build-backend` and included in distribution archives
+- `warmdesk-seed` is built alongside the main binary by `make build-backend` and included in distribution archives
 - System settings handler splits SMTP saves from general settings saves to prevent cross-contamination
 
 ## 2026-03-28

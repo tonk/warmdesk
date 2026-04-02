@@ -5,8 +5,8 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/tonk/coworker/database"
-	"github.com/tonk/coworker/models"
+	"github.com/tonk/warmdesk/database"
+	"github.com/tonk/warmdesk/models"
 )
 
 // AdminGetUserProjects returns the project IDs the user is currently a member of.

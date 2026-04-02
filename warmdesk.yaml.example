@@ -1,4 +1,4 @@
-# Coworker configuration file
+# WarmDesk configuration file
 # Environment variables override any value set here.
 
 # HTTP port the server listens on
@@ -8,15 +8,15 @@ port: "8080"
 db_driver: sqlite
 
 # SQLite (default) — path to the database file
-db_dsn: "./coworker.db"
+db_dsn: "./warmdesk.db"
 
 # PostgreSQL example:
 # db_driver: postgres
-# db_dsn: "host=localhost user=coworker password=secret dbname=coworker port=5432 sslmode=disable"
+# db_dsn: "host=localhost user=warmdesk password=secret dbname=warmdesk port=5432 sslmode=disable"
 
 # MySQL / MariaDB example:
 # db_driver: mysql
-# db_dsn: "coworker:secret@tcp(localhost:3306)/coworker?charset=utf8mb4&parseTime=True&loc=Local"
+# db_dsn: "warmdesk:secret@tcp(localhost:3306)/warmdesk?charset=utf8mb4&parseTime=True&loc=Local"
 
 # SMTP email settings (used for notifications: mentions, DMs, card assignments).
 # These values are used as initial defaults; they can be overridden via the admin
@@ -25,7 +25,7 @@ db_dsn: "./coworker.db"
 smtp:
   host: ""             # e.g. mail.example.com or smtp.gmail.com
   port: 587            # 587 for STARTTLS (recommended), 465 for SSL, 25 for plaintext
-  from: ""             # e.g. coworker@example.com
+  from: ""             # e.g. warmdesk@example.com
   username: ""         # SMTP login (often the same as the from address)
   password: ""         # SMTP password or app-specific password
 

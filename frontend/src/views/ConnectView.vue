@@ -1,9 +1,9 @@
 <template>
   <div class="connect-page">
     <div class="connect-card">
-      <img src="/logo.svg" alt="Coworker" class="connect-logo" />
-      <h1 class="connect-title">Connect to Coworker</h1>
-      <p class="connect-hint">Enter the URL of your Coworker server.</p>
+      <img src="/logo.svg" alt="WarmDesk" class="connect-logo" />
+      <h1 class="connect-title">Connect to WarmDesk</h1>
+      <p class="connect-hint">Enter the URL of your WarmDesk server.</p>
 
       <form @submit.prevent="connect" class="connect-form">
         <div class="form-group">
@@ -13,7 +13,7 @@
             v-model="serverUrl"
             class="form-input"
             type="url"
-            placeholder="https://coworker.example.com"
+            placeholder="https://warmdesk.example.com"
             autocomplete="url"
             required
             :disabled="loading"
@@ -67,7 +67,7 @@ async function connect() {
       signal: AbortSignal.timeout(8000),
     })
     if (res.ok || res.status === 401 || res.status === 403) {
-      // Got a real response from a Coworker server
+      // Got a real response from a WarmDesk server
       setServerUrl(url)
       router.push('/login')
     } else {

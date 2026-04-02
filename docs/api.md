@@ -1,4 +1,4 @@
-# Coworker — API Reference
+# WarmDesk — API Reference
 
 ## Contents
 
@@ -134,7 +134,7 @@ PATCH /api/v1/ticket/{projectSlug}/cards/{cardId}/move
 
 ```bash
 API_KEY="cwk_live_xxxxxxxxxxxx"
-BASE="https://coworker.example.com/api/v1/ticket"
+BASE="https://warmdesk.example.com/api/v1/ticket"
 PROJECT="my-project"
 
 # 1. Create a deploy card
@@ -207,7 +207,7 @@ Content-Type: application/json
 ### Example: send from a shell script
 
 ```bash
-curl -s -X POST https://coworker.example.com/api/v1/webhooks/TOKEN \
+curl -s -X POST https://warmdesk.example.com/api/v1/webhooks/TOKEN \
   -H "Content-Type: application/json" \
   -d '{"text":"**Build passed** — [view run](https://ci.example.com/build/42)","username":"GitHub Actions"}'
 ```
@@ -237,7 +237,7 @@ POST /api/v1/gitea-webhook/{token}
 1. Create a webhook of type **Gitea / Forgejo** in Project Settings.
 2. In your Gitea or Forgejo repository, go to
    **Settings → Webhooks → Add Webhook → Gitea** and set:
-   - Target URL: `https://coworker.example.com/api/v1/gitea-webhook/{token}`
+   - Target URL: `https://warmdesk.example.com/api/v1/gitea-webhook/{token}`
    - Content type: `application/json`
    - Secret: leave empty (the token in the URL is sufficient)
    - Trigger: select all events, or at minimum: *Push*, *Issues*,
@@ -280,7 +280,7 @@ POST /api/v1/github-webhook/{token}
 1. Create a webhook of type **GitHub** in Project Settings.
 2. In your GitHub repository, go to
    **Settings → Webhooks → Add webhook** and set:
-   - Payload URL: `https://coworker.example.com/api/v1/github-webhook/{token}`
+   - Payload URL: `https://warmdesk.example.com/api/v1/github-webhook/{token}`
    - Content type: `application/json`
    - Secret: leave empty (or enter any string — currently not validated)
    - Events: choose **Let me select individual events** and enable at minimum:
@@ -323,8 +323,8 @@ POST /api/v1/gitlab-webhook/{token}
 
 1. Create a webhook of type **GitLab** in Project Settings.
 2. In your GitLab repository, go to **Settings → Webhooks** and set:
-   - URL: `https://coworker.example.com/api/v1/gitlab-webhook/{token}`
-   - Secret token: leave empty, or set it to the Coworker webhook token for
+   - URL: `https://warmdesk.example.com/api/v1/gitlab-webhook/{token}`
+   - Secret token: leave empty, or set it to the WarmDesk webhook token for
      extra validation (GitLab sends it in `X-Gitlab-Token`)
    - Trigger: enable at minimum **Push events**, **Merge request events**, and
      **Issues events**
@@ -364,7 +364,7 @@ reference badge at the top of the card detail.
 ### Using references in git
 
 Include a card reference anywhere in a commit message, PR title, or issue title
-and Coworker will create a link automatically when the webhook event arrives:
+and WarmDesk will create a link automatically when the webhook event arrives:
 
 ```
 git commit -m "Fix login redirect loop — closes PRJ-42"

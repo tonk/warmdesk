@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    coworker_lib::run()
+    warmdesk_lib::run()
 }

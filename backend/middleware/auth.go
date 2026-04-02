@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/tonk/coworker/services"
+	"github.com/tonk/warmdesk/services"
 )
 
 const (

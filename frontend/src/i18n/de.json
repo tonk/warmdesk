@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Coworker"
+    "name": "WarmDesk"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -205,7 +205,7 @@
     "company_logo_preview": "Vorschau"
   },
   "update": {
-    "available": "Eine neue Version von Coworker ist verfügbar: v{version}.",
+    "available": "Eine neue Version von WarmDesk ist verfügbar: v{version}.",
     "release_notes": "Versionshinweise anzeigen"
   },
   "common": {

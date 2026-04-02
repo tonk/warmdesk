@@ -5,8 +5,8 @@ import (
 	"log"
 	"unicode"
 
-	"github.com/tonk/coworker/config"
-	"github.com/tonk/coworker/models"
+	"github.com/tonk/warmdesk/config"
+	"github.com/tonk/warmdesk/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"

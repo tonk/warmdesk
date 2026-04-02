@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Coworker"
+    "name": "WarmDesk"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -234,7 +234,7 @@
     "run": "Generate Report"
   },
   "update": {
-    "available": "A new version of Coworker is available: v{version}.",
+    "available": "A new version of WarmDesk is available: v{version}.",
     "release_notes": "View release notes"
   },
   "common": {

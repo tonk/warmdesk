@@ -3,7 +3,7 @@
 // Usage (run from the backend/ directory):
 //
 //	go run ./cmd/seed
-//	go run ./cmd/seed --config /path/to/coworker.yaml
+//	go run ./cmd/seed --config /path/to/warmdesk.yaml
 //	go run ./cmd/seed --reset   # drop all demo data first, then re-seed
 //
 // The script is idempotent: it exits early when it detects that the demo data
@@ -16,9 +16,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/tonk/coworker/config"
-	"github.com/tonk/coworker/database"
-	"github.com/tonk/coworker/models"
+	"github.com/tonk/warmdesk/config"
+	"github.com/tonk/warmdesk/database"
+	"github.com/tonk/warmdesk/models"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -98,7 +98,7 @@ var demoProjects = []seedProject{
 // ─── main ────────────────────────────────────────────────────────────────────
 
 func main() {
-	configPath := flag.String("config", "", "path to coworker.yaml (optional)")
+	configPath := flag.String("config", "", "path to warmdesk.yaml (optional)")
 	reset := flag.Bool("reset", false, "remove existing demo data before seeding")
 	flag.Parse()
 

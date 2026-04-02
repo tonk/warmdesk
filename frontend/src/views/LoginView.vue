@@ -2,7 +2,7 @@
   <div class="auth-page">
     <div class="auth-card">
       <div class="auth-logo">
-        <img src="/logo.svg" alt="Coworker" style="height:36px;width:auto" />
+        <img src="/logo.svg" alt="WarmDesk" style="height:36px;width:auto" />
       </div>
       <h1 class="auth-title">{{ $t('auth.login_title') }}</h1>
       <form @submit.prevent="handleSubmit">
@@ -25,7 +25,7 @@
         <RouterLink to="/register">{{ $t('auth.register') }}</RouterLink>
       </p>
     </div>
-    <div class="auth-version">Coworker v{{ appVersion }}</div>
+    <div class="auth-version">WarmDesk v{{ appVersion }}</div>
   </div>
 </template>
 

@@ -1,4 +1,4 @@
-# Coworker — Administrator Guide
+# WarmDesk — Administrator Guide
 
 ## Contents
 
@@ -48,7 +48,7 @@ Configuration is loaded in priority order (highest wins):
 
 1. CLI flag `--config /path/to/file.yaml`
 2. Environment variable `CONFIG_FILE=/path/to/file.yaml`
-3. `coworker.yaml` in the current working directory
+3. `warmdesk.yaml` in the current working directory
 4. Built-in defaults
 
 Every YAML key has a matching environment variable. Environment variables
@@ -70,7 +70,7 @@ web_dir: "./web"                  # WEB_DIR — compiled frontend (required in p
 
 # ── Database ──────────────────────────────────────────────────────────────────
 db_driver: "sqlite"               # DB_DRIVER — sqlite | postgres | mysql
-db_dsn: "./coworker.db"           # DB_DSN — file path or connection string
+db_dsn: "./warmdesk.db"           # DB_DSN — file path or connection string
 db_log: "warn"                    # DB_LOG — silent | error | warn | info
 
 # ── File uploads ──────────────────────────────────────────────────────────────
@@ -106,11 +106,11 @@ that is accessible from a network.
 
 ### SQLite (default — recommended for single-server installs)
 
-No setup needed. Coworker creates the file automatically.
+No setup needed. WarmDesk creates the file automatically.
 
 ```yaml
 db_driver: sqlite
-db_dsn: /var/lib/coworker/coworker.db
+db_dsn: /var/lib/warmdesk/warmdesk.db
 ```
 
 Ensure the directory is writable by the process user and is on a volume that is
@@ -120,31 +120,31 @@ included in your backup.
 
 ```bash
 # Create database and user
-psql -U postgres -c "CREATE USER coworker WITH PASSWORD 'secret';"
-psql -U postgres -c "CREATE DATABASE coworker OWNER coworker;"
+psql -U postgres -c "CREATE USER warmdesk WITH PASSWORD 'secret';"
+psql -U postgres -c "CREATE DATABASE warmdesk OWNER warmdesk;"
 ```
 
 ```yaml
 db_driver: postgres
-db_dsn: "host=localhost user=coworker password=secret dbname=coworker port=5432 sslmode=require"
+db_dsn: "host=localhost user=warmdesk password=secret dbname=warmdesk port=5432 sslmode=require"
 ```
 
 ### MySQL / MariaDB
 
 ```bash
-mysql -u root -p -e "CREATE DATABASE coworker CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-mysql -u root -p -e "CREATE USER 'coworker'@'localhost' IDENTIFIED BY 'secret';"
-mysql -u root -p -e "GRANT ALL PRIVILEGES ON coworker.* TO 'coworker'@'localhost';"
+mysql -u root -p -e "CREATE DATABASE warmdesk CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql -u root -p -e "CREATE USER 'warmdesk'@'localhost' IDENTIFIED BY 'secret';"
+mysql -u root -p -e "GRANT ALL PRIVILEGES ON warmdesk.* TO 'warmdesk'@'localhost';"
 ```
 
 ```yaml
 db_driver: mysql
-db_dsn: "coworker:secret@tcp(localhost:3306)/coworker?charset=utf8mb4&parseTime=True&loc=Local"
+db_dsn: "warmdesk:secret@tcp(localhost:3306)/warmdesk?charset=utf8mb4&parseTime=True&loc=Local"
 ```
 
 ### Schema migration
 
-Coworker runs **GORM AutoMigrate** on every startup. New columns and tables are
+WarmDesk runs **GORM AutoMigrate** on every startup. New columns and tables are
 created automatically; existing data is never destroyed. There are no separate
 migration files to run.
 
@@ -154,33 +154,33 @@ migration files to run.
 
 ### systemd (Linux — recommended)
 
-A ready-made unit file is at `deploy/coworker.service`. Edit it before
+A ready-made unit file is at `deploy/warmdesk.service`. Edit it before
 installing — at minimum set `JWT_SECRET` and `ALLOWED_ORIGINS`.
 
 ```ini
 [Service]
 Environment="JWT_SECRET=your-secret-here"
-Environment="ALLOWED_ORIGINS=https://coworker.example.com"
-Environment="DB_DSN=/var/lib/coworker/coworker.db"
+Environment="ALLOWED_ORIGINS=https://warmdesk.example.com"
+Environment="DB_DSN=/var/lib/warmdesk/warmdesk.db"
 ```
 
 ```bash
-sudo useradd -r -s /bin/false -d /opt/coworker coworker
-sudo mkdir -p /opt/coworker/{data,uploads}
-sudo cp -r dist/. /opt/coworker/
-sudo chown -R coworker:coworker /opt/coworker
+sudo useradd -r -s /bin/false -d /opt/warmdesk warmdesk
+sudo mkdir -p /opt/warmdesk/{data,uploads}
+sudo cp -r dist/. /opt/warmdesk/
+sudo chown -R warmdesk:warmdesk /opt/warmdesk
 
-sudo cp deploy/coworker.service /etc/systemd/system/
+sudo cp deploy/warmdesk.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable --now coworker
-sudo journalctl -u coworker -f   # follow logs
+sudo systemctl enable --now warmdesk
+sudo journalctl -u warmdesk -f   # follow logs
 ```
 
 ---
 
 ## 5. Reverse Proxy
 
-Always run Coworker behind a reverse proxy in production. Ready-made configs
+Always run WarmDesk behind a reverse proxy in production. Ready-made configs
 are in `deploy/`.
 
 ### Nginx (`deploy/nginx.conf`)
@@ -202,9 +202,9 @@ proxy_set_header X-Real-IP $remote_addr;
 ```
 
 ```bash
-sudo cp deploy/nginx.conf /etc/nginx/sites-available/coworker
+sudo cp deploy/nginx.conf /etc/nginx/sites-available/warmdesk
 # Edit: replace yourdomain.com and SSL certificate paths
-sudo ln -s /etc/nginx/sites-available/coworker /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/warmdesk /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
@@ -212,24 +212,24 @@ sudo nginx -t && sudo systemctl reload nginx
 
 ```bash
 sudo a2enmod proxy proxy_http proxy_wstunnel ssl headers rewrite
-sudo cp deploy/apache.conf /etc/apache2/sites-available/coworker.conf
+sudo cp deploy/apache.conf /etc/apache2/sites-available/warmdesk.conf
 # Edit: replace yourdomain.com and SSL certificate paths
-sudo a2ensite coworker
+sudo a2ensite warmdesk
 sudo systemctl reload apache2
 ```
 
 ### CORS
 
-Set `ALLOWED_ORIGINS` to the **exact** origin that users access Coworker from
+Set `ALLOWED_ORIGINS` to the **exact** origin that users access WarmDesk from
 (including scheme and port). A mismatch will prevent the frontend from making
 API calls.
 
 ```bash
 # Single domain
-ALLOWED_ORIGINS=https://coworker.example.com
+ALLOWED_ORIGINS=https://warmdesk.example.com
 
 # Multiple domains (comma-separated)
-ALLOWED_ORIGINS=https://coworker.example.com,https://coworker.internal
+ALLOWED_ORIGINS=https://warmdesk.example.com,https://warmdesk.internal
 ```
 
 Use `*` only in development — never in production.
@@ -242,7 +242,7 @@ Register normally through the web interface. Then promote the account to admin:
 
 **SQLite**
 ```bash
-sqlite3 /var/lib/coworker/coworker.db \
+sqlite3 /var/lib/warmdesk/warmdesk.db \
   "UPDATE users SET global_role='admin' WHERE username='yourname';"
 ```
 
@@ -311,8 +311,8 @@ Go to **Admin → Settings → Email** and fill in:
 | SMTP Port | Typically `587` (STARTTLS), `465` (TLS), or `25` (relay) |
 | Username | Often your email address; leave empty for relay servers |
 | Password | Leave empty for relay servers that don't require auth |
-| From address | The `From:` header, e.g. `coworker@example.com` |
-| From name | Display name, e.g. `Coworker` |
+| From address | The `From:` header, e.g. `warmdesk@example.com` |
+| From name | Display name, e.g. `WarmDesk` |
 
 Click **Save** and then use **Send Test Email** to verify the configuration
 before going live. Enter any email address in the test field and click **Send
@@ -329,12 +329,12 @@ From:     youraddress@gmail.com
 ```
 
 You must enable 2-factor authentication on the Google account and generate an
-**App Password** for Coworker. Standard account passwords will not work.
+**App Password** for WarmDesk. Standard account passwords will not work.
 
 ### Auth-less relay (common in corporate environments)
 
 Leave Username and Password empty. The mail server must be configured to accept
-connections from the Coworker server's IP without authentication.
+connections from the WarmDesk server's IP without authentication.
 
 ---
 
@@ -420,7 +420,7 @@ Individual users can override any of these in their own User Settings.
 
 ## 11. Horizontal Scaling
 
-Coworker uses WebSocket connections for real-time updates. In a single-instance
+WarmDesk uses WebSocket connections for real-time updates. In a single-instance
 setup, connections are managed in memory. When running multiple instances behind
 a load balancer, each instance has its own connection pool — a message broadcast
 by one instance is not seen by clients connected to another.
@@ -439,7 +439,7 @@ or
 REDIS_URL=redis://username:password@redis-host:6379/0
 ```
 
-When `redis_url` is set, Coworker subscribes to a Redis channel and all
+When `redis_url` is set, WarmDesk subscribes to a Redis channel and all
 `BroadcastToProject` calls publish to that channel. Every instance receives the
 message and delivers it to its own connected clients.
 
@@ -454,7 +454,7 @@ but they reduce Redis traffic.
 
 ### Redis configuration
 
-Coworker uses a single pub/sub channel per subscription scope. A minimal Redis
+WarmDesk uses a single pub/sub channel per subscription scope. A minimal Redis
 install with default settings works. No persistence (AOF/RDB) is required for
 the pub/sub use case.
 
@@ -467,8 +467,8 @@ redis-cli -h redis-host ping
 
 ## 12. Desktop Apps
 
-Coworker ships Tauri-based desktop apps that wrap the web frontend and connect
-to a Coworker server. The apps are standalone — they do not bundle the server.
+WarmDesk ships Tauri-based desktop apps that wrap the web frontend and connect
+to a WarmDesk server. The apps are standalone — they do not bundle the server.
 
 Users configure the server URL in the app's **Connect** screen on first launch.
 
@@ -478,10 +478,10 @@ Pre-built desktop apps are attached to each GitHub release:
 
 | Platform | File | Notes |
 |----------|------|-------|
-| Linux | `Coworker-vX.Y.Z-x86_64.AppImage` | Portable; no installation required |
-| Windows | `Coworker-vX.Y.Z-x64-setup.exe` | NSIS installer |
-| Windows | `Coworker-vX.Y.Z-x64-portable.zip` | Extract and run `Coworker.exe` |
-| macOS | `Coworker-vX.Y.Z-universal.dmg` | Universal binary (Intel + Apple Silicon) |
+| Linux | `WarmDesk-vX.Y.Z-x86_64.AppImage` | Portable; no installation required |
+| Windows | `WarmDesk-vX.Y.Z-x64-setup.exe` | NSIS installer |
+| Windows | `WarmDesk-vX.Y.Z-x64-portable.zip` | Extract and run `WarmDesk.exe` |
+| macOS | `WarmDesk-vX.Y.Z-universal.dmg` | Universal binary (Intel + Apple Silicon) |
 
 ### Building desktop apps from source
 
@@ -500,7 +500,7 @@ git pull
 make build
 
 # Restart the service
-sudo systemctl restart coworker
+sudo systemctl restart warmdesk
 ```
 
 AutoMigrate runs on startup and applies any schema changes automatically. No
@@ -521,49 +521,49 @@ manual migration step is needed.
 
 | Item | Location | Frequency |
 |------|----------|-----------|
-| Database | `coworker.db` (SQLite) or PostgreSQL/MySQL dump | Daily or more |
+| Database | `warmdesk.db` (SQLite) or PostgreSQL/MySQL dump | Daily or more |
 | Uploads | `upload_dir` (default `./uploads/`) | Daily or more |
-| Config | `coworker.yaml` | On change |
+| Config | `warmdesk.yaml` | On change |
 
 ### SQLite backup
 
 ```bash
 # Hot copy — safe while the server is running
-sqlite3 /var/lib/coworker/coworker.db ".backup /backup/coworker-$(date +%Y%m%d).db"
+sqlite3 /var/lib/warmdesk/warmdesk.db ".backup /backup/warmdesk-$(date +%Y%m%d).db"
 
 # Or stop the service first and copy directly
-sudo systemctl stop coworker
-cp /var/lib/coworker/coworker.db /backup/coworker-$(date +%Y%m%d).db
-sudo systemctl start coworker
+sudo systemctl stop warmdesk
+cp /var/lib/warmdesk/warmdesk.db /backup/warmdesk-$(date +%Y%m%d).db
+sudo systemctl start warmdesk
 ```
 
 ### PostgreSQL backup
 
 ```bash
-pg_dump -U coworker coworker | gzip > /backup/coworker-$(date +%Y%m%d).sql.gz
+pg_dump -U warmdesk warmdesk | gzip > /backup/warmdesk-$(date +%Y%m%d).sql.gz
 ```
 
 ### Restoring
 
 ```bash
 # SQLite
-cp /backup/coworker-20260329.db /var/lib/coworker/coworker.db
+cp /backup/warmdesk-20260329.db /var/lib/warmdesk/warmdesk.db
 
 # PostgreSQL
-gunzip -c /backup/coworker-20260329.sql.gz | psql -U coworker coworker
+gunzip -c /backup/warmdesk-20260329.sql.gz | psql -U warmdesk warmdesk
 ```
 
 ---
 
 ## 15. Demo Data
 
-The `coworker-seed` binary ships alongside `coworker` and populates the
+The `warmdesk-seed` binary ships alongside `warmdesk` and populates the
 database with realistic demo content for evaluation and testing.
 
 ```bash
 cd dist
-./coworker-seed           # seed (idempotent — safe to run multiple times)
-./coworker-seed --reset   # wipe all demo data and re-seed
+./warmdesk-seed           # seed (idempotent — safe to run multiple times)
+./warmdesk-seed --reset   # wipe all demo data and re-seed
 ```
 
 **Demo accounts** (password for all: `demo1234`)
@@ -593,7 +593,7 @@ cd dist
 
 ## 16. Security Checklist
 
-Before exposing Coworker to the internet:
+Before exposing WarmDesk to the internet:
 
 - [ ] Changed `JWT_SECRET` to a randomly generated 32-byte hex string
 - [ ] Set `ALLOWED_ORIGINS` to the exact production domain
@@ -602,9 +602,9 @@ Before exposing Coworker to the internet:
 - [ ] `API_LOG=false` (or piped to a log file, not stdout)
 - [ ] Database credentials are strong and not the defaults
 - [ ] Uploads directory (`upload_dir`) is outside the web root
-- [ ] Firewall allows inbound traffic on port 80/443 only; Coworker's port
+- [ ] Firewall allows inbound traffic on port 80/443 only; WarmDesk's port
       (8080) is not directly exposed
-- [ ] Systemd service runs as a non-root dedicated user (`coworker`)
+- [ ] Systemd service runs as a non-root dedicated user (`warmdesk`)
 - [ ] Backup schedule is in place for the database and uploads
 - [ ] Public registration disabled (`Allow public registration = off`) if only
       known users should access the instance

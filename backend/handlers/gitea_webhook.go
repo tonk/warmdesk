@@ -11,10 +11,10 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/tonk/coworker/database"
-	"github.com/tonk/coworker/models"
-	"github.com/tonk/coworker/services"
-	appws "github.com/tonk/coworker/ws"
+	"github.com/tonk/warmdesk/database"
+	"github.com/tonk/warmdesk/models"
+	"github.com/tonk/warmdesk/services"
+	appws "github.com/tonk/warmdesk/ws"
 )
 
 // giteaUser is the common user object in Gitea payloads.

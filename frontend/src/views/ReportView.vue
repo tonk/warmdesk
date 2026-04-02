@@ -83,8 +83,8 @@
     <!-- Report content (visible on screen and when printing) -->
     <!-- Per-page header: hidden on screen, repeats on every printed page via position:fixed -->
     <div class="print-page-header" v-if="report">
-      <img src="/logo.svg" alt="Coworker" class="print-logo" />
-      <span class="print-app-name">Coworker</span>
+      <img src="/logo.svg" alt="WarmDesk" class="print-logo" />
+      <span class="print-app-name">WarmDesk</span>
     </div>
 
     <div class="report-content" v-if="report">
@@ -621,7 +621,7 @@ onUnmounted(() => {
   size: auto;
   /* App name top-left on pages 2+, page number top-right on all pages */
   @top-left {
-    content: "Coworker";
+    content: "WarmDesk";
     font-size: 11pt;
     font-weight: 700;
     color: #6366f1;
@@ -639,7 +639,7 @@ onUnmounted(() => {
   @bottom-right  { content: ""; }
 }
 
-/* Page 1: logo banner replaces the margin-box "Coworker" text */
+/* Page 1: logo banner replaces the margin-box "WarmDesk" text */
 @page :first {
   @top-left  { content: ""; }
 }

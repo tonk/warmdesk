@@ -1,15 +1,15 @@
 [Unit]
-Description=Coworker Kanban
-Documentation=https://github.com/tonk/coworker
+Description=WarmDesk Kanban
+Documentation=https://github.com/tonk/warmdesk
 After=network.target
 
 [Service]
 Type=simple
-User=coworker
-Group=coworker
-WorkingDirectory=/opt/coworker
+User=warmdesk
+Group=warmdesk
+WorkingDirectory=/opt/warmdesk
 
-ExecStart=/opt/coworker/coworker
+ExecStart=/opt/warmdesk/warmdesk
 Restart=on-failure
 RestartSec=5
 TimeoutStopSec=10
@@ -17,16 +17,16 @@ TimeoutStopSec=10
 # Environment — adjust to your setup
 Environment=PORT=8080
 Environment=DB_DRIVER=sqlite
-Environment=DB_DSN=/opt/coworker/data/coworker.db
+Environment=DB_DSN=/opt/warmdesk/data/warmdesk.db
 Environment=JWT_SECRET=change-me-to-a-random-secret
 Environment=ALLOWED_ORIGINS=https://yourdomain.com
-Environment=WEB_DIR=/opt/coworker/web
+Environment=WEB_DIR=/opt/warmdesk/web
 
 # Security hardening
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
-ReadWritePaths=/opt/coworker/data
+ReadWritePaths=/opt/warmdesk/data
 
 [Install]
 WantedBy=multi-user.target

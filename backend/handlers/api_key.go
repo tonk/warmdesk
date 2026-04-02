@@ -8,9 +8,9 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/tonk/coworker/database"
-	"github.com/tonk/coworker/middleware"
-	"github.com/tonk/coworker/models"
+	"github.com/tonk/warmdesk/database"
+	"github.com/tonk/warmdesk/middleware"
+	"github.com/tonk/warmdesk/models"
 )
 
 func generateAPIKey() (plain, hash, prefix string, err error) {

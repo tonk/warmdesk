@@ -1,4 +1,4 @@
-You are performing a Coworker release. The version to release is: $ARGUMENTS
+You are performing a WarmDesk release. The version to release is: $ARGUMENTS
 
 Follow these steps in order:
 

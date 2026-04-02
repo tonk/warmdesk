@@ -1,8 +1,8 @@
 # ── Build output ─────────────────────────────────────────────────────────────
 dist/
-coworker
-coworker.db
-coworker-*.tar.gz
+warmdesk
+warmdesk.db
+warmdesk-*.tar.gz
 
 # ── Go ───────────────────────────────────────────────────────────────────────
 *.exe
@@ -32,7 +32,7 @@ frontend/src-tauri/target/release/bundle/
 *.log
 
 # ── Config (keep the example, ignore local overrides) ────────────────────────
-coworker.yaml
+warmdesk.yaml
 *.local.yaml
 
 # ── OS / editor artifacts ─────────────────────────────────────────────────────

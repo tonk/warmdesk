@@ -1,6 +1,6 @@
 package handlers
 
-import "github.com/tonk/coworker/services"
+import "github.com/tonk/warmdesk/services"
 
 var notifSvc *services.NotificationService
 

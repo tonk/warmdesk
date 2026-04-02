@@ -340,13 +340,13 @@ definitions:
 host: localhost:8080
 info:
   contact:
-    name: Coworker
-    url: https://github.com/tonk/coworker
+    name: WarmDesk
+    url: https://github.com/tonk/warmdesk
   description: Self-hosted project management tool — Kanban boards, team chat, discussions,
     and time reporting.
   license:
     name: MIT
-  title: Coworker API
+  title: WarmDesk API
   version: "1.0"
 paths:
   /auth/api-keys:

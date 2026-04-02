@@ -7,7 +7,7 @@
       <div class="app-shell-content">
         <RouterView />
         <footer class="app-footer">
-          <span class="footer-left">Coworker v{{ appVersion }}</span>
+          <span class="footer-left">WarmDesk v{{ appVersion }}</span>
           <span class="footer-right">{{ userFullName }}</span>
         </footer>
       </div>

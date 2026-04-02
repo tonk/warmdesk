@@ -1,16 +1,16 @@
-BINARY   := coworker
+BINARY   := warmdesk
 DIST_DIR := dist
 BACKEND  := backend
 FRONTEND := frontend
 VERSION  := $(shell git -C $(BACKEND) describe --tags --always 2>/dev/null || echo "dev")
-ARCHIVE  := coworker-$(VERSION).tar.gz
+ARCHIVE  := warmdesk-$(VERSION).tar.gz
 .PHONY: all build build-frontend build-backend clean dev-backend dev-frontend run package appimage dmg windows-installer windows-portable
 
 # Build everything into dist/
 all: build
 
 build: build-frontend build-backend
-	@cp coworker.yaml.example $(DIST_DIR)/coworker.yaml.example
+	@cp warmdesk.yaml.example $(DIST_DIR)/warmdesk.yaml.example
 	@cp -r deploy $(DIST_DIR)/deploy
 	@cp INSTALL.md $(DIST_DIR)/INSTALL.md
 	@cp README.md $(DIST_DIR)/README.md
@@ -29,6 +29,7 @@ build-backend:
 	cd $(BACKEND) && go build -ldflags="-s -w -X main.version=$(VERSION)" -o ../$(DIST_DIR)/$(BINARY) .
 	cd $(BACKEND) && go build -ldflags="-s -w" -o ../$(DIST_DIR)/$(BINARY)-seed ./cmd/seed
 
+
 # Run in development mode (two terminals needed)
 dev-backend:
 	cd $(BACKEND) && go run .
@@ -46,37 +47,37 @@ package: build
 # Requires: Rust, webkit2gtk4.1-devel, gtk3-devel, librsvg2-devel, openssl-devel
 # NO_STRIP=true works around linuxdeploy's bundled strip being too old for newer glibc.
 appimage:
-	@echo "Building Coworker desktop app (AppImage)..."
+	@echo "Building WarmDesk desktop app (AppImage)..."
 	cd $(FRONTEND) && NO_STRIP=true npm run tauri:build -- --bundles appimage
-	@echo "AppImage: $(FRONTEND)/src-tauri/target/release/bundle/appimage/Coworker_*_amd64.AppImage"
+	@echo "AppImage: $(FRONTEND)/src-tauri/target/release/bundle/appimage/WarmDesk_*_amd64.AppImage"
 
 # Build the Tauri desktop client as a macOS DMG (universal: Intel + Apple Silicon).
 # Must be run on macOS. Requires: Rust, Xcode command line tools.
 dmg:
-	@echo "Building Coworker desktop app (macOS DMG)..."
+	@echo "Building WarmDesk desktop app (macOS DMG)..."
 	rustup target add aarch64-apple-darwin x86_64-apple-darwin 2>/dev/null || true
 	cd $(FRONTEND) && npm run tauri:build -- --bundles dmg --target universal-apple-darwin
-	@echo "DMG: $(FRONTEND)/src-tauri/target/universal-apple-darwin/release/bundle/dmg/Coworker_*.dmg"
+	@echo "DMG: $(FRONTEND)/src-tauri/target/universal-apple-darwin/release/bundle/dmg/WarmDesk_*.dmg"
 
 # Build the Tauri desktop client as a Windows NSIS installer.
 # Must be run on Windows. Requires: Rust, WebView2 (pre-installed on Windows 11).
 windows-installer:
-	@echo "Building Coworker desktop app (Windows installer)..."
+	@echo "Building WarmDesk desktop app (Windows installer)..."
 	cd $(FRONTEND) && npm run tauri:build -- --bundles nsis
-	@echo "Installer: $(FRONTEND)/src-tauri/target/release/bundle/nsis/Coworker_*_x64-setup.exe"
+	@echo "Installer: $(FRONTEND)/src-tauri/target/release/bundle/nsis/WarmDesk_*_x64-setup.exe"
 
 # Build the Tauri desktop client as a portable Windows zip — extract and run, no installation.
 # Must be run on Windows. Requires: Rust, WebView2 (pre-installed on Windows 11).
 # WebView2 is pre-installed on Windows 10 (2018+) and Windows 11.
 windows-portable:
-	@echo "Building Coworker desktop app (Windows portable zip)..."
+	@echo "Building WarmDesk desktop app (Windows portable zip)..."
 	cd $(FRONTEND) && npm run tauri:build -- --bundles nsis
-	powershell -Command "Compress-Archive -Path '$(FRONTEND)/src-tauri/target/release/Coworker.exe' -DestinationPath 'Coworker-portable.zip' -Force"
-	@echo "Portable zip: Coworker-portable.zip"
+	powershell -Command "Compress-Archive -Path '$(FRONTEND)/src-tauri/target/release/WarmDesk.exe' -DestinationPath 'WarmDesk-portable.zip' -Force"
+	@echo "Portable zip: WarmDesk-portable.zip"
 
 # Remove build artifacts
 clean:
-	rm -rf $(DIST_DIR) coworker-*.tar.gz
+	rm -rf $(DIST_DIR) warmdesk-*.tar.gz
 	rm -rf $(FRONTEND)/dist $(FRONTEND)/src-tauri/target
 
 # Build and run production binary locally

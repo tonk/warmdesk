@@ -45,24 +45,24 @@ jobs:
         run: |
           mkdir -p dist
           cd backend
-          go build -ldflags="-s -w -X main.version=${{ github.ref_name }}" -o ../dist/coworker .
-          go build -ldflags="-s -w" -o ../dist/coworker-seed ./cmd/seed
+          go build -ldflags="-s -w -X main.version=${{ github.ref_name }}" -o ../dist/warmdesk .
+          go build -ldflags="-s -w" -o ../dist/warmdesk-seed ./cmd/seed
 
       - name: Assemble distribution
         run: |
-          cp coworker.yaml.example dist/coworker.yaml.example
+          cp warmdesk.yaml.example dist/warmdesk.yaml.example
           cp -r deploy dist/deploy
           cp INSTALL.md dist/INSTALL.md
           cp README.md dist/README.md
           cp -r docs dist/docs
 
       - name: Create archive
-        run: tar -czf coworker-${{ github.ref_name }}.tar.gz -C dist .
+        run: tar -czf warmdesk-${{ github.ref_name }}.tar.gz -C dist .
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: coworker-${{ github.ref_name }}.tar.gz
+          files: warmdesk-${{ github.ref_name }}.tar.gz
           generate_release_notes: true
 
   # ── Tauri desktop clients ────────────────────────────────────────────────────
@@ -77,20 +77,20 @@ jobs:
           - name: Linux
             os: ubuntu-22.04
             bundle: appimage
-            artifact: "Coworker-*-x86_64.AppImage"
-            rename: "Coworker-${{ github.ref_name }}-x86_64.AppImage"
+            artifact: "WarmDesk-*-x86_64.AppImage"
+            rename: "WarmDesk-${{ github.ref_name }}-x86_64.AppImage"
 
           - name: Windows
             os: windows-latest
             bundle: nsis
-            artifact: "Coworker_*_x64-setup.exe"
-            rename: "Coworker-${{ github.ref_name }}-x64-setup.exe"
+            artifact: "WarmDesk_*_x64-setup.exe"
+            rename: "WarmDesk-${{ github.ref_name }}-x64-setup.exe"
 
           - name: macOS
             os: macos-latest
             bundle: dmg
-            artifact: "Coworker_*.dmg"
-            rename: "Coworker-${{ github.ref_name }}-universal.dmg"
+            artifact: "WarmDesk_*.dmg"
+            rename: "WarmDesk-${{ github.ref_name }}-universal.dmg"
 
     steps:
       - name: Checkout
@@ -149,38 +149,38 @@ jobs:
         if: matrix.os == 'ubuntu-22.04'
         run: |
           SRC=$(ls frontend/src-tauri/target/release/bundle/appimage/*.AppImage | head -1)
-          cp "$SRC" "Coworker-${{ github.ref_name }}-x86_64.AppImage"
+          cp "$SRC" "WarmDesk-${{ github.ref_name }}-x86_64.AppImage"
 
       - name: Collect and rename artifact (Windows)
         if: matrix.os == 'windows-latest'
         shell: pwsh
         run: |
           $installer = Get-ChildItem frontend/src-tauri/target/release/bundle/nsis/*.exe | Select-Object -First 1
-          Copy-Item $installer.FullName "Coworker-${{ github.ref_name }}-x64-setup.exe"
-          Compress-Archive -Path "frontend/src-tauri/target/release/Coworker.exe" -DestinationPath "Coworker-${{ github.ref_name }}-x64-portable.zip"
+          Copy-Item $installer.FullName "WarmDesk-${{ github.ref_name }}-x64-setup.exe"
+          Compress-Archive -Path "frontend/src-tauri/target/release/WarmDesk.exe" -DestinationPath "WarmDesk-${{ github.ref_name }}-x64-portable.zip"
 
       - name: Collect and rename artifact (macOS)
         if: matrix.os == 'macos-latest'
         run: |
           SRC=$(ls frontend/src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg | head -1)
-          cp "$SRC" "Coworker-${{ github.ref_name }}-universal.dmg"
+          cp "$SRC" "WarmDesk-${{ github.ref_name }}-universal.dmg"
 
       - name: Upload to GitHub Release (Linux)
         if: matrix.os == 'ubuntu-22.04'
         uses: softprops/action-gh-release@v2
         with:
-          files: Coworker-${{ github.ref_name }}-x86_64.AppImage
+          files: WarmDesk-${{ github.ref_name }}-x86_64.AppImage
 
       - name: Upload to GitHub Release (Windows)
         if: matrix.os == 'windows-latest'
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            Coworker-${{ github.ref_name }}-x64-setup.exe
-            Coworker-${{ github.ref_name }}-x64-portable.zip
+            WarmDesk-${{ github.ref_name }}-x64-setup.exe
+            WarmDesk-${{ github.ref_name }}-x64-portable.zip
 
       - name: Upload to GitHub Release (macOS)
         if: matrix.os == 'macos-latest'
         uses: softprops/action-gh-release@v2
         with:
-          files: Coworker-${{ github.ref_name }}-universal.dmg
+          files: WarmDesk-${{ github.ref_name }}-universal.dmg
