@@ -1,4 +1,4 @@
-name: Build Windows (manual)
+name: Build client Windows (manual)
 
 on:
   workflow_dispatch:
