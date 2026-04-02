@@ -1,0 +1,63 @@
+name: Build Windows (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build from'
+        required: false
+        default: 'main'
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build:
+    name: Build Windows installer
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust build artifacts
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: frontend/src-tauri -> target
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: cd frontend && npm ci
+
+      - name: Build
+        run: cd frontend && npm run tauri:build -- --bundles nsis
+
+      - name: Collect artifacts
+        shell: pwsh
+        run: |
+          $sha = (git rev-parse --short HEAD).Trim()
+          $installer = Get-ChildItem frontend/src-tauri/target/release/bundle/nsis/*.exe | Select-Object -First 1
+          Copy-Item $installer.FullName "WarmDesk-dev-$sha-x64-setup.exe"
+          Compress-Archive -Path "frontend/src-tauri/target/release/WarmDesk.exe" -DestinationPath "WarmDesk-dev-$sha-x64-portable.zip"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: WarmDesk-windows
+          path: |
+            WarmDesk-dev-*-x64-setup.exe
+            WarmDesk-dev-*-x64-portable.zip
