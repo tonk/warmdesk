@@ -4,6 +4,10 @@
   "description": "Default capability — allows the app to connect to any external server URL.",
   "windows": ["main"],
   "permissions": [
-    "core:default"
+    "core:default",
+    {
+      "identifier": "http:default",
+      "allow": [{ "url": "http://**" }, { "url": "https://**" }]
+    }
   ]
 }
