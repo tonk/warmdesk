@@ -15,7 +15,8 @@ import './styles/main.css'
 // already sees the patched fetch when it makes its first request.
 async function init() {
   if (window.__TAURI_INTERNALS__ && navigator.userAgent.includes('Windows')) {
-    await import('@tauri-apps/plugin-http')
+    const { fetch: tauriFetch } = await import('@tauri-apps/plugin-http')
+    window.fetch = tauriFetch
   }
 
   const app = createApp(App)
