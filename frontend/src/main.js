@@ -26,7 +26,7 @@ async function init() {
   if (window.__TAURI_INTERNALS__ && navigator.userAgent.includes('Windows')) {
     const [{ fetch: tauriFetch }, { getFetch }] = await Promise.all([
       import('@tauri-apps/plugin-http'),
-      import('axios/lib/adapters/fetch.js'),
+      import('axios/unsafe/adapters/fetch.js'),
     ])
     window.fetch = tauriFetch
     client.defaults.adapter = getFetch({ env: { fetch: tauriFetch, Request, Response } })
