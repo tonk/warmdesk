@@ -219,3 +219,15 @@ See [INSTALL.md](INSTALL.md) for full instructions including:
 - Nginx and Apache reverse proxy configuration
 - PostgreSQL / MySQL setup
 - First admin account setup
+
+## Code Signing Policy
+
+Windows binaries released by WarmDesk are code-signed through the
+[SignPath Foundation](https://signpath.org) free code-signing programme for
+open-source software.
+
+- Code signing for WarmDesk is provided by **SignPath.io** / **SignPath Foundation**.
+- Team members involved in the signing process:
+  - **Ton Kersten** — project maintainer and signing approver
+- No user data is collected or shared with any third party as part of the
+  signing process.
