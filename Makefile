@@ -2,7 +2,7 @@ BINARY   := warmdesk
 DIST_DIR := dist
 BACKEND  := backend
 FRONTEND := frontend
-VERSION  := $(shell git -C $(BACKEND) describe --tags --always 2>/dev/null || echo "dev")
+VERSION  := $(shell git describe --tags --always --match 'v*' 2>/dev/null || echo "dev")
 ARCHIVE  := warmdesk-$(VERSION).tar.gz
 .PHONY: all build build-frontend build-backend clean dev-backend dev-frontend run package stamp-desktop-version appimage dmg windows-installer windows-portable
 
