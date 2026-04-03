@@ -13,11 +13,21 @@ pub fn run() {
     // configurations (integrated GPUs, NVIDIA, VMs, some Wayland compositors),
     // producing a completely blank window.  Disabling it forces the fallback
     // compositing path, which works reliably across all configurations.
-    // The env var check lets users override the behaviour if they prefer.
+    //
+    // GDK_RENDERING=image forces GDK into full software rendering, which also
+    // prevents a COLRv1 font crash in webkit2gtk/Skia (Fedora 43,
+    // webkit2gtk 2.50.x): assertion failure in colrv1_configure_skpaint when
+    // rendering colour emoji.  The env var checks let users override if needed.
+    //
+    // SAFETY: single-threaded at this point, before the Tauri runtime starts.
     #[cfg(target_os = "linux")]
-    if std::env::var("WEBKIT_DISABLE_DMABUF_RENDERER").is_err() {
-        // SAFETY: single-threaded at this point, before the Tauri runtime starts.
-        unsafe { std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1") };
+    {
+        if std::env::var("WEBKIT_DISABLE_DMABUF_RENDERER").is_err() {
+            unsafe { std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1") };
+        }
+        if std::env::var("GDK_RENDERING").is_err() {
+            unsafe { std::env::set_var("GDK_RENDERING", "image") };
+        }
     }
 
     tauri::Builder::default()
