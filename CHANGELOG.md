@@ -2,7 +2,7 @@
 
 All notable changes to WarmDesk are documented here.
 
-## v0.4.9 — 2026-04-03
+## v0.4.10 — 2026-04-03
 
 ### Added
 - **FreeFont support** — FreeSans, FreeSerif, and FreeMono are now available as selectable fonts; the woff files are served from the same origin (no external font CDN required)
