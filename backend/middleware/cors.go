@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"log"
 	"strings"
 
 	"github.com/gin-contrib/cors"
@@ -12,7 +11,7 @@ import (
 // the server's configured allowed_origins.
 // tauri://localhost  — Linux / macOS
 // https://tauri.localhost — Windows
-var tauriOrigins = []string{"tauri://localhost", "https://tauri.localhost"}
+var tauriOrigins = []string{"tauri://localhost", "https://tauri.localhost", "http://tauri.localhost"}
 
 func CORS(allowedOrigins string) gin.HandlerFunc {
 	origins := []string{}
@@ -38,11 +37,9 @@ func CORS(allowedOrigins string) gin.HandlerFunc {
 	cfg := cors.Config{
 		AllowOriginFunc: func(origin string) bool {
 			if allowAll {
-				log.Printf("[CORS] origin=%q → allowed (wildcard)", origin)
 				return true
 			}
 			_, ok := allowed[origin]
-			log.Printf("[CORS] origin=%q → allowed=%v", origin, ok)
 			return ok
 		},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
