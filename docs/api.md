@@ -66,10 +66,10 @@ X-API-Key: <key>
 ```
 or as a query parameter:
 ```
-GET /api/v1/ticket/my-project/cards?api_key=<key>
+GET /api/v1/projects/my-project/cards/1?api_key=<key>
 ```
 
-API keys have access to the [Ticket API](#2-ticket-api) endpoints only.
+API keys work on all authenticated endpoints, not just the Ticket API.
 
 ---
 

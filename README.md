@@ -64,7 +64,7 @@ and asked Claude Code to generate the app.
 - **Time reports** — generate a time overview filtered by period (all / year / month / week), project, and one or more assignees; export to PDF (report only, no sidebar) or Excel (XLSX); time displayed as H:MM
 - **Company branding** — set a company name and logo that appears on reports
 - **Configurable initial columns** — admin can define which columns are created when a new project is made (defaults to "Backlog")
-- **Ticket API** — create cards, add comments, and move cards via API key (for CI/CD pipelines and external integrations)
+- **Ticket API** — create cards, add comments, and move cards via API key (for CI/CD pipelines and external integrations); API keys also work on all other authenticated endpoints
 - **Git integration** — connect GitHub, GitLab, Gitea, or Forgejo; commit/PR/issue events post to project chat and automatically link to cards when a card reference (e.g. `PRJ-42`) appears in the message or title
 - **Database support** — SQLite (zero configuration), PostgreSQL, MySQL/MariaDB
 - **Horizontal scaling** — Redis pub/sub for multi-instance WebSocket broadcast
@@ -190,7 +190,7 @@ POST  /api/v1/ticket/{slug}/cards/{id}/comments      — add a comment
 PATCH /api/v1/ticket/{slug}/cards/{id}/move          — move to a column
 ```
 
-Pass the key in the `X-API-Key` header or as `?api_key=` query parameter.
+Pass the key in the `X-API-Key` header or as `?api_key=` query parameter. API keys work on all authenticated endpoints, not just the Ticket API.
 
 ## Git Integration
 
