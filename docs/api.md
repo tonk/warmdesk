@@ -47,7 +47,7 @@ The frontend refreshes them silently via `POST /api/v1/auth/refresh` using the
 ### API Keys (automation / CI-CD)
 
 API keys are personal (per user, not per project). Generate one in the UI under
-**User Settings → API Keys**, or via the API while authenticated with a JWT:
+**Project Settings → API Keys**, or via the API while authenticated with a JWT:
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/api-keys \

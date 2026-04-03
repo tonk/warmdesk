@@ -173,7 +173,7 @@ See [INSTALL.md](INSTALL.md) for full options and deployment instructions.
 
 Automate ticket management from CI/CD pipelines or external tools using API keys.
 
-API keys are personal (per user). Generate one under **User Settings → API Keys**, or via the API while authenticated with a JWT:
+API keys are personal (per user). Generate one under **Project Settings → API Keys**, or via the API while authenticated with a JWT:
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/api-keys \
