@@ -24,6 +24,10 @@
         {{ $t('auth.no_account') }}
         <RouterLink to="/register">{{ $t('auth.register') }}</RouterLink>
       </p>
+      <div v-if="isTauri" class="auth-server">
+        <span class="auth-server-url">{{ currentServer }}</span>
+        <RouterLink to="/connect" class="auth-server-change">Change</RouterLink>
+      </div>
     </div>
     <div class="auth-version">WarmDesk v{{ appVersion }}</div>
   </div>
@@ -36,6 +40,7 @@ const appVersion = __APP_VERSION__
 import { RouterLink, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { systemApi } from '@/api/system'
+import { getServerUrl } from '@/api/serverConfig'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -43,6 +48,8 @@ const form = ref({ login: '', password: '' })
 const error = ref('')
 const loading = ref(false)
 const registrationEnabled = ref(true)
+const isTauri = !!window.__TAURI_INTERNALS__
+const currentServer = getServerUrl()
 
 onMounted(async () => {
   try {
@@ -106,6 +113,33 @@ async function handleSubmit() {
 
 .auth-error { color: var(--color-danger); font-size: 13px; margin-bottom: 12px; }
 .auth-link { text-align: center; margin-top: 20px; font-size: 13px; color: var(--color-text-muted); }
+
+.auth-server {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.auth-server-url {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 260px;
+}
+
+.auth-server-change {
+  flex-shrink: 0;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.auth-server-change:hover {
+  text-decoration: underline;
+}
 
 .auth-version {
   position: fixed;
