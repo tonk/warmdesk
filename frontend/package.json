@@ -11,6 +11,10 @@
     "tauri:build": "tauri build"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.2.8",
+    "@fontsource/open-sans": "^5.2.7",
+    "@fontsource/roboto": "^5.2.10",
+    "@fontsource/source-code-pro": "^5.2.7",
     "@tauri-apps/plugin-http": "^2.5.7",
     "axios": "^1.7.7",
     "dompurify": "^3.1.7",
