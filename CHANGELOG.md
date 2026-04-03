@@ -2,6 +2,11 @@
 
 All notable changes to WarmDesk are documented here.
 
+## v0.4.7 — 2026-04-03
+
+### Fixed
+- **Windows release CI** — the version-stamping step in the release workflow now runs under `shell: bash` (Git Bash) instead of the default PowerShell; PowerShell was interpreting the regex character class `[^"]*` in the inline Node.js script as an array index expression and aborting with a parse error
+
 ## v0.4.6 — 2026-04-03
 
 ### Added

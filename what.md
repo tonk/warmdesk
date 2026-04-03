@@ -235,3 +235,4 @@ Create an application that has all these features and requirements
 - Fix Linux desktop app network error with webkit2gtk 4.1: route all HTTP/HTTPS fetch calls through tauri-plugin-http on all Tauri platforms; non-HTTP requests fall back to native fetch (also fixes blank screen from routing all requests through the plugin)
 - Stamp Cargo.toml version from git tag alongside tauri.conf.json; make appimage/dmg/windows-installer targets stamp both files automatically
 - Document AppImage build prerequisites (system libraries for Fedora and Ubuntu; Rust install) in INSTALL.md
+- Fix Windows release CI: run version-stamping Node.js script under bash instead of PowerShell (PowerShell parsed the regex character class `[^"]*` as an array index and aborted)
