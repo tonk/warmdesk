@@ -14,6 +14,21 @@
 
 ---
 
+## Interactive API (Swagger UI)
+
+WarmDesk ships with a full Swagger UI at:
+
+```
+http://<your-server>:8080/swagger/index.html
+```
+
+The interactive documentation lists every endpoint, shows request/response
+schemas, and lets you try requests directly from the browser. A valid JWT
+Bearer token (obtained from `POST /api/v1/auth/login`) can be entered via the
+**Authorize** button to authenticate requests.
+
+---
+
 ## 1. Authentication
 
 ### JWT (browser / SPA)
