@@ -15,24 +15,30 @@ const (
 )
 
 func Auth(authSvc *services.AuthService) gin.HandlerFunc {
+	apiKeyAuth := APIKeyAuth()
 	return func(c *gin.Context) {
 		header := c.GetHeader("Authorization")
-		if header == "" || !strings.HasPrefix(header, "Bearer ") {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing token"})
+		if strings.HasPrefix(header, "Bearer ") {
+			tokenStr := strings.TrimPrefix(header, "Bearer ")
+			claims, err := authSvc.ValidateToken(tokenStr)
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+				return
+			}
+			c.Set(ContextUserID, claims.UserID)
+			c.Set(ContextUsername, claims.Username)
+			c.Set(ContextGlobalRole, claims.GlobalRole)
+			c.Next()
 			return
 		}
 
-		tokenStr := strings.TrimPrefix(header, "Bearer ")
-		claims, err := authSvc.ValidateToken(tokenStr)
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		// Fall back to API key auth (X-API-Key header or ?api_key= query param)
+		if c.GetHeader("X-API-Key") != "" || c.Query("api_key") != "" {
+			apiKeyAuth(c)
 			return
 		}
 
-		c.Set(ContextUserID, claims.UserID)
-		c.Set(ContextUsername, claims.Username)
-		c.Set(ContextGlobalRole, claims.GlobalRole)
-		c.Next()
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing token"})
 	}
 }
 
