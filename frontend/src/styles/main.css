@@ -60,6 +60,10 @@ body {
   color: var(--color-text);
   font-size: var(--user-font-size, 14px);
   line-height: 1.5;
+  /* Force text presentation of emoji to prevent COLRv1 crash in
+     webkit2gtk 2.50.x / Skia on Fedora 43 (colrv1_configure_skpaint
+     assertion failure). Has no effect on other browsers/platforms. */
+  font-variant-emoji: text;
 }
 
 a { color: var(--color-primary); text-decoration: none; }
