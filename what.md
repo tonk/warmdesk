@@ -250,3 +250,4 @@ Create an application that has all these features and requirements
 - Temporarily disable Windows code signing in release CI (SignPath signing steps commented out)
 - Show server version in footer alongside client version (fetched from new public GET /api/v1/version endpoint)
 - Fix make appimage/dmg broken by non-semver git tags: pass --match 'v*' to git describe in Makefile
+- Fix webhook setup URL showing tauri://localhost in desktop app: use configured server URL instead of window.location.origin for GitHub, GitLab, and Gitea payload URL display

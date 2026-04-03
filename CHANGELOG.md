@@ -2,6 +2,11 @@
 
 All notable changes to WarmDesk are documented here.
 
+## v0.5.1 — 2026-04-03
+
+### Fixed
+- **Webhook setup URL shows `tauri://` in desktop app** — the payload URL displayed in Project Settings → Webhooks for GitHub, GitLab, and Gitea was derived from `window.location.origin`, which is `tauri://localhost` inside the desktop app; it now uses the configured server URL so the correct `http(s)://` address is shown
+
 ## v0.5.0 — 2026-04-03
 
 ### Added

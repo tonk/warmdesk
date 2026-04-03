@@ -306,6 +306,7 @@ import { projectsApi } from '@/api/projects'
 import { authApi } from '@/api/auth'
 import { useDateFormat } from '@/composables/useDateFormat'
 import client from '@/api/client'
+import { getServerUrl } from '@/api/serverConfig'
 
 const route = useRoute()
 const { formatDateTime } = useDateFormat()
@@ -334,7 +335,7 @@ const webhooks = ref([])
 const newWebhookName = ref('')
 const newWebhookType = ref('generic')
 const createdWebhookToken = ref('')
-const baseUrl = computed(() => window.location.origin)
+const baseUrl = computed(() => getServerUrl() || window.location.origin)
 
 // Users not yet in the project
 const invitableUsers = computed(() => {
