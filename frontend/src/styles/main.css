@@ -52,12 +52,12 @@ a:hover { text-decoration: underline; }
 button {
   cursor: pointer;
   font-family: inherit;
-  font-size: 14px;
+  font-size: inherit;
 }
 
 input, textarea, select {
   font-family: inherit;
-  font-size: 14px;
+  font-size: inherit;
 }
 
 .btn {
