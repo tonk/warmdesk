@@ -145,6 +145,17 @@ function onKeyZoom(e) {
   }
 }
 
+function onWheelZoom(e) {
+  if (!e.ctrlKey && !e.metaKey) return
+  e.preventDefault()
+  const current = parseFloat(localStorage.getItem(ZOOM_KEY) || 1)
+  if (e.deltaY < 0) {
+    applyZoom(Math.min(ZOOM_MAX, Math.round((current + ZOOM_STEP) * 10) / 10))
+  } else {
+    applyZoom(Math.max(ZOOM_MIN, Math.round((current - ZOOM_STEP) * 10) / 10))
+  }
+}
+
 // ── Idle session timeout ─────────────────────────────────────────────────────
 const ACTIVITY_EVENTS = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll']
 
@@ -163,6 +174,7 @@ watch([() => auth.isLoggedIn, () => systemStore.sessionTimeoutMinutes], ([logged
 onMounted(() => {
   ACTIVITY_EVENTS.forEach(e => window.addEventListener(e, onActivity, { passive: true }))
   window.addEventListener('keydown', onKeyZoom)
+  window.addEventListener('wheel', onWheelZoom, { passive: false })
   const savedZoom = localStorage.getItem(ZOOM_KEY)
   if (savedZoom) applyZoom(parseFloat(savedZoom))
 })
@@ -170,6 +182,7 @@ onMounted(() => {
 onUnmounted(() => {
   ACTIVITY_EVENTS.forEach(e => window.removeEventListener(e, onActivity))
   window.removeEventListener('keydown', onKeyZoom)
+  window.removeEventListener('wheel', onWheelZoom)
   auth.stopIdleTimer()
   disconnectUserWs()
 })
