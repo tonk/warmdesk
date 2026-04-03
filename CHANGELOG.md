@@ -2,6 +2,14 @@
 
 All notable changes to WarmDesk are documented here.
 
+## v0.5.0 — 2026-04-03
+
+### Added
+- **Server version in footer** — after login, the footer shows both the client version and the server version (`WarmDesk vX.Y.Z · server vX.Y.Z`); fetched from the new public `GET /api/v1/version` endpoint
+
+### Fixed
+- **`make appimage` / `make dmg` broken by non-semver git tags** — `git describe` was picking up arbitrary tags (e.g. `works_on_win_and_linux`) and producing a version string that Tauri rejects; the Makefile now passes `--match 'v*'` so only version tags are considered
+
 ## v0.4.12 — 2026-04-03
 
 ### Fixed

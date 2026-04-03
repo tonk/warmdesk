@@ -248,3 +248,5 @@ Create an application that has all these features and requirements
 - Add Linux .desktop file (deploy/warmdesk.desktop) for system-wide installation; document installation steps in INSTALL.md
 - Add Ctrl+Scroll mouse wheel zoom (alongside existing Ctrl+/Ctrl-/Ctrl+0 keyboard shortcuts)
 - Temporarily disable Windows code signing in release CI (SignPath signing steps commented out)
+- Show server version in footer alongside client version (fetched from new public GET /api/v1/version endpoint)
+- Fix make appimage/dmg broken by non-semver git tags: pass --match 'v*' to git describe in Makefile
