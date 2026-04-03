@@ -23,10 +23,23 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_http::init())
         .setup(move |app| {
-            if maximized {
-                if let Some(win) = tauri::Manager::get_webview_window(app, "main") {
+            if let Some(win) = tauri::Manager::get_webview_window(app, "main") {
+                if maximized {
                     win.maximize()?;
                 }
+
+                // Disable WebKit hardware acceleration on Linux to work around
+                // a COLRv1 font rendering crash in webkit2gtk/Skia (Fedora 43,
+                // webkit2gtk 2.50.x). Forces software compositing.
+                #[cfg(target_os = "linux")]
+                win.with_webview(|webview| {
+                    use webkit2gtk::{HardwareAccelerationPolicy, SettingsExt, WebViewExt};
+                    if let Some(settings) = WebViewExt::settings(&webview.inner()) {
+                        settings.set_hardware_acceleration_policy(
+                            HardwareAccelerationPolicy::Never,
+                        );
+                    }
+                })?;
             }
             Ok(())
         })
