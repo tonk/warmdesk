@@ -243,3 +243,8 @@ Create an application that has all these features and requirements
 - Fix Open Sans and Source Code Pro showing wrong font: extract font name from CSS font-family stack before Google Fonts lookup
 - Fix font size setting having no effect: change hardcoded font-size: 14px on button/input/textarea/select to inherit
 - Code signing policy section added to README.md as required by SignPath Foundation OSS programme
+- Bundle Inter, Roboto, Open Sans, Source Code Pro via @fontsource (no Google Fonts CDN); FreeSans, FreeSerif, FreeMono served from /fonts/ (woff files copied from FreeFont project)
+- Fix Linux desktop app COLRv1 crash in webkit2gtk/Skia: set HardwareAccelerationPolicy::Never via with_webview API; also set WEBKIT_DISABLE_DMABUF_RENDERER=1 to prevent blank window on many GPU configurations
+- Add Linux .desktop file (deploy/warmdesk.desktop) for system-wide installation; document installation steps in INSTALL.md
+- Add Ctrl+Scroll mouse wheel zoom (alongside existing Ctrl+/Ctrl-/Ctrl+0 keyboard shortcuts)
+- Temporarily disable Windows code signing in release CI (SignPath signing steps commented out)

@@ -2,6 +2,20 @@
 
 All notable changes to WarmDesk are documented here.
 
+## v0.4.9 — 2026-04-03
+
+### Added
+- **FreeFont support** — FreeSans, FreeSerif, and FreeMono are now available as selectable fonts; the woff files are served from the same origin (no external font CDN required)
+- **Linux `.desktop` file** — `deploy/warmdesk.desktop` for system-wide installation; documented in `INSTALL.md`
+
+### Fixed
+- **Linux desktop app COLRv1 crash** — clicking a project caused webkit2gtk to crash with a Skia assertion failure on COLRv1 fonts; fixed by disabling WebKit hardware acceleration (`HardwareAccelerationPolicy::Never`) via the `with_webview` API; also sets `WEBKIT_DISABLE_DMABUF_RENDERER=1` to avoid a DMA-BUF renderer blank window on many GPU configurations
+
+### Changed
+- **Fonts now self-hosted** — Inter, Roboto, Open Sans, and Source Code Pro are bundled via `@fontsource` npm packages instead of loading from Google Fonts; eliminates the external network dependency and makes the font setting work in air-gapped and desktop (Tauri) deployments
+- **Ctrl+Scroll zoom** — mouse wheel zoom (Ctrl+Scroll) added alongside existing Ctrl+/Ctrl-/Ctrl+0 keyboard shortcuts
+- **Windows code signing temporarily disabled** — SignPath signing steps are commented out in the release workflow until the signing certificate is renewed
+
 ## v0.4.8 — 2026-04-03
 
 ### Added

@@ -241,30 +241,31 @@ jobs:
           Copy-Item $installer.FullName "WarmDesk-${{ github.ref_name }}-x64-setup.exe"
           Compress-Archive -Path "frontend/src-tauri/target/release/WarmDesk.exe" -DestinationPath "WarmDesk-${{ github.ref_name }}-x64-portable.zip"
 
-      - name: Upload unsigned installer for signing
-        id: upload-unsigned
-        uses: actions/upload-artifact@v4
-        with:
-          name: warmdesk-unsigned-installer
-          path: WarmDesk-${{ github.ref_name }}-x64-setup.exe
-          if-no-files-found: error
+      # Signing temporarily disabled
+      # - name: Upload unsigned installer for signing
+      #   id: upload-unsigned
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: warmdesk-unsigned-installer
+      #     path: WarmDesk-${{ github.ref_name }}-x64-setup.exe
+      #     if-no-files-found: error
 
-      - name: Sign installer via SignPath
-        uses: signpath/github-action-submit-signing-request@v2
-        with:
-          api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
-          organization-id: '${{ vars.SIGNPATH_ORGANIZATION_ID }}'
-          project-slug: 'warmdesk'
-          signing-policy-slug: 'release-signing'
-          github-artifact-id: '${{ steps.upload-unsigned.outputs.artifact-id }}'
-          wait-for-completion: true
-          wait-for-completion-timeout-in-seconds: 1200
-          output-artifact-directory: signed
+      # - name: Sign installer via SignPath
+      #   uses: signpath/github-action-submit-signing-request@v2
+      #   with:
+      #     api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
+      #     organization-id: '${{ vars.SIGNPATH_ORGANIZATION_ID }}'
+      #     project-slug: 'warmdesk'
+      #     signing-policy-slug: 'release-signing'
+      #     github-artifact-id: '${{ steps.upload-unsigned.outputs.artifact-id }}'
+      #     wait-for-completion: true
+      #     wait-for-completion-timeout-in-seconds: 1200
+      #     output-artifact-directory: signed
 
-      - name: Rename signed installer
-        shell: pwsh
-        run: |
-          Copy-Item (Get-ChildItem signed/*.exe | Select-Object -First 1).FullName "WarmDesk-${{ github.ref_name }}-x64-setup.exe"
+      # - name: Rename signed installer
+      #   shell: pwsh
+      #   run: |
+      #     Copy-Item (Get-ChildItem signed/*.exe | Select-Object -First 1).FullName "WarmDesk-${{ github.ref_name }}-x64-setup.exe"
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
