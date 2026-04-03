@@ -138,6 +138,7 @@ jobs:
         run: cd frontend && npm ci
 
       - name: Stamp version in tauri.conf.json and Cargo.toml
+        shell: bash
         run: |
           node -e "
             const fs = require('fs');
