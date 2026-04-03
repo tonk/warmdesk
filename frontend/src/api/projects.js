@@ -80,5 +80,10 @@ export const projectsApi = {
   // Starred
   starProject: (slug) => client.post(`/projects/${slug}/star`),
   unstarProject: (slug) => client.delete(`/projects/${slug}/star`),
-  listStarred: () => client.get('/starred-projects')
+  listStarred: () => client.get('/starred-projects'),
+
+  // Project-scoped API keys
+  listApiKeys: (slug) => client.get(`/projects/${slug}/api-keys`),
+  createApiKey: (slug, name) => client.post(`/projects/${slug}/api-keys`, { name }),
+  deleteApiKey: (slug, id) => client.delete(`/projects/${slug}/api-keys/${id}`)
 }

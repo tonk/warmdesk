@@ -70,6 +70,7 @@
 
         <!-- API Keys Tab -->
         <div v-if="tab === 'apikeys'" class="tab-content">
+          <p class="tab-description">{{ $t('apikeys.project_description') }}</p>
           <div class="form-group" style="max-width:400px">
             <label class="form-label">{{ $t('apikeys.key_name') }}</label>
             <input class="form-input" v-model="newKeyName" :placeholder="$t('apikeys.key_name_placeholder')" />
@@ -448,13 +449,13 @@ async function deleteLabel(label) {
 }
 
 async function loadApiKeys() {
-  const { data } = await authApi.listApiKeys()
+  const { data } = await projectsApi.listApiKeys(slug.value)
   apiKeys.value = data
 }
 
 async function generateKey() {
   try {
-    const { data } = await authApi.createApiKey(newKeyName.value.trim())
+    const { data } = await projectsApi.createApiKey(slug.value, newKeyName.value.trim())
     generatedKey.value = data.key
     newKeyName.value = ''
     loadApiKeys()
@@ -465,7 +466,7 @@ async function generateKey() {
 
 async function revokeKey(key) {
   if (!confirm('Revoke this API key?')) return
-  await authApi.deleteApiKey(key.id)
+  await projectsApi.deleteApiKey(slug.value, key.id)
   loadApiKeys()
 }
 

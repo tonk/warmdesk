@@ -131,6 +131,44 @@
           </form>
         </div>
 
+        <div class="settings-card">
+          <h2>{{ $t('apikeys.personal_title') }}</h2>
+          <p class="form-hint" style="margin-bottom:16px">{{ $t('apikeys.personal_description') }}</p>
+          <div class="form-group" style="max-width:400px">
+            <label class="form-label">{{ $t('apikeys.key_name') }}</label>
+            <input class="form-input" v-model="newPersonalKeyName" :placeholder="$t('apikeys.key_name_placeholder')" />
+          </div>
+          <button class="btn btn-primary btn-sm" :disabled="!newPersonalKeyName.trim()" @click="generatePersonalKey">{{ $t('apikeys.generate') }}</button>
+
+          <div v-if="generatedPersonalKey" class="personal-key-box">
+            <p class="new-key-notice">{{ $t('apikeys.copy_notice') }}</p>
+            <code class="new-key-value">{{ generatedPersonalKey }}</code>
+            <button class="btn btn-secondary btn-sm" @click="copyPersonalKey">{{ $t('apikeys.copy') }}</button>
+          </div>
+
+          <table class="data-table" style="margin-top:24px">
+            <thead>
+              <tr>
+                <th>{{ $t('apikeys.name') }}</th>
+                <th>{{ $t('apikeys.prefix') }}</th>
+                <th>{{ $t('apikeys.last_used') }}</th>
+                <th>{{ $t('common.actions') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="personalKeys.length === 0">
+                <td colspan="4" style="text-align:center;color:var(--color-text-muted)">{{ $t('apikeys.no_keys') }}</td>
+              </tr>
+              <tr v-for="key in personalKeys" :key="key.id">
+                <td>{{ key.name }}</td>
+                <td><code>{{ key.key_prefix }}…</code></td>
+                <td>{{ key.last_used_at ? formatDateTime(key.last_used_at) : '—' }}</td>
+                <td><button class="btn btn-danger btn-sm" @click="revokePersonalKey(key)">{{ $t('apikeys.revoke') }}</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
         <div class="settings-card info-card">
           <div class="info-row">
             <span class="info-label">{{ $t('settings.last_login') }}</span>
@@ -192,10 +230,14 @@ const timezones = [
 
 const pwForm = ref({ current_password: '', new_password: '' })
 const savingProfile = ref(false)
+const personalKeys = ref([])
+const newPersonalKeyName = ref('')
+const generatedPersonalKey = ref('')
 const savingPassword = ref(false)
 const avatarError = ref(false)
 
 onMounted(() => {
+  loadPersonalKeys()
   const u = auth.user
   if (u) {
     form.value = {
@@ -242,6 +284,33 @@ async function saveProfile() {
   } finally {
     savingProfile.value = false
   }
+}
+
+async function loadPersonalKeys() {
+  const { data } = await authApi.listApiKeys()
+  personalKeys.value = data
+}
+
+async function generatePersonalKey() {
+  try {
+    const { data } = await authApi.createApiKey(newPersonalKeyName.value.trim())
+    generatedPersonalKey.value = data.key
+    newPersonalKeyName.value = ''
+    loadPersonalKeys()
+  } catch (e) {
+    ui.error('Failed to generate key')
+  }
+}
+
+async function revokePersonalKey(key) {
+  if (!confirm('Revoke this API key?')) return
+  await authApi.deleteApiKey(key.id)
+  loadPersonalKeys()
+}
+
+function copyPersonalKey() {
+  navigator.clipboard.writeText(generatedPersonalKey.value)
+  ui.success('Copied!')
 }
 
 async function savePassword() {
@@ -300,4 +369,17 @@ h1 { font-size: 22px; font-weight: 700; margin-bottom: 24px; }
   cursor: pointer;
   accent-color: var(--color-primary);
 }
+
+.personal-key-box {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.new-key-notice { font-size: 13px; color: var(--color-warning); margin: 0; }
+.new-key-value { font-size: 13px; word-break: break-all; }
 </style>

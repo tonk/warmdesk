@@ -38,6 +38,24 @@ func APIKeyAuth() gin.HandlerFunc {
 			return
 		}
 
+		// Enforce project scope when the key is project-scoped
+		if key.ProjectID != nil {
+			slug := c.Param("projectSlug")
+			if slug == "" {
+				c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "key is scoped to a specific project"})
+				return
+			}
+			var project models.Project
+			if err := database.DB.Where("slug = ?", slug).First(&project).Error; err != nil {
+				c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "project not found"})
+				return
+			}
+			if project.ID != *key.ProjectID {
+				c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "key not valid for this project"})
+				return
+			}
+		}
+
 		// Update last used timestamp (best-effort)
 		now := time.Now()
 		database.DB.Model(&key).Update("last_used_at", now)

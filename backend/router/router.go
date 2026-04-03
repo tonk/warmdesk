@@ -211,6 +211,11 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webDir string, 
 			projects.DELETE("/:projectSlug/webhooks/:webhookId", handlers.DeleteWebhook)
 			projects.POST("/:projectSlug/webhooks/:webhookId/regenerate", handlers.RegenerateWebhookToken)
 
+			// Project-scoped API keys
+			projects.GET("/:projectSlug/api-keys", handlers.ListProjectAPIKeys)
+			projects.POST("/:projectSlug/api-keys", handlers.CreateProjectAPIKey)
+			projects.DELETE("/:projectSlug/api-keys/:keyId", handlers.DeleteProjectAPIKey)
+
 			// Star / unstar project
 			projects.POST("/:projectSlug/star", handlers.StarProject)
 			projects.DELETE("/:projectSlug/star", handlers.UnstarProject)
