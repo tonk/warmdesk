@@ -236,3 +236,10 @@ Create an application that has all these features and requirements
 - Stamp Cargo.toml version from git tag alongside tauri.conf.json; make appimage/dmg/windows-installer targets stamp both files automatically
 - Document AppImage build prerequisites (system libraries for Fedora and Ubuntu; Rust install) in INSTALL.md
 - Fix Windows release CI: run version-stamping Node.js script under bash instead of PowerShell (PowerShell parsed the regex character class `[^"]*` as an array index and aborted)
+- Project-scoped API keys: keys created in Project Settings → API Keys are locked to that project and rejected on any other; personal API keys in User Settings give full access across all projects
+- Accept API keys on all authenticated endpoints, not just the Ticket API (X-API-Key header or ?api_key= query param)
+- Add base_url config setting (BASE_URL env var) to set the correct host in Swagger UI so "Try it out" calls reach the right server
+- Fix font family setting having no effect: load selected fonts (Inter, Roboto, Open Sans, Source Code Pro) from Google Fonts on demand
+- Fix Open Sans and Source Code Pro showing wrong font: extract font name from CSS font-family stack before Google Fonts lookup
+- Fix font size setting having no effect: change hardcoded font-size: 14px on button/input/textarea/select to inherit
+- Code signing policy section added to README.md as required by SignPath Foundation OSS programme

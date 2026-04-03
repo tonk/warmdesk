@@ -2,6 +2,23 @@
 
 All notable changes to WarmDesk are documented here.
 
+## v0.4.8 — 2026-04-03
+
+### Added
+- **Project-scoped API keys** — keys created in Project Settings → API Keys are now scoped to that project only; a project key is rejected on requests for any other project; ideal for CI/CD pipelines
+- **Personal API keys** — a new API Keys section in User Settings lets you create personal keys with full access across all your projects; use these for scripts and tools that span multiple projects
+- **API keys on all endpoints** — API keys (both personal and project-scoped) now authenticate all protected endpoints, not just the Ticket API
+- **Swagger UI base URL** — new `base_url` config setting (env: `BASE_URL`) sets the host shown in the Swagger UI so "Try it out" calls reach the correct server; documented in `warmdesk.yaml.example`, `README.md`, and `INSTALL.md`
+- **Code Signing Policy** — added required SignPath Foundation code signing policy section to `README.md`
+
+### Fixed
+- **Font family setting had no effect** — selected fonts (Inter, Roboto, Open Sans, Source Code Pro) are now loaded from Google Fonts on demand; the CSS variable was previously set to a bare name with no corresponding font loaded
+- **Open Sans and Source Code Pro showed wrong font** — the Google Fonts lookup was keyed by plain name but option values are full CSS stacks (`'Open Sans', sans-serif`); now extracts the font name from the CSS value before lookup
+- **Font size setting had no effect** — `button`, `input`, `textarea`, and `select` elements had a hardcoded `font-size: 14px` that overrode the `--user-font-size` variable; changed to `inherit`
+
+### Changed
+- **Swagger UI** — interactive API documentation available at `/swagger/index.html`; documented in `docs/api.md`
+
 ## v0.4.7 — 2026-04-03
 
 ### Fixed
