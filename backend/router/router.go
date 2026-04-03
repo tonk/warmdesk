@@ -28,7 +28,8 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webDir string, 
 	// Swagger UI
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// Public system settings (e.g. registration enabled)
+	// Public endpoints
+	v1.GET("/version", handlers.GetVersion)
 	v1.GET("/system/settings", handlers.GetSystemSettings)
 
 	// Auth routes (public)

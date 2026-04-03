@@ -7,7 +7,7 @@
       <div class="app-shell-content">
         <RouterView />
         <footer class="app-footer">
-          <span class="footer-left">WarmDesk v{{ appVersion }}</span>
+          <span class="footer-left">WarmDesk v{{ appVersion }}<span v-if="serverVersion" class="footer-server"> · server {{ serverVersion }}</span></span>
           <span class="footer-right">{{ userFullName }}</span>
         </footer>
       </div>
@@ -18,9 +18,11 @@
 </template>
 
 <script setup>
-import { computed, watch, onMounted, onUnmounted } from 'vue'
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
+import client from '@/api/client'
 
 const appVersion = __APP_VERSION__
+const serverVersion = ref('')
 import { RouterView } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useSystemStore } from '@/stores/system'
@@ -40,7 +42,10 @@ const ui = useUIStore()
 const { updateAvailable, latestVersion, releaseUrl, check: checkForUpdate } = useUpdateCheck()
 // Run once when the user is logged in
 watch(() => auth.isLoggedIn, (loggedIn) => {
-  if (loggedIn) checkForUpdate(appVersion)
+  if (loggedIn) {
+    checkForUpdate(appVersion)
+    client.get('/version').then(r => { serverVersion.value = r.data.version }).catch(() => {})
+  }
 }, { immediate: true })
 
 const sidebarPos = computed(() => auth.user?.sidebar_position || localStorage.getItem('sidebar_position') || 'left')
@@ -236,4 +241,5 @@ onUnmounted(() => {
 }
 .footer-left { text-align: left; }
 .footer-right { text-align: right; }
+.footer-server { opacity: 0.75; }
 </style>

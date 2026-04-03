@@ -67,6 +67,7 @@ func main() {
 		docs.SwaggerInfo.Host = host
 	}
 
+	handlers.SetVersion(version)
 	handlers.InitSystemDefaults(cfg)
 	handlers.InitAttachments(cfg)
 
