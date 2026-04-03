@@ -96,7 +96,7 @@ jobs:
       matrix:
         include:
           - name: Linux
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             bundle: appimage
             artifact: "WarmDesk-*-x86_64.AppImage"
             rename: "WarmDesk-${{ github.ref_name }}-x86_64.AppImage"
@@ -112,7 +112,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Linux system dependencies
-        if: matrix.os == 'ubuntu-22.04'
+        if: matrix.os == 'ubuntu-24.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -164,7 +164,7 @@ jobs:
           VERSION: ${{ github.ref_name }}
 
       - name: Build desktop app (Linux)
-        if: matrix.os == 'ubuntu-22.04'
+        if: matrix.os == 'ubuntu-24.04'
         # NO_STRIP=true: linuxdeploy's bundled strip is too old for newer glibc.
         # The Rust release profile already strips the binary.
         run: cd frontend && NO_STRIP=true npm run tauri:build -- --bundles appimage
@@ -175,7 +175,7 @@ jobs:
         run: cd frontend && npm run tauri:build -- --bundles dmg --target universal-apple-darwin
 
       - name: Collect and rename artifact (Linux)
-        if: matrix.os == 'ubuntu-22.04'
+        if: matrix.os == 'ubuntu-24.04'
         run: |
           SRC=$(ls frontend/src-tauri/target/release/bundle/appimage/*.AppImage | head -1)
           cp "$SRC" "WarmDesk-${{ github.ref_name }}-x86_64.AppImage"
@@ -187,7 +187,7 @@ jobs:
           cp "$SRC" "WarmDesk-${{ github.ref_name }}-universal.dmg"
 
       - name: Upload to GitHub Release (Linux)
-        if: matrix.os == 'ubuntu-22.04'
+        if: matrix.os == 'ubuntu-24.04'
         uses: softprops/action-gh-release@v2
         with:
           files: WarmDesk-${{ github.ref_name }}-x86_64.AppImage
