@@ -28,11 +28,12 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/tonk/warmdesk/config"
 	"github.com/tonk/warmdesk/database"
-	_ "github.com/tonk/warmdesk/docs"
+	"github.com/tonk/warmdesk/docs"
 	"github.com/tonk/warmdesk/handlers"
 	"github.com/tonk/warmdesk/router"
 	"github.com/tonk/warmdesk/services"
@@ -55,6 +56,17 @@ func main() {
 	log.Printf("Starting WarmDesk %s", version)
 
 	cfg := config.Load(*configFile)
+
+	if cfg.BaseURL != "" {
+		// Strip scheme so Swagger host is just "host" or "host:port"
+		host := cfg.BaseURL
+		if i := strings.Index(host, "://"); i >= 0 {
+			host = host[i+3:]
+		}
+		host = strings.TrimRight(host, "/")
+		docs.SwaggerInfo.Host = host
+	}
+
 	handlers.InitSystemDefaults(cfg)
 	handlers.InitAttachments(cfg)
 

@@ -155,6 +155,7 @@ Settings can also be provided as environment variables, which always take preced
 | `db_log` | `DB_LOG` | `info` | DB query log level: `silent` / `error` / `warn` / `info` |
 | `upload_dir` | `UPLOAD_DIR` | `./uploads` | Directory for uploaded files |
 | `max_upload_mb` | `MAX_UPLOAD_MB` | `25` | Maximum upload file size in MB |
+| `base_url` | `BASE_URL` | *(empty)* | Public base URL (e.g. `https://desk.example.com`) — sets the host in Swagger UI |
 
 See [INSTALL.md](INSTALL.md) for full options and deployment instructions.
 

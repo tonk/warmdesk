@@ -60,6 +60,7 @@ always override the YAML file.
 ```yaml
 # ── Server ────────────────────────────────────────────────────────────────────
 port: 8080                        # PORT — HTTP listen port
+base_url: "https://desk.example.com"  # BASE_URL — public URL; sets Swagger UI host
 allowed_origins: "https://app.example.com"  # ALLOWED_ORIGINS — CORS origins
 
 # ── Security ──────────────────────────────────────────────────────────────────

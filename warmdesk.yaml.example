@@ -51,6 +51,12 @@ smtp:
 # tls_cert: "/etc/ssl/warmdesk/server.crt"
 # tls_key:  "/etc/ssl/warmdesk/server.key"
 
+# Public base URL of this WarmDesk instance (scheme + host + optional port).
+# Used to set the correct host in the Swagger UI so "Try it out" requests
+# reach the right server. Leave empty to keep the default (localhost:8080).
+# Env var override: BASE_URL
+# base_url: "https://desk.example.com"
+
 # Secret used to sign JWT tokens — change this to a long random string in production
 jwt_secret: "change-me-for-production"
 

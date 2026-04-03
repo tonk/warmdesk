@@ -27,6 +27,7 @@ type Config struct {
 	APILog         bool   `yaml:"api_log"`  // log HTTP requests (default: true)
 	UploadDir      string `yaml:"upload_dir"`    // directory for uploaded files (default: ./uploads)
 	MaxUploadMB    int64  `yaml:"max_upload_mb"` // max upload size in MB (default: 25)
+	BaseURL        string `yaml:"base_url"`      // public base URL (e.g. https://desk.example.com) — used in Swagger UI
 	SMTP           SMTPConfig `yaml:"smtp"`
 }
 
@@ -147,5 +148,8 @@ func applyEnv(cfg *Config) {
 	}
 	if v := os.Getenv("TLS_KEY"); v != "" {
 		cfg.TLSKey = v
+	}
+	if v := os.Getenv("BASE_URL"); v != "" {
+		cfg.BaseURL = v
 	}
 }

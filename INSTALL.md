@@ -139,6 +139,7 @@ Open the application at **http://localhost:8080** (or your configured port).
 | `JWT_SECRET` | `change-me-in-production` | Token signing secret — **always change this** |
 | `ALLOWED_ORIGINS` | `http://localhost:5173` | CORS allowed origins (`*` for any) |
 | `WEB_DIR` | *(empty)* | Path to built frontend files (required in production) |
+| `BASE_URL` | *(empty)* | Public base URL (e.g. `https://desk.example.com`) — sets the host shown in Swagger UI |
 
 ---
 
