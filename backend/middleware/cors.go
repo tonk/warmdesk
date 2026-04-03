@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"log"
 	"strings"
 
 	"github.com/gin-contrib/cors"
@@ -31,9 +32,17 @@ func CORS(allowedOrigins string) gin.HandlerFunc {
 		allowed[o] = struct{}{}
 	}
 
+	// Check if wildcard is configured — allow any origin
+	_, allowAll := allowed["*"]
+
 	cfg := cors.Config{
 		AllowOriginFunc: func(origin string) bool {
+			if allowAll {
+				log.Printf("[CORS] origin=%q → allowed (wildcard)", origin)
+				return true
+			}
 			_, ok := allowed[origin]
+			log.Printf("[CORS] origin=%q → allowed=%v", origin, ok)
 			return ok
 		},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
