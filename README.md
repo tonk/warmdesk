@@ -173,7 +173,16 @@ See [INSTALL.md](INSTALL.md) for full options and deployment instructions.
 
 Automate ticket management from CI/CD pipelines or external tools using API keys.
 
-Generate an API key under **Project Settings → API Keys**, then use it with any of the endpoints below.
+API keys are personal (per user). Generate one under **User Settings → API Keys**, or via the API while authenticated with a JWT:
+
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/api-keys \
+  -H "Authorization: Bearer <your_jwt_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "my-ci-key"}'
+```
+
+The full key (prefixed `cwk_...`) is returned **once only**. Then use it with any of the endpoints below.
 
 ```
 POST  /api/v1/ticket/{slug}/cards                    — create a card

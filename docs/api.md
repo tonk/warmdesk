@@ -46,8 +46,20 @@ The frontend refreshes them silently via `POST /api/v1/auth/refresh` using the
 
 ### API Keys (automation / CI-CD)
 
-For server-to-server calls, generate a personal API key under
-**Project Settings → API Keys**. Pass it in one of two ways:
+API keys are personal (per user, not per project). Generate one in the UI under
+**User Settings → API Keys**, or via the API while authenticated with a JWT:
+
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/api-keys \
+  -H "Authorization: Bearer <your_jwt_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "my-ci-key"}'
+```
+
+The response includes the full key (prefixed `cwk_...`) — **it is only shown
+once**. Subsequent list calls only return the key prefix.
+
+Pass the key in one of two ways:
 
 ```
 X-API-Key: <key>
