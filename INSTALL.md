@@ -232,7 +232,28 @@ Set `ALLOWED_ORIGINS=https://yourdomain.com` in the systemd service environment.
 
 ---
 
-## 9. First Admin Account
+## 9. Desktop Entry (Linux)
+
+A `.desktop` file is provided at `deploy/warmdesk.desktop` so WarmDesk
+appears in application menus on GNOME, KDE, and other freedesktop-compatible
+desktops.
+
+```bash
+# Install the desktop file
+sudo cp deploy/warmdesk.desktop /usr/share/applications/
+
+# Install the icon
+sudo mkdir -p /usr/share/icons/hicolor/scalable/apps
+sudo cp frontend/public/logo.svg /usr/share/icons/hicolor/scalable/apps/warmdesk.svg
+
+# Refresh caches
+sudo update-desktop-database
+sudo gtk-update-icon-cache /usr/share/icons/hicolor
+```
+
+---
+
+## 10. First Admin Account
 
 The first registered user is a regular user. To grant admin rights:
 
@@ -252,7 +273,7 @@ Once an admin account exists, further admin promotion can be done through
 
 ---
 
-## 10. Development Mode
+## 11. Development Mode
 
 Run backend and frontend separately with hot-reloading:
 
@@ -268,7 +289,7 @@ Open **http://localhost:5173** during development.
 
 ---
 
-## 11. Updating
+## 12. Updating
 
 ```bash
 git pull
@@ -279,7 +300,7 @@ sudo systemctl restart warmdesk
 
 ---
 
-## 12. Distribution Package
+## 13. Distribution Package
 
 To create a portable archive for deployment on another machine:
 
@@ -298,7 +319,7 @@ Then follow steps 3–7 above.
 
 ---
 
-## 13. Desktop App Builds
+## 14. Desktop App Builds
 
 The desktop apps are Tauri 2 wrappers around the same frontend. They require
 Rust and the system libraries listed below in addition to the normal
