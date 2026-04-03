@@ -69,7 +69,7 @@ and asked Claude Code to generate the app.
 - **Database support** — SQLite (zero configuration), PostgreSQL, MySQL/MariaDB
 - **Horizontal scaling** — Redis pub/sub for multi-instance WebSocket broadcast
 - **App zoom** — `Ctrl +` / `Ctrl -` to zoom in/out; `Ctrl 0` to reset; level persisted across sessions
-- **Desktop app** — native Tauri app for Linux (AppImage), macOS (DMG), and Windows (installer)
+- **Desktop app** — native Tauri app for Linux (AppImage), macOS (DMG), and Windows (installer); server URL configurable from the login page at any time
 - **Project migration** — `warmdesk-export` and `warmdesk-import` standalone tools to migrate projects to/from Jira, Trello, OpenProject, or Ryver; column mapping via config file
 
 ## Quick Start

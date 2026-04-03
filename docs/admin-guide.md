@@ -231,9 +231,15 @@ ALLOWED_ORIGINS=https://warmdesk.example.com
 
 # Multiple domains (comma-separated)
 ALLOWED_ORIGINS=https://warmdesk.example.com,https://warmdesk.internal
+
+# Allow any origin (useful when the desktop app connects to an internal server
+# that is not exposed to the internet)
+ALLOWED_ORIGINS=*
 ```
 
-Use `*` only in development — never in production.
+Desktop app origins (`tauri://localhost`, `https://tauri.localhost`,
+`http://tauri.localhost`) are always allowed automatically regardless of this
+setting — no extra configuration is needed for the native clients.
 
 ---
 
@@ -472,6 +478,8 @@ WarmDesk ships Tauri-based desktop apps that wrap the web frontend and connect
 to a WarmDesk server. The apps are standalone — they do not bundle the server.
 
 Users configure the server URL in the app's **Connect** screen on first launch.
+The URL is saved locally and can be changed at any time via the **Change** link
+shown next to the server URL on the login page.
 
 ### Distributing desktop apps
 

@@ -222,3 +222,9 @@ Create an application that has all these features and requirements
 - Opt GitHub Actions into Node.js 24 via FORCE_JAVASCRIPT_ACTIONS_TO_NODE24
 - Fix Linux desktop app blank screen regression (v0.4.3 applied tauri-plugin-http fetch patch on all platforms; now Windows-only)
 - Fix Windows desktop app connection: await plugin-http import before Vue mounts so Axios sees the patched fetch from the first request
+- Fix Windows desktop app login 403: add `http://tauri.localhost` to CORS allow-list (actual Windows Tauri origin); disable HTTP/2 in tauri-plugin-http; send browser User-Agent to avoid WAF blocks; parse plain-string error response bodies
+- Fix `allowed_origins: *` wildcard not working (was treated as literal string)
+- Allow server URL to be changed from the login page in the desktop app ("Change" link next to current server)
+- Show version number on the Connect screen in the desktop app
+- Install window.fetch proxy via inline script in index.html so Tauri HTTP patch is active before any ES module fires a request
+- CI: split manual desktop build into per-platform workflows; add manual server build; replace PowerShell version stamping with Node.js

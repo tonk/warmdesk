@@ -2,6 +2,20 @@
 
 All notable changes to WarmDesk are documented here.
 
+## v0.4.5 — 2026-04-03
+
+### Added
+- **Server URL change from login page (desktop app)** — the current server URL is shown at the bottom of the login screen with a "Change" link that navigates back to the Connect screen; no need to reinstall or clear local storage to point the app at a different server
+- **Version number on Connect screen** — the app version is now shown on the Connect screen in addition to the login page
+- **`ALLOWED_ORIGINS=*` wildcard support** — setting `allowed_origins` to `*` now correctly allows requests from any origin; previously `*` was treated as a literal string and had no effect
+
+### Fixed
+- **Windows desktop app login 403** — a combination of root causes all resolved: `http://tauri.localhost` (the actual Windows Tauri origin) was missing from the hard-coded CORS allow-list (only `https://tauri.localhost` was listed); HTTP/2 negotiation with `tauri-plugin-http` was rejected by some servers; some reverse proxies blocked the non-browser `reqwest` User-Agent on POST endpoints; error messages returned as a plain string body were not parsed correctly and showed as a generic failure
+- **Desktop app fetch patch applied too early** — `window.fetch` is now patched via a synchronous inline script in `index.html` before any ES module loads, preventing a race condition where the first API request fired before the patch was in place
+
+### Changed
+- **CI: manual desktop build workflows** — split into per-platform jobs (Linux AppImage, macOS DMG, Windows installer); a manual server build workflow added; PowerShell-based version stamping replaced with a Node.js script that works on all platforms
+
 ## v0.4.4 — 2026-04-02
 
 ### Fixed
