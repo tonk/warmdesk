@@ -2,6 +2,16 @@
 
 All notable changes to WarmDesk are documented here.
 
+## v0.4.12 — 2026-04-03
+
+### Fixed
+- **Linux desktop app COLRv1 crash (final fix)** — `font-variant-emoji: text` added globally to CSS forces text presentation of emoji, bypassing the COLRv1 colour-font rendering path in Skia entirely; webkit2gtk 2.50.x on Fedora 43 has a bounds-check assertion failure (`colrv1_configure_skpaint`) when rendering COLRv1 emoji; env vars and hardware-acceleration settings cannot prevent it because the crash is in the CPU font-rendering path
+
+## v0.4.11 — 2026-04-03
+
+### Fixed
+- **Linux desktop app COLRv1 crash (attempt)** — added `GDK_RENDERING=image` to force GDK software rendering; did not prevent the crash (Skia font rendering is unaffected by GDK rendering mode)
+
 ## v0.4.10 — 2026-04-03
 
 ### Added
@@ -9,7 +19,7 @@ All notable changes to WarmDesk are documented here.
 - **Linux `.desktop` file** — `deploy/warmdesk.desktop` for system-wide installation; documented in `INSTALL.md`
 
 ### Fixed
-- **Linux desktop app COLRv1 crash** — clicking a project caused webkit2gtk to crash with a Skia assertion failure on COLRv1 fonts; fixed by disabling WebKit hardware acceleration (`HardwareAccelerationPolicy::Never`) via the `with_webview` API; also sets `WEBKIT_DISABLE_DMABUF_RENDERER=1` to avoid a DMA-BUF renderer blank window on many GPU configurations
+- **Linux desktop app COLRv1 crash (attempt)** — disabled WebKit hardware acceleration (`HardwareAccelerationPolicy::Never`) via the `with_webview` API; also sets `WEBKIT_DISABLE_DMABUF_RENDERER=1` to avoid a DMA-BUF renderer blank window on many GPU configurations; the COLRv1 crash was not fully resolved until v0.4.12
 
 ### Changed
 - **Fonts now self-hosted** — Inter, Roboto, Open Sans, and Source Code Pro are bundled via `@fontsource` npm packages instead of loading from Google Fonts; eliminates the external network dependency and makes the font setting work in air-gapped and desktop (Tauri) deployments
