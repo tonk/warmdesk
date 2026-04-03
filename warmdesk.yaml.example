@@ -18,6 +18,20 @@ db_dsn: "./warmdesk.db"
 # db_driver: mysql
 # db_dsn: "warmdesk:secret@tcp(localhost:3306)/warmdesk?charset=utf8mb4&parseTime=True&loc=Local"
 
+# Database TLS (PostgreSQL and MySQL only; not applicable to SQLite).
+# db_tls_mode controls the level of certificate verification:
+#   disable      — no TLS (default)
+#   require      — encrypt the connection but do not verify the server certificate
+#   verify-ca    — verify the server certificate was signed by a trusted CA
+#   verify-full  — verify the server certificate AND that the hostname matches
+#
+# Env var overrides: DB_TLS_MODE, DB_TLS_CA_CERT, DB_TLS_CERT, DB_TLS_KEY
+#
+# db_tls_mode: "verify-full"
+# db_tls_ca_cert: "/etc/ssl/warmdesk/ca.pem"      # CA certificate (verify-ca / verify-full)
+# db_tls_cert: "/etc/ssl/warmdesk/client.crt"     # client certificate (mTLS, optional)
+# db_tls_key: "/etc/ssl/warmdesk/client.key"      # client private key  (mTLS, optional)
+
 # SMTP email settings (used for notifications: mentions, DMs, card assignments).
 # These values are used as initial defaults; they can be overridden via the admin
 # panel (Admin → Settings → Email) without requiring a server restart.
@@ -28,6 +42,14 @@ smtp:
   from: ""             # e.g. warmdesk@example.com
   username: ""         # SMTP login (often the same as the from address)
   password: ""         # SMTP password or app-specific password
+
+# Server TLS — serve HTTPS directly without a reverse proxy.
+# Both tls_cert and tls_key must be set to enable HTTPS; if either is absent
+# the server starts in plain HTTP mode (suitable when TLS is terminated upstream).
+# Env var overrides: TLS_CERT, TLS_KEY
+#
+# tls_cert: "/etc/ssl/warmdesk/server.crt"
+# tls_key:  "/etc/ssl/warmdesk/server.key"
 
 # Secret used to sign JWT tokens — change this to a long random string in production
 jwt_secret: "change-me-for-production"

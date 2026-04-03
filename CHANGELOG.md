@@ -2,9 +2,25 @@
 
 All notable changes to WarmDesk are documented here.
 
+## v0.4.6 — 2026-04-03
+
+### Added
+- **Desktop app CLI flags** — `--version` / `-V` prints the app version and exits; `--maximized` starts the window maximised
+- **Database TLS** — PostgreSQL and MySQL connections can now be encrypted via `db_tls_mode` (`disable` / `require` / `verify-ca` / `verify-full`), `db_tls_ca_cert`, `db_tls_cert`, `db_tls_key`; matching `DB_TLS_*` env vars; mutual TLS (client certificate) supported
+- **Server TLS** — WarmDesk can now serve HTTPS directly without a reverse proxy; set `tls_cert` and `tls_key` (or `TLS_CERT` / `TLS_KEY` env vars) to enable; falls back to plain HTTP when either is absent
+
+### Fixed
+- **Linux desktop app network error** — webkit2gtk 4.1 treats `tauri://localhost` as a secure context and blocks `http://` requests as mixed content (same restriction as Windows WebView2); the fetch proxy now routes all HTTP/HTTPS requests through `tauri-plugin-http` on all Tauri platforms, while non-HTTP requests (internal `tauri://` scheme loads) continue to use native WebKit fetch — this also resolves the previously-reported blank screen caused by routing all requests through the plugin
+- **Desktop app icons contained old Coworker branding** — all icon files (`32x32.png`, `128x128.png`, `128x128@2x.png`, `icon.png`, `icon.ico`, `icon.icns`) regenerated from the current WarmDesk SVG logo
+
+### Changed
+- **Desktop app version stamping** — `Cargo.toml` is now stamped with the git tag version alongside `tauri.conf.json`; `make appimage` / `make dmg` / `make windows-installer` stamp both files automatically before building so local builds report the correct version
+- **AppImage build dependencies documented** — `INSTALL.md` gains a desktop app prerequisites section listing the required system libraries for Fedora/RHEL and Ubuntu/Debian, plus Rust installation instructions
+
 ## v0.4.5 — 2026-04-03
 
 ### Added
+- **Database TLS** — PostgreSQL and MySQL connections can now be encrypted and verified via four new settings (`db_tls_mode`, `db_tls_ca_cert`, `db_tls_cert`, `db_tls_key`) with matching `DB_TLS_*` environment variables; modes: `disable` (default), `require` (encrypt without cert verification), `verify-ca`, `verify-full`; mutual TLS (client certificate) is also supported
 - **Server URL change from login page (desktop app)** — the current server URL is shown at the bottom of the login screen with a "Change" link that navigates back to the Connect screen; no need to reinstall or clear local storage to point the app at a different server
 - **Version number on Connect screen** — the app version is now shown on the Connect screen in addition to the login page
 - **`ALLOWED_ORIGINS=*` wildcard support** — setting `allowed_origins` to `*` now correctly allows requests from any origin; previously `*` was treated as a literal string and had no effect

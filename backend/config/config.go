@@ -11,6 +11,12 @@ type Config struct {
 	Port           string `yaml:"port"`
 	DBDriver       string `yaml:"db_driver"`
 	DBDSN          string `yaml:"db_dsn"`
+	DBTLSMode      string `yaml:"db_tls_mode"`    // disable | require | verify-ca | verify-full
+	DBTLSCACert    string `yaml:"db_tls_ca_cert"` // path to CA certificate file
+	DBTLSCert      string `yaml:"db_tls_cert"`    // path to client certificate file (mTLS)
+	DBTLSKey       string `yaml:"db_tls_key"`     // path to client key file (mTLS)
+	TLSCert        string `yaml:"tls_cert"`       // path to server TLS certificate; enables HTTPS when set together with tls_key
+	TLSKey         string `yaml:"tls_key"`        // path to server TLS private key
 	JWTSecret      string `yaml:"jwt_secret"`
 	AllowedOrigins string `yaml:"allowed_origins"`
 	WebDir         string `yaml:"web_dir"`
@@ -19,7 +25,7 @@ type Config struct {
 	GinMode        string `yaml:"gin_mode"` // debug | release (default: debug)
 	DBLog          string `yaml:"db_log"`   // silent | error | warn | info (default: info)
 	APILog         bool   `yaml:"api_log"`  // log HTTP requests (default: true)
-	UploadDir      string `yaml:"upload_dir"`   // directory for uploaded files (default: ./uploads)
+	UploadDir      string `yaml:"upload_dir"`    // directory for uploaded files (default: ./uploads)
 	MaxUploadMB    int64  `yaml:"max_upload_mb"` // max upload size in MB (default: 25)
 	SMTP           SMTPConfig `yaml:"smtp"`
 }
@@ -123,5 +129,23 @@ func applyEnv(cfg *Config) {
 	}
 	if v := os.Getenv("API_LOG"); v != "" {
 		cfg.APILog = v != "false" && v != "0"
+	}
+	if v := os.Getenv("DB_TLS_MODE"); v != "" {
+		cfg.DBTLSMode = v
+	}
+	if v := os.Getenv("DB_TLS_CA_CERT"); v != "" {
+		cfg.DBTLSCACert = v
+	}
+	if v := os.Getenv("DB_TLS_CERT"); v != "" {
+		cfg.DBTLSCert = v
+	}
+	if v := os.Getenv("DB_TLS_KEY"); v != "" {
+		cfg.DBTLSKey = v
+	}
+	if v := os.Getenv("TLS_CERT"); v != "" {
+		cfg.TLSCert = v
+	}
+	if v := os.Getenv("TLS_KEY"); v != "" {
+		cfg.TLSKey = v
 	}
 }

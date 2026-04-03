@@ -86,8 +86,16 @@ func main() {
 
 	r := router.Setup(authSvc, cfg.AllowedOrigins, cfg.WebDir, cfg.APILog, cfg.UploadDir)
 
-	log.Printf("Starting server on :%s", cfg.Port)
-	if err := r.Run(":" + cfg.Port); err != nil {
-		log.Fatalf("server failed: %v", err)
+	addr := ":" + cfg.Port
+	if cfg.TLSCert != "" && cfg.TLSKey != "" {
+		log.Printf("Starting server (HTTPS) on %s", addr)
+		if err := r.RunTLS(addr, cfg.TLSCert, cfg.TLSKey); err != nil {
+			log.Fatalf("server failed: %v", err)
+		}
+	} else {
+		log.Printf("Starting server on %s", addr)
+		if err := r.Run(addr); err != nil {
+			log.Fatalf("server failed: %v", err)
+		}
 	}
 }

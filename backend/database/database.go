@@ -1,10 +1,15 @@
 package database
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"log"
+	"os"
+	"strings"
 	"unicode"
 
+	mysqldriver "github.com/go-sql-driver/mysql"
 	"github.com/tonk/warmdesk/config"
 	"github.com/tonk/warmdesk/models"
 	"gorm.io/driver/mysql"
@@ -21,9 +26,17 @@ func Init(cfg *config.Config) error {
 
 	switch cfg.DBDriver {
 	case "mysql":
-		dialector = mysql.Open(cfg.DBDSN)
+		dsn, err := applyMySQLTLS(cfg)
+		if err != nil {
+			return err
+		}
+		dialector = mysql.Open(dsn)
 	case "postgres":
-		dialector = postgres.Open(cfg.DBDSN)
+		dsn, err := applyPostgresTLS(cfg)
+		if err != nil {
+			return err
+		}
+		dialector = postgres.Open(dsn)
 	default:
 		dialector = sqlite.Open(cfg.DBDSN)
 	}
@@ -52,6 +65,108 @@ func Init(cfg *config.Config) error {
 		return err
 	}
 	return backfillCardNumbers(db)
+}
+
+// buildTLSConfig builds a *tls.Config from the db_tls_* config fields.
+// Returns nil when TLS is disabled or not configured.
+func buildTLSConfig(cfg *config.Config) (*tls.Config, error) {
+	mode := strings.ToLower(cfg.DBTLSMode)
+	if mode == "" || mode == "disable" {
+		return nil, nil
+	}
+
+	tlsCfg := &tls.Config{
+		InsecureSkipVerify: mode == "require",
+	}
+
+	if cfg.DBTLSCACert != "" {
+		pem, err := os.ReadFile(cfg.DBTLSCACert)
+		if err != nil {
+			return nil, fmt.Errorf("db tls: read CA cert %q: %w", cfg.DBTLSCACert, err)
+		}
+		pool := x509.NewCertPool()
+		if !pool.AppendCertsFromPEM(pem) {
+			return nil, fmt.Errorf("db tls: no valid certificates found in CA cert %q", cfg.DBTLSCACert)
+		}
+		tlsCfg.RootCAs = pool
+		tlsCfg.InsecureSkipVerify = false
+	}
+
+	if cfg.DBTLSCert != "" && cfg.DBTLSKey != "" {
+		cert, err := tls.LoadX509KeyPair(cfg.DBTLSCert, cfg.DBTLSKey)
+		if err != nil {
+			return nil, fmt.Errorf("db tls: load client cert/key: %w", err)
+		}
+		tlsCfg.Certificates = []tls.Certificate{cert}
+	}
+
+	return tlsCfg, nil
+}
+
+// applyPostgresTLS appends sslmode and cert parameters to the PostgreSQL DSN.
+func applyPostgresTLS(cfg *config.Config) (string, error) {
+	mode := strings.ToLower(cfg.DBTLSMode)
+	if mode == "" || mode == "disable" {
+		return cfg.DBDSN, nil
+	}
+
+	// pgx accepts both key=value and URL-style DSNs; use simple appending for
+	// key=value style and query-param appending for URL style.
+	dsn := cfg.DBDSN
+	sep := " "
+	if strings.HasPrefix(dsn, "postgres://") || strings.HasPrefix(dsn, "postgresql://") {
+		if strings.Contains(dsn, "?") {
+			sep = "&"
+		} else {
+			sep = "?"
+		}
+	}
+
+	param := func(k, v string) {
+		dsn += sep + k + "=" + v
+		sep = "&"
+		if !strings.HasPrefix(cfg.DBDSN, "postgres://") && !strings.HasPrefix(cfg.DBDSN, "postgresql://") {
+			sep = " "
+		}
+	}
+
+	param("sslmode", mode)
+	if cfg.DBTLSCACert != "" {
+		param("sslrootcert", cfg.DBTLSCACert)
+	}
+	if cfg.DBTLSCert != "" {
+		param("sslcert", cfg.DBTLSCert)
+	}
+	if cfg.DBTLSKey != "" {
+		param("sslkey", cfg.DBTLSKey)
+	}
+
+	return dsn, nil
+}
+
+// applyMySQLTLS registers a named TLS config with the MySQL driver and appends
+// the tls= parameter to the DSN.
+func applyMySQLTLS(cfg *config.Config) (string, error) {
+	tlsCfg, err := buildTLSConfig(cfg)
+	if err != nil {
+		return "", err
+	}
+	if tlsCfg == nil {
+		return cfg.DBDSN, nil
+	}
+
+	const tlsName = "warmdesk"
+	if err := mysqldriver.RegisterTLSConfig(tlsName, tlsCfg); err != nil {
+		return "", fmt.Errorf("db tls: register MySQL TLS config: %w", err)
+	}
+
+	dsn := cfg.DBDSN
+	if strings.Contains(dsn, "?") {
+		dsn += "&tls=" + tlsName
+	} else {
+		dsn += "?tls=" + tlsName
+	}
+	return dsn, nil
 }
 
 // backfillCardNumbers assigns key_prefix to projects and card_number to existing cards

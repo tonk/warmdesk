@@ -69,7 +69,7 @@ and asked Claude Code to generate the app.
 - **Database support** — SQLite (zero configuration), PostgreSQL, MySQL/MariaDB
 - **Horizontal scaling** — Redis pub/sub for multi-instance WebSocket broadcast
 - **App zoom** — `Ctrl +` / `Ctrl -` to zoom in/out; `Ctrl 0` to reset; level persisted across sessions
-- **Desktop app** — native Tauri app for Linux (AppImage), macOS (DMG), and Windows (installer); server URL configurable from the login page at any time
+- **Desktop app** — native Tauri app for Linux (AppImage), macOS (DMG), and Windows (installer); server URL configurable from the login page at any time; supports `--version` and `--maximized` CLI flags
 - **Project migration** — `warmdesk-export` and `warmdesk-import` standalone tools to migrate projects to/from Jira, Trello, OpenProject, or Ryver; column mapping via config file
 
 ## Quick Start
@@ -141,6 +141,12 @@ Settings can also be provided as environment variables, which always take preced
 | `port` | `PORT` | `8080` | HTTP listen port |
 | `db_driver` | `DB_DRIVER` | `sqlite` | `sqlite` / `postgres` / `mysql` |
 | `db_dsn` | `DB_DSN` | `./warmdesk.db` | Database connection string |
+| `db_tls_mode` | `DB_TLS_MODE` | *(off)* | `disable` / `require` / `verify-ca` / `verify-full` |
+| `db_tls_ca_cert` | `DB_TLS_CA_CERT` | *(empty)* | Path to CA certificate file |
+| `db_tls_cert` | `DB_TLS_CERT` | *(empty)* | Path to client certificate (mTLS) |
+| `db_tls_key` | `DB_TLS_KEY` | *(empty)* | Path to client private key (mTLS) |
+| `tls_cert` | `TLS_CERT` | *(empty)* | Path to server TLS certificate (enables HTTPS when set with `tls_key`) |
+| `tls_key` | `TLS_KEY` | *(empty)* | Path to server TLS private key |
 | `jwt_secret` | `JWT_SECRET` | *(change this)* | Secret for signing JWT tokens |
 | `allowed_origins` | `ALLOWED_ORIGINS` | `http://localhost:8080` | CORS allowed origins |
 | `default_locale` | `DEFAULT_LOCALE` | `en` | Default UI language for new users |

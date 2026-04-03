@@ -38,6 +38,19 @@ npm --version
 - **macOS**: `xcode-select --install`
 - **Windows**: Install [TDM-GCC](https://jmeubank.github.io/tdm-gcc/) or use WSL
 
+### Rust + Tauri CLI (desktop app builds only)
+
+Required only when building the AppImage, DMG, or Windows installer.
+
+```bash
+# Install Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source "$HOME/.cargo/env"
+
+# Install Tauri CLI
+cargo install tauri-cli --version '^2'
+```
+
 ---
 
 ## 2. Build
@@ -117,6 +130,12 @@ Open the application at **http://localhost:8080** (or your configured port).
 | `PORT` | `8080` | HTTP port |
 | `DB_DRIVER` | `sqlite` | `sqlite`, `mysql`, or `postgres` |
 | `DB_DSN` | `./warmdesk.db` | Database connection string / file path |
+| `DB_TLS_MODE` | *(off)* | `disable` / `require` / `verify-ca` / `verify-full` |
+| `DB_TLS_CA_CERT` | *(empty)* | Path to CA certificate file |
+| `DB_TLS_CERT` | *(empty)* | Path to client certificate (mTLS) |
+| `DB_TLS_KEY` | *(empty)* | Path to client private key (mTLS) |
+| `TLS_CERT` | *(empty)* | Path to server TLS certificate (enables HTTPS when set with `TLS_KEY`) |
+| `TLS_KEY` | *(empty)* | Path to server TLS private key |
 | `JWT_SECRET` | `change-me-in-production` | Token signing secret — **always change this** |
 | `ALLOWED_ORIGINS` | `http://localhost:5173` | CORS allowed origins (`*` for any) |
 | `WEB_DIR` | *(empty)* | Path to built frontend files (required in production) |
@@ -275,3 +294,40 @@ tar -xzf warmdesk-*.tar.gz -C /opt/warmdesk
 ```
 
 Then follow steps 3–7 above.
+
+---
+
+## 13. Desktop App Builds
+
+The desktop apps are Tauri 2 wrappers around the same frontend. They require
+Rust and the system libraries listed below in addition to the normal
+prerequisites.
+
+### System libraries
+
+**Ubuntu / Debian**
+```bash
+sudo apt install libgtk-3-dev libwebkit2gtk-4.1-dev libssl-dev \
+  libsoup-3.0-dev libglib2.0-dev librsvg2-dev squashfs-tools
+```
+
+**RHEL / Fedora**
+```bash
+sudo dnf install gtk3-devel webkit2gtk4.1-devel openssl-devel \
+  libsoup3-devel glib2-devel librsvg2-devel squashfs-tools
+```
+
+**macOS** — no extra libraries needed beyond Xcode Command Line Tools.
+
+**Windows** — no extra libraries needed; the NSIS installer tool is
+downloaded automatically by Tauri.
+
+### Build
+
+```bash
+make appimage          # Linux — WarmDesk-vX.Y.Z-x86_64.AppImage
+make dmg               # macOS — WarmDesk-vX.Y.Z-universal.dmg
+make windows-installer # Windows — WarmDesk-vX.Y.Z-x64-setup.exe
+```
+
+Output is placed in `frontend/src-tauri/target/release/bundle/`.

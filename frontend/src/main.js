@@ -6,14 +6,14 @@ import { i18n } from './i18n'
 import { useSystemStore } from '@/stores/system'
 import './styles/main.css'
 
-// On Windows, WebView2 blocks http:// requests from the https://tauri.localhost
-// origin as mixed content.  index.html installs a window.fetch proxy before the
-// ES module bundle loads (so Axios captures the proxy, not the native fetch).
-// Here we point that proxy at the tauri-plugin-http fetch, which routes requests
-// through the native Rust HTTP client.  Linux and macOS are unaffected because
-// we only set window.__tauriFetch on Windows.
+// Both WebView2 (Windows, https://tauri.localhost) and WebKitGTK 4.1 (Linux,
+// tauri://localhost) treat the Tauri origin as a secure context and block
+// http:// requests as mixed content.  Route all fetch calls through
+// tauri-plugin-http so requests go via the native Rust HTTP client, which has
+// no such restriction.  index.html installs the window.fetch proxy before the
+// ES module bundle loads so Axios captures it at import time.
 async function init() {
-  if (window.__TAURI_INTERNALS__ && navigator.userAgent.includes('Windows')) {
+  if (window.__TAURI_INTERNALS__) {
     const { fetch: tauriFetch } = await import('@tauri-apps/plugin-http')
     window.__tauriFetch = tauriFetch
   }

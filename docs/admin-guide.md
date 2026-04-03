@@ -143,6 +143,33 @@ db_driver: mysql
 db_dsn: "warmdesk:secret@tcp(localhost:3306)/warmdesk?charset=utf8mb4&parseTime=True&loc=Local"
 ```
 
+### Database TLS
+
+Both PostgreSQL and MySQL support encrypted connections. Use the `db_tls_*`
+settings (or their `DB_TLS_*` env var equivalents) instead of embedding TLS
+parameters in the DSN directly.
+
+| Setting | Env var | Description |
+|---------|---------|-------------|
+| `db_tls_mode` | `DB_TLS_MODE` | `disable` (default) / `require` / `verify-ca` / `verify-full` |
+| `db_tls_ca_cert` | `DB_TLS_CA_CERT` | Path to CA certificate file |
+| `db_tls_cert` | `DB_TLS_CERT` | Path to client certificate (mTLS, optional) |
+| `db_tls_key` | `DB_TLS_KEY` | Path to client key (mTLS, optional) |
+
+```yaml
+# Encrypt and fully verify the server certificate
+db_tls_mode: "verify-full"
+db_tls_ca_cert: "/etc/ssl/warmdesk/ca.pem"
+
+# Additionally authenticate with a client certificate (mTLS)
+db_tls_cert: "/etc/ssl/warmdesk/client.crt"
+db_tls_key:  "/etc/ssl/warmdesk/client.key"
+```
+
+`require` encrypts the connection but skips certificate verification (useful
+for self-signed certs in development). `verify-ca` checks the certificate
+chain; `verify-full` also checks that the hostname matches the certificate CN.
+
 ### Schema migration
 
 WarmDesk runs **GORM AutoMigrate** on every startup. New columns and tables are
@@ -218,6 +245,25 @@ sudo cp deploy/apache.conf /etc/apache2/sites-available/warmdesk.conf
 sudo a2ensite warmdesk
 sudo systemctl reload apache2
 ```
+
+### Server TLS
+
+WarmDesk can serve HTTPS directly without a reverse proxy. Set both `tls_cert`
+and `tls_key` (or their `TLS_CERT` / `TLS_KEY` env vars) to enable it:
+
+```yaml
+tls_cert: "/etc/ssl/warmdesk/server.crt"
+tls_key:  "/etc/ssl/warmdesk/server.key"
+```
+
+When either value is absent the server starts in plain HTTP mode. This is the
+right choice when TLS is terminated upstream by nginx, Apache, or a load
+balancer — no extra configuration is needed in that case.
+
+> **Note:** if you enable server TLS, update `ALLOWED_ORIGINS` and any reverse
+> proxy config to use `https://` URLs accordingly.
+
+---
 
 ### CORS
 
@@ -480,6 +526,19 @@ to a WarmDesk server. The apps are standalone — they do not bundle the server.
 Users configure the server URL in the app's **Connect** screen on first launch.
 The URL is saved locally and can be changed at any time via the **Change** link
 shown next to the server URL on the login page.
+
+### Command-line flags
+
+| Flag | Description |
+|------|-------------|
+| `--version`, `-V` | Print the app version and exit |
+| `--maximized` | Start the window maximised |
+
+```bash
+# Examples (Linux AppImage)
+./WarmDesk.AppImage --version
+./WarmDesk.AppImage --maximized
+```
 
 ### Distributing desktop apps
 

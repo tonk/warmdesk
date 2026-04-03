@@ -1,6 +1,6 @@
 {
   "productName": "WarmDesk",
-  "version": "0.3.2",
+  "version": "0.4.5",
   "identifier": "com.warmdesk.desktop",
   "build": {
     "frontendDist": "../dist",
@@ -31,7 +31,8 @@
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.icns",
-      "icons/icon.ico"
+      "icons/icon.ico",
+      "icons/icon.png"
     ],
     "linux": {
       "deb": {

@@ -4,7 +4,7 @@ BACKEND  := backend
 FRONTEND := frontend
 VERSION  := $(shell git -C $(BACKEND) describe --tags --always 2>/dev/null || echo "dev")
 ARCHIVE  := warmdesk-$(VERSION).tar.gz
-.PHONY: all build build-frontend build-backend clean dev-backend dev-frontend run package appimage dmg windows-installer windows-portable
+.PHONY: all build build-frontend build-backend clean dev-backend dev-frontend run package stamp-desktop-version appimage dmg windows-installer windows-portable
 
 # Build everything into dist/
 all: build
@@ -46,17 +46,33 @@ package: build
 	@tar -czf $(ARCHIVE) -C $(DIST_DIR) .
 	@echo "Distribution package: $(ARCHIVE)"
 
+# Stamp version into tauri.conf.json and Cargo.toml from the current git tag.
+stamp-desktop-version:
+	@node -e "\
+		const fs = require('fs');\
+		const ver = '$(VERSION)'.replace(/^v/, '');\
+		const tp = '$(FRONTEND)/src-tauri/tauri.conf.json';\
+		const tc = JSON.parse(fs.readFileSync(tp, 'utf8'));\
+		tc.version = ver;\
+		fs.writeFileSync(tp, JSON.stringify(tc, null, 2) + '\n');\
+		const cp = '$(FRONTEND)/src-tauri/Cargo.toml';\
+		let cargo = fs.readFileSync(cp, 'utf8');\
+		cargo = cargo.replace(/^version = \"[^\"]*\"/m, 'version = \"' + ver + '\"');\
+		fs.writeFileSync(cp, cargo);\
+		console.log('Stamped desktop version:', ver);\
+	"
+
 # Build the Tauri desktop client as an AppImage (Linux).
 # Requires: Rust, webkit2gtk4.1-devel, gtk3-devel, librsvg2-devel, openssl-devel
 # NO_STRIP=true works around linuxdeploy's bundled strip being too old for newer glibc.
-appimage:
+appimage: stamp-desktop-version
 	@echo "Building WarmDesk desktop app (AppImage)..."
 	cd $(FRONTEND) && NO_STRIP=true npm run tauri:build -- --bundles appimage
 	@echo "AppImage: $(FRONTEND)/src-tauri/target/release/bundle/appimage/WarmDesk_*_amd64.AppImage"
 
 # Build the Tauri desktop client as a macOS DMG (universal: Intel + Apple Silicon).
 # Must be run on macOS. Requires: Rust, Xcode command line tools.
-dmg:
+dmg: stamp-desktop-version
 	@echo "Building WarmDesk desktop app (macOS DMG)..."
 	rustup target add aarch64-apple-darwin x86_64-apple-darwin 2>/dev/null || true
 	cd $(FRONTEND) && npm run tauri:build -- --bundles dmg --target universal-apple-darwin
@@ -64,7 +80,7 @@ dmg:
 
 # Build the Tauri desktop client as a Windows NSIS installer.
 # Must be run on Windows. Requires: Rust, WebView2 (pre-installed on Windows 11).
-windows-installer:
+windows-installer: stamp-desktop-version
 	@echo "Building WarmDesk desktop app (Windows installer)..."
 	cd $(FRONTEND) && npm run tauri:build -- --bundles nsis
 	@echo "Installer: $(FRONTEND)/src-tauri/target/release/bundle/nsis/WarmDesk_*_x64-setup.exe"
@@ -72,7 +88,7 @@ windows-installer:
 # Build the Tauri desktop client as a portable Windows zip — extract and run, no installation.
 # Must be run on Windows. Requires: Rust, WebView2 (pre-installed on Windows 11).
 # WebView2 is pre-installed on Windows 10 (2018+) and Windows 11.
-windows-portable:
+windows-portable: stamp-desktop-version
 	@echo "Building WarmDesk desktop app (Windows portable zip)..."
 	cd $(FRONTEND) && npm run tauri:build -- --bundles nsis
 	powershell -Command "Compress-Archive -Path '$(FRONTEND)/src-tauri/target/release/WarmDesk.exe' -DestinationPath 'WarmDesk-portable.zip' -Force"

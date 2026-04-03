@@ -228,3 +228,10 @@ Create an application that has all these features and requirements
 - Show version number on the Connect screen in the desktop app
 - Install window.fetch proxy via inline script in index.html so Tauri HTTP patch is active before any ES module fires a request
 - CI: split manual desktop build into per-platform workflows; add manual server build; replace PowerShell version stamping with Node.js
+- Database TLS for PostgreSQL and MySQL: db_tls_mode (disable/require/verify-ca/verify-full), db_tls_ca_cert, db_tls_cert, db_tls_key with DB_TLS_* env var overrides; mTLS (client certificate) supported
+- Server TLS: set tls_cert and tls_key (or TLS_CERT/TLS_KEY env vars) to serve HTTPS directly without a reverse proxy
+- Regenerate all desktop app icons from WarmDesk SVG (removed old Coworker branding from 32x32, 128x128, 128x128@2x, icon.png, icon.ico, icon.icns)
+- Desktop app CLI flags: --version/-V prints version and exits; --maximized starts window maximised
+- Fix Linux desktop app network error with webkit2gtk 4.1: route all HTTP/HTTPS fetch calls through tauri-plugin-http on all Tauri platforms; non-HTTP requests fall back to native fetch (also fixes blank screen from routing all requests through the plugin)
+- Stamp Cargo.toml version from git tag alongside tauri.conf.json; make appimage/dmg/windows-installer targets stamp both files automatically
+- Document AppImage build prerequisites (system libraries for Fedora and Ubuntu; Rust install) in INSTALL.md
