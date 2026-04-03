@@ -77,6 +77,9 @@
                 <option value="'Open Sans', sans-serif">Open Sans</option>
                 <option value="'Source Code Pro', monospace">Source Code Pro (monospace)</option>
                 <option value="Georgia, serif">Georgia (serif)</option>
+                <option value="'FreeSans', sans-serif">FreeSans</option>
+                <option value="'FreeSerif', serif">FreeSerif</option>
+                <option value="'FreeMono', monospace">FreeMono (monospace)</option>
               </select>
             </div>
             <div class="form-group">
