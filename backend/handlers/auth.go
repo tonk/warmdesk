@@ -148,12 +148,31 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	now := time.Now()
 	database.DB.Model(&user).Update("last_login_at", now)
 
+	// If the user has TOTP enabled, issue an MFA challenge token instead of full tokens.
+	if user.TOTPEnabled {
+		mfaToken, err := h.authSvc.IssueMFAToken(user.ID, user.Username)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"mfa_required": true, "mfa_token": mfaToken})
+		return
+	}
+
 	tokens, err := h.issueTokens(user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
 		return
 	}
-	c.JSON(http.StatusOK, tokens)
+
+	resp := gin.H{
+		"access_token":  tokens.AccessToken,
+		"refresh_token": tokens.RefreshToken,
+	}
+	if IsMFARequired() {
+		resp["mfa_setup_required"] = true
+	}
+	c.JSON(http.StatusOK, resp)
 }
 
 // Refresh godoc
@@ -355,6 +374,136 @@ func (h *AuthHandler) ChangePassword(c *gin.Context) {
 
 	database.DB.Model(&user).Update("password_hash", hash)
 	c.JSON(http.StatusOK, gin.H{"message": "password updated"})
+}
+
+// MFAVerify handles POST /auth/mfa/verify.
+// Accepts the short-lived mfa_token from the login challenge and a TOTP code,
+// and — if valid — returns a full access+refresh token pair.
+func (h *AuthHandler) MFAVerify(c *gin.Context) {
+	var req struct {
+		MFAToken string `json:"mfa_token" binding:"required"`
+		Code     string `json:"code" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	claims, err := h.authSvc.ValidateToken(req.MFAToken)
+	if err != nil || !claims.MFAPending {
+		// Use 400 so the axios 401 interceptor does not fire and redirect the user.
+		// The frontend shows an "expired session" message and resets to step 1.
+		c.JSON(http.StatusBadRequest, gin.H{"error": "mfa_session_expired"})
+		return
+	}
+
+	var user models.User
+	if err := database.DB.First(&user, claims.UserID).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "mfa_session_expired"})
+		return
+	}
+
+	if !user.TOTPEnabled || !h.authSvc.VerifyTOTP(user.TOTPSecret, req.Code) {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "invalid_code"})
+		return
+	}
+
+	tokens, err := h.issueTokens(user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+		return
+	}
+	c.JSON(http.StatusOK, tokens)
+}
+
+// MFASetup handles GET /auth/mfa/setup.
+// Generates a fresh TOTP secret for the current user and stores it (not yet enabled).
+// Returns the base32 secret and the otpauth:// URI for QR code generation.
+func (h *AuthHandler) MFASetup(c *gin.Context) {
+	userID := middleware.GetUserID(c)
+	var user models.User
+	if err := database.DB.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
+	issuer := GetCompanyName()
+	if issuer == "" {
+		issuer = "WarmDesk"
+	}
+
+	secret, uri, err := h.authSvc.GenerateTOTPSecret(user.Username, issuer)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+		return
+	}
+
+	// Store the secret but keep TOTP disabled until the user verifies with MFAEnable.
+	database.DB.Model(&user).Update("totp_secret", secret)
+
+	c.JSON(http.StatusOK, gin.H{"secret": secret, "uri": uri})
+}
+
+// MFAEnable handles POST /auth/mfa/enable.
+// Verifies the provided TOTP code against the stored secret and enables TOTP.
+func (h *AuthHandler) MFAEnable(c *gin.Context) {
+	userID := middleware.GetUserID(c)
+	var req struct {
+		Code string `json:"code" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var user models.User
+	if err := database.DB.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
+	if user.TOTPSecret == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "no mfa setup in progress"})
+		return
+	}
+
+	if !h.authSvc.VerifyTOTP(user.TOTPSecret, req.Code) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid code"})
+		return
+	}
+
+	database.DB.Model(&user).Update("totp_enabled", true)
+	c.JSON(http.StatusOK, gin.H{"message": "mfa enabled"})
+}
+
+// MFADisable handles POST /auth/mfa/disable.
+// Requires the user's current password; clears the TOTP secret and disables TOTP.
+func (h *AuthHandler) MFADisable(c *gin.Context) {
+	userID := middleware.GetUserID(c)
+	var req struct {
+		Password string `json:"password" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var user models.User
+	if err := database.DB.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
+	if !h.authSvc.CheckPassword(user.PasswordHash, req.Password) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "incorrect password"})
+		return
+	}
+
+	database.DB.Model(&user).Updates(map[string]interface{}{
+		"totp_enabled": false,
+		"totp_secret":  "",
+	})
+	c.JSON(http.StatusOK, gin.H{"message": "mfa disabled"})
 }
 
 func (h *AuthHandler) issueTokens(user models.User) (*tokenResponse, error) {

@@ -202,7 +202,8 @@
     "company_logo": "Bedrijfslogo",
     "company_logo_hint": "Plak een URL of upload een afbeelding.",
     "company_logo_upload": "Afbeelding uploaden",
-    "company_logo_preview": "Voorbeeld"
+    "company_logo_preview": "Voorbeeld",
+    "reset_mfa": "MFA resetten"
   },
   "update": {
     "available": "Er is een nieuwe versie van WarmDesk beschikbaar: v{version}.",
@@ -226,6 +227,29 @@
   },
   "presence": {
     "online": "online"
+  },
+  "mfa": {
+    "title": "Twee-factor authenticatie",
+    "description": "Beveilig uw account met een authenticator-app (bijv. Google Authenticator, Authy).",
+    "enabled": "MFA is ingeschakeld",
+    "disabled": "MFA is niet ingeschakeld",
+    "enable": "MFA instellen",
+    "disable": "MFA uitschakelen",
+    "setup_instructions": "Scan deze QR-code met uw authenticator-app.",
+    "manual_entry": "Of voer deze sleutel handmatig in:",
+    "verify_code": "Voer de 6-cijferige code uit uw app in ter bevestiging:",
+    "code_placeholder": "Authenticator code",
+    "confirm_enable": "Inschakelen",
+    "disable_instructions": "Voer uw wachtwoord in om tweestapsverificatie uit te schakelen.",
+    "confirm_disable": "MFA uitschakelen",
+    "mfa_required_title": "Twee-factor authenticatie",
+    "mfa_required_instructions": "Voer de 6-cijferige code uit uw authenticator-app in.",
+    "invalid_code": "Ongeldige code. Probeer het opnieuw.",
+    "session_expired": "MFA-sessie verlopen. Meld u opnieuw aan.",
+    "setup_success": "MFA succesvol ingeschakeld.",
+    "disable_success": "MFA is uitgeschakeld.",
+    "enforce_label": "MFA verplichten voor alle gebruikers",
+    "enforce_hint": "Wanneer ingeschakeld, worden gebruikers gevraagd MFA in te stellen bij hun volgende aanmelding."
   },
   "settings": {
     "title": "Accountinstellingen",

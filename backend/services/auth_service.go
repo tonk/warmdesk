@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/pquerna/otp/totp"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -18,6 +19,7 @@ type Claims struct {
 	UserID     uint   `json:"user_id"`
 	Username   string `json:"username"`
 	GlobalRole string `json:"global_role"`
+	MFAPending bool   `json:"mfa_pending,omitempty"`
 	jwt.RegisteredClaims
 }
 
@@ -64,6 +66,39 @@ func (s *AuthService) IssueRefreshToken(userID uint, username, role string) (str
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(s.secret)
+}
+
+// IssueMFAToken returns a short-lived (5 min) JWT used only for the TOTP verification step.
+func (s *AuthService) IssueMFAToken(userID uint, username string) (string, error) {
+	claims := Claims{
+		UserID:     userID,
+		Username:   username,
+		MFAPending: true,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(5 * time.Minute)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString(s.secret)
+}
+
+// GenerateTOTPSecret creates a new TOTP secret. Returns the base32 secret and the
+// otpauth:// URI suitable for encoding as a QR code.
+func (s *AuthService) GenerateTOTPSecret(username, issuer string) (secret, uri string, err error) {
+	key, err := totp.Generate(totp.GenerateOpts{
+		Issuer:      issuer,
+		AccountName: username,
+	})
+	if err != nil {
+		return "", "", err
+	}
+	return key.Secret(), key.URL(), nil
+}
+
+// VerifyTOTP validates a 6-digit TOTP code against the given base32 secret.
+func (s *AuthService) VerifyTOTP(secret, code string) bool {
+	return totp.Validate(code, secret)
 }
 
 func (s *AuthService) ValidateToken(tokenStr string) (*Claims, error) {

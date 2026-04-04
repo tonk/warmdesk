@@ -202,7 +202,8 @@
     "company_logo": "Company Logo",
     "company_logo_hint": "Paste a URL or upload an image file.",
     "company_logo_upload": "Upload Image",
-    "company_logo_preview": "Preview"
+    "company_logo_preview": "Preview",
+    "reset_mfa": "Reset MFA"
   },
   "report": {
     "title": "Time Report",
@@ -255,6 +256,29 @@
   },
   "presence": {
     "online": "online"
+  },
+  "mfa": {
+    "title": "Two-Factor Authentication",
+    "description": "Protect your account with an authenticator app (e.g. Google Authenticator, Authy).",
+    "enabled": "MFA is enabled",
+    "disabled": "MFA is not enabled",
+    "enable": "Set Up MFA",
+    "disable": "Disable MFA",
+    "setup_instructions": "Scan this QR code with your authenticator app.",
+    "manual_entry": "Or enter this key manually:",
+    "verify_code": "Enter the 6-digit code from your app to confirm:",
+    "code_placeholder": "Authenticator code",
+    "confirm_enable": "Enable",
+    "disable_instructions": "Enter your password to disable two-factor authentication.",
+    "confirm_disable": "Disable MFA",
+    "mfa_required_title": "Two-Factor Authentication",
+    "mfa_required_instructions": "Enter the 6-digit code from your authenticator app.",
+    "invalid_code": "Invalid code. Please try again.",
+    "session_expired": "MFA session expired. Please sign in again.",
+    "setup_success": "MFA enabled successfully.",
+    "disable_success": "MFA has been disabled.",
+    "enforce_label": "Require MFA for all users",
+    "enforce_hint": "When enabled, users are prompted to configure MFA after their next login."
   },
   "settings": {
     "title": "Account Settings",

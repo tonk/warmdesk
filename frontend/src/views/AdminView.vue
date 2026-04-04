@@ -51,6 +51,7 @@
                   <span :class="['badge', user.is_active ? 'badge-active' : 'badge-inactive']">
                     {{ user.is_active ? $t('admin.active') : $t('admin.inactive') }}
                   </span>
+                  <span v-if="user.totp_enabled" class="badge badge-mfa" :title="$t('mfa.title')">MFA</span>
                 </td>
                 <td class="actions-cell">
                   <button class="btn btn-secondary btn-sm" @click="openEditUser(user)">{{ $t('common.edit') }}</button>
@@ -124,6 +125,14 @@
                 <input type="checkbox" v-model="systemSettings.registration_enabled" @change="saveGeneralSettings" />
               </label>
               <p class="form-hint">{{ $t('admin.registration_hint') }}</p>
+            </div>
+
+            <div class="form-group" style="max-width:400px">
+              <label class="toggle-row">
+                <span>{{ $t('mfa.enforce_label') }}</span>
+                <input type="checkbox" v-model="systemSettings.mfa_required" @change="saveMFASettings" />
+              </label>
+              <p class="form-hint">{{ $t('mfa.enforce_hint') }}</p>
             </div>
 
             <div class="form-group" style="max-width:400px">
@@ -386,6 +395,14 @@
         <input class="form-input" v-model="editUser._newPassword" type="password" autocomplete="new-password" minlength="8" placeholder="New password…" />
       </div>
       <div class="form-group">
+        <label class="form-label">{{ $t('mfa.title') }}</label>
+        <div v-if="editUser.totp_enabled" style="display:flex;align-items:center;gap:12px">
+          <span class="badge badge-mfa">{{ $t('mfa.enabled') }}</span>
+          <button type="button" class="btn btn-danger btn-sm" @click="adminResetMFA(editUser)">{{ $t('admin.reset_mfa') }}</button>
+        </div>
+        <span v-else class="badge badge-inactive">{{ $t('mfa.disabled') }}</span>
+      </div>
+      <div class="form-group">
         <label class="form-label">{{ $t('admin.assign_projects') }}</label>
         <div class="labels-picker">
           <span
@@ -476,6 +493,7 @@ const userProjectIds = ref([])
 
 const systemSettings = ref({
   registration_enabled: true,
+  mfa_required: false,
   session_timeout_minutes: 60,
   default_date_time_format: 'YYYY-MM-DD HH:mm',
   default_timezone: 'UTC',
@@ -543,6 +561,7 @@ async function loadSettings() {
   try {
     const { data } = await adminApi.getSystemSettings()
     systemSettings.value.registration_enabled    = data.registration_enabled !== 'false'
+    systemSettings.value.mfa_required             = data.mfa_required === 'true' || data.mfa_required === true
     systemSettings.value.session_timeout_minutes  = parseInt(data.session_timeout_minutes) || 0
     systemSettings.value.default_date_time_format = data.default_date_time_format || 'YYYY-MM-DD HH:mm'
     systemSettings.value.default_timezone         = data.default_timezone || 'UTC'
@@ -603,6 +622,15 @@ async function saveGeneralSettings() {
       default_labels:           systemSettings.value.default_labels,
     }
     await adminApi.updateSystemSettings(payload)
+    ui.success('Settings saved')
+  } catch {
+    ui.error('Failed to save settings')
+  }
+}
+
+async function saveMFASettings() {
+  try {
+    await adminApi.updateSystemSettings({ mfa_required: systemSettings.value.mfa_required })
     ui.success('Settings saved')
   } catch {
     ui.error('Failed to save settings')
@@ -687,6 +715,20 @@ async function deleteUser(user) {
     ui.success('User deleted')
   } catch {
     ui.error('Failed to delete user')
+  }
+}
+
+async function adminResetMFA(user) {
+  if (!confirm(`Disable MFA for ${user.display_name || user.username}?`)) return
+  try {
+    const { data } = await adminApi.disableUserMFA(user.id)
+    // Update both the modal and the list
+    editUser.value = { ...editUser.value, totp_enabled: false }
+    const idx = users.value.findIndex(u => u.id === user.id)
+    if (idx >= 0) users.value[idx] = { ...users.value[idx], totp_enabled: false }
+    ui.success('MFA disabled for ' + (data.display_name || data.username))
+  } catch {
+    ui.error('Failed to disable MFA')
   }
 }
 
@@ -819,8 +861,10 @@ h1 { font-size: 22px; font-weight: 700; margin-bottom: 24px; }
 }
 .badge-active { background: #dcfce7; color: #166534; }
 .badge-inactive { background: #fee2e2; color: #991b1b; }
+.badge-mfa { background: #dbeafe; color: #1e40af; margin-left: 6px; }
 [data-theme="dark"] .badge-active { background: #14532d; color: #86efac; }
 [data-theme="dark"] .badge-inactive { background: #450a0a; color: #fca5a5; }
+[data-theme="dark"] .badge-mfa { background: #1e3a5f; color: #93c5fd; }
 .open-cards-count { font-weight: 600; color: var(--color-primary); }
 
 .loading-state { display: flex; justify-content: center; padding: 60px; }

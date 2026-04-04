@@ -9,5 +9,9 @@ export const authApi = {
   changePassword: (data) => client.put('/auth/me/password', data),
   listApiKeys: () => client.get('/auth/api-keys'),
   createApiKey: (name) => client.post('/auth/api-keys', { name }),
-  deleteApiKey: (id) => client.delete(`/auth/api-keys/${id}`)
+  deleteApiKey: (id) => client.delete(`/auth/api-keys/${id}`),
+  verifyMFA: (mfaToken, code) => client.post('/auth/mfa/verify', { mfa_token: mfaToken, code }),
+  setupMFA: () => client.get('/auth/mfa/setup'),
+  enableMFA: (code) => client.post('/auth/mfa/enable', { code }),
+  disableMFA: (password) => client.post('/auth/mfa/disable', { password }),
 }

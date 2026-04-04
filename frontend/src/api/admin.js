@@ -16,5 +16,6 @@ export const adminApi = {
   setUserProjects: (id, projectIds) => client.put(`/admin/users/${id}/projects`, { project_ids: projectIds }),
   getSystemSettings: () => client.get('/admin/system'),
   updateSystemSettings: (data) => client.put('/admin/system', data),
-  sendTestEmail: (to) => client.post('/admin/system/test-email', { to })
+  sendTestEmail: (to) => client.post('/admin/system/test-email', { to }),
+  disableUserMFA: (id) => client.post(`/admin/users/${id}/mfa/disable`)
 }

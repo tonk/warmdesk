@@ -38,6 +38,7 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webDir string, 
 		auth.POST("/register", authHandler.Register)
 		auth.POST("/login", authHandler.Login)
 		auth.POST("/refresh", authHandler.Refresh)
+		auth.POST("/mfa/verify", authHandler.MFAVerify)
 	}
 
 	// Authenticated routes
@@ -48,6 +49,11 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webDir string, 
 		protected.GET("/auth/me", authHandler.Me)
 		protected.PUT("/auth/me", authHandler.UpdateMe)
 		protected.PUT("/auth/me/password", authHandler.ChangePassword)
+
+		// MFA management
+		protected.GET("/auth/mfa/setup", authHandler.MFASetup)
+		protected.POST("/auth/mfa/enable", authHandler.MFAEnable)
+		protected.POST("/auth/mfa/disable", authHandler.MFADisable)
 
 		// API keys (personal tokens)
 		protected.GET("/auth/api-keys", handlers.ListAPIKeys)
@@ -63,6 +69,7 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webDir string, 
 			admin.GET("/users/:id", handlers.AdminGetUser)
 			admin.PUT("/users/:id", handlers.AdminUpdateUser)
 			admin.DELETE("/users/:id", handlers.AdminDeleteUser)
+			admin.POST("/users/:id/mfa/disable", handlers.AdminDisableUserMFA)
 			admin.GET("/users/:id/projects", handlers.AdminGetUserProjects)
 			admin.PUT("/users/:id/projects", handlers.AdminSetUserProjects)
 			admin.GET("/projects", handlers.AdminListProjects)

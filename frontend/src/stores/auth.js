@@ -7,6 +7,8 @@ import client from '@/api/client'
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(JSON.parse(sessionStorage.getItem('user') || 'null'))
   const accessToken = ref(sessionStorage.getItem('access_token') || null)
+  const pendingMFAToken = ref(null)
+  const mfaSetupRequired = ref(false)
 
   // Seed the axios default header from the stored token so requests never miss
   // the token even if sessionStorage is cleared after initialization.
@@ -44,6 +46,19 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function login(login, password) {
     const { data } = await authApi.login({ login, password })
+    if (data.mfa_required) {
+      pendingMFAToken.value = data.mfa_token
+      return { mfa_required: true }
+    }
+    setTokens(data.access_token, data.refresh_token)
+    mfaSetupRequired.value = !!data.mfa_setup_required
+    await fetchMe()
+    return {}
+  }
+
+  async function verifyMFA(code) {
+    const { data } = await authApi.verifyMFA(pendingMFAToken.value, code)
+    pendingMFAToken.value = null
     setTokens(data.access_token, data.refresh_token)
     await fetchMe()
   }
@@ -72,6 +87,8 @@ export const useAuthStore = defineStore('auth', () => {
     stopIdleTimer()
     user.value = null
     accessToken.value = null
+    pendingMFAToken.value = null
+    mfaSetupRequired.value = false
     sessionStorage.removeItem('access_token')
     sessionStorage.removeItem('refresh_token')
     sessionStorage.removeItem('user')
@@ -85,5 +102,5 @@ export const useAuthStore = defineStore('auth', () => {
     if (data.locale) setLocale(data.locale)
   }
 
-  return { user, accessToken, isLoggedIn, isAdmin, canViewReports, login, register, logout, fetchMe, updateProfile, startIdleTimer, resetIdleTimer, stopIdleTimer }
+  return { user, accessToken, isLoggedIn, isAdmin, canViewReports, pendingMFAToken, mfaSetupRequired, login, verifyMFA, register, logout, fetchMe, updateProfile, startIdleTimer, resetIdleTimer, stopIdleTimer }
 })

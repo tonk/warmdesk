@@ -33,6 +33,8 @@ type User struct {
 	SettingsUpdatedAt  *time.Time `json:"settings_updated_at"`
 	IsActive           bool       `gorm:"default:true" json:"is_active"`
 	EmailNotifications bool       `gorm:"default:true" json:"email_notifications"`
+	TOTPSecret         string     `gorm:"size:64" json:"-"`
+	TOTPEnabled        bool       `gorm:"default:false" json:"totp_enabled"`
 
 	// Computed — not stored in DB
 	GravatarURL    string `gorm:"-" json:"gravatar_url"`

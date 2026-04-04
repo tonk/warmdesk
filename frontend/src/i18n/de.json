@@ -202,7 +202,8 @@
     "company_logo": "Firmenlogo",
     "company_logo_hint": "URL einfügen oder Bilddatei hochladen.",
     "company_logo_upload": "Bild hochladen",
-    "company_logo_preview": "Vorschau"
+    "company_logo_preview": "Vorschau",
+    "reset_mfa": "MFA zurücksetzen"
   },
   "update": {
     "available": "Eine neue Version von WarmDesk ist verfügbar: v{version}.",
@@ -226,6 +227,29 @@
   },
   "presence": {
     "online": "online"
+  },
+  "mfa": {
+    "title": "Zwei-Faktor-Authentifizierung",
+    "description": "Schützen Sie Ihr Konto mit einer Authenticator-App (z. B. Google Authenticator, Authy).",
+    "enabled": "MFA ist aktiviert",
+    "disabled": "MFA ist nicht aktiviert",
+    "enable": "MFA einrichten",
+    "disable": "MFA deaktivieren",
+    "setup_instructions": "Scannen Sie diesen QR-Code mit Ihrer Authenticator-App.",
+    "manual_entry": "Oder geben Sie diesen Schlüssel manuell ein:",
+    "verify_code": "Geben Sie den 6-stelligen Code aus Ihrer App zur Bestätigung ein:",
+    "code_placeholder": "Authenticator-Code",
+    "confirm_enable": "Aktivieren",
+    "disable_instructions": "Geben Sie Ihr Passwort ein, um die Zwei-Faktor-Authentifizierung zu deaktivieren.",
+    "confirm_disable": "MFA deaktivieren",
+    "mfa_required_title": "Zwei-Faktor-Authentifizierung",
+    "mfa_required_instructions": "Geben Sie den 6-stelligen Code aus Ihrer Authenticator-App ein.",
+    "invalid_code": "Ungültiger Code. Bitte versuchen Sie es erneut.",
+    "session_expired": "MFA-Sitzung abgelaufen. Bitte melden Sie sich erneut an.",
+    "setup_success": "MFA erfolgreich aktiviert.",
+    "disable_success": "MFA wurde deaktiviert.",
+    "enforce_label": "MFA für alle Benutzer vorschreiben",
+    "enforce_hint": "Wenn aktiviert, werden Benutzer aufgefordert, MFA bei ihrer nächsten Anmeldung einzurichten."
   },
   "settings": {
     "title": "Kontoeinstellungen",

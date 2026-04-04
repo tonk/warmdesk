@@ -31,6 +31,7 @@ const (
 	settingCompanyLogo            = "company_logo"
 	settingDefaultColumns         = "default_columns"
 	settingDefaultLabels          = "default_labels"
+	settingMFARequired            = "mfa_required"
 )
 
 var systemSettingDefaults = map[string]string{
@@ -51,6 +52,7 @@ var systemSettingDefaults = map[string]string{
 	settingCompanyLogo:            "",
 	settingDefaultColumns:         "Backlog",
 	settingDefaultLabels:          "Bug\nFeature\nDesign\nContent",
+	settingMFARequired:            "false",
 }
 
 // InitSystemDefaults seeds the in-memory defaults from the config file so that
@@ -113,6 +115,7 @@ func GetSystemSettings(c *gin.Context) {
 		"session_timeout_minutes":     timeoutMinutes,
 		"company_name":                all[settingCompanyName],
 		"company_logo":                all[settingCompanyLogo],
+		"mfa_required":                all[settingMFARequired] == "true",
 	})
 }
 
@@ -130,6 +133,7 @@ func AdminGetSystemSettings(c *gin.Context) {
 // AdminUpdateSystemSettings updates system settings.
 func AdminUpdateSystemSettings(c *gin.Context) {
 	var req struct {
+		MFARequired            *bool   `json:"mfa_required"`
 		RegistrationEnabled    *bool   `json:"registration_enabled"`
 		DefaultDateTimeFormat  string  `json:"default_date_time_format"`
 		DefaultTimezone        string  `json:"default_timezone"`
@@ -153,6 +157,13 @@ func AdminUpdateSystemSettings(c *gin.Context) {
 		return
 	}
 
+	if req.MFARequired != nil {
+		val := "false"
+		if *req.MFARequired {
+			val = "true"
+		}
+		saveSetting(settingMFARequired, val)
+	}
 	if req.RegistrationEnabled != nil {
 		val := "true"
 		if !*req.RegistrationEnabled {
@@ -253,6 +264,16 @@ func AdminSendTestEmail(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Test email sent to " + req.To})
+}
+
+// IsMFARequired returns true when the admin has enabled system-wide MFA enforcement.
+func IsMFARequired() bool {
+	return loadAllSettings()[settingMFARequired] == "true"
+}
+
+// GetCompanyName returns the configured company name (used as the TOTP issuer).
+func GetCompanyName() string {
+	return loadAllSettings()[settingCompanyName]
 }
 
 // IsRegistrationEnabled is a helper used by the Register handler.

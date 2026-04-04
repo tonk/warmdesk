@@ -134,6 +134,68 @@
           </form>
         </div>
 
+        <!-- MFA card -->
+        <div class="settings-card">
+          <h2>{{ $t('mfa.title') }}</h2>
+          <p class="form-hint" style="margin-bottom:16px">{{ $t('mfa.description') }}</p>
+
+          <!-- MFA enabled state -->
+          <div v-if="auth.user?.totp_enabled">
+            <div class="mfa-status mfa-status-on">{{ $t('mfa.enabled') }}</div>
+            <form @submit.prevent="disableMFA" style="margin-top:16px">
+              <div class="form-group" style="max-width:320px">
+                <label class="form-label">{{ $t('mfa.disable_instructions') }}</label>
+                <input class="form-input" type="password" v-model="mfaDisablePassword" required :placeholder="$t('auth.password')" autocomplete="current-password" />
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-danger" :disabled="mfaLoading || !mfaDisablePassword">
+                  {{ mfaLoading ? $t('common.loading') : $t('mfa.confirm_disable') }}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- MFA disabled: setup flow -->
+          <div v-else>
+            <div class="mfa-status mfa-status-off">{{ $t('mfa.disabled') }}</div>
+
+            <!-- Step 1: click to begin -->
+            <div v-if="!mfaSetupData" style="margin-top:16px">
+              <button class="btn btn-primary" @click="startMFASetup" :disabled="mfaLoading">
+                {{ mfaLoading ? $t('common.loading') : $t('mfa.enable') }}
+              </button>
+            </div>
+
+            <!-- Step 2: show QR + verify code -->
+            <div v-else style="margin-top:16px">
+              <p class="form-hint" style="margin-bottom:12px">{{ $t('mfa.setup_instructions') }}</p>
+              <canvas ref="qrCanvas" class="mfa-qr"></canvas>
+              <p class="form-hint" style="margin-top:12px">{{ $t('mfa.manual_entry') }}</p>
+              <code class="mfa-secret">{{ mfaSetupData.secret }}</code>
+              <form @submit.prevent="confirmMFAEnable" style="margin-top:20px">
+                <div class="form-group" style="max-width:320px">
+                  <label class="form-label">{{ $t('mfa.verify_code') }}</label>
+                  <input
+                    class="form-input mfa-code-input"
+                    v-model="mfaEnableCode"
+                    inputmode="numeric"
+                    autocomplete="one-time-code"
+                    maxlength="6"
+                    required
+                    placeholder="000000"
+                  />
+                </div>
+                <div class="form-actions" style="gap:8px">
+                  <button type="button" class="btn btn-secondary" @click="mfaSetupData = null; mfaEnableCode = ''">{{ $t('common.cancel') }}</button>
+                  <button type="submit" class="btn btn-primary" :disabled="mfaLoading || mfaEnableCode.length !== 6">
+                    {{ mfaLoading ? $t('common.loading') : $t('mfa.confirm_enable') }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
         <div class="settings-card">
           <h2>{{ $t('apikeys.personal_title') }}</h2>
           <p class="form-hint" style="margin-bottom:16px">{{ $t('apikeys.personal_description') }}</p>
@@ -191,7 +253,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useUIStore } from '@/stores/ui'
 import { useTheme } from '@/composables/useTheme'
@@ -203,6 +266,7 @@ const auth = useAuthStore()
 const ui = useUIStore()
 const { setTheme } = useTheme()
 const { formatDateTime } = useDateFormat()
+const { t: $t } = useI18n()
 
 const form = ref({
   first_name: '',
@@ -238,6 +302,13 @@ const newPersonalKeyName = ref('')
 const generatedPersonalKey = ref('')
 const savingPassword = ref(false)
 const avatarError = ref(false)
+
+// MFA
+const mfaSetupData = ref(null)  // { secret, uri } during setup
+const mfaEnableCode = ref('')
+const mfaDisablePassword = ref('')
+const mfaLoading = ref(false)
+const qrCanvas = ref(null)
 
 onMounted(() => {
   loadPersonalKeys()
@@ -328,6 +399,52 @@ async function savePassword() {
     savingPassword.value = false
   }
 }
+
+async function startMFASetup() {
+  mfaLoading.value = true
+  try {
+    const { data } = await authApi.setupMFA()
+    mfaSetupData.value = data
+    mfaEnableCode.value = ''
+    // Render QR code on next tick when canvas is in DOM
+    await nextTick()
+    const QRCode = (await import('qrcode')).default
+    QRCode.toCanvas(qrCanvas.value, data.uri, { width: 200, margin: 2 })
+  } catch (e) {
+    ui.error(e.response?.data?.error || 'Failed to start MFA setup')
+  } finally {
+    mfaLoading.value = false
+  }
+}
+
+async function confirmMFAEnable() {
+  mfaLoading.value = true
+  try {
+    await authApi.enableMFA(mfaEnableCode.value)
+    mfaSetupData.value = null
+    mfaEnableCode.value = ''
+    await auth.fetchMe()
+    ui.success($t('mfa.setup_success'))
+  } catch (e) {
+    ui.error(e.response?.data?.error || $t('mfa.invalid_code'))
+  } finally {
+    mfaLoading.value = false
+  }
+}
+
+async function disableMFA() {
+  mfaLoading.value = true
+  try {
+    await authApi.disableMFA(mfaDisablePassword.value)
+    mfaDisablePassword.value = ''
+    await auth.fetchMe()
+    ui.success($t('mfa.disable_success'))
+  } catch (e) {
+    ui.error(e.response?.data?.error || 'Failed to disable MFA')
+  } finally {
+    mfaLoading.value = false
+  }
+}
 </script>
 
 <style scoped>
@@ -385,4 +502,17 @@ h1 { font-size: 22px; font-weight: 700; margin-bottom: 24px; }
 }
 .new-key-notice { font-size: 13px; color: var(--color-warning); margin: 0; }
 .new-key-value { font-size: 13px; word-break: break-all; }
+
+.mfa-status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.mfa-status-on { background: color-mix(in srgb, var(--color-success) 15%, transparent); color: var(--color-success); }
+.mfa-status-off { background: color-mix(in srgb, var(--color-text-muted) 15%, transparent); color: var(--color-text-muted); }
+.mfa-qr { display: block; margin-top: 12px; border-radius: var(--radius); border: 1px solid var(--color-border); }
+.mfa-secret { display: block; font-size: 13px; word-break: break-all; margin-top: 6px; letter-spacing: 2px; }
+.mfa-code-input { font-size: 20px; letter-spacing: 6px; text-align: center; font-family: monospace; }
 </style>

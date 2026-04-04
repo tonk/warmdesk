@@ -126,6 +126,26 @@ func AdminUpdateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// AdminDisableUserMFA clears the TOTP secret and disables MFA for a user.
+func AdminDisableUserMFA(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		return
+	}
+	var user models.User
+	if err := database.DB.First(&user, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+	database.DB.Model(&user).Updates(map[string]interface{}{
+		"totp_enabled": false,
+		"totp_secret":  "",
+	})
+	database.DB.First(&user, id)
+	c.JSON(http.StatusOK, user)
+}
+
 func AdminDeleteUser(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
