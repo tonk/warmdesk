@@ -8,9 +8,10 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.26.1)
+## Latest release (v0.26.2)
 
-- **Fixed** — a time entry's picked location now actually persists (weekly grid, calendar modal, and macros), instead of only filling in the distance and forgetting which location it came from.
+- **Fixed** — card titles with Markdown formatting (backticks, bold, etc.) now render correctly instead of showing the raw syntax, on board card tiles and in read-only title views.
+- **Fixed** — ordered/unordered lists in rendered Markdown (card descriptions and comments, call chat, topic posts and replies) now have proper left indentation instead of sitting flush against the edge.
 
 ## Experiment
 

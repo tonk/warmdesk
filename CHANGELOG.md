@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.26.2 — 2026-09-17
+
+### Fixed
+- **Card titles containing Markdown (backticks, bold, etc.) rendered as raw text** on the board's card tiles and in the read-only title view shown to viewer-role users, unlike descriptions and comments which already rendered Markdown correctly. Titles now render the same way.
+- **Ordered and unordered lists in rendered Markdown had no left indent** — list markers sat flush against the edge in card descriptions/comments, call chat messages, and topic posts/replies, since those views were missing the compensating `padding-left` the app's global CSS reset strips from list elements.
+
 ## v0.26.1 — 2026-09-07
 
 ### Fixed
