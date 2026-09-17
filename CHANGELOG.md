@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.27.0 — 2026-09-17
+
+### Added
+- **Customer locations now have a name** — a short label shown in time-tracking *Location* dropdowns (weekly grid, distance popup, macros, and calendar entry modal). Managed from the customer Locations tab; falls back to the address when unset.
+
 ## v0.26.2 — 2026-09-17
 
 ### Fixed

@@ -8,10 +8,9 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.26.2)
+## Latest release (v0.27.0)
 
-- **Fixed** — card titles with Markdown formatting (backticks, bold, etc.) now render correctly instead of showing the raw syntax, on board card tiles and in read-only title views.
-- **Fixed** — ordered/unordered lists in rendered Markdown (card descriptions and comments, call chat, topic posts and replies) now have proper left indentation instead of sitting flush against the edge.
+- **Added** — customer locations can have a name, used as the label in time-tracking Location dropdowns (falls back to address when unset).
 
 ## Experiment
 
@@ -330,7 +329,7 @@ See [INSTALL.md](INSTALL.md) for full instructions including:
 ## Features
 
 - **Customer / Contract / Project hierarchy** — customers are top-level entities; contracts sit under a customer; projects can be linked to a customer and optionally to a contract; manage from the Customers page or from Project Settings; customers (including time-tracking-only ones) can be given a color, used to color-code the time-tracking calendar view
-- **Customer locations** — a customer can have multiple locations, each with a full address (line 1/2, city, postcode, region, country), phone number, contact person (name, email, phone), and a standard travel distance; managed from the customer detail page's Locations tab
+- **Customer locations** — a customer can have multiple locations, each with a name (shown in time-tracking Location dropdowns), a full address (line 1/2, city, postcode, region, country), phone number, contact person (name, email, phone), and a standard travel distance; managed from the customer detail page's Locations tab
 - **Customers sidebar** — starred customers listed in the sidebar with star/unstar toggle; dedicated Customers page (`/customers`) with grid view and full Customer detail page
 - **Sub-cards** — add child cards (one level deep) inside a parent card's detail view; hidden from the board; parent card shows a done/total progress pill; each sub-card has its own card number, assignees, labels, and comments; opening a sub-card shows a ← back link to return to the parent
 - **Kanban boards** — columns, cards, drag-and-drop reorder, labels, priorities, start date, due dates, assignees, watchers, markdown descriptions and comments; configurable card prefix set at creation time (e.g. `PRJ`, `SHOP`, `API`) used in all card references like `PRJ-42`; primary and extra assignee avatars shown on card tiles
