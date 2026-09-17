@@ -136,6 +136,7 @@ const locationOptions = computed(() =>
 )
 
 function formatLocationLabel(loc) {
+  if (loc.name) return loc.name
   const parts = [loc.address_line1, loc.city].filter(Boolean)
   return parts.length ? parts.join(', ') : `#${loc.id}`
 }

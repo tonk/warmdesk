@@ -223,7 +223,7 @@ func GetCustomer(c *gin.Context) {
 	database.DB.Where("customer_id = ?", cust.ID).Order("is_primary desc, id asc").Find(&contacts)
 
 	var locations []models.CustomerLocation
-	database.DB.Where("customer_id = ?", cust.ID).Order("id asc").Find(&locations)
+	database.DB.Where("customer_id = ?", cust.ID).Order("name asc, id asc").Find(&locations)
 
 	c.JSON(http.StatusOK, CustomerDetailResponse{
 		Customer:  custItem,

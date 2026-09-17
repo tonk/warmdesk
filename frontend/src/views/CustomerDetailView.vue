@@ -352,6 +352,7 @@
         <div v-else class="locations-list">
           <div v-for="loc in locations" :key="loc.id" class="location-row">
             <div class="location-info">
+              <span v-if="loc.name" class="location-name">{{ loc.name }}</span>
               <span v-if="formatLocationAddress(loc)" class="location-detail">
                 <span aria-hidden="true">📍</span> {{ formatLocationAddress(loc) }}
               </span>
@@ -368,8 +369,8 @@
               <span v-if="loc.travel_distance != null" class="location-detail">{{ loc.travel_distance }} {{ distanceUnit }}</span>
             </div>
             <div v-if="canManage" class="contact-actions">
-              <button class="btn btn-sm" @click="openEditLocation(loc)" :aria-label="$t('customer.edit_location') + ': ' + (formatLocationAddress(loc) || loc.id)">✎</button>
-              <button class="icon-btn icon-danger" @click="removeLocation(loc)" :aria-label="$t('common.delete') + ' ' + (formatLocationAddress(loc) || loc.id)">✕</button>
+              <button class="btn btn-sm" @click="openEditLocation(loc)" :aria-label="$t('customer.edit_location') + ': ' + (locationLabel(loc))">✎</button>
+              <button class="icon-btn icon-danger" @click="removeLocation(loc)" :aria-label="$t('common.delete') + ' ' + (locationLabel(loc))">✕</button>
             </div>
           </div>
         </div>
@@ -417,6 +418,10 @@
       :title="editingLocation ? $t('customer.edit_location') : $t('customer.add_location')"
       @close="showLocationModal = false"
     >
+      <div class="form-group">
+        <label class="form-label" for="loc-name">{{ $t('customer.location_name') }}</label>
+        <input id="loc-name" class="form-input" type="text" v-model="locationForm.name" />
+      </div>
       <div class="form-group">
         <label class="form-label" for="loc-address1">{{ $t('customer.location_address_line1') }}</label>
         <input id="loc-address1" class="form-input" type="text" v-model="locationForm.address_line1" />
@@ -1534,7 +1539,7 @@ const locations = ref([])
 const showLocationModal = ref(false)
 const editingLocation = ref(null)
 const emptyLocationForm = () => ({
-  address_line1: '', address_line2: '', city: '', postal_code: '', region: '', country: '',
+  name: '', address_line1: '', address_line2: '', city: '', postal_code: '', region: '', country: '',
   phone: '', contact_name: '', contact_email: '', contact_phone: '', travel_distance: null,
 })
 const locationForm = ref(emptyLocationForm())
@@ -1547,6 +1552,10 @@ function formatLocationAddress(loc) {
   return [addressLines, cityLine, loc.region, loc.country].filter(Boolean).join(', ')
 }
 
+function locationLabel(loc) {
+  return loc.name || formatLocationAddress(loc) || String(loc.id)
+}
+
 function openAddLocation() {
   editingLocation.value = null
   locationForm.value = emptyLocationForm()
@@ -1556,6 +1565,7 @@ function openAddLocation() {
 function openEditLocation(loc) {
   editingLocation.value = loc
   locationForm.value = {
+    name: loc.name || '',
     address_line1: loc.address_line1 || '',
     address_line2: loc.address_line2 || '',
     city: loc.city || '',
@@ -2393,6 +2403,7 @@ async function deleteContract(grp) {
 }
 
 .location-info { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; }
+.location-name { font-weight: 600; font-size: 13px; color: var(--color-text); white-space: nowrap; }
 .location-detail { font-size: 12px; color: var(--color-text-muted); white-space: nowrap; }
 
 .form-check-row { display: flex; align-items: center; gap: 8px; }

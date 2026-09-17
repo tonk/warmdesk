@@ -142,6 +142,7 @@
     "add_location": "Adicionar localização",
     "edit_location": "Editar localização",
     "no_locations": "Ainda não há localizações.",
+    "location_name": "Nome da localização",
     "location_address_line1": "Morada linha 1",
     "location_address_line2": "Morada linha 2",
     "location_city": "Cidade",

@@ -142,6 +142,7 @@
     "add_location": "Legg til sted",
     "edit_location": "Rediger sted",
     "no_locations": "Ingen steder ennå.",
+    "location_name": "Stedsnavn",
     "location_address_line1": "Adresselinje 1",
     "location_address_line2": "Adresselinje 2",
     "location_city": "By",

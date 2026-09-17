@@ -24,11 +24,12 @@ func ListLocations(c *gin.Context) {
 		return
 	}
 	var locations []models.CustomerLocation
-	database.DB.Where("customer_id = ?", custID).Order("id asc").Find(&locations)
+	database.DB.Where("customer_id = ?", custID).Order("name asc, id asc").Find(&locations)
 	c.JSON(http.StatusOK, locations)
 }
 
 type locationRequest struct {
+	Name           string   `json:"name"`
 	AddressLine1   string   `json:"address_line1"`
 	AddressLine2   string   `json:"address_line2"`
 	City           string   `json:"city"`
@@ -60,6 +61,7 @@ func CreateLocation(c *gin.Context) {
 	}
 	location := models.CustomerLocation{
 		CustomerID:     uint(custID),
+		Name:           req.Name,
 		AddressLine1:   req.AddressLine1,
 		AddressLine2:   req.AddressLine2,
 		City:           req.City,
@@ -106,6 +108,7 @@ func UpdateLocation(c *gin.Context) {
 		return
 	}
 	database.DB.Model(&location).Updates(map[string]interface{}{
+		"name":            req.Name,
 		"address_line1":   req.AddressLine1,
 		"address_line2":   req.AddressLine2,
 		"city":            req.City,
@@ -118,6 +121,7 @@ func UpdateLocation(c *gin.Context) {
 		"contact_phone":   req.ContactPhone,
 		"travel_distance": req.TravelDistance,
 	})
+	database.DB.First(&location, location.ID)
 	c.JSON(http.StatusOK, location)
 }
 

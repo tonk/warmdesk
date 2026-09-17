@@ -142,6 +142,7 @@
     "add_location": "Lisää sijainti",
     "edit_location": "Muokkaa sijaintia",
     "no_locations": "Ei vielä sijainteja.",
+    "location_name": "Sijainnin nimi",
     "location_address_line1": "Osoiterivi 1",
     "location_address_line2": "Osoiterivi 2",
     "location_city": "Kaupunki",

@@ -2553,6 +2553,7 @@ Pagerduty schedules will be updated to match this by Friday.`,
 		timeSlots    []timeSlotSpec
 	}
 	type locationSpec struct {
+		name           string
 		addressLine1   string
 		addressLine2   string
 		city           string
@@ -2624,6 +2625,7 @@ Pagerduty schedules will be updated to match this by Friday.`,
 			vatNumber:         "GB123456789",
 			locations: []locationSpec{
 				{
+					name:           "HQ London",
 					addressLine1:   "42 Acme Way",
 					city:           "London",
 					postalCode:     "EC2A 4BX",
@@ -2636,6 +2638,7 @@ Pagerduty schedules will be updated to match this by Friday.`,
 					travelDistance: ptr(8.5),
 				},
 				{
+					name:           "Manchester Office",
 					addressLine1:   "15 Deansgate",
 					addressLine2:   "Floor 3",
 					city:           "Manchester",
@@ -2649,6 +2652,7 @@ Pagerduty schedules will be updated to match this by Friday.`,
 					travelDistance: ptr(262.0),
 				},
 				{
+					name:           "Slough Warehouse",
 					addressLine1:   "Unit 4, Southern Gate Way",
 					city:           "Slough",
 					postalCode:     "SL1 4LX",
@@ -2683,6 +2687,7 @@ Pagerduty schedules will be updated to match this by Friday.`,
 			vatNumber:         "IE1234567F",
 			locations: []locationSpec{
 				{
+					name:           "Dublin HQ",
 					addressLine1:   "10 Innovation Drive",
 					city:           "Dublin",
 					postalCode:     "D01 X2X1",
@@ -2695,6 +2700,7 @@ Pagerduty schedules will be updated to match this by Friday.`,
 					travelDistance: ptr(12.0),
 				},
 				{
+					name:           "Cork Data Centre",
 					addressLine1:   "Unit 7, Model Farm Road",
 					city:           "Cork",
 					postalCode:     "T12 EFG3",
@@ -2720,6 +2726,7 @@ Pagerduty schedules will be updated to match this by Friday.`,
 			vatNumber:         "NL987654321B02",
 			locations: []locationSpec{
 				{
+					name:           "Amsterdam HQ",
 					addressLine1:   "Keizersgracht 999",
 					city:           "Amsterdam",
 					postalCode:     "1017 DS",
@@ -2732,6 +2739,7 @@ Pagerduty schedules will be updated to match this by Friday.`,
 					travelDistance: ptr(5.0),
 				},
 				{
+					name:           "Rotterdam Branch",
 					addressLine1:   "Coolsingel 42",
 					city:           "Rotterdam",
 					postalCode:     "3011 AD",
@@ -2767,6 +2775,7 @@ Pagerduty schedules will be updated to match this by Friday.`,
 		for _, locSpec := range cs.locations {
 			must(db.Create(&models.CustomerLocation{
 				CustomerID:     cust.ID,
+				Name:           locSpec.name,
 				AddressLine1:   locSpec.addressLine1,
 				AddressLine2:   locSpec.addressLine2,
 				City:           locSpec.city,

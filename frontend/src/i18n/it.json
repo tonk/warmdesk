@@ -142,6 +142,7 @@
     "add_location": "Aggiungi sede",
     "edit_location": "Modifica sede",
     "no_locations": "Nessuna sede ancora.",
+    "location_name": "Nome della sede",
     "location_address_line1": "Indirizzo riga 1",
     "location_address_line2": "Indirizzo riga 2",
     "location_city": "Città",

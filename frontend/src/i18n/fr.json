@@ -142,6 +142,7 @@
     "add_location": "Ajouter un site",
     "edit_location": "Modifier le site",
     "no_locations": "Aucun site pour le moment.",
+    "location_name": "Nom du site",
     "location_address_line1": "Adresse ligne 1",
     "location_address_line2": "Adresse ligne 2",
     "location_city": "Ville",

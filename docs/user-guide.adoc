@@ -1617,7 +1617,7 @@ Customer-admins and global admins can add, edit, and delete contacts.
 
 ==== Locations
 
-The *Locations* section lists the customer's physical locations — each with a full address (address line 1/2, city, postcode, region, country), phone number, a contact person (name, email, phone), and a standard *travel distance*.
+The *Locations* section lists the customer's physical locations — each with a *name* (shown in time-tracking location dropdowns), a full address (address line 1/2, city, postcode, region, country), phone number, a contact person (name, email, phone), and a standard *travel distance*.
 
 Customer-admins and global admins can add, edit, and delete locations.
 

@@ -142,6 +142,7 @@
     "add_location": "Standort hinzufügen",
     "edit_location": "Standort bearbeiten",
     "no_locations": "Noch keine Standorte.",
+    "location_name": "Standortname",
     "location_address_line1": "Adresszeile 1",
     "location_address_line2": "Adresszeile 2",
     "location_city": "Stadt",

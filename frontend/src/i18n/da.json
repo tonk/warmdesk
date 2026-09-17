@@ -142,6 +142,7 @@
     "add_location": "Tilføj lokation",
     "edit_location": "Rediger lokation",
     "no_locations": "Ingen lokationer endnu.",
+    "location_name": "Lokationsnavn",
     "location_address_line1": "Adresselinje 1",
     "location_address_line2": "Adresselinje 2",
     "location_city": "By",

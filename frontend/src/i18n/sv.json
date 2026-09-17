@@ -142,6 +142,7 @@
     "add_location": "Lägg till plats",
     "edit_location": "Redigera plats",
     "no_locations": "Inga platser än.",
+    "location_name": "Platsnamn",
     "location_address_line1": "Adressrad 1",
     "location_address_line2": "Adressrad 2",
     "location_city": "Ort",

@@ -6,6 +6,7 @@ import "time"
 type CustomerLocation struct {
 	ID             uint      `gorm:"primaryKey" json:"id"`
 	CustomerID     uint      `gorm:"not null;index" json:"customer_id"`
+	Name           string    `gorm:"size:200" json:"name"`
 	AddressLine1   string    `gorm:"size:300" json:"address_line1"`
 	AddressLine2   string    `gorm:"size:300" json:"address_line2"`
 	City           string    `gorm:"size:200" json:"city"`

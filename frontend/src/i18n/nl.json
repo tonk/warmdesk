@@ -142,6 +142,7 @@
     "add_location": "Locatie toevoegen",
     "edit_location": "Locatie bewerken",
     "no_locations": "Nog geen locaties.",
+    "location_name": "Locatienaam",
     "location_address_line1": "Adresregel 1",
     "location_address_line2": "Adresregel 2",
     "location_city": "Plaats",

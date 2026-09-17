@@ -922,6 +922,9 @@ Each customer can have any number of physical locations (*Customers → (click c
 |===
 |Field |Purpose
 
+|*Name*
+|Short label for the location; shown in time-tracking *Location* dropdowns
+
 |*Address line 1 / 2, city, postcode, region, country*
 |Full postal address of the location
 
@@ -1999,7 +2002,7 @@ cd dist
 * Multiple columns per project with realistic cards including checklists, labels, priorities, start dates, due dates, time entries, and card cross-references
 * Threaded topics per project
 * 4 direct message conversations and 1 group chat with realistic history
-* 3 customers (Acme Corporation, Globex Systems, Initech Ltd) with contracts linked to projects, and 2-3 locations each (address, contact person, and travel distance)
+* 3 customers (Acme Corporation, Globex Systems, Initech Ltd) with contracts linked to projects, and 2-3 named locations each (name, address, contact person, and travel distance)
 * 3 groups: Frontend Team, DevOps Team, Acme Stakeholders (with members and project/customer access pre-configured)
 * Favorite projects pre-set for each demo user (e.g. admin has all three; owners have their own project plus one adjacent)
 * Favorite customers pre-set (Acme starred for admin, sarah, marc; Globex for marc, lisa)

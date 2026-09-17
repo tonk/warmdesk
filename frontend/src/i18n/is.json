@@ -142,6 +142,7 @@
     "add_location": "Bæta við staðsetningu",
     "edit_location": "Breyta staðsetningu",
     "no_locations": "Engar staðsetningar ennþá.",
+    "location_name": "Heiti staðsetningar",
     "location_address_line1": "Heimilisfang lína 1",
     "location_address_line2": "Heimilisfang lína 2",
     "location_city": "Borg/Bær",
