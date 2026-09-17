@@ -277,6 +277,13 @@ onUnmounted(() => {
 .cc-body :deep(p + p) {
   margin-top: 4px;
 }
+.cc-body :deep(ul), .cc-body :deep(ol) {
+  margin: 4px 0;
+  padding-left: 1.5em;
+}
+.cc-body :deep(li) {
+  margin: 2px 0;
+}
 
 .call-chat-discard-warn {
   flex-shrink: 0;

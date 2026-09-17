@@ -31,7 +31,8 @@
     <div class="card-priority" v-if="card.priority !== 'none'">
       <span :class="`badge priority-${card.priority}`">{{ $t(`board.priorities.${card.priority}`) }}</span>
     </div>
-    <div class="card-title">{{ card.title }}</div>
+    <!-- nosemgrep: javascript.vue.security.audit.xss.templates.avoid-v-html.avoid-v-html -- renderMarkdown sanitizes with DOMPurify -->
+    <div class="card-title" v-html="renderedTitle"></div>
     <div class="card-labels" v-if="card.labels?.length">
       <span
         v-for="label in card.labels"
@@ -61,6 +62,7 @@
 import { computed } from 'vue'
 import { useDateFormat } from '@/composables/useDateFormat'
 import { avatarUrl } from '@/composables/useAvatar'
+import { renderMarkdown } from '@/composables/useCardRef'
 import { useProjectStore } from '@/stores/project'
 import { useSystemStore } from '@/stores/system'
 
@@ -77,6 +79,8 @@ const allAssignees = computed(() => {
   const extras = (props.card.assignees || []).filter(u => u.id !== props.card.assignee?.id)
   return [...primary, ...extras]
 })
+
+const renderedTitle = computed(() => renderMarkdown(props.card.title))
 
 const cardRef = computed(() => {
   const prefix = projectStore.currentProject?.key_prefix
@@ -193,6 +197,30 @@ const isOverdue = computed(() => {
   margin-bottom: 8px;
   /* leave room for avatars on the right */
   padding-right: 34px;
+}
+.card-title :deep(p),
+.card-title :deep(h1),
+.card-title :deep(h2),
+.card-title :deep(h3),
+.card-title :deep(h4),
+.card-title :deep(h5),
+.card-title :deep(h6),
+.card-title :deep(ul),
+.card-title :deep(ol),
+.card-title :deep(blockquote) {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: none;
+  font-size: inherit;
+  font-weight: inherit;
+}
+.card-title :deep(code) {
+  background: var(--color-border);
+  color: var(--color-text);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 12px;
 }
 
 .card-labels { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }

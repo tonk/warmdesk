@@ -21,7 +21,8 @@
       <div class="form-group">
         <label class="form-label">{{ $t('board.card_title') }}</label>
         <input v-if="!locked" class="form-input" v-model="form.title" aria-label="Card title" spellcheck="true" :lang="auth.user?.locale || 'en'" :autofocus="isNew" />
-        <div v-else class="description-text">{{ form.title }}</div>
+        <!-- nosemgrep: javascript.vue.security.audit.xss.templates.avoid-v-html.avoid-v-html -- renderMarkdown sanitizes with DOMPurify -->
+        <div v-else class="description-text comment-text" v-html="renderMarkdown(form.title)"></div>
       </div>
 
       <div class="form-group">
@@ -1741,6 +1742,8 @@ function renderMarkdown(text) {
 
 .comment-text { font-size: 13px; line-height: 1.5; }
 .comment-text :deep(p) { margin-bottom: 6px; }
+.comment-text :deep(ul), .comment-text :deep(ol) { margin: 0 0 6px; padding-left: 1.5em; }
+.comment-text :deep(li) { margin: 2px 0; }
 .comment-text :deep(code) {
   background: var(--color-border);
   color: var(--color-text);

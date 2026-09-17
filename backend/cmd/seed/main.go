@@ -606,12 +606,12 @@ func main() {
 			subCards: []cardSpec{
 				{title: "Define CSS custom properties for dark palette", assignee: "sarah", priority: "medium"},
 				{title: "Add toggle button to site header", assignee: "sarah", priority: "medium"},
-				{title: "Persist theme choice in localStorage", assignee: "marc", priority: "low"},
+				{title: "Persist theme choice in `localStorage`", assignee: "marc", priority: "low"},
 				{title: "QA dark mode on Safari and Firefox", assignee: "priya", priority: "low"},
 			},
 		},
 		{
-			title: "Fix mobile navigation overflow on small screens", col: "In Progress",
+			title: "Fix mobile navigation overflow: `.nav-container` clips on small screens", col: "In Progress",
 			description: "On viewports narrower than ~390 px the hamburger menu button clips behind the logo, making it unreachable on iPhone SE and older Android devices.\n\n**Steps to reproduce:**\n1. Open the site in Chrome DevTools at a 375 px viewport width\n2. Observe the nav — the ☰ icon overlaps the logo\n\n**Root cause:** `overflow: hidden` is missing on the `.nav-container` element.\n\n**Fix:** Add `overflow: hidden` to `.nav-container` and verify on iPhone SE, iPhone 12 mini, and Pixel 4a viewports before closing.",
 			priority: "high", labels: []string{"Bug"},
 			assignee: "marc", timeMin: 90, startInDays: ptr(0), dueInDays: ptr(2),
@@ -683,7 +683,7 @@ func main() {
 	mobCards := []cardSpec{
 		// Ideas
 		{
-			title: "Offline mode with sync queue", col: "Ideas",
+			title: "**Offline mode** with sync queue", col: "Ideas",
 			description: "Users in low-connectivity areas (trains, rural locations) report data loss when the app loses connection mid-action. Implement a local sync queue that persists operations and replays them automatically when connectivity is restored.\n\n**Proposed scope:**\n- Queue: create, update, and delete operations on tasks and notes\n- Persistence: SQLite via React Native async storage\n- Conflict resolution: last-write-wins with a merge prompt for conflicting edits\n- UI: subtle offline banner; sync progress indicator on reconnect\n\n**Out of scope for v1:** Real-time collaboration conflict resolution.",
 			priority: "high", labels: []string{"Enhancement"},
 			tags: []string{"offline", "ux"},
@@ -831,7 +831,7 @@ func main() {
 		},
 		// In Progress
 		{
-			title: "Migrate primary database to PostgreSQL", col: "In Progress",
+			title: "Migrate primary database from `SQLite` to `PostgreSQL`", col: "In Progress",
 			description: "Our production database is SQLite, causing write-contention issues under load. This card tracks the migration to PostgreSQL 16 on RDS.\n\n**Migration plan:**\n1. Provision RDS PostgreSQL 16 instance (Multi-AZ for prod)\n2. Run `pgloader` to migrate existing data\n3. Shadow-write period: 1 week writing to both, reading from Postgres\n4. Verify row counts and checksums across both databases\n5. Promote Postgres as primary; demote SQLite to read-only standby\n6. Remove SQLite dependency after 2 weeks of stable operation\n\n**Rollback:** SQLite remains available as a read-only fallback throughout the cutover window.",
 			priority: "high", labels: []string{"Enhancement"},
 			assignee: "marc", timeMin: 480, startInDays: ptr(-10), dueInDays: ptr(4),
@@ -926,7 +926,7 @@ func main() {
 			storyPoints: 5, sprintName: "Sprint 2 — Auth & Security",
 			startInDays: ptr(-55), dueInDays: ptr(-48),
 			closed: true, closedAtDays: ptr(-44), createdAtDays: ptr(-55)},
-		{title: "Bcrypt password hashing", col: "Done", priority: "high",
+		{title: "`bcrypt` password hashing", col: "Done", priority: "high",
 			description: "Ensure all passwords are stored as bcrypt hashes with a cost factor tuned to our server hardware.\n\n**Implementation:**\n- Cost factor: 12 (≈ 250 ms per hash on the CI server — acceptable for login latency)\n- `bcrypt.GenerateFromPassword` called at registration and on every password change\n- `bcrypt.CompareHashAndPassword` used at login (constant-time comparison built in)\n\n**Migration:** Any plain-text passwords in the dev database are transparently upgraded on the user's next login.\n\n**Tests:** Verify a cost-12 hash is accepted; verify that hashes from other cost factors are also accepted (bcrypt embeds the cost in the hash string).",
 			labels: []string{"Feature"}, assignee: "james", timeMin: 120,
 			storyPoints: 3, sprintName: "Sprint 2 — Auth & Security",
@@ -1051,7 +1051,7 @@ func main() {
 		{title: "Mobile app wrapper (Capacitor)", col: "To Do", priority: "low",
 			description: "Wrap the Vue frontend in a Capacitor shell to produce iOS and Android apps from the same codebase, enabling native device features.\n\n**Scope:**\n- Basic Capacitor project setup with `@capacitor/ios` and `@capacitor/android`\n- Push notifications via `@capacitor/push-notifications`\n- Deep link handling (`warmdesk://` URL scheme)\n- App icon and splash screen assets configured for both platforms\n\n**Out of scope:** Offline mode (separate card), biometric auth (separate card), App Store submission process.",
 			labels: []string{"Feature"}, tags: []string{"mobile"}},
-		{title: "Fix sorting bug on dashboard table", col: "To Do", priority: "high",
+		{title: "Fix sorting bug in `sortByDate()` on dashboard table", col: "To Do", priority: "high",
 			description: "The \"My Cards\" table sorts by due date incorrectly — cards without a due date appear at the top when sorting ascending, but should always appear at the bottom.\n\n**Steps to reproduce:**\n1. Create three cards: one with no due date, one due tomorrow, one due next week\n2. Sort the table by \"Due date\" ascending\n3. **Expected:** tomorrow → next week → (no due date)\n4. **Actual:** (no due date) → tomorrow → next week\n\n**Fix:** Update the sort comparator to push `null` due dates to the end regardless of sort direction:\n```js\nif (!a.due_date) return 1\nif (!b.due_date) return -1\n```",
 			labels: []string{"Bug"}},
 	}
@@ -1146,7 +1146,7 @@ func main() {
 			storyPoints: 5, sprintName: "Sprint 1 — Bootstrap",
 			startInDays: ptr(-81), dueInDays: ptr(-74),
 			closed: true, closedAtDays: ptr(-72), createdAtDays: ptr(-81)},
-		{title: "Error response standardisation (RFC 7807)", col: "Done", priority: "medium",
+		{title: "Error response standardisation (`RFC 7807`)", col: "Done", priority: "medium",
 			description: "Standardise all API error responses to follow RFC 7807 (Problem Details for HTTP APIs) so clients receive consistent, machine-readable errors.\n\n**Standard error format:**\n```json\n{\n  \"type\": \"https://api.example.com/errors/validation-error\",\n  \"title\": \"Validation Error\",\n  \"status\": 422,\n  \"detail\": \"The 'email' field must be a valid email address.\",\n  \"instance\": \"/api/v1/users\"\n}\n```\n\n**Error types defined:** `validation-error`, `not-found`, `forbidden`, `rate-limited`, `internal-error`.\n\n**Note:** This is a breaking change for any existing error consumers — coordinate rollout accordingly.",
 			labels: []string{"Enhancement"}, assignee: "elena", timeMin: 120,
 			storyPoints: 2, sprintName: "Sprint 1 — Bootstrap",
@@ -1636,7 +1636,7 @@ func main() {
 				cardTitles: []string{
 					"OAuth 2.0 provider integration",
 					"JWT token management and refresh",
-					"Bcrypt password hashing",
+					"`bcrypt` password hashing",
 					"User registration and login flow",
 					"Role-based access control (RBAC)",
 				},
@@ -1664,7 +1664,7 @@ func main() {
 					"Full-text search endpoint",
 					"API rate limiting middleware",
 					"Multi-language support (i18n)",
-					"Fix sorting bug on dashboard table",
+					"Fix sorting bug in `sortByDate()` on dashboard table",
 				},
 			},
 			{
@@ -1690,7 +1690,7 @@ func main() {
 					"Set up Go project structure with CI/CD",
 					"Implement health-check and metrics endpoints",
 					"Docker containerisation and registry setup",
-					"Error response standardisation (RFC 7807)",
+					"Error response standardisation (`RFC 7807`)",
 				},
 			},
 			{
@@ -1817,9 +1817,9 @@ func main() {
 		{"product-platform", "JWT token management and refresh", "To Do", "In Progress", 52},
 		{"product-platform", "JWT token management and refresh", "In Progress", "In Review", 47},
 		{"product-platform", "JWT token management and refresh", "In Review", "Done", 44},
-		{"product-platform", "Bcrypt password hashing", "To Do", "In Progress", 51},
-		{"product-platform", "Bcrypt password hashing", "In Progress", "In Review", 46},
-		{"product-platform", "Bcrypt password hashing", "In Review", "Done", 44},
+		{"product-platform", "`bcrypt` password hashing", "To Do", "In Progress", 51},
+		{"product-platform", "`bcrypt` password hashing", "In Progress", "In Review", 46},
+		{"product-platform", "`bcrypt` password hashing", "In Review", "Done", 44},
 		{"product-platform", "Admin dashboard scaffolding", "To Do", "In Progress", 50},
 		{"product-platform", "Admin dashboard scaffolding", "In Progress", "In Review", 45},
 		{"product-platform", "Admin dashboard scaffolding", "In Review", "Done", 43},
@@ -1868,9 +1868,9 @@ func main() {
 		{"api-platform", "Docker containerisation and registry setup", "To Do", "In Progress", 78},
 		{"api-platform", "Docker containerisation and registry setup", "In Progress", "In Review", 73},
 		{"api-platform", "Docker containerisation and registry setup", "In Review", "Done", 72},
-		{"api-platform", "Error response standardisation (RFC 7807)", "To Do", "In Progress", 77},
-		{"api-platform", "Error response standardisation (RFC 7807)", "In Progress", "In Review", 72},
-		{"api-platform", "Error response standardisation (RFC 7807)", "In Review", "Done", 71},
+		{"api-platform", "Error response standardisation (`RFC 7807`)", "To Do", "In Progress", 77},
+		{"api-platform", "Error response standardisation (`RFC 7807`)", "In Progress", "In Review", 72},
+		{"api-platform", "Error response standardisation (`RFC 7807`)", "In Review", "Done", 71},
 
 		// ── API Platform — Sprint 2 Core API (created -70 to -66, closed -59 to -57) ──
 		{"api-platform", "Implement resource CRUD endpoints", "To Do", "In Progress", 67},
@@ -2043,11 +2043,11 @@ func main() {
 		// Auth tests cover the profile screen flow
 		{"mobile-app-v2/User profile screen", "mobile-app-v2/Integration tests for authentication flow"},
 		// K8s cluster is a prerequisite for the DB migration
-		{"devops-infra/Set up Kubernetes cluster on cloud provider", "devops-infra/Migrate primary database to PostgreSQL"},
+		{"devops-infra/Set up Kubernetes cluster on cloud provider", "devops-infra/Migrate primary database from `SQLite` to `PostgreSQL`"},
 		// Monitoring stack runs on the new K8s cluster
 		{"devops-infra/Add Prometheus + Grafana monitoring stack", "devops-infra/Set up Kubernetes cluster on cloud provider"},
 		// Backups depend on the completed DB migration
-		{"devops-infra/Automate database backups with off-site retention", "devops-infra/Migrate primary database to PostgreSQL"},
+		{"devops-infra/Automate database backups with off-site retention", "devops-infra/Migrate primary database from `SQLite` to `PostgreSQL`"},
 	}
 
 	totalRefs := 0

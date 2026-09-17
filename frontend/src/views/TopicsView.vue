@@ -1041,6 +1041,8 @@ function renderMarkdown(text) {
 }
 .topic-body-text :deep(p) { margin-bottom: 8px; }
 .topic-body-text :deep(code) { background: #f1f5f9; padding: 1px 4px; border-radius: 3px; font-size: 13px; }
+.topic-body-text :deep(ul), .topic-body-text :deep(ol) { margin: 0 0 8px; padding-left: 1.5em; }
+.topic-body-text :deep(li) { margin: 2px 0; }
 
 .compose-outer { position: relative; }
 .topic-editor-wrap {
@@ -1093,6 +1095,8 @@ function renderMarkdown(text) {
 .reply-body { font-size: 13px; line-height: 1.5; }
 .reply-body :deep(p) { margin-bottom: 6px; }
 .reply-body :deep(code) { background: #f1f5f9; padding: 1px 4px; border-radius: 3px; font-size: 12px; }
+.reply-body :deep(ul), .reply-body :deep(ol) { margin: 0 0 6px; padding-left: 1.5em; }
+.reply-body :deep(li) { margin: 2px 0; }
 
 .add-reply { display: flex; flex-direction: column; gap: 8px; }
 .add-reply .btn { align-self: flex-end; }
