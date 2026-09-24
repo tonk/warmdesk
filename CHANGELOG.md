@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.29.0 — 2026-09-24
+
+### Added
+- **Read-only Ticket API endpoints** — API keys (including project-scoped ones) can now read a board without changing anything: `GET /api/v1/ticket/{slug}/columns` lists the lanes, `GET /api/v1/ticket/{slug}/cards` lists cards (filter by lane with `?column=Backlog` or `?column_id=`, open cards only unless `?include_closed=true`), and `GET /api/v1/ticket/{slug}/cards/{id}` returns a single card with its comments. Each card includes its lane name and key (e.g. `ANSI-12`). Requires only viewer access; listed in **Project Settings → API Keys**.
+
+### Fixed
+- **Swagger/OpenAPI spec was out of date** — it was missing the project API-key, search-and-replace, and version endpoints, and the card comment list/create endpoints had dropped out of it entirely. The spec is regenerated and complete again.
+
 ## v0.28.0 — 2026-09-24
 
 ### Added

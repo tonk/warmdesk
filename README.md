@@ -8,9 +8,9 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.28.0)
+## Latest release (v0.29.0)
 
-- **Added** — Copy/Paste for time-tracking calendar entries: copy a block via right-click, then paste it into any empty slot to create a new entry with the same customer, project, activity, distance, and location.
+- **Added** — Read-only Ticket API endpoints: list a project's columns and cards (filterable by lane, e.g. `?column=Backlog`) or fetch a single card with its comments, using the same `X-API-Key` as the write endpoints.
 
 ## Experiment
 
@@ -381,7 +381,7 @@ See [INSTALL.md](INSTALL.md) for full instructions including:
 - **Time tracking PDF options** — the weekly timesheet export and the time-tracking report tab both offer the same PDF Font and PDF Language selects as the main report view; selections are persisted in localStorage; when the report is grouped by Customer a *New page per customer* checkbox appears — each customer is exported to its own page with the full document header repeated and no cross-customer grand total; optional per-row distance and undeclarable-time columns show billable vs. unbillable time and mileage on every entry, not just totals, and the undeclarable/billable breakdown is available for every grouping
 - **Company branding** — set a company name and separate light/dark logos (JPG, PNG, GIF, WebP, or SVG); light logo shown on the login screen's light theme, dark logo on dark theme; logos also appear on reports
 - **Configurable initial columns** — admin can define which columns are created when a new project is made (defaults to "Backlog")
-- **Ticket API** — create cards, add comments, and move cards via API key (for CI/CD pipelines and external integrations); API keys also work on all other authenticated endpoints
+- **Ticket API** — list columns and cards (filterable by lane) or fetch a card with comments, create cards, add comments, and move cards via API key (for CI/CD pipelines and external integrations); API keys also work on all other authenticated endpoints
 - **Project-scoped API keys** — keys created in Project Settings are locked to that project; personal API keys in User Settings give full access across all projects
 - **Typing indicator** — animated indicator in project chat shows who is currently typing
 - **@mention autocomplete** — `@username` dropdown in project chat, card descriptions, and card comments
