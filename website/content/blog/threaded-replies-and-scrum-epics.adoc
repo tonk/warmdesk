@@ -93,4 +93,4 @@ Both features are part of WarmDesk v0.10.37.
 Database columns for epics are added automatically on first boot via GORM AutoMigrate — no manual migration required.
 Existing tickets and Scrum projects are unaffected: threaded replies are opt-in per message, and cards are not assigned to any epic until you do so explicitly.
 
-Download from the link:../download[download page] or pull the latest release tag.
+Download from the link:../../download[download page] or pull the latest release tag.

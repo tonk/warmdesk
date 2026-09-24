@@ -23,5 +23,5 @@ The `●` unread notification prefix still works correctly when combined with th
 
 == Upgrade
 
-Download `v0.12.9` from the link:../download[download page] or pull the latest release tag.
+Download `v0.12.9` from the link:../../download[download page] or pull the latest release tag.
 No database or configuration changes are required.

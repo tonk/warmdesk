@@ -89,17 +89,17 @@ Only contracts that have at least one time slot are included.
 
 == Documentation corrections
 
-The link:../database-schema[database schema reference] had several stale entries that have now been corrected:
+The link:../../docs/database-schema[database schema reference] had several stale entries that have now been corrected:
 
 * `contracts` — removed non-existent `budget_hours`, `status`, and `deleted_at` columns; added `price_per_hour` and `currency`
 * `customers` — added `logo_url`, `position`, `time_tracking_only`, and `created_by_id`; removed `slug`, `website`, `color`, and `deleted_at` (never in the model)
 * `contract_time_slots` — new table entry documenting all 8 columns
 * `customer_favorites` and `customer_access` — corrected to composite primary keys (no surrogate `id`); `customer_access` role values fixed to `member` / `admin`
 
-The link:../api[REST API reference] gained a *Customers and contracts* section listing all 10 endpoints.
+The link:../../docs/api[REST API reference] gained a *Customers and contracts* section listing all 10 endpoints.
 
 == Upgrade
 
-Download `v0.12.5` from the link:../download[download page] or pull the latest release tag.
+Download `v0.12.5` from the link:../../download[download page] or pull the latest release tag.
 
 No database changes are required — the new endpoint reads existing data.

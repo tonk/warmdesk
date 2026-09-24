@@ -47,4 +47,4 @@ Chasing down how entries should keep their distance surfaced a real bug: editing
 
 All of this is part of `v0.19.0`. No database migration is required — as with every WarmDesk release, this is a purely additive change to existing functionality.
 
-Download from the link:../download[download page] or pull the latest release tag.
+Download from the link:../../download[download page] or pull the latest release tag.

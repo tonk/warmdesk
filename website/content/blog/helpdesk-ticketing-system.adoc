@@ -138,4 +138,4 @@ Example — open a ticket when a deployment fails:
 The helpdesk module is part of WarmDesk v0.10.17.
 Database columns are added automatically on first boot via GORM AutoMigrate — no manual migration required.
 
-Download from the link:../download[download page] or pull the latest release tag.
+Download from the link:../../download[download page] or pull the latest release tag.

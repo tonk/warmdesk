@@ -277,6 +277,6 @@ No external services required out of the box, no per-seat pricing, no vendor loc
 == Links
 
 * link:https://github.com/tonk/warmdesk[Repository on GitHub]
-* link:/docs/install/[Installation Guide]
-* link:/docs/admin-guide/[Administrator Guide]
-* link:/docs/api/[API Reference]
+* link:../../docs/install/[Installation Guide]
+* link:../../docs/admin-guide/[Administrator Guide]
+* link:../../docs/api/[API Reference]

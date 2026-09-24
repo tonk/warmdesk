@@ -81,6 +81,6 @@ The helpdesk ticket list page shows the same tab bar so navigation between secti
 
 == Upgrade
 
-Download `v0.12.22` from the link:../download[download page] or pull the latest release tag.
+Download `v0.12.22` from the link:../../download[download page] or pull the latest release tag.
 Run the new version in-place — no manual database migration is required.
 AutoMigrate adds the new `customer_contacts` table and the new columns on `invoices` and `invoice_line_items` on first boot.

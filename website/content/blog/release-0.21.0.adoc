@@ -1,0 +1,49 @@
+---
+title: "v0.21.0: A sidebar you can trim down"
+date: "2026-08-05"
+author: "Ton Kersten"
+description: "Hide the sidebar sections you never use with a new ⋮ menu. v0.21.1 adds TURN server support for 1:1 calls that connect but show a black screen, makes the browser tab blink on new messages, and fixes a double-click race when accepting a call."
+draft: false
+---
+:doctype: article
+:icons!:
+
+The WarmDesk sidebar has grown one section at a time: favourite projects, all projects, customers, tickets, people, chats. Most people only need some of them. `v0.21.0` lets you hide the rest.
+
+== Show and hide sidebar sections
+
+A new *⋮* menu at the top of the main sidebar lists every section, and you can switch each one on or off. This is on top of the existing collapse/expand per section: a collapsed section still takes up a row, while a hidden one is gone completely.
+
+The menu only lists sections that are actually enabled for your account and instance. If helpdesk is off for you, the Tickets section won't appear there either. The Topics page sidebar has the same kind of menu for its *Project Chat* entry. Your choices are saved per browser.
+
+== TURN servers for 1:1 calls (v0.21.1)
+
+1:1 calls used to rely only on two public Google STUN servers. STUN is fine on simple networks, but it can't relay media across symmetric NATs, CGNAT or strict firewalls. That's a common reason for calls that connect but show a black screen with no sound, especially over VPNs and on some home and office networks.
+
+Admins can now set up a TURN server with three new config keys:
+
+[source,yaml]
+----
+turn_urls: "turn:turn.example.com:3478"
+turn_username: "warmdesk"
+turn_credential: "your-secret"
+----
+
+The app gets its ICE servers from a new `GET /api/v1/ice-servers` endpoint. If no TURN server is configured, it falls back to STUN-only, exactly as before. Any standard TURN server works, for example coturn. See the link:../../docs/admin-guide/[Admin Guide] for details.
+
+== A tab that tells you something's waiting (v0.21.1)
+
+When a DM or project chat message is unread and the WarmDesk tab isn't visible or focused, the tab title now switches back and forth with "New message!" every second. Before, it only showed a static "●" prefix. The blinking stops as soon as you return to the tab.
+
+== Also fixed
+
+* *Accepting a call could fail if you clicked Accept more than once.* Getting camera and microphone access can take a few seconds with no feedback, and a second click during that time started a second negotiation that broke the first. The Accept button now disables itself and shows a spinner while connecting. If negotiation fails, you get a real error message and the call resets cleanly instead of hanging.
+* *Admins could only set another user's language to English or Dutch.* The admin endpoint now accepts all 12 languages, the same list users can choose from themselves.
+* *The Linux AppImage couldn't find any cameras or microphones.* The build now bundles the GStreamer capture plugins directly and warns at build time if the `webrtcbin` plugin is missing. 1:1 calls in the Linux desktop app are still not working, though: `RTCPeerConnection` is undefined in that WebView, and that's still being investigated.
+* *The dark-background company logo preview* in *Admin → Settings* was invisible in light mode. The preview's background changed with the theme, so a white logo sat on a light swatch.
+* *Ryver chat-only imports* failed with "$skip not supported". Chat history now pages with an id-based cursor.
+* *Re-importing only chat into an existing Ryver project* failed because the card prefix was already taken. The importer now reuses the existing project by slug instead of always creating a new one.
+
+== Upgrade
+
+Download `v0.21.1` from the link:../../download/[download page] or pull the latest release tag. The TURN settings are optional, so existing configs keep working unchanged.

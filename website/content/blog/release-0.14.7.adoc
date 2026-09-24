@@ -27,6 +27,6 @@ The row-order tracking state is now reset the instant you switch weeks, in the s
 
 == Upgrade
 
-Download `v0.14.7` from the link:../download[download page] or pull the latest release tag.
+Download `v0.14.7` from the link:../../download[download page] or pull the latest release tag.
 
 No database migration is required for this release.

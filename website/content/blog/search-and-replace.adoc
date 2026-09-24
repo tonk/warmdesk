@@ -54,4 +54,4 @@ Project chat messages are search-only for now: there's currently no capability t
 
 Search & Replace and the wider search coverage are part of `v0.18.0`. No database migration is required — as with every WarmDesk release, this is a purely additive change to existing functionality.
 
-Download from the link:../download[download page] or pull the latest release tag.
+Download from the link:../../download[download page] or pull the latest release tag.

@@ -1,0 +1,32 @@
+---
+title: "v0.26.0: Locations in time-tracking macros"
+date: "2026-09-07"
+author: "Ton Kersten"
+description: "Time-tracking macro rows get the same Location picker as the weekly grid, so a macro can fill in travel distance for you. v0.26.1 makes the picked location actually stick to an entry, and v0.26.2 renders Markdown in card titles."
+draft: false
+---
+:doctype: article
+:icons!:
+
+Customer locations, added in `v0.19.0`, let you pick a site and have its standard travel distance filled in automatically. That worked in the weekly grid and the calendar, but not in time macros, which are where recurring trips usually live. `v0.26.0` adds it there.
+
+== A Location picker for macro rows
+
+Every distance field in the macro editor now has a *Location* dropdown next to it. That includes both single-day rows and the alternating A/B pattern, where each of the two days gets its own picker. Pick a customer location and its travel distance fills the field, just like the weekly grid's add-row and edit-row forms and the calendar entry modal.
+
+The location is saved with the macro, so it's still there the next time you open the editor. When you apply the macro, each entry it creates gets both the distance and the location, and you can edit each one afterwards like any other entry.
+
+== v0.26.1: the location now sticks
+
+Right after `v0.26.0`, a long-standing gap came to light. Picking a location only ever copied its distance into the entry, and the location itself was never saved. This affected the weekly grid's per-cell distance popup, the calendar entry modal, and macro-applied entries. The distance was saved correctly, but reopening the popup always showed "Choose location" again.
+
+Time entries now store the location they were given. It's pre-selected when you reopen the popup or modal, and you can still change the location and the distance independently.
+
+== v0.26.2: Markdown in card titles, and list indents
+
+* *Card titles with Markdown* (backticks, bold, and so on) were shown as raw text on board card tiles and in the read-only title that viewer-role users see. Descriptions and comments already rendered correctly. Titles now render the same way.
+* *Lists had no left indent* in rendered Markdown, so bullets and numbers sat flush against the edge in card descriptions and comments, call chat messages, and topic posts and replies. Those views were missing the `padding-left` that the app's global CSS reset removes. They have it now.
+
+== Upgrade
+
+Download `v0.26.2` from the link:../../download[download page] or pull the latest release tag. The new location column on time entries is added automatically at startup.

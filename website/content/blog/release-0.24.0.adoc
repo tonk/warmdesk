@@ -1,0 +1,57 @@
+---
+title: "v0.24.0: Partial updates that stay partial, and a fuller Ansible collection"
+date: "2026-08-07"
+author: "Ton Kersten"
+description: "v0.24.0 fixes a family of bugs where saving one field of a customer, invoice, or ticket silently wiped others, lets the admin API set and clear user avatars, and fills in missing fields in the Ansible collection. v0.24.1 fixes a documentation typo that broke ansible-doc for the whole collection."
+draft: false
+---
+:doctype: article
+:icons!:
+
+Most of `v0.24.0` is about one kind of bug: you change one thing, and something you never touched quietly disappears. Tracking it down turned up the same pattern in several places, in the API and in the Ansible collection, so this release fixes all of them together.
+
+== Saving one field no longer wipes the others
+
+Several update endpoints applied _every_ field in the request unconditionally, including fields the request never mentioned. Those fields simply ended up empty. In practice:
+
+* *Renaming a customer*, or toggling its hidden status in *Admin → Customers*, wiped its color, billing address, VAT number, and PO reference.
+* *Marking an invoice as sent*, editing its line items, or recording a payment could wipe its notes and due date.
+
+Both endpoints now only touch the fields that are actually sent.
+
+The opposite problem showed up on tickets: clicking *clear* on a ticket's reminder or close date showed a success message but didn't clear anything, because the server couldn't tell an explicit clear from a field that was just left out. It can now.
+
+== User avatars through the admin API
+
+Creating a user through the admin API ignored `avatar_url`, and an avatar couldn't be cleared on update. Project avatars already supported both; user avatars now do too.
+
+== A fuller Ansible collection
+
+The `ansilabnl.warmdesk` collection gained a number of fields that the API already supported but the modules didn't expose:
+
+* `customer`: `avatar`, `color`, and the billing address fields
+* `group`: `avatar`
+* `news`: `sidebar_color`
+* `user_access`: `can_create_projects`
+* `ticket`: `is_spam`
+* `contract`: hourly and per-km pricing, and time slots
+* `card`: story points, external issue link, and epic
+
+The collection had its own version of the field-wipe bug: several modules blanked fields they weren't managing whenever they wrote anything else. That affected contract pricing and time slots, sprint dates, invoice-template line items, and group descriptions, and it's fixed. Fields that the API can't accept when a card or checklist item is created are now applied automatically with a follow-up update, and clearing a column's WIP limit no longer fails.
+
+See link:../../docs/admin-guide/#_ansible_deployment[Ansible deployment] in the Admin Guide for installing the collection.
+
+== Also fixed
+
+* Promoting a project member's role through the API could return an incomplete user object.
+* The "black" theme couldn't be set for other users through the admin API.
+* A newly created webhook's API response was missing its project ID.
+* A few stale return-value descriptions in the Ansible collection were corrected.
+
+== v0.24.1
+
+`v0.24.1` came out the same day. A documentation note on the `column` module contained an unquoted `wip_limit: 0`, a colon followed by a space in plain prose, which YAML reads as a mapping key. Because `ansible-doc` and `ansible-lint` usually load every module's documentation in one go, that single line broke both tools for the whole collection. It's escaped now.
+
+== Upgrade
+
+Download `v0.24.1` from the link:../../download[download page] or pull the latest release tag. No database migration is needed.

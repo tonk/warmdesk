@@ -91,6 +91,7 @@ WEB_DIR=./web JWT_SECRET=your-secret ./warmdesk
 
 Requires Go 1.21+ and Node.js 20+.
 
+[[configuration-reference]]
 == Configuration reference
 
 Configuration is loaded in priority order:
@@ -253,6 +254,7 @@ sudo systemctl reload apache2
 Vhost-level `ProxyPass /api/v1/ws ws://…` (before the catch-all `ProxyPass /`) with `ProxyTimeout 86400` handles WebSocket connections.
 The template forwards `X-Forwarded-For`, `X-Real-IP`, and `X-Forwarded-Proto`; set `trusted_proxies: "127.0.0.1"` in `warmdesk.yaml` when Apache runs on the same host as WarmDesk.
 
+[[desktop-apps]]
 == Desktop apps
 
 Pre-built Tauri 2 desktop apps are attached to the

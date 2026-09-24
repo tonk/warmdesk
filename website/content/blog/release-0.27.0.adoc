@@ -1,0 +1,28 @@
+---
+title: "v0.27.0: Customer locations get a name"
+date: "2026-09-17"
+author: "Ton Kersten"
+description: "Customer locations can now have a short name, which is what time-tracking Location dropdowns show instead of a full address."
+draft: false
+---
+:doctype: article
+:icons!:
+
+Since `v0.19.0`, a customer can have several locations, each with its own travel distance. In time tracking you pick one from a *Location* dropdown, and until now that dropdown showed each location's address. That works, but "Head office" or "Data centre Amsterdam" is easier to spot than a street name.
+
+== A name for every location
+
+Locations have a new *Name* field. Set it on the customer's *Locations* tab. It's a short label, and it's what every time-tracking *Location* dropdown now shows:
+
+* the weekly grid's add-row and edit-row forms
+* the per-cell distance popup
+* the macro editor's location pickers
+* the calendar view's entry modal
+
+The name is optional. A location without one still shows its address, as before. Location lists are also sorted by name now, so the dropdowns come out alphabetical.
+
+See the Customers section of the link:../../docs/user-guide/[User Guide] for more on locations.
+
+== Upgrade
+
+Download `v0.27.0` from the link:../../download[download page] or pull the latest release tag. The new column is added automatically at startup.

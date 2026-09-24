@@ -1,0 +1,45 @@
+---
+title: "v0.22.0: Who may create projects, and better calls"
+date: "2026-08-06"
+author: "Ton Kersten"
+description: "Admins now decide who may create projects. Calls show when the other person is muted, screen shares are no longer cropped, and the in-call chat can be resized. v0.22.1 fixes code blocks in DMs and lines up the sidebar menu."
+draft: false
+---
+:doctype: article
+:icons!:
+
+`v0.22.0` gives admins control over project creation, fills a few gaps in 1:1 calls, and fixes a batch of annoying chat problems.
+
+== Restricting who can create projects
+
+Until now, any user who wasn't a viewer could create a project, and on a busy instance that quickly leads to a crowded sidebar full of test boards. Project creation is now a permission of its own: a *Create projects* checkbox in the feature access table under *Admin → Users*.
+
+It is *off by default*. Admins can always create projects. Everyone else needs the permission granted, and users without it no longer see the *+ New Project* button. After upgrading, check this table and turn it on for anyone who should keep creating projects. The link:../../docs/admin-guide/[Admin Guide] has the full feature access table.
+
+== Better 1:1 calls
+
+* *See when the other person is muted.* A muted-microphone icon now shows next to their name in the call bar, for both video and audio-only calls. WebRTC can't tell you this by itself, so WarmDesk now sends a small signal whenever either side toggles mute.
+* *Screen shares show the whole screen.* The remote video was always cropped to fill the window, which is fine for a camera but cuts off parts of a shared screen. The viewer is now told when the incoming stream is a screen share and fits it inside the window instead of cropping it.
+* *Resizable in-call chat.* Drag the left edge of the in-call text chat to make it wider or narrower, just like the main sidebar. The width is remembered per browser.
+
+== Emoji picker fixes
+
+* It no longer pops up on a lone `:`. Colons are common in normal text, so the picker now waits for at least one character after the colon.
+* It no longer swallows what you type. Typing `:something` in a message box used to move focus into the picker's hidden search field. Now your cursor stays in the message box and the picker's results update as you type. Focus only moves into the picker when you open it with the 😊 toolbar button.
+* Searching for `:-)`, `:)` or `<3` now finds the matching emoji, using the same emoticon table the app already had.
+
+== Also fixed
+
+* The browser tab kept blinking "New message!" even after you had read the project chat message. The unread counter was never reset. It now clears when you open the Project Chat panel, or when you return to the window while it's open.
+* Creating a user with only a first and last name set their display name to their user ID. It now uses "First Last" first.
+* Creating a user with a bad email address just said "invalid request". You now get the actual reason, such as "invalid email address" or "username must be at least 3 characters".
+
+== What v0.22.1 fixes
+
+* Code blocks in direct messages were unreadable in dark mode: white text on white. The colour rule for inline code in your own (purple) messages was also being applied to fenced code blocks.
+* Numbers in DM code blocks looked oddly spread out, with `100644` showing as `1 0 0 6 4 4`. The emoji font setting on message bubbles was being applied inside code blocks too. It no longer is.
+* The sidebar's *⋮* section menu didn't line up with the first section's row. The sidebar is now a bit wider by default, and the menu sits on the same row as the section title, to the right of its collapse arrow.
+
+== Upgrade
+
+Download `v0.22.1` from the link:../../download/[download page] or pull the latest release tag. Remember to grant *Create projects* to non-admin users who need it.

@@ -1,0 +1,26 @@
+---
+title: "v0.28.0: Copy and paste in the time-tracking calendar"
+date: "2026-09-24"
+author: "Ton Kersten"
+description: "Right-click a block in the time-tracking calendar to copy it, then right-click an empty slot to paste a new entry with the same customer, project, activity, distance, location, and duration."
+draft: false
+---
+:doctype: article
+:icons!:
+
+The weekly grid has had copy, cut, and paste for a long time. The calendar view didn't, so logging the same kind of entry on another day meant filling in the whole form again. `v0.28.0` adds copy and paste to the calendar's right-click menu.
+
+== Copy a block, paste it anywhere
+
+* *Right-click a block* and choose *Copy*. It sits next to the existing *Edit* and *Delete*.
+* *Right-click an empty slot* and choose *Paste*. It's greyed out until you've copied something.
+
+Pasting creates a new entry that starts at the slot you right-clicked. It gets the same customer, project, activity, distance, and location as the original, and the same duration. The original entry stays as it is.
+
+If the duration would run past midnight, the pasted entry is cut off at the end of that day instead of spilling into the next one.
+
+See the time tracking section of the link:../../docs/user-guide/[User Guide] for more on the calendar view.
+
+== Upgrade
+
+Download `v0.28.0` from the link:../../download[download page] or pull the latest release tag. No database migration is needed.

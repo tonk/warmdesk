@@ -23,8 +23,10 @@ If registration is not available, ask an administrator to create an account for 
 
 === Logging in
 
-Enter your username and password.
+Enter your username and password, or sign in with a registered *passkey*.
 WarmDesk issues a short-lived JWT access token (15 minutes) and a 7-day refresh token that keeps you logged in as long as your browser tab is open.
+
+By default the session expires after 60 minutes of inactivity; your administrator can change or disable this timeout.
 
 === Forgotten password
 
@@ -37,17 +39,30 @@ The link is valid for one hour.
 You can enable TOTP-based MFA from *Settings → Security*.
 Scan the QR code with an authenticator app (Aegis, Authy, Google Authenticator, etc.) and enter the 6-digit code to confirm.
 Once enabled, every login requires the one-time code after the password.
+If your administrator allows it, you can mark a device as trusted to skip MFA on it for 7 or 30 days.
+
+=== Desktop app
+
+WarmDesk is also available as a native desktop app (Linux AppImage, macOS DMG, Windows installer) that asks for your server URL on first run.
+
+* *Profiles* — connect to several WarmDesk servers with fully separate sessions and settings (`warmdesk --create-profile customer-a`, then `warmdesk --profile customer-a`).
+* *System tray* — an optional tray icon shows an unread badge; closing the window can minimise it to the tray.
+When connected to a test server, the tray icon turns orange and gets a "(TEST)" suffix.
 
 == Interface overview
 
-The sidebar on the left contains:
+The collapsible, resizable sidebar (left or right) contains drag-to-reorder sections:
 
-* *Dashboard* — all your starred and recently visited projects
-* *Projects* — full project list with customer filter
-* *Messages* — direct messages and group chats
-* *Reports* — time tracking and reporting
-* *Admin* — admin panel (admin users only)
-* *Settings* — your profile and preferences
+* *Favorite Projects* / *Projects* — your starred projects and all projects you belong to
+* *Favorite Customers* / *All Customers* — customers you have been assigned to
+* *Favorite People* / *People* — online users; click a name to open a direct message
+* *Chats* — your most recent conversations with unread indicators
+* *Tickets* — your helpdesk inbox and per-customer ticket lists (helpdesk users only)
+
+Use the *⋮* menu at the top of the sidebar to show or hide whole sections you never use.
+
+The header holds the global search bar, quick links to *Dashboard*, *News*, *Chats* and *Time Tracking*, the language and theme switchers, a *?* button for contextual help on the current page, and your avatar menu (settings, admin panel, *Keyboard Shortcuts*, guide PDFs under *Downloads*, *About*, *Logout*).
+Press `?` anywhere to see all keyboard shortcuts.
 
 The *notification bell* in the top bar shows unread @mentions and card updates.
 
@@ -55,47 +70,60 @@ The *notification bell* in the top bar shows unread @mentions and card updates.
 
 === Creating a project
 
-Click *New Project* from the dashboard or the projects list.
-Choose a name (the URL slug is derived automatically), a board type (Kanban or Scrum), and optionally assign a customer.
+Click *+ New Project* on the dashboard.
+Choose a name, a *card prefix* (e.g. `PRJ`, used in card numbers and fixed after creation), a colour, and a board type (Kanban or Scrum).
+
+If you don't see the *+ New Project* button, your administrator has not granted you permission to create projects.
 
 === Board types
 
 *Kanban* — columns you define, cards flow freely between columns.
 Suitable for continuous-flow work.
 
-*Scrum* — same column structure but with sprints, a backlog, and story points.
-Adds a sprint panel in the sidebar for planning and tracking.
+*Scrum* — same column structure but with sprints, a backlog, epics, and story points.
+
+=== Members and roles
+
+Open *Project Settings → Members* to invite people as *Viewer* (read-only), *Member* (create and edit cards, comment, chat), *Admin* (also manage columns), or *Owner* (also manage members and webhooks, delete the project).
 
 === Starring and ordering
 
-Star a project with the ⭐ icon to pin it to the top of your dashboard.
-Drag project cards on the dashboard to reorder them.
-Filter by customer using the dropdown at the top.
+Star a project with the ⭐ icon to pin it to *Favorite Projects* in the sidebar.
+Drag favourites to reorder them.
+Filter the dashboard by customer using the dropdown at the top.
+
+=== Closing a project
+
+Owners can close a project from *Project Settings → General → Danger Zone*.
+A closed project is hidden from the sidebar and project list but stays reachable by its URL and can be reopened at any time.
 
 == Kanban board
 
 === Columns
 
 Add columns with *+ Add Column* in the board toolbar (project admins and owners).
-Double-click a column title to rename it; drag the column header to reorder; remove an empty column with the trash icon.
+Click a column title to rename it; drag the column header to reorder; remove an empty column with the trash icon.
 
 Open *Column settings* (⚙) on a column header to change its colour and optional *WIP limit* (maximum cards).
 The header shows count versus limit (for example `3 / 5`); it is emphasized when the column is at or over the limit.
 Leave the limit empty to turn off WIP tracking.
 
-You can also set an optional WIP limit when creating a new column.
-
 === Cards
 
 Click *+ Add card* at the bottom of a column to create a new card.
-Drag cards between columns and within a column to reorder them.
-Click a card title to open the card detail panel.
+Drag cards between columns and within a column to reorder them, or use a column's sort controls (date, assignee, priority).
+Click a card to open the card detail panel.
+
+=== Gantt chart
+
+Click *Gantt* in the board toolbar for a timeline of every card with a start or due date.
+Switch between Day, Week, and Month zoom; click a bar to open the card.
 
 === Scrum extras
 
-In Scrum projects, a *Sprint* panel appears in the left sidebar.
-Create a sprint, drag backlog cards into it, and click *Start Sprint* to begin.
-When a sprint ends, incomplete cards are moved back to the backlog.
+Scrum projects add a *Backlog* view (prioritise cards by dragging, assign them to sprints), an *Epics* view for grouping cards across sprints, and a *Sprint Board* showing only the active sprint.
+Create a sprint, add backlog cards to it, and click *Start* to begin.
+When you complete a sprint, unfinished cards return to the backlog.
 
 image::../../images/screenshots/15-scrum-backlog.png[Scrum backlog, 900]
 
@@ -113,7 +141,7 @@ Kanban projects include four charts:
 A widening band for a column signals growing WIP or a blocked stage.
 
 |*Cycle Time*
-|Distribution of how long each card spent in progress — from the moment it first left the starting column until it was closed.
+|Control chart of how long each card spent open, plotted by close date, with a 7-day rolling average.
 
 |*Lead Time*
 |Distribution of total time from card creation to closure, including any waiting time in the initial column.
@@ -126,20 +154,26 @@ Use the time-range selectors at the top of each chart to adjust the window.
 
 image::../../images/screenshots/14-cumulative.png[Cumulative flow diagram, 900]
 
-Scrum projects add four additional charts:
+Scrum projects add these charts:
 
 [cols="1,3"]
 |===
 |Chart |What it shows
 
 |*Velocity*
-|Story points completed per sprint — helps forecast future sprint capacity.
+|Committed versus completed story points per sprint — helps forecast future sprint capacity.
 
 |*Burndown*
 |Remaining story points versus the ideal burn line; shows whether the sprint is on track.
 
 |*Burnup*
 |Work completed versus total scope — useful for visualising scope creep mid-sprint.
+
+|*Sprint Report*
+|Completed and not-completed cards for a finished sprint, with a completion percentage.
+
+|*Epic Burndown*
+|Remaining cards and points for a single epic over time.
 
 |*Release Burndown*
 |Progress across all sprints in a release; shows remaining scope toward the release goal.
@@ -158,28 +192,32 @@ Open any card to access its full set of fields.
 
 === Basic fields
 
-* *Title* — required, short description of the work
-* *Description* — full Markdown description with live preview
-* *Priority* — none / low / medium / high (colour-coded)
+* *Title* — required, short description of the work (Markdown formatting is rendered)
+* *Description* — Markdown with toolbar, emoji picker, and @mention autocomplete
+* *Priority* — none / low / medium / high / critical (colour-coded)
 * *Due date* / *Start date*
 * *Assignees* — one or more team members; their avatars appear on the board
-* *Labels* — colour-coded tags defined per project (manage in Project Settings)
-* *Story points* — for Scrum velocity tracking
+* *Labels* — colour-coded labels defined per project (manage in Project Settings); *Tags* are free-form hashtags
+* *Story points* — for Scrum velocity tracking (when enabled by the administrator)
+* *Epic* — Scrum projects only
+
+Use the *⋮* menu in the card's top-right corner to show or hide optional sections (attachments, checklist, labels, tags, watchers, sub-cards, linked cards, …); a section with content is always shown.
 
 === Checklist
 
-Add checklist items from the *Checklist* tab.
-Each item has its own checkbox; the card header shows a completion ratio (e.g. `3/5`).
+Add checklist items in the *Checklist* section and drag the ⠿ handle to reorder them.
+Each item has its own checkbox; the card shows a completion ratio (e.g. `3/5`).
 
 === Comments and time logging
 
-Add a comment in the *Comments* tab.
-To log time on the same comment, fill in the *Time spent (minutes)* field.
-Logged time appears in the time report.
+Add a comment at the bottom of the card detail; click *Reply* under a comment to quote it.
+Comments can carry attachments too — paste a screenshot or attach a file directly in the comment box.
+To log time with the comment, fill in the hours and minutes fields.
+Logged time appears in the board time report.
 
 === File attachments
 
-Drag files or click *Attach* to upload.
+Drag files or click the upload zone to attach them.
 Images are displayed inline; other file types appear as download links.
 MIME type is detected server-side; the client-supplied content type is ignored.
 
@@ -189,6 +227,12 @@ MIME type is detected server-side; the client-supplied content type is ignored.
 * *Cross-references* — link any two cards across projects with a _relates-to_ badge
 * *Git links* — commits, pull requests, and issues from GitHub, GitLab, Gitea, or Forgejo (added automatically via webhooks or manually)
 
+=== Copy, transfer, and close
+
+* *Copy Card* duplicates the card in the same column.
+* *Transfer* copies or moves the card to another project or column.
+* *Close Card* marks it done (it stays visible, struck through); *Reopen Card* restores it.
+
 === Watchers
 
 Add yourself or colleagues as watchers to receive notifications when the card is updated.
@@ -196,11 +240,11 @@ Add yourself or colleagues as watchers to receive notifications when the card is
 === Card numbers
 
 Every card gets a sequential number like `PRJ-42`.
-Type this number in any chat message or comment to generate a clickable badge that opens the card.
+Type this number in any chat message or comment to generate a clickable badge that opens the card, or use it in commit messages to link git events to the card.
 
 == Topics (threaded discussions)
 
-Each project has a *Topics* board alongside the Kanban board.
+Each project has a *Topics* page alongside the Kanban board.
 Topics are threaded discussion threads — good for design decisions, meeting notes, and async conversations that don't map to a single card.
 
 * *Pin* a topic to keep it at the top
@@ -211,26 +255,40 @@ Topics are threaded discussion threads — good for design decisions, meeting no
 
 === Project chat
 
-Every project has a persistent *chat* channel accessible from the *Chat* tab in the project.
-All project members can read and post.
+Every project has a persistent chat channel, opened from the *Project Chat* entry in the sidebar of the project's *Topics* page.
+All project members can read and post, including pasted screenshots and file attachments.
+Use the *⋮* menu at the top of the Topics sidebar to hide the entry if you don't use it.
 
 === Direct messages
 
-Click *Messages* in the sidebar to access direct messages and group chats.
+Open *Chats* in the header (or click a name under *People* in the sidebar) to access direct messages and group chats.
 
-Start a 1-on-1 conversation from any user's profile.
-Create a *group chat* by selecting multiple users (or an entire project team).
+Start a 1-on-1 conversation from any user, or click *New Conversation* and create a *group chat* by selecting multiple users.
+The *Teams* tab pre-fills all members of one of your projects in a single click.
 Group chats support a custom avatar and member management (add / remove participants).
+
+Chat messages support:
+
+* *Markdown* formatting, including syntax-highlighted code blocks
+* *File attachments* — images shown inline, other files as links; paste an image from the clipboard to attach it
+* *Emoji reactions* — react to any message; hover to see who reacted
+* *@mentions* — triggers a notification and highlights the name in the recipient's view
+* *Link previews* — Open Graph metadata is fetched server-side
+* *Layout options* — bubble, comfortable, compact, cozy, or grouped (Discord-style)
+* *Desktop notifications* — enabled via the bell icon when your browser prompts; while the tab is in the background its title also blinks with the sender's name
 
 === Voice and video calls
 
 WarmDesk supports two call modes in direct messages:
 
 * *1:1 audio/video* in one-on-one conversations (WebRTC peer-to-peer)
-* *Group video calls* in group conversations with *3 or more members* (LiveKit)
+* *Group calls* in any group conversation (LiveKit)
 
-In eligible group chats, use the video button in the header to join the room.
-If the server has not configured LiveKit yet, the chat shows a clear status banner so users know group video is currently unavailable on that instance.
+Use the camera button in the chat header to start a video call, or the mic button next to it for a voice-only call that never asks for camera access.
+During a call you can share your screen, see when the other party is muted, and use a resizable in-call text chat.
+If the server has not configured LiveKit yet, group chats show a status banner explaining that group calls are unavailable.
+
+Click the pop-out button in the call controls to shrink the call into a small floating window that you can move and resize (also with the keyboard), so you can keep working while on the call; click it again to return to full screen.
 
 ==== Inviting people to an active call
 
@@ -241,14 +299,6 @@ Each selected user receives a real-time popup with a *Join* button.
 If you are in a *1:1 call*, inviting someone upgrades the call automatically to a LiveKit group room — your existing call partner also receives the join popup.
 Users who are offline or decline simply do not appear in the room.
 
-* *Markdown* formatting in messages
-* *File attachments* — images shown inline, other files as links
-* *Emoji reactions* — react to any message; hover to see who reacted
-* *@mentions* — triggers a notification and highlights the name in the recipient's view
-* *Link previews* — Open Graph metadata is fetched server-side
-* *Layout options* — bubble, comfortable, compact, cozy, or grouped (Discord-style)
-* *Desktop notifications* — enabled via the bell icon when your browser prompts
-
 == Notifications and @mentions
 
 The notification bell in the top bar shows unread items.
@@ -256,41 +306,114 @@ Click it to open the notification panel.
 
 You receive a notification when:
 
-* Someone @mentions you in a card comment or chat message
+* Someone @mentions you in a card comment, topic reply, or chat message
 * A card you are watching is updated
 * A card assigned to you is moved or commented on
 
+If you are online, a mention also shows a popup in the corner of the screen; if you are offline, WarmDesk emails you (when SMTP is configured).
+
 == Time tracking
 
-=== Logging time
+Time tracking is an optional module enabled per user.
+The *Time Tracking* page (`/time-tracking`) has these tabs:
 
-Time can be logged in two ways:
+* *Log Time* — the weekly grid or the calendar view
+* *Report* — your personal time report with PDF/XLSX export
+* *Board* — time logged on project cards (for users with report access)
+* *Invoices* — invoices across your customers (when invoicing is available to you)
 
-. *On a card comment* — fill in the *Time spent* field when adding a comment
-. *Time sheet* — go to *Reports → Time Sheet*, select the week, and click a cell to log hours for a project on a given day
+Time-tracking viewers and administrators get an *Employee* dropdown to view another user's sheet or report.
 
-=== Time report
+=== Weekly grid
 
-Go to *Reports* to view a summary of time entries.
-Filter by date range, user, customer, and project.
-Export to *PDF* (browser print) or *XLSX*.
+Each row is a customer + project + activity combination; columns are the days of the week, with today highlighted.
+Click a cell to enter the hours worked that day; row, day, and week totals update automatically.
+
+* Hover a cell for buttons to set a *time range* (⏱), a travel *distance* (⇆), or mark it as a *holiday*.
+* Link a row to a *contract* to show its rate and, if the contract has time slots, fill the week from them.
+* Edit a row's customer, project, contract, location, or activity with ✎ or by double-clicking it.
+* *Copy Previous Week* copies the row layout without hours; *Undo* reverts the last change.
+* Export the week as XLSX or PDF, or a printable *Grid PDF* for a whole week, month, or year.
+
+=== Copy, cut, and paste
+
+Select a cell, then *Shift+click* or *Shift+arrow keys* to extend a rectangular selection.
+`Ctrl+C` / `Ctrl+X` / `Ctrl+V` (`⌘` on macOS) copy, cut, and paste minutes, start/end times, holiday flag, and distance.
+A single copied value fills every selected cell; a copied block pastes as a grid.
+The clipboard survives switching weeks, so you can copy Monday of one week into Monday of another.
+
+=== Calendar view
+
+Click the 📅 button next to *Edit macros* to switch the Log Time tab between the weekly grid and a drag-and-drop calendar (choose which one opens by default in Settings).
+Entries with a start and end time appear as coloured blocks; entries without times are listed in an *Unscheduled* strip.
+Blocks are coloured by customer by default, or by project via the *Calendar block color* setting.
+
+* *Click* an empty slot to create a one-hour entry, or *click and drag* to create one for the exact range.
+* *Drag* a block to move it to another time or day; drag its top or bottom edge to *resize* it.
+* *Right-click* a block to *Edit*, *Copy*, or *Delete* it; right-click an empty slot to create an entry or *Paste* the copied one (same customer, project, activity, distance, and location, and the same duration).
+* Use *−* / *+* in the top-right corner to *zoom*; the zoom level is remembered in your browser.
+* Tab to a block and press `Enter` to edit its date and times with the keyboard.
+
+Macros, *Copy Previous Week*, *Undo*, and the export buttons work in the calendar view too.
+
+[[travel-distance-auto-fill]]
+=== Travel distance auto-fill
+
+If a customer has <<customers,locations>> with a standard travel distance, a *Location* picker appears wherever a distance can be set: the add/edit row forms, the per-cell distance popup, the calendar entry form, and macro rows.
+Picking a location fills in its distance (still editable afterwards) and remembers the chosen location on the entry.
+Re-picking a row's location also updates that week's entries on the row that already have a distance; days left blank stay untouched.
+
+=== Time macros
+
+Store recurring weekly patterns (for example travel out, preparation, teaching, travel home) as *time macros*.
+Open the editor with *⚡* in the top bar to create, duplicate, import, or export macros; each row presets customer, project, activity, hours, optional start/end times, distance, and location — either the same for every day or as an alternating A/B pattern.
+Run a macro from *⚡ Macro* in the bottom bar: pick the macro and the start day, and it fills the current week.
+Macros are stored on the server, so they follow you across devices.
+
+=== Time-tracking-only projects and customers
+
+The ⚙ button on the time-tracking tab bar manages lightweight projects and customers that exist only for time tracking (no board, no CRM entry).
+A project can have *undeclarable minutes* (e.g. travel time) that are subtracted from declarable totals in the sheet, report, and exports.
+Projects and customers created by an administrator are marked *Global (created by admin)* and are visible to everyone.
+
+=== Reports
+
+The *Report* tab shows your own entries for a week, month, year, or custom range, grouped by period, customer, project, or customer + project.
+Switch between a table and a chart (bar, pie, or stacked bar).
+*Export options* control font, PDF language, a page per customer, costs, distances, and undeclarable time before you download a *PDF* or *XLSX*.
+When grouped by customer, billable groups offer a *Create Invoice* button.
+
+The *Board* tab (formerly *Reports*, which still redirects there) reports time logged on cards per project, filterable by period, project, and assignees, and exports to PDF or XLSX.
+All exports are generated on the server.
+
+== Helpdesk
+
+When the helpdesk is enabled for you, a *Tickets* section appears in the sidebar with an *Inbox* (email tickets not yet assigned to a customer) and one ticket list per customer.
+
+* Tickets move through *New*, *Open*, *Pending* (with an optional reminder date), *Pending close* (closed automatically on its close date), and *Closed*.
+* In a ticket you can change status, priority, type, assignee, group, and tags, see SLA deadlines, and link other tickets or board cards.
+* Reply to the customer, or tick *Private* to post an internal note that is never emailed and hidden from customer-role users.
+* Apply a *macro* to set several fields and pre-fill a reply in one click, or a checklist template; open checklist items block closing the ticket.
+* *Mark as Spam* closes a ticket and hides it from the default list.
+
+Users with the *customer* role only see the helpdesk, and only their own customers' tickets.
 
 == User settings
 
-Open *Settings* from the sidebar or the top-right avatar menu.
+Open *Settings* from the avatar menu.
 
 [cols="1,2", options="header"]
 |===
 |Setting |Options
 
 |Theme
-|Light, Dark, System
+|Light, Dark, Black, System
 
 |Language
 |12 languages (en, nl, de, fr, es, da, sv, nb, fi, is, pt, it)
 
 |Date / time format
-|Multiple regional formats
+|Multiple regional date formats; 24- or 12-hour time
 
 |Timezone
 |Any IANA timezone
@@ -302,30 +425,55 @@ Open *Settings* from the sidebar or the top-right avatar menu.
 |Left or right
 
 |Accent colour
-|Pick from presets or enter a hex value
+|Blue, Red, Green, or Orange
 
-|MFA
-|Enable / disable TOTP
+|Dashboard shows
+|Boards, or your first starred customer's tickets (helpdesk users)
+
+|Log Time view / Calendar block color
+|Table or Calendar; colour calendar blocks by customer or by project
+
+|Working hours
+|Per-weekday hours and lunch break, used to flag over-allotment in the time sheet
+
+|System tray / Close to tray
+|Desktop app only
+
+|MFA, trusted devices, passkeys
+|Enable / disable TOTP, manage trusted devices, register passkeys
 
 |Personal API keys
-|Create keys for automation scripts
+|Create keys for automation scripts (see the link:../api/[API reference])
 |===
 
+[[customers]]
 == Customers
 
 If your organisation uses customer management:
 
-* All projects belong to a customer
+* You only see customers you have been assigned to (administrators see all)
 * Star a customer for quick access
-* View all projects and contracts for a customer from the customer detail page
-* Contracts track start and end dates
+* The customer detail page shows its projects, contracts (with rates and optional time slots), billing information, contacts, and invoices
+* *Locations* list the customer's sites, each with a name, address, contact details, and a standard *travel distance* used by <<travel-distance-auto-fill,travel distance auto-fill>>
+* Give a customer a *colour* to identify its blocks in the time-tracking calendar; customers without one get an unused colour automatically
+
+Customer admins can edit the customer, manage its contracts, contacts, and locations, and add or remove members.
 
 == Search
 
-The global search bar (shortcut: `/`) searches across:
+The global search bar (shortcut: `Ctrl+K`, `⌘K` on macOS) searches across:
 
-* Card titles and descriptions
-* Topics
-* Projects and customers
+* Card titles, descriptions, and comments
+* Project chat and direct messages (in conversations you belong to)
+* Ticket subjects (with helpdesk access)
+* Time-entry descriptions
 
-Search results are scoped to your accessible resources.
+Queries need at least 3 characters.
+Search results are scoped to your accessible resources, and clicking a comment or time entry jumps straight to it.
+
+=== Search & replace
+
+Click the ⇄ icon next to the search box to find and replace text across Cards, Card comments, Direct messages, Tickets, and Time entries.
+Choose the categories and how many results per type to show, then click *Preview* to see a before/after snippet for every match.
+Matches you are not allowed to edit are greyed out; uncheck anything you want to keep and click *Replace* to update only the checked rows.
+Project chat messages can be searched but not replaced.

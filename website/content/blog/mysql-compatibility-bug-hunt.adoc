@@ -43,6 +43,6 @@ Not everything today was firefighting. `v0.17.0` shipped earlier the same day wi
 
 == Upgrade
 
-Download `v0.17.1` from the link:../download[download page] or pull the latest release tag. If you're running MySQL or MariaDB, double-check your `db_dsn` includes `parseTime=true` — the server will now tell you plainly at startup if it doesn't.
+Download `v0.17.1` from the link:../../download[download page] or pull the latest release tag. If you're running MySQL or MariaDB, double-check your `db_dsn` includes `parseTime=true` — the server will now tell you plainly at startup if it doesn't.
 
 No database migration is required — as with every WarmDesk release, any new or changed fields are handled automatically on first startup.

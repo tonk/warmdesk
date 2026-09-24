@@ -27,6 +27,6 @@ If you'd already run into this before v0.14.4, a small number of weeks may still
 
 == Upgrade
 
-Download `v0.14.5` from the link:../download[download page] or pull the latest release tag.
+Download `v0.14.5` from the link:../../download[download page] or pull the latest release tag.
 
 No database migration is required for this release.

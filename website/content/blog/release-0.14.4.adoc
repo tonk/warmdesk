@@ -23,6 +23,6 @@ A week with no saved layout of its own now returns empty, rather than falling ba
 
 == Upgrade
 
-Download `v0.14.4` from the link:../download[download page] or pull the latest release tag.
+Download `v0.14.4` from the link:../../download[download page] or pull the latest release tag.
 
 No database migration is required for this release.

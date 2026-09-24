@@ -1,0 +1,38 @@
+---
+title: "v0.25.0: Voice-only calls"
+date: "2026-08-18"
+author: "Ton Kersten"
+description: "Start a call without turning on your camera: a mic button now sits next to the camera button in every chat header. v0.25.1 makes systemctl report a failed start straight away, and v0.25.2 brings the Log Time toolbar back in calendar view."
+draft: false
+---
+:doctype: article
+:icons!:
+
+Not every call needs video. Until now, starting a call in WarmDesk always asked for your camera. You'd only get an audio-only call if the camera failed. `v0.25.0` makes audio-only something you can choose.
+
+== A mic button next to the camera
+
+Both one-to-one and group chat headers now have a *mic* button next to the camera button. Click it to start a voice call. WarmDesk never asks for camera access, so there's no permission prompt and no camera light.
+
+It uses the same call infrastructure as video calls: WebRTC peer-to-peer for one-to-one conversations, LiveKit for group conversations. The audio-only call bar you see is the one that already appeared when a camera couldn't be opened. Now you can also get it on purpose.
+
+See link:../../docs/user-guide/#_voice_and_video_calls[Voice and video calls] in the User Guide.
+
+== Also fixed in v0.25.0
+
+* If a group call failed to connect (for example because LiveKit isn't configured), you could get a console error and the banner's "dismissed" state could get stuck. A watcher referred to a variable before it was declared. It no longer does.
+* Backup notification emails said "WarmDesk" twice, as in "WarmDesk — WarmDesk backup succeeded", when no company branding was set, because the default company name is also "WarmDesk".
+
+== v0.25.1: systemd tells you when startup fails
+
+Before this fix, `systemctl start warmdesk` reported success even when the server was about to crash, whether from a bad `JWT_SECRET`, a wildcard CORS origin in release mode, or a port that was already in use. The unit used `Type=simple`, so systemd treated the job as done as soon as the process started.
+
+The server now binds its listener first and tells systemd it's ready only after startup has actually succeeded. Both `deploy/warmdesk.service` and `deploy/multi-instance/warmdesk.service` switch to `Type=notify` and wait for that signal, so a failed start shows up immediately, the same way a broken `nginx` config does. If you installed an older copy of the unit file, update it to benefit.
+
+== v0.25.2: the Log Time toolbar in calendar view
+
+When you switched Log Time to the calendar view, the whole bottom toolbar vanished: macros, copy previous week, undo, and export. The bar only existed inside the table view. It's now shared by both views. *Add row* is still hidden in calendar mode, because it only applies to the table.
+
+== Upgrade
+
+Download `v0.25.2` from the link:../../download[download page] or pull the latest release tag. No database migration is needed.

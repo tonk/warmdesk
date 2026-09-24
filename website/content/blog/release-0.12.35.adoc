@@ -37,6 +37,6 @@ Macro JSON export works in the Tauri desktop app on Linux, and `HH:MM` values in
 
 == Upgrade
 
-Download `v0.12.35` from the link:../download[download page] or pull the latest release tag.
+Download `v0.12.35` from the link:../../download[download page] or pull the latest release tag.
 
 GORM AutoMigrate adds the `time_macro_libraries` table on startup — no manual migration step.

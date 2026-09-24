@@ -18,10 +18,11 @@ enableEmoji = true
   warmdesk_version = "v0.29.0"
   release_date     = "2026-09-24"
   # Blog post slug for the current release (linked from the homepage "What's new" strip)
-  release_blog     = "blog/travel-distance-auto-fill/"
+  release_blog     = "blog/read-only-ticket-api/"
   # Release highlights shown in the "What's new" strip on the homepage (2-3 bullets)
   release_highlights = [
-    "**Fixed — Admin Panel group tables** — the Groups list and a group's Customer access table showed the literal text `customer.title` instead of a \"Customers\" column heading, due to a reference to a nonexistent translation key.",
+    "**Added — Read-only Ticket API** — API keys (including project-scoped ones) can now list a project's lanes and cards (filter with `?column=Backlog`) or fetch a single card with its comments, without changing anything.",
+    "**Added — Copy/Paste in the time-tracking calendar** (v0.28.0) — right-click a block to copy it, then paste it into an empty slot to create an identical entry.",
   ]
 
 [markup]

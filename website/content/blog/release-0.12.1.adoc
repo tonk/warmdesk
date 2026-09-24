@@ -65,7 +65,7 @@ Passkey login and the Tauri desktop client read the same policy; there is no sep
 
 == Undeclarable time on the weekly sheet (v0.12.1)
 
-Projects with an *undeclarable minutes* value (see link:undeclarable-time[the undeclarable-time blog post]) subtract non-billable time from every entry when totals are calculated.
+Projects with an *undeclarable minutes* value (see link:../undeclarable-time/[the undeclarable-time blog post]) subtract non-billable time from every entry when totals are calculated.
 The weekly sheet received a focused UX pass:
 
 * Red undeclarable amounts in day cells now right-align with the entered time value.
@@ -110,7 +110,7 @@ The nginx and Apache templates in the `deploy/` directory include this header, a
 
 == Upgrade
 
-Download `v0.12.1` from the link:../download[download page] or pull the latest release tag.
+Download `v0.12.1` from the link:../../download[download page] or pull the latest release tag.
 
 No manual database changes are required.
 New columns and settings are applied automatically on first boot via GORM AutoMigrate and the system-settings loader.

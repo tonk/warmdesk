@@ -28,6 +28,6 @@ This is the tool for consolidating a second WarmDesk instance's projects and tic
 
 == Upgrade
 
-Download `v0.15.0` from the link:../download[download page] or pull the latest release tag.
+Download `v0.15.0` from the link:../../download[download page] or pull the latest release tag.
 
 No database migration is required for this release — the new setting is added automatically on first startup, as with every WarmDesk release.

@@ -760,7 +760,7 @@ The author (and project owners / admins) can edit or delete a topic or any of it
 
 === Project chat
 
-Each project has a dedicated *Chat* page accessible from the project navigation.
+Each project has a persistent chat channel, opened from the *Project Chat* entry in the sidebar of the project's *Topics* page.
 Messages support:
 
 * *Markdown* — bold, italic, lists, headings, and inline code

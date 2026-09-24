@@ -23,6 +23,6 @@ Each week-load now carries a request token. If a newer load has started by the t
 
 == Upgrade
 
-Download `v0.14.3` from the link:../download[download page] or pull the latest release tag.
+Download `v0.14.3` from the link:../../download[download page] or pull the latest release tag.
 
 No database migration is required for this release.

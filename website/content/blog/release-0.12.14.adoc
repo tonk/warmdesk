@@ -38,6 +38,6 @@ Other confirmations default to a primary *Yes* label — for example the copy-pr
 
 == Upgrade
 
-Download `v0.12.14` from the link:../download[download page] or pull the latest release tag.
+Download `v0.12.14` from the link:../../download[download page] or pull the latest release tag.
 Run the new version in-place — no database migration beyond the usual AutoMigrate on startup.
 Open the avatar menu → *Downloads* to save the updated guides locally.

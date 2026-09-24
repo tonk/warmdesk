@@ -50,208 +50,101 @@ curl -H "Authorization: Bearer <token>" \
 === API keys
 
 API keys authenticate CI/CD pipelines and automation scripts.
-Create a personal API key in *Settings → API Keys*.
+Create a personal API key in *Settings → API Keys* (full access as you, across all your projects), or a project-scoped key in *Project Settings → API Keys* (locked to that one project).
 
-Use the key with either:
+Send the key in either header:
 
-* Header: `X-API-Key: <key>`
-* Query parameter: `?api_key=<key>`
+* `X-API-Key: <key>`
+* `Authorization: ApiKey <key>` — for tools that can only set the `Authorization` header (e.g. Prometheus)
 
 [source,bash]
 ----
-curl -H "X-API-Key: wd_abc123..." \
+curl -H "X-API-Key: cwk_abc123..." \
      https://warmdesk.example.com/api/v1/projects
 ----
 
-API keys carry the same project permissions as the user who created them.
+API keys carry the same project permissions as the user who created them, and work on all authenticated endpoints, not just the Ticket API.
+A project-scoped key only works on routes that contain its own project's slug (e.g. `/api/v1/projects/{slug}/...` or `/api/v1/ticket/{slug}/...`); anything else returns `key is scoped to a specific project`.
 Keys with the `backup` global role can trigger backups without a full admin account.
-
-== REST API overview
-
-All endpoints are nested under `/api/v1/`.
-
-=== Authentication endpoints
-
-[source]
-----
-POST /api/v1/auth/login           # obtain access + refresh token
-POST /api/v1/auth/refresh         # exchange refresh token for new access token
-POST /api/v1/auth/logout          # invalidate refresh token
-POST /api/v1/auth/register        # register a new user
-POST /api/v1/auth/forgot-password # request a password reset email
-POST /api/v1/auth/reset-password  # complete password reset
-----
-
-=== Projects
-
-[source]
-----
-GET    /api/v1/projects                      # list accessible projects
-POST   /api/v1/projects                      # create project
-GET    /api/v1/projects/:slug                # get project detail
-PUT    /api/v1/projects/:slug                # update project
-DELETE /api/v1/projects/:slug                # archive project
-----
-
-=== Columns
-
-[source]
-----
-GET    /api/v1/projects/:slug/columns         # list columns
-POST   /api/v1/projects/:slug/columns         # create column
-PUT    /api/v1/projects/:slug/columns/:id     # update column
-DELETE /api/v1/projects/:slug/columns/:id     # delete column
-PATCH  /api/v1/projects/:slug/columns/reorder # reorder columns
-----
-
-=== Cards
-
-[source]
-----
-GET    /api/v1/projects/:slug/columns/:colId/cards   # list cards in column
-POST   /api/v1/projects/:slug/columns/:colId/cards   # create card
-GET    /api/v1/projects/:slug/cards/:cardId          # get card detail
-PUT    /api/v1/projects/:slug/cards/:cardId          # update card
-DELETE /api/v1/projects/:slug/cards/:cardId          # soft-delete card
-PATCH  /api/v1/projects/:slug/cards/:cardId/move     # move to another column
-PATCH  /api/v1/projects/:slug/cards/:cardId/reorder  # reorder within column
-----
-
-=== Card sub-resources
-
-[source]
-----
-GET  /api/v1/projects/:slug/cards/:cardId/comments   # list comments
-POST /api/v1/projects/:slug/cards/:cardId/comments   # add comment (+ time log)
-PUT  /api/v1/projects/:slug/cards/:cardId/comments/:id
-DELETE /api/v1/projects/:slug/cards/:cardId/comments/:id
-
-GET  /api/v1/projects/:slug/cards/:cardId/checklist
-POST /api/v1/projects/:slug/cards/:cardId/checklist
-PUT  /api/v1/projects/:slug/cards/:cardId/checklist/:id
-DELETE /api/v1/projects/:slug/cards/:cardId/checklist/:id
-
-POST /api/v1/projects/:slug/cards/:cardId/attachments
-DELETE /api/v1/projects/:slug/cards/:cardId/attachments/:id
-
-GET  /api/v1/projects/:slug/cards/:cardId/links      # git links
-POST /api/v1/projects/:slug/cards/:cardId/links
-----
-
-=== Chat
-
-[source]
-----
-GET  /api/v1/projects/:slug/chat/messages   # paginated message history
-POST /api/v1/projects/:slug/chat/messages   # send message
-PUT  /api/v1/projects/:slug/chat/messages/:id
-DELETE /api/v1/projects/:slug/chat/messages/:id
-POST /api/v1/projects/:slug/chat/messages/:id/reactions  # add reaction
-----
-
-=== Direct messages
-
-[source]
-----
-GET  /api/v1/conversations                   # list DM conversations
-POST /api/v1/conversations                   # create DM or group chat
-GET  /api/v1/conversations/:id/messages
-POST /api/v1/conversations/:id/messages
-----
-
-=== Topics
-
-[source]
-----
-GET    /api/v1/projects/:slug/topics
-POST   /api/v1/projects/:slug/topics
-GET    /api/v1/projects/:slug/topics/:id
-PUT    /api/v1/projects/:slug/topics/:id
-DELETE /api/v1/projects/:slug/topics/:id
-POST   /api/v1/projects/:slug/topics/:id/replies
-----
-
-=== Customers and contracts
-
-[source]
-----
-GET    /api/v1/customers                                  # list accessible customers
-GET    /api/v1/customers/rates                            # all contracts with time slots (read-only overview)
-GET    /api/v1/customers/:id                              # customer detail with contracts and projects
-POST   /api/v1/customers                                  # create customer (admin)
-PUT    /api/v1/customers/:id                              # update customer (admin)
-DELETE /api/v1/customers/:id                              # delete customer (admin)
-
-GET    /api/v1/customers/:id/contracts                    # list contracts for a customer
-POST   /api/v1/customers/:id/contracts                    # create contract (customer admin)
-PUT    /api/v1/customers/:id/contracts/:contractId        # update contract (customer admin)
-DELETE /api/v1/customers/:id/contracts/:contractId        # delete contract (customer admin)
-----
-
-`GET /customers/rates` returns every accessible customer that has at least one contract with time slots, grouped as `[{ customer_id, customer_name, contracts: [{ …, time_slots: […] }] }]`.
-It applies the same access-control filter as `GET /customers` — non-admins only see customers they are assigned to.
-
-=== Time and reports
-
-[source]
-----
-GET  /api/v1/reports/time          # aggregate time report
-GET  /api/v1/reports/timesheet     # weekly time sheet for the current user
-POST /api/v1/time-entries          # log a time entry
-PUT  /api/v1/time-entries/:id
-DELETE /api/v1/time-entries/:id
-----
-
-=== Users and admin
-
-[source]
-----
-GET  /api/v1/users/me              # current user profile
-PUT  /api/v1/users/me              # update profile
-GET  /api/v1/users                 # list all users (admin)
-POST /api/v1/users                 # create user (admin)
-PUT  /api/v1/users/:id             # update user (admin)
-
-GET  /api/v1/admin/system-settings
-PUT  /api/v1/admin/system-settings
-POST /api/v1/admin/backup
-POST /api/v1/admin/restore
-----
 
 == Ticket API
 
-The Ticket API is designed for CI/CD automation.
-It uses `X-API-Key` authentication and provides stable, simple operations.
+The Ticket API is designed for CI/CD automation and external tools.
+All endpoints live under `/api/v1/ticket/{projectSlug}/` and use `X-API-Key` authentication.
+The `GET` endpoints need only viewer access and never change anything; the others need member access (commenting needs viewer access).
+
+[cols="1,3,3",options="header"]
+|===
+|Method |Path |Action
+|`GET` |`/api/v1/ticket/{slug}/columns` |List columns (lanes), left to right
+|`GET` |`/api/v1/ticket/{slug}/cards` |List cards
+|`GET` |`/api/v1/ticket/{slug}/cards/{cardId}` |Get one card, with its comments
+|`POST` |`/api/v1/ticket/{slug}/cards` |Create a card
+|`POST` |`/api/v1/ticket/{slug}/cards/{cardId}/comments` |Add a comment
+|`PATCH` |`/api/v1/ticket/{slug}/cards/{cardId}/move` |Move a card to another column
+|===
+
+=== Read a lane
+
+`GET /cards` returns open cards ordered by column, then position.
+Each card includes `column_name` and its `key` (e.g. `ANSI-12`), plus `priority`, `story_points`, `time_spent_minutes`, `due_date`, labels, tags, assignees, and epic.
+
+[cols="1,1,4",options="header"]
+|===
+|Query parameter |Type |Notes
+|`column` |string |Only cards in the column with this name (case-insensitive), e.g. `Backlog`
+|`column_id` |number |Only cards in this column
+|`include_closed` |bool |`true` to also return closed cards
+|===
+
+An unknown column returns `400 column not found in project`.
+
+[source,bash]
+----
+curl -s -H "X-API-Key: cwk_abc123..." \
+  "https://warmdesk.example.com/api/v1/ticket/myproject/cards?column=Backlog" \
+  | jq '.[] | {key, title, priority, story_points}'
+----
 
 === Create a card
+
+Look up the target `column_id` with `GET /columns` first.
+`priority` is not accepted here; new cards get the default (`none`).
 
 [source,bash]
 ----
 curl -X POST \
-  -H "X-API-Key: wd_abc123..." \
+  -H "X-API-Key: cwk_abc123..." \
   -H "Content-Type: application/json" \
   -d '{
     "title": "Security scan found CVE-2026-1234",
     "description": "**Severity:** High\n\nFound in dependency `foo@1.2.3`.",
-    "priority": "high",
-    "column_name": "Backlog"
+    "column_id": 5
   }' \
-  "https://warmdesk.example.com/api/v1/projects/myproject/ticket"
+  "https://warmdesk.example.com/api/v1/ticket/myproject/cards"
 ----
+
+Returns `201 Created` with the new card.
 
 === Add a comment / move a card
 
+`{cardId}` is the card's numeric `id` from the create/list response, not its `key`.
+
 [source,bash]
 ----
-# Move card to 'Done' and add a comment
-curl -X PATCH \
-  -H "X-API-Key: wd_abc123..." \
+# Add a comment
+curl -X POST \
+  -H "X-API-Key: cwk_abc123..." \
   -H "Content-Type: application/json" \
-  -d '{
-    "column_name": "Done",
-    "comment": "Deployment to production succeeded. Build #4242."
-  }' \
-  "https://warmdesk.example.com/api/v1/projects/myproject/ticket/MYPROJ-99"
+  -d '{"body": "Deployment to production succeeded. Build #4242."}' \
+  "https://warmdesk.example.com/api/v1/ticket/myproject/cards/42/comments"
+
+# Move the card to column 8 (omit position to append at the end)
+curl -X PATCH \
+  -H "X-API-Key: cwk_abc123..." \
+  -H "Content-Type: application/json" \
+  -d '{"column_id": 8}' \
+  "https://warmdesk.example.com/api/v1/ticket/myproject/cards/42/move"
 ----
 
 == Webhooks

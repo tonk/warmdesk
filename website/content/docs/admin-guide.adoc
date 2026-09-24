@@ -10,7 +10,7 @@ weight: 30
 :toclevels: 3
 :sectanchors:
 
-See the link:/docs/install/[Installation Guide] for binary download, database setup, systemd, and reverse proxy instructions.
+See the link:../install/[Installation Guide] for binary download, database setup, systemd, and reverse proxy instructions.
 This guide focuses on configuration and day-to-day administration.
 
 == First registered user (automatic admin)
@@ -18,6 +18,7 @@ This guide focuses on configuration and day-to-day administration.
 When the user table is empty, the account created by the first successful self-registration is given the `admin` global role automatically—no SQL or manual promotion step.
 
 Additional administrators can be assigned later from *Admin panel → Users*.
+If public registration is not wanted, turn it off after creating the first admin (*Admin → Settings → Allow public registration*).
 
 === Recovering admin access
 
@@ -37,6 +38,30 @@ mysql -u warmdesk -p -e "UPDATE users SET global_role='admin' WHERE username='yo
 
 Restarting the server is optional after manual fixes like these.
 
+== Server modes
+
+Two optional settings change what a WarmDesk server offers or how it looks.
+Each can be set as a YAML key, an environment variable, or a CLI flag (the flag wins over the YAML key, which wins over the environment variable).
+
+[cols="1,1,1,3", options="header"]
+|===
+|YAML key |Env var |CLI flag |Effect
+
+|`app_mode: timetracking`
+|`APP_MODE`
+|`--mode=timetracking`
+|Runs a time-tracking-only server: board, chat, topic, and helpdesk routes are disabled, related admin settings are hidden, and the time-tracking logos replace the default WarmDesk logos in the web UI and PDFs.
+
+|`instance_mode: test`
+|`INSTANCE_MODE`
+|`--instance-mode=test`
+|Marks a test or staging server: orange, "TEST"-ribboned logos are served everywhere (web UI, PDFs, and the desktop app's tray icon), so it is never mistaken for production.
+|===
+
+Both default to empty (full WarmDesk, production) and combine independently — a `timetracking` + `test` server shows the orange time-tracking logo.
+A custom company logo (*Admin → Settings → Branding & Billing*) still takes precedence in PDFs.
+`GET /api/v1/version` reports both values so clients can detect them.
+
 == Global roles
 
 [cols="1,3", options="header"]
@@ -47,7 +72,7 @@ Restarting the server is optional after manual fixes like these.
 |Full access to all projects, customers, users, and system settings
 
 |`user`
-|Can create projects, manage their own projects, access assigned resources
+|Uses the application and sees assigned projects and customers; can create projects only when granted the *Create projects* permission
 
 |`viewer`
 |Read-only access to assigned projects and customers
@@ -56,7 +81,10 @@ Restarting the server is optional after manual fixes like these.
 |Read-only access to the Prometheus `/api/v1/metrics` endpoint
 
 |`backup`
-|Can trigger and download backups via the API
+|Can only trigger backups via `POST /api/v1/backup`
+
+|`customer`
+|Customer-portal access: view and comment on tickets of assigned customers; blocked from boards, chat, and time tracking
 |===
 
 Within each project, users have a *project role* (owner, member, viewer) that is independent of their global role.
@@ -69,10 +97,11 @@ It contains:
 
 === Users tab
 
-* Create new user accounts (for when self-registration is disabled)
+* Create new user accounts (for when self-registration is disabled), optionally requiring a password change on next login
 * Edit name, email, and global role
+* Grant per-user features in the *Feature Access* table — including *Create projects* (off by default for non-admins; admins can always create projects) and *Helpdesk (tickets)*
 * Deactivate or reactivate accounts; soft-deleted users can be restored or permanently purged
-* Reset a user's MFA (TOTP)
+* Reset a user's MFA (TOTP) or revoke all of their passkeys (the *Passkey* column shows who has one)
 * View last login time and last password change
 * Create and revoke API keys on behalf of any user (useful for `metrics` and `backup` service accounts)
 * View the full *Login History* for each user — every authentication and security-sensitive event with IP, client, timestamp, and the actor (blank for self-actions; admin username for admin-on-behalf actions)
@@ -83,12 +112,15 @@ It contains:
 |Event |When it is recorded
 
 |`login_ok` |Successful password or passkey login
-|`login_fail` |Failed login attempt
+|`login_failed` |Failed login attempt (wrong password, unknown or deactivated user, failed passkey)
 |`logout` |Explicit logout
-|`token_refresh` |Silent access-token renewal
 |`password_changed` |User changed their own password
+|`password_reset` |Password reset completed via the emailed link
 |`email_changed` |User changed their email address
-|`mfa_enabled` |TOTP was enabled
+|`mfa_challenge` |An MFA challenge was issued after a successful password/passkey check
+|`mfa_ok` |MFA challenge passed
+|`mfa_failed` |Invalid MFA code, or the MFA session expired
+|`mfa_trusted_device` |User chose to skip MFA on this device for 7 or 30 days
 |`mfa_disabled` |TOTP was disabled by the user
 |`passkey_registered` |WebAuthn passkey added
 |`passkey_deleted` |WebAuthn passkey removed
@@ -100,6 +132,7 @@ It contains:
 |`admin_user_restored` |An admin restored this user from soft-delete
 |`admin_user_purged` |An admin permanently deleted this user
 |`admin_mfa_disabled` |An admin reset this user's MFA
+|`admin_passkeys_revoked` |An admin revoked all of this user's passkeys
 |===
 
 === Groups tab
@@ -107,23 +140,35 @@ It contains:
 Define *user groups* and assign them to projects and customers.
 Assigning a group to a project gives all group members the specified project role.
 This is useful for onboarding an entire team at once.
+Group access is additive: a user's effective role is the highest one from direct and group assignments.
+
+NOTE: Non-admin users only see customers they are explicitly assigned to (directly or via a group). The ticket *assignee* dropdown lists only *direct* customer assignments, so give every assignable agent a direct Customer Access row.
 
 === Projects tab
 
-* View all projects, including archived ones
-* Archive, restore, or permanently delete projects
+* View all projects, including archived and closed ones (*Show closed* toggle)
+* Create projects, and archive, close/reopen, restore, or permanently delete them
 * Change project ownership
+
+A project's card prefix (e.g. `PRJ` in `PRJ-42`) must be unique and cannot be changed after creation.
 
 === System settings tab
 
-See the link:#system-settings[System Settings] section below.
+See the <<system-settings,System Settings>> section below.
 
 === Customers and contracts
 
-Manage customer organisations under *Admin → Customers*.
+Manage customer organisations under *Admin → Customers* (name, description, logo, and an optional colour used by the time-tracking calendar).
 
-Customer contracts are edited from the customer detail page (*Customers → (click customer) → Contracts*).
-Each contract has a base hourly rate and optional *time slots* that define alternative rates for work done outside standard hours — for example evening, overnight, or weekend standby rates.
+Each customer detail page (*Customers → (click customer)*) also holds:
+
+* *Contracts* — base hourly rate and optional time slots (see below)
+* *Billing information* — billing address, VAT number, and PO reference, printed on invoices
+* *Contacts* — informational contact persons (not user accounts)
+* *Locations* — named sites with address, contact details, and a standard *travel distance*; picking a location in time tracking auto-fills the entry's distance (the value stays editable)
+* *Invoices* — generated from contract-linked time entries (draft → sent → paid, plus credit notes), with a PDF using the company details from *Admin → Settings → Branding & Billing*
+
+Reusable invoice starting points (line items, VAT rate, currency, notes) are managed under *Admin → Invoice Templates*.
 
 To see all standby slots across every customer in one place, click the *₡ Contract Rates* button in the Customers page header or in the Time Tracking toolbar.
 The modal groups slots by customer → contract and shows from/to times, applicable days, and the rate or multiplier for each slot.
@@ -160,7 +205,7 @@ The PDF time report renders a sub-row per slot for each entry that overlaps the 
 
 === Time tracking
 
-Time-tracking projects and customers are managed from *Admin → Time Tracking* or from the ⚙ gear button on the time-tracking page.
+Time-tracking projects and customers are managed from *Admin → Time Tracking* or from the ⚙ gear button on the time-tracking page (create, rename, recolour, set undeclarable minutes, delete).
 Admin-created items are visible to all users and labelled *Global (created by admin)* in the management lists.
 
 ==== Standby shift entry
@@ -172,6 +217,13 @@ A *Weekend standby* preset button fills in Friday 19:00 → Monday 07:00 for the
 
 If the project's contract has time slots configured, the PDF report will break the generated entries down by slot rate automatically.
 
+=== Helpdesk
+
+* Enable helpdesk access per user (*Admin → Users → Edit → Helpdesk (tickets)*); admins always have access.
+* *SLA policies*, *Macros*, and *Checklist templates* are managed under *Admin → Settings*.
+* *Incoming Mail (IMAP)* polls a mailbox and turns new mail into tickets; processed messages are moved to a `Processed` folder (or marked `\Seen` if the server lacks `MOVE`). Plain and OAuth2 (Google / Office 365) authentication are supported — OAuth2 client IDs and secrets go in the `oauth2:` block of `warmdesk.yaml` and need a restart.
+
+[[system-settings]]
 == System settings
 
 System settings are stored as key/value rows in the database and take effect immediately without a restart.
@@ -184,32 +236,38 @@ Configure them from *Admin → System Settings*.
 |Setting |Description
 
 |SMTP host
-|Mail server hostname
+|Mail server hostname (leave empty to disable outgoing mail)
 
 |SMTP port
-|Usually 587 (STARTTLS) or 465 (TLS)
+|Usually 587 (STARTTLS, recommended); 25 for an internal relay
 
 |SMTP username / password
-|Mail server credentials
+|Mail server credentials; leave empty for an auth-less relay
 
-|From address
+|From address / name
 |`From:` header on all outgoing mail
-
-|TLS mode
-|`none`, `starttls`, or `ssl`
 |===
 
+There is no separate TLS setting: STARTTLS is used automatically when the mail server offers it.
+Initial values can also come from the `smtp:` block in `warmdesk.yaml`; the admin panel overrides them.
 Test the SMTP configuration with the *Send test email* button.
 
 === Registration and sessions
 
 * *Allow public registration* — enable or disable self-registration on the login page
-* *Session timeout* — idle minutes before a user is logged out (0 = no timeout)
-* *Password max age* — days before a password expires (0 = never); users with expired passwords are redirected to Settings on login
+* *Session timeout* — idle minutes before a user is logged out (default 60; 0 = no timeout)
+* *Maximum password age* — days after which users are asked to change their password (0 = never, the default)
 
-=== Group video calls (LiveKit)
+=== Security
+
+* *Require MFA for all users* — users are prompted to set up TOTP after their next login
+* *Remember MFA on trusted devices* — `Disabled`, `1 week only`, or `1 week or 1 month` (default); tightening it revokes existing trusted devices that no longer fit
+* *API allowed IP addresses* — comma-separated IPs/CIDR ranges allowed to use API keys (empty = no restriction). Browser sessions are never blocked. A wrong value locks all API-key clients out.
+
+=== Calls (LiveKit and TURN)
 
 WarmDesk supports group video calls in DM group conversations with 3+ members via LiveKit.
+One-to-one calls use WebRTC directly; add a TURN server so they also work across NAT, CGNAT, and restrictive firewalls (without one, such calls connect but show no audio/video).
 
 Add these settings in `warmdesk.yaml` (or environment variables) and restart the server:
 
@@ -218,41 +276,63 @@ Add these settings in `warmdesk.yaml` (or environment variables) and restart the
 livekit_url: "wss://livekit.example.com"
 livekit_api_key: "APIxxxxxxxxxxxxxxxx"
 livekit_api_secret: "your-secret"
+livekit_room_prefix: ""        # optional, when several servers share one LiveKit
+
+turn_urls: "turn:turn.example.com:3478"   # comma-separated list allowed
+turn_username: "warmdesk"
+turn_credential: "your-secret"
 ----
 
 When LiveKit is not configured, one-on-one WebRTC calls continue to work and the UI shows a status banner in group chats explaining that group video is unavailable on that server.
 
 === Branding
 
-* *Company name* — shown in the page title and emails
-* *Company logo* — PNG/SVG displayed on the login page and in the header
+Set these under *Admin → Settings → Branding & Billing*:
+
+* *Company name* — shown in the login screen branding panel and in report headers / PDF footers
+* *Company logo* — separate logos for light and dark backgrounds (JPG, PNG, GIF, WebP, or SVG), used on the login screen, reports, and PDFs
+* *Show company branding on the login screen* — splits the login page into a branding panel and the login form
+* *Billing* — company address, VAT and CoC numbers, IBAN/BIC, payment terms, default VAT rate, invoice number prefix, and a VAT-exempt toggle, all used on invoice PDFs
+
+=== New project defaults and features
+
+* *Initial columns* and *Initial labels* — created for every new project (existing projects are not changed)
+* *Scrum Story Points* — shows a story-points field on cards
 
 === Locale defaults
 
-Default language, date format, and timezone for new users.
+Default language, date format, timezone, theme, and font for new users.
 Users can override these in their own settings.
 
 == Password policy
+
+Configure under *Admin → Settings → Password Policy*.
+The policy applies to registration, password changes, and email resets.
 
 [cols="1,2", options="header"]
 |===
 |Setting |Description
 
 |Minimum length
-|Default: 8 characters
+|Default: 12 characters; cannot be set below 8
 
-|Max age (days)
-|Days before password expires; 0 disables expiry
+|Character classes
+|Require uppercase, lowercase, digit, and/or special characters (lowercase and digit are on by default)
+
+|Maximum password age
+|Days before users are asked to change their password; 0 disables expiry
 
 |Bcrypt cost
 |Fixed at 12 (compile-time constant; change requires a rebuild)
 |===
 
+CAUTION: A password set by an admin in *Admin → Users → Create User* is only checked against an 8-character minimum, not the policy. Use *Require password change on next login* if you rely on the policy.
+
 == SMTP troubleshooting
 
-* Verify host, port, credentials, and TLS mode in System Settings
+* Verify host, port, and credentials in System Settings
 * Use the *Send test email* button to confirm delivery
-* Check firewall rules for outbound port 587/465
+* Check firewall rules for outbound port 587
 * If using Gmail, create an App Password (regular passwords are blocked)
 
 == Backup and recovery
@@ -260,29 +340,36 @@ Users can override these in their own settings.
 === Via the admin panel
 
 Go to *Admin → Backup / Restore*.
-Click *Create Backup* to generate a `.tar.gz` archive in `./backups/` containing the database dump and, by default, the upload directory (attachments, avatars, customer logos, company branding) — uncheck *Include uploaded files* in the scheduled-backup settings for database-only backups.
+Click *Create Backup* to generate a `warmdesk_backup_<timestamp>_<hex>.tar.gz` archive in `./backups/` containing the database dump (under `db/`) and, by default, the upload directory (attachments, avatars, customer logos, company branding, under `uploads/`) — uncheck *Include uploaded files* in the scheduled-backup settings for database-only backups.
 Download it for off-site storage.
+Older database-only backups (`warmdesk_db_*.db` / `.sql`) are still listed and restorable.
 
-To bring a backup file from another WarmDesk server into this one, click *Import Backup*, choose the file, then pick *Completely restart* (replace everything) or *Add to current data* (merge — uploaded files are always merged safely; database rows are added only when their ID doesn't already exist locally, SQLite only).
+*Restore* asks how to apply a backup:
 
-The scheduling section on the same tab lets you configure automatic backups: interval (every 6/8/12/24 hours), an optional time-of-day anchor, and the retention count. Scheduled backups run server-side — no external cron job needed.
+* *Completely restart* (replace) — replaces the database and the upload directory with the backup's contents. SQLite restores are live; no server restart needed.
+* *Add to current data* (merge) — uploaded files are copied in alongside existing ones; database rows are added only when their ID doesn't already exist locally (SQLite only — on PostgreSQL/MySQL only the uploads are merged).
 
-WARNING: *Completely restart* replaces all current data with the backup's contents. *Add to current data* never overwrites existing rows, but a row whose ID collides with unrelated existing data is skipped rather than merged.
+To bring a backup file from another WarmDesk server into this one, click *Import Backup* and choose a `.tar.gz`, `.db`, or `.sql` file.
+It is saved into `./backups/` and you are asked the same replace-or-merge question.
+
+The scheduling section on the same tab lets you configure automatic backups: interval (every 6/8/12/24 hours), an optional time-of-day anchor, the retention count (default 10), and an optional notification email (several addresses may be separated by commas, semicolons, or spaces). Scheduled backups run server-side — no external cron job needed.
+
+WARNING: *Completely restart* replaces all current data with the backup's contents. *Add to current data* never overwrites existing rows, but a row whose ID collides with unrelated existing data is skipped rather than merged — two independent servers share no ID space.
 
 === Via the API (automation)
 
-Use a personal API key with the `backup` role:
+Use an API key belonging to a user with the `backup` role (or an admin).
+Send it in the `X-API-Key` header:
 
 [source,bash]
 ----
-# Create a backup and download it
+# Create a backup; the JSON response contains the new filename
 curl -H "X-API-Key: your-key" -X POST \
      https://warmdesk.example.com/api/v1/backup
-
-curl -H "X-API-Key: your-key" \
-     https://warmdesk.example.com/api/v1/admin/system/backups/<filename> \
-     -o backup-$(date +%Y%m%d).tar.gz
 ----
+
+The `backup` role can only trigger backups.
+Downloading an archive (`GET /api/v1/admin/system/backups/<filename>`) requires an admin — or copy it straight from `./backups/` on the server.
 
 To schedule automatic backups outside WarmDesk's own scheduler, add a cron job (`crontab -e`):
 
@@ -301,6 +388,23 @@ To schedule automatic backups outside WarmDesk's own scheduler, add a cron job (
 sqlite3 warmdesk.db ".backup /backup/warmdesk-$(date +%Y%m%d).db"
 ----
 
+[[db-convert]]
+=== Restoring onto a different database driver
+
+The admin panel only restores within the same driver.
+`warmdesk-db-convert` (shipped alongside `warmdesk`) copies all data between any combination of SQLite, PostgreSQL, and MySQL — directly from a backup archive, including its bundled uploads:
+
+[source,bash]
+----
+./warmdesk-db-convert \
+  --backup ~/warmdesk_backup_20260416_1430_a3f9.tar.gz \
+  --dst-config ./warmdesk.yaml \
+  --truncate
+----
+
+`--dst-config` takes the destination's database and `upload_dir` settings from its own config file; `--truncate` empties destination tables first so the command can be re-run.
+Run it without arguments for all flags (including direct database-to-database conversion).
+
 == Security hardening
 
 === Startup safety checks
@@ -308,20 +412,29 @@ sqlite3 warmdesk.db ".backup /backup/warmdesk-$(date +%Y%m%d).db"
 WarmDesk refuses to start if:
 
 * `jwt_secret` is still the default value `change-me-in-production`
+* `jwt_secret` is shorter than 32 characters
 * `gin_mode` is `release` and `allowed_origins` contains `*`
+* `db_driver` is `mysql` and `db_dsn` lacks `parseTime=true` (without it every timestamp read silently fails, showing up as misleading "invalid credentials" / "not found" errors)
+* `app_mode` or `instance_mode` has an unknown value
+
+The supplied systemd unit (`deploy/warmdesk.service`) uses `Type=notify`: the server signals readiness only after it has bound its port, so `systemctl start warmdesk` reports a failed start (bad secret, port in use, …) immediately instead of claiming success.
+A warning is logged when a remote database is used without TLS.
 
 === Security checklist
 
-* [ ] `jwt_secret` is a long random string
+* [ ] `jwt_secret` is a long random string (e.g. `openssl rand -hex 32`)
 * [ ] `gin_mode: release` in production
 * [ ] `allowed_origins` lists only your actual domain(s)
 * [ ] `db_tls_mode: verify-full` for remote databases
 * [ ] TLS terminated at the reverse proxy
 * [ ] Port 8080 not exposed to the internet (firewall)
+* [ ] Service runs as a dedicated non-root user
 * [ ] `upload_dir` is outside the web root
 * [ ] Backups are scheduled and regularly tested
 * [ ] MFA enforced for admin accounts
-* [ ] Asciidoctor `safeMode` set to `unsafe` only in trusted deployments
+* [ ] Password policy set to at least 12 characters with character-class requirements
+* [ ] Public registration disabled if only known users should have access
+* [ ] API-key access restricted with *API allowed IP addresses* where possible
 
 === Known limitations
 
@@ -341,9 +454,13 @@ db_dsn: host=pg-primary user=warmdesk password=secret dbname=warmdesk sslmode=re
 
 Requirements:
 
-* All instances share the same PostgreSQL or MySQL database
+* All instances share the same PostgreSQL or MySQL database (not SQLite)
 * Redis is required for WebSocket pub/sub across instances
+* All instances mount the same shared `upload_dir` (e.g. NFS) and use the same `jwt_secret`
 * Sticky sessions are *not* required — WebSocket connections are handled per-instance and bridged via Redis
+* Enable scheduled backups on exactly one instance, to avoid overlapping runs
+
+Ready-made templates (identical `warmdesk.yaml`, systemd unit, nginx load balancer config, NFS `fstab` example, and setup notes) are in `deploy/multi-instance/`.
 
 == Ansible deployment
 
@@ -355,9 +472,14 @@ ansible-galaxy collection install ansilabnl.warmdesk
 ----
 
 The collection installs the binary, creates a systemd unit, and configures nginx.
+It also provides modules for managing WarmDesk content (users, groups, customers, contracts, projects, cards, and more) through the API.
 See the collection README for variables and an example playbook.
 
 == Updating
+
+For tarball installs, run the bundled `get_warmdesk` script as root (`sudo get_warmdesk`, or `--force` to reinstall): it downloads the latest release for your architecture, stops the service, unpacks it, and restarts it.
+
+Manually:
 
 . Download the new binary
 . Stop the service: `systemctl stop warmdesk`
@@ -366,6 +488,27 @@ See the collection README for variables and an example playbook.
 
 Schema migrations run automatically on startup via GORM AutoMigrate.
 No manual SQL migration steps are needed.
+
+Desktop clients on Linux (`.deb`, `.rpm`, AppImage) and macOS can be updated with the `deploy/update_warmdesk_client` script, which verifies the GPG signature of the download.
+
+== Maintenance and migration tools
+
+[cols="1,3", options="header"]
+|===
+|Tool |Purpose
+
+|`warmdesk-db-convert`
+|Copy data between SQLite, PostgreSQL, and MySQL, or restore a backup onto another driver (see <<db-convert,above>>)
+
+|`warmdesk-import` / `warmdesk-export`
+|Move projects from/to Jira, Trello, OpenProject, or Ryver (Ryver imports also bring chat history). Configure with `warmdesk-migrate.yaml`; `user_map` attributes imported cards, comments, and messages to the right WarmDesk accounts; `--dry-run` previews
+
+|`warmdesk-training`
+|Creates (or `--reset` removes) isolated training slots — one user, customer, contract, and project each
+
+|`gc-uploads`
+|Lists files in `upload_dir` no longer referenced by any user, customer, project, group, setting, or attachment (dry run by default); `--delete` removes them. Run from the source tree: `cd backend && go run ./cmd/gc-uploads [--config warmdesk.yaml] [--delete]`
+|===
 
 == Demo data
 
@@ -418,6 +561,9 @@ NOTE: `bearer_token` / `Authorization: Bearer` is *not* supported for API key au
 Use `authorization.type: ApiKey` as shown above.
 
 === Exposed metrics
+
+Metrics cover projects, columns, and cards; users by role; customers; tickets by status and priority, SLA breaches, and ticket messages; and backup health (`warmdesk_backup_last_run_timestamp_seconds`, `warmdesk_backup_last_success`, `warmdesk_backup_files_total`).
+A ready-made Grafana dashboard ships as `docs/grafana-dashboard.json`.
 
 The endpoint also exposes two self-monitoring gauges:
 

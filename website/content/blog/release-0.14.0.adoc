@@ -28,6 +28,6 @@ Two smaller but worthwhile fixes landed alongside the above:
 
 == Upgrade
 
-Download `v0.14.0` from the link:../download[download page] or pull the latest release tag.
+Download `v0.14.0` from the link:../../download[download page] or pull the latest release tag.
 
 No database migration is required for this release.

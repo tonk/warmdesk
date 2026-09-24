@@ -44,5 +44,5 @@ Each slot's preview bar uses a colour from a fixed palette so you can tell them 
 
 == Upgrade
 
-Download `v0.12.6` from the link:../download[download page] or pull the latest release tag.
+Download `v0.12.6` from the link:../../download[download page] or pull the latest release tag.
 No database or configuration changes are required.

@@ -1,0 +1,44 @@
+---
+title: "Reading Your Board Through the Ticket API"
+date: "2026-09-24"
+author: "Ton Kersten"
+description: "The Ticket API used to be write-only: create a card, add a comment, move a card. v0.29.0 adds read-only endpoints, so a script or an AI agent holding an API key can list a lane's cards and report on them without touching anything."
+draft: false
+---
+:doctype: article
+:icons!:
+
+The Ticket API has always been about pushing things _into_ WarmDesk: a CI pipeline creates a card when a build fails, comments when it's fixed, and moves it to *Done* on deploy. What it couldn't do was tell you what's already there.
+
+That gap showed up in a very practical way. An automation agent was asked to "read the Backlog lane, report which tasks are open and how much work that is, and *don't change anything*". It had a project-scoped API key and three documented endpoints: create, comment, move. Every one of them writes. The only way to "look" would have been to create a probe card, which is exactly what it had been told not to do.
+
+`v0.29.0` fixes that.
+
+== Three new read endpoints
+
+[cols="1,3,3",options="header"]
+|===
+|Method |Path |Returns
+|`GET` |`/api/v1/ticket/{slug}/columns` |The project's lanes, left to right, with their ids
+|`GET` |`/api/v1/ticket/{slug}/cards` |Cards, optionally filtered to one lane
+|`GET` |`/api/v1/ticket/{slug}/cards/{cardId}` |One card, with its comments
+|===
+
+They use the same `X-API-Key` header as the existing endpoints, project-scoped keys included, and need only *viewer* access to the project. None of them change anything.
+
+== Reading one lane
+
+Filter by lane name (case-insensitive) or by id:
+
+[source,bash]
+----
+curl -s -H "X-API-Key: $WARMDESK_KEY" \
+  "https://warmdesk.example.com/api/v1/ticket/ansible-fundamentals/cards?column=Backlog" \
+  | jq '.[] | {key, title, priority, story_points}'
+----
+
+Only open cards are returned unless you add `include_closed=true`. Each card carries its lane name (`column_name`) and its human-readable key (`ANSI-12`), plus everything you need to size the work: priority, story points, time spent, due date, labels, tags, assignees, and epic.
+
+== Where to find it
+
+The endpoints are listed in *Project Settings → API Keys*, next to the existing ones, and documented in the link:../../docs/api/#_ticket_api[API reference]. The Bruno and Postman collections include them too.

@@ -47,6 +47,6 @@ This is a one-time cleanup tool for reclaiming disk space left behind by the pre
 
 == Upgrade
 
-Download `v0.16.5` from the link:../download[download page] or pull the latest release tag.
+Download `v0.16.5` from the link:../../download[download page] or pull the latest release tag.
 
 No database migration is required for this release — as with every WarmDesk release, any new fields are added automatically on first startup.

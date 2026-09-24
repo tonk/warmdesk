@@ -42,6 +42,6 @@ Both the tray icon and close-to-tray behavior are toggled from *Settings*.
 
 == Upgrade
 
-Download `v0.12.40` from the link:../download[download page] or pull the latest release tag.
+Download `v0.12.40` from the link:../../download[download page] or pull the latest release tag.
 
 GORM AutoMigrate adds two columns (`tray_icon_enabled`, `close_to_tray_enabled`) to the `users` table on startup — no manual migration step.

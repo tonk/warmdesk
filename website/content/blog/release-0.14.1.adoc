@@ -23,6 +23,6 @@ Chart canvases now cancel the app-wide zoom locally, so Chart.js always does its
 
 == Upgrade
 
-Download `v0.14.1` from the link:../download[download page] or pull the latest release tag.
+Download `v0.14.1` from the link:../../download[download page] or pull the latest release tag.
 
 No database migration is required for this release.

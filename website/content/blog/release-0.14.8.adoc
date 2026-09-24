@@ -25,6 +25,6 @@ Registration now correctly records these flags. For passkeys registered before t
 
 == Upgrade
 
-Download `v0.14.8` from the link:../download[download page] or pull the latest release tag.
+Download `v0.14.8` from the link:../../download[download page] or pull the latest release tag.
 
 No database migration is required for this release — the new columns are added automatically on first startup, as with every WarmDesk release.

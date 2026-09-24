@@ -34,6 +34,6 @@ The custom date range picker also got a small polish pass: the Start date and En
 
 == Upgrade
 
-Download `v0.12.41` from the link:../download[download page] or pull the latest release tag.
+Download `v0.12.41` from the link:../../download[download page] or pull the latest release tag.
 
 No database migration is required for this release.

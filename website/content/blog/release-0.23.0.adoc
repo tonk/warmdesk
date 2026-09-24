@@ -1,0 +1,41 @@
+---
+title: "v0.23.0: Pop calls out into a floating window"
+date: "2026-08-07"
+author: "Ton Kersten"
+description: "1:1 video calls and group calls can shrink into a small floating window you can drag and resize, so you can keep working during a call. The new-message tab alert now says who or where the message is from."
+draft: false
+---
+:doctype: article
+:icons!:
+:experimental:
+
+A call used to take over the whole WarmDesk window. That's fine for a quick chat, but not when you want to look at a board or a ticket while you talk about it. `v0.23.0` fixes that.
+
+== A floating call window
+
+Both the 1:1 WebRTC video call and the LiveKit group call grid now have a *pop-out* button (arrows pointing inward) in the call's control bar. Click it and the call shrinks into a small floating window on top of the app, and you can keep working behind it.
+
+* Drag the window by its top edge to move it.
+* Drag the bottom-right corner to resize it.
+* Both handles also work from the keyboard: focus one and use the arrow keys, with kbd:[Shift] for bigger steps.
+* Click the same button again (now arrows pointing outward) to go back to full screen.
+
+WarmDesk remembers the window's position and size for next time. More about calls is in the link:../../docs/user-guide/[User Guide].
+
+== A new-message alert that says what it's about
+
+`v0.21.1` made the browser tab blink "New message!" when something arrived while you were away. It didn't say *which* conversation, and when you came back to the tab the blinking just turned into an equally vague "●".
+
+The tab title now says what's waiting:
+
+* *New message from {name}* for a direct message
+* *New message in {project}* for a project chat
+* *New messages (N)* when several are waiting
+
+== What v0.23.1 fixes
+
+Nothing changes for users in `v0.23.1`. It fixes the CI builds for the server and the Linux client, which broke because `frontend/package-lock.json` had been removed from git by mistake during an earlier cleanup. The lockfile is back, and the builds work again.
+
+== Upgrade
+
+Download `v0.23.1` from the link:../../download/[download page] or pull the latest release tag. No manual migration is needed.

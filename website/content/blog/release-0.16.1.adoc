@@ -38,6 +38,6 @@ Shortly after `v0.16.0` shipped, dragging a block's *edge* to resize it turned o
 
 == Upgrade
 
-Download `v0.16.1` from the link:../download[download page] or pull the latest release tag.
+Download `v0.16.1` from the link:../../download[download page] or pull the latest release tag.
 
 No database migration is required for this release — the new fields are added automatically on first startup, as with every WarmDesk release.

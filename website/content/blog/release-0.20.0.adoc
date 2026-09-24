@@ -1,0 +1,46 @@
+---
+title: "v0.20.0: Project chat returns, and comments get attachments"
+date: "2026-08-05"
+author: "Ton Kersten"
+description: "Project chat has a place to live again, in the Topics sidebar, and card comments can finally carry screenshots and files. There's also a Ryver importer for the migration tools. v0.20.1 makes labels editable and fixes Ryver team names with spaces."
+draft: false
+---
+:doctype: article
+:icons!:
+
+This release brings back two things that were half-built: a project chat you can actually open, and attachments on card comments that actually show up.
+
+== Project chat is back
+
+Project chat never really went away. The backend, the unread badges and the live updates all kept working. What was missing was a screen for it: the old chat panel had been removed from the board page some time ago, and nothing replaced it.
+
+Now it has a home. Open a project's *Topics* page and you'll find a *Project Chat* entry in the sidebar. It shows the project's full chat history and lets you post new messages. New messages arrive live, and you can paste a screenshot or attach a file just like in a direct message.
+
+== Attachments on card comments
+
+You can now paste a screenshot or attach a file right in a card's comment box. The upload endpoint always accepted comment attachments, but nothing ever loaded them back, so they were stored and then never shown. Comments now load and display their attachments everywhere they appear.
+
+This also fixes a related gap: a comment or chat message that is *only* an attachment, with no text, used to be rejected outright because the backend insisted on a non-empty body. An image-only comment or message now works as you'd expect.
+
+== Migrating from Ryver
+
+The standalone `warmdesk-import` and `warmdesk-export` tools now support Ryver, next to Jira, Trello and OpenProject. An import brings over:
+
+* Tasks, with their columns, labels/tags, comments (including the comments' own attachments), assignees, creator, and start/due dates
+* Forum topics
+* The team's full project chat history
+
+A `user_map` in the config links Ryver usernames to WarmDesk accounts. Cards, comments and chat messages are then posted *as* the right person, using short-lived per-user API keys, rather than all showing up under the account that ran the import. Default columns and labels that already exist are reused, not duplicated. The new `include.cards` and `include.chat` toggles let you import either kind of content on its own. The details are in the *Migration Tools* section of the link:../../docs/admin-guide/[Admin Guide].
+
+== Backup notifications to more than one person
+
+The backup notification email setting now accepts several addresses. Separate them with a comma, a semicolon or whitespace.
+
+== What v0.20.1 fixes
+
+* *Project labels can be edited.* Until now you could only create and delete them. The API supported editing all along, but *Project Settings → Labels* had no button for it. Each label row now has an *Edit* button, which opens the same modal used for adding a label.
+* *Ryver teams with a space in their name* (like "Restic Server") made the migration fail with a plain-HTML 400. The team name went into the request URL without being escaped. Both the team lookup and the `--dump-task-ref` lookup now URL-encode it, which also covers names with a literal `&`.
+
+== Upgrade
+
+Download `v0.20.1` from the link:../../download/[download page] or pull the latest release tag. No manual migration is needed.
