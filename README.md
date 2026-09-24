@@ -8,9 +8,9 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.27.0)
+## Latest release (v0.28.0)
 
-- **Added** — customer locations can have a name, used as the label in time-tracking Location dropdowns (falls back to address when unset).
+- **Added** — Copy/Paste for time-tracking calendar entries: copy a block via right-click, then paste it into any empty slot to create a new entry with the same customer, project, activity, distance, and location.
 
 ## Experiment
 

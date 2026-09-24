@@ -1,6 +1,6 @@
 = WarmDesk — User Guide
-:revnumber: v0.27.0
-:revdate: 2026-09-17
+:revnumber: v0.28.0
+:revdate: 2026-09-24
 Ton Kersten <tonk@smartowl.nl>
 ifdef::backend-pdf[]
 :title-page:
@@ -1152,10 +1152,10 @@ Blocks are coloured by customer by default, or by project if you switch the *Cal
 |Resizes the entry, changing its start or end time independently.
 
 |Right-click a block
-|Opens a menu to *Edit* or *Delete* that entry.
+|Opens a menu to *Edit*, *Copy*, or *Delete* that entry.
 
 |Right-click an empty slot
-|Opens a menu to create a new entry at that time.
+|Opens a menu to create a new entry at that time, or *Paste* the entry last copied (same customer, project, activity, distance, and location; duration preserved).
 
 |*−* / *+* (top-right of the calendar)
 |Zooms the grid out or in (changes how many pixels represent an hour); your zoom level is remembered on this browser.

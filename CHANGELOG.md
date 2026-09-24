@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.28.0 — 2026-09-24
+
+### Added
+- **Copy/Paste for time-tracking calendar entries** — right-clicking a calendar block now offers *Copy* alongside *Edit*/*Delete*; right-clicking an empty slot offers *Paste* (once something has been copied), creating a new entry there with the same customer, project, activity, distance, and location, and the same duration.
+
 ## v0.27.0 — 2026-09-17
 
 ### Added
