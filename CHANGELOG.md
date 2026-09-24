@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.31.0 — 2026-09-24
+
+### Added
+- **Table view for the project board** — a new toggle in the board toolbar switches between the kanban lane layout and a flat, sortable table of every card in the project (ref, title, column, priority, assignee, due date, story points, time spent, closed). Click a column header to sort; click a row's title to open the card. Your choice is remembered per browser.
+
 ## v0.30.0 — 2026-09-24
 
 ### Added

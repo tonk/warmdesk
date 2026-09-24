@@ -8,10 +8,9 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.30.0)
+## Latest release (v0.31.0)
 
-- **Added** — Update cards through the Ticket API: change title, description, priority, dates, or story points, and close or reopen a card, with a partial `PATCH` that only touches the fields you send.
-- **Added** — Refer to cards by key (`ANSI-12`) and to lanes by name (`"column": "Done"`) in Ticket API calls, and set priority, dates, and story points when creating a card.
+- **Added** — Table view for the project board: toggle between the kanban lanes and a flat, sortable table of every card (ref, title, column, priority, assignee, due date, story points, time spent, closed).
 
 ## Experiment
 
@@ -339,7 +338,7 @@ See [INSTALL.md](INSTALL.md) for full instructions including:
 - **Customer locations** — a customer can have multiple locations, each with a name (shown in time-tracking Location dropdowns), a full address (line 1/2, city, postcode, region, country), phone number, contact person (name, email, phone), and a standard travel distance; managed from the customer detail page's Locations tab
 - **Customers sidebar** — starred customers listed in the sidebar with star/unstar toggle; dedicated Customers page (`/customers`) with grid view and full Customer detail page
 - **Sub-cards** — add child cards (one level deep) inside a parent card's detail view; hidden from the board; parent card shows a done/total progress pill; each sub-card has its own card number, assignees, labels, and comments; opening a sub-card shows a ← back link to return to the parent
-- **Kanban boards** — columns, cards, drag-and-drop reorder, labels, priorities, start date, due dates, assignees, watchers, markdown descriptions and comments; configurable card prefix set at creation time (e.g. `PRJ`, `SHOP`, `API`) used in all card references like `PRJ-42`; primary and extra assignee avatars shown on card tiles
+- **Kanban boards** — columns, cards, drag-and-drop reorder, labels, priorities, start date, due dates, assignees, watchers, markdown descriptions and comments; configurable card prefix set at creation time (e.g. `PRJ`, `SHOP`, `API`) used in all card references like `PRJ-42`; primary and extra assignee avatars shown on card tiles; a toggle in the toolbar switches to a sortable table view of every card in the project
 - **Card sections visibility menu** — ⋮ button on the card detail lets users toggle Labels, Tags, Attachments, Checklist, Sub-cards, Linked Cards, Watchers, and Git Issue on/off; sections hidden by default when empty; preferences saved per-browser; options sorted alphabetically in the active UI language
 - **Git issue linking** — optionally attach an external issue URL (GitHub, GitLab, Gitea, Forgejo, etc.) and a short reference to any card; reference is auto-filled from the URL path (`/issues/42`, `/pull/7`, `/merge_requests/5`) but can be edited; opens in a new tab; toggled via the card ⋮ menu
 - **Scrum** — choose Kanban or Scrum when creating a project (immutable thereafter); Scrum projects add a **Backlog** view (two-panel sprint planner with drag-and-drop card assignment, sprint CRUD, goal and date editing, and a velocity SVG chart of completed sprints) and a **Sprint Board** view (board filtered to the active sprint's cards); sprint lifecycle: planning → active → completed; completing a sprint returns unfinished cards to the backlog; optional story-points field on cards (enabled in Admin → Settings)

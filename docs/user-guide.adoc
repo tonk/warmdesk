@@ -1,5 +1,5 @@
 = WarmDesk — User Guide
-:revnumber: v0.30.0
+:revnumber: v0.31.0
 :revdate: 2026-09-24
 Ton Kersten <tonk@smartowl.nl>
 ifdef::backend-pdf[]
@@ -321,6 +321,10 @@ A closed project remains accessible via its direct URL, and can be reopened from
 '''
 
 == Kanban Board
+
+=== Table view
+
+The toolbar's *Table View* / *Lane View* button switches between the standard column layout and a flat, sortable table listing every card in the project — its reference, title, column, priority, assignee, due date, story points, time spent, and closed status. Click any column header to sort by it, and click again to reverse the order. Click a card's title to open it. The "Hide Closed" filter applies to both views, and your last-used view is remembered on this browser.
 
 === Columns
 

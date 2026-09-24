@@ -902,3 +902,4 @@ Create an application that has all these features and requirements
 - Accept priority, start/due date, and story points when creating a card through the Ticket API, and return the enriched card (key, column_name) from create and move
 - Bring the website's user guide, admin guide, and API reference up to date, add release posts for v0.20–v0.29, and fix broken download and docs links in older blog posts
 - Fix API key docs that still advertised the unsupported ?api_key= query parameter
+- Add a table view toggle to the project board — a sortable, flat table of every card (ref, title, column, priority, assignee, due date, story points, time spent, closed) alongside the existing kanban lanes; per-browser preference remembered
