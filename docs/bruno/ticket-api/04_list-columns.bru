@@ -1,0 +1,19 @@
+meta {
+  name: List Columns (Ticket API)
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/ticket/{{projectSlug}}/columns
+  body: none
+  auth: none
+}
+
+headers {
+  X-API-Key: {{apiKey}}
+}
+
+docs {
+  Read-only; requires viewer access to the project.
+}

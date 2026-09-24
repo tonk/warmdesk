@@ -1105,7 +1105,10 @@
     "docs_auth": "Authenticate with header",
     "docs_add": "Add ticket",
     "docs_comment": "Add comment",
-    "docs_move": "Move ticket"
+    "docs_move": "Move ticket",
+    "docs_columns": "List columns",
+    "docs_list": "List tickets",
+    "docs_get": "Get ticket"
   },
   "gantt": {
     "title": "Gantt",

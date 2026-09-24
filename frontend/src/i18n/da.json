@@ -986,7 +986,10 @@
     "docs_auth": "Godkend med header",
     "docs_add": "Tilføj billet",
     "docs_comment": "Tilføj kommentar",
-    "docs_move": "Flyt billet"
+    "docs_move": "Flyt billet",
+    "docs_columns": "Vis kolonner",
+    "docs_list": "Vis billetter",
+    "docs_get": "Hent billet"
   },
   "gantt": {
     "title": "Gantt",

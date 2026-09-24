@@ -986,7 +986,10 @@
     "docs_auth": "Autentisera med header",
     "docs_add": "Lägg till ärende",
     "docs_comment": "Lägg till kommentar",
-    "docs_move": "Flytta ärende"
+    "docs_move": "Flytta ärende",
+    "docs_columns": "Lista kolumner",
+    "docs_list": "Lista ärenden",
+    "docs_get": "Hämta ärende"
   },
   "gantt": {
     "title": "Gantt",

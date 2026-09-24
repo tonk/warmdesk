@@ -986,7 +986,10 @@
     "docs_auth": "Todenna otsikolla",
     "docs_add": "Lisää tiketti",
     "docs_comment": "Lisää kommentti",
-    "docs_move": "Siirrä tiketti"
+    "docs_move": "Siirrä tiketti",
+    "docs_columns": "Listaa sarakkeet",
+    "docs_list": "Listaa tiketit",
+    "docs_get": "Hae tiketti"
   },
   "gantt": {
     "title": "Gantt",

@@ -1928,7 +1928,7 @@
                 }
               ]
             },
-            "description": "Applies a macro to the ticket. Returns {ticket, macro_messages} — post macro_messages as ticket messages if non-empty."
+            "description": "Applies a macro to the ticket. Returns {ticket, macro_messages} \u2014 post macro_messages as ticket messages if non-empty."
           }
         },
         {
@@ -2777,6 +2777,66 @@
                   "language": "json"
                 }
               }
+            }
+          }
+        },
+        {
+          "name": "List Columns (Ticket API)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/ticket/{{projectSlug}}/columns"
+            },
+            "description": "Read-only; requires viewer access to the project.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "List Cards (Ticket API)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/ticket/{{projectSlug}}/cards?column=Backlog"
+            },
+            "description": "Read-only; requires viewer access to the project.\nQuery params: column (name, case-insensitive), column_id, include_closed=true. Open cards only by default.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Get Card (Ticket API)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/ticket/{{projectSlug}}/cards/{{cardId}}"
+            },
+            "description": "Read-only; requires viewer access to the project. Returns the card with its comments.",
+            "auth": {
+              "type": "noauth"
             }
           }
         }

@@ -950,7 +950,10 @@
     "docs_auth": "Autentíquese con el encabezado",
     "docs_add": "Agregar ticket",
     "docs_comment": "Agregar comentario",
-    "docs_move": "Mover ticket"
+    "docs_move": "Mover ticket",
+    "docs_columns": "Listar columnas",
+    "docs_list": "Listar tickets",
+    "docs_get": "Obtener ticket"
   },
   "report": {
     "title": "Informe de tiempo",

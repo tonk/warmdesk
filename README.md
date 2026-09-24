@@ -218,6 +218,9 @@ curl -X POST http://localhost:8080/api/v1/auth/api-keys \
 The full key (prefixed `cwk_...`) is returned **once only**. Then use it with any of the endpoints below.
 
 ```
+GET   /api/v1/ticket/{slug}/columns                  — list columns (lanes)
+GET   /api/v1/ticket/{slug}/cards                    — list cards (?column=Backlog, ?column_id=, ?include_closed=true)
+GET   /api/v1/ticket/{slug}/cards/{id}               — get a card with comments
 POST  /api/v1/ticket/{slug}/cards                    — create a card
 POST  /api/v1/ticket/{slug}/cards/{id}/comments      — add a comment
 PATCH /api/v1/ticket/{slug}/cards/{id}/move          — move to a column

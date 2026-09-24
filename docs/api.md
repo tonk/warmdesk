@@ -123,9 +123,54 @@ API keys work on all authenticated endpoints, not just the Ticket API.
 
 ## 2. Ticket API
 
-The Ticket API lets CI/CD pipelines and external tools create cards, add
-comments, and move cards without a user account. All endpoints sit under
-`/api/v1/ticket/` and require API key authentication.
+The Ticket API lets CI/CD pipelines and external tools read cards, create
+cards, add comments, and move cards without a user account. All endpoints sit
+under `/api/v1/ticket/` and require API key authentication. The read endpoints
+(`GET`) need only viewer access to the project and never modify anything.
+
+### List columns (lanes)
+
+```
+GET /api/v1/ticket/{projectSlug}/columns
+```
+
+**Response** `200 OK` — array of `Column` objects (`id`, `name`, `position`,
+`color`, `wip_limit`), ordered left to right. Use the `id` values as
+`column_id` for the create/move/list endpoints.
+
+### List cards
+
+```
+GET /api/v1/ticket/{projectSlug}/cards
+```
+
+| Query param | Type | Notes |
+|-------------|------|-------|
+| `column_id` | number | Only cards in this column |
+| `column` | string | Only cards in the column with this name (case-insensitive), e.g. `Backlog` |
+| `include_closed` | bool | `true` to also return closed cards (default: open cards only) |
+
+An unknown `column_id`/`column` returns `400 column not found in project`.
+
+**Response** `200 OK` — array of `Card` objects ordered by column, then
+position within the column. Each card includes `column_name` and `key`
+(e.g. `ANSI-12`), plus `priority`, `story_points`, `time_spent_minutes`,
+`due_date`, `labels`, `tags`, `assignees`, and `epic` — enough to size the
+work in a lane.
+
+```bash
+curl -s -H "X-API-Key: $API_KEY" \
+  "https://warmdesk.example.com/api/v1/ticket/my-project/cards?column=Backlog"
+```
+
+### Get a card
+
+```
+GET /api/v1/ticket/{projectSlug}/cards/{cardId}
+```
+
+**Response** `200 OK` — a single card (same shape as above) with its
+`comments` included, oldest first.
 
 ### Create a card
 

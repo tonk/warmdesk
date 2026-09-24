@@ -950,7 +950,10 @@
     "docs_auth": "Authenticeer met header",
     "docs_add": "Ticket toevoegen",
     "docs_comment": "Reactie toevoegen",
-    "docs_move": "Ticket verplaatsen"
+    "docs_move": "Ticket verplaatsen",
+    "docs_columns": "Kolommen ophalen",
+    "docs_list": "Tickets ophalen",
+    "docs_get": "Ticket ophalen"
   },
   "report": {
     "title": "Tijdrapport",

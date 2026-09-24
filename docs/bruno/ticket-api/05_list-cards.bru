@@ -1,0 +1,20 @@
+meta {
+  name: List Cards (Ticket API)
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/ticket/{{projectSlug}}/cards?column=Backlog
+  body: none
+  auth: none
+}
+
+headers {
+  X-API-Key: {{apiKey}}
+}
+
+docs {
+  Read-only; requires viewer access to the project.
+  Query params: column (name, case-insensitive), column_id, include_closed=true. Open cards only by default.
+}

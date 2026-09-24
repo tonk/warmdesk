@@ -604,6 +604,9 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 		ticket := v1.Group("/ticket")
 		ticket.Use(middleware.APIKeyAuth())
 		{
+			ticket.GET("/:projectSlug/columns", handlers.TicketListColumns)
+			ticket.GET("/:projectSlug/cards", handlers.TicketListCards)
+			ticket.GET("/:projectSlug/cards/:cardId", handlers.TicketGetCard)
 			ticket.POST("/:projectSlug/cards", handlers.TicketAdd)
 			ticket.POST("/:projectSlug/cards/:cardId/comments", handlers.TicketComment)
 			ticket.PATCH("/:projectSlug/cards/:cardId/move", handlers.TicketMove)

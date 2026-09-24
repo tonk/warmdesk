@@ -1,0 +1,20 @@
+meta {
+  name: Get Card (Ticket API)
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/v1/ticket/{{projectSlug}}/cards/{{cardId}}
+  body: none
+  auth: none
+}
+
+headers {
+  X-API-Key: {{apiKey}}
+}
+
+docs {
+  Read-only; requires viewer access to the project.
+  Returns the card with its comments.
+}

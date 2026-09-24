@@ -417,6 +417,14 @@ const docTemplate = `{
                     "projects"
                 ],
                 "summary": "List projects accessible to the current user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Set to 'true' to include closed projects",
+                        "name": "include_closed",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -641,6 +649,89 @@ const docTemplate = `{
                             "additionalProperties": {
                                 "type": "string"
                             }
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{projectSlug}/api-keys": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "api-keys"
+                ],
+                "summary": "List API keys for a project",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project slug",
+                        "name": "projectSlug",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.APIKey"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "api-keys"
+                ],
+                "summary": "Create a project-scoped API key",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project slug",
+                        "name": "projectSlug",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Key name",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     }
                 }
@@ -1244,7 +1335,7 @@ const docTemplate = `{
                 "tags": [
                     "search"
                 ],
-                "summary": "Search cards, topics, and projects",
+                "summary": "Search cards, messages, tickets, and time entries",
                 "parameters": [
                     {
                         "type": "string",
@@ -1274,6 +1365,46 @@ const docTemplate = `{
                 }
             }
         },
+        "/search/replace/apply": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "search"
+                ],
+                "summary": "Apply a previously previewed search-and-replace to an explicit set of rows",
+                "responses": {}
+            }
+        },
+        "/search/replace/preview": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "search"
+                ],
+                "summary": "Preview a search-and-replace across cards, card comments, DMs, tickets, and time entries",
+                "responses": {}
+            }
+        },
         "/system/settings": {
             "get": {
                 "produces": [
@@ -1295,6 +1426,86 @@ const docTemplate = `{
             }
         },
         "/ticket/{projectSlug}/cards": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Returns open cards by default, ordered by column then position.\nFilter by lane with column_id or column (case-insensitive name).",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ticket"
+                ],
+                "summary": "List a project's cards via API key (read-only)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project slug",
+                        "name": "projectSlug",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Only cards in this column",
+                        "name": "column_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Only cards in the column with this name (case-insensitive)",
+                        "name": "column",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Also return closed cards",
+                        "name": "include_closed",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/handlers.ticketAPICard"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -1335,6 +1546,73 @@ const docTemplate = `{
                         "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/models.Card"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ticket/{projectSlug}/cards/{cardId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ticket"
+                ],
+                "summary": "Get a single card via API key (read-only)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project slug",
+                        "name": "projectSlug",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ticketAPICard"
                         }
                     },
                     "400": {
@@ -1511,6 +1789,60 @@ const docTemplate = `{
                 }
             }
         },
+        "/ticket/{projectSlug}/columns": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ticket"
+                ],
+                "summary": "List a project's columns (lanes) via API key",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project slug",
+                        "name": "projectSlug",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Column"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "security": [
@@ -1532,6 +1864,28 @@ const docTemplate = `{
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/models.User"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/version": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "system"
+                ],
+                "summary": "Server version",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
                             }
                         }
                     }
@@ -1581,6 +1935,134 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.ticketAPICard": {
+            "type": "object",
+            "properties": {
+                "assignee": {
+                    "$ref": "#/definitions/models.User"
+                },
+                "assignee_id": {
+                    "type": "integer"
+                },
+                "assignees": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.User"
+                    }
+                },
+                "attachments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Attachment"
+                    }
+                },
+                "card_number": {
+                    "type": "integer"
+                },
+                "closed": {
+                    "type": "boolean"
+                },
+                "closed_at": {
+                    "type": "string"
+                },
+                "column_id": {
+                    "type": "integer"
+                },
+                "column_name": {
+                    "type": "string"
+                },
+                "comments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.CardComment"
+                    }
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "$ref": "#/definitions/models.User"
+                },
+                "created_by_id": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "due_date": {
+                    "type": "string"
+                },
+                "epic": {
+                    "$ref": "#/definitions/models.Epic"
+                },
+                "epic_id": {
+                    "type": "integer"
+                },
+                "external_issue_ref": {
+                    "type": "string"
+                },
+                "external_issue_url": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "labels": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Label"
+                    }
+                },
+                "parent_card_id": {
+                    "type": "integer"
+                },
+                "position": {
+                    "type": "number"
+                },
+                "priority": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "integer"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "story_points": {
+                    "type": "integer"
+                },
+                "sub_card_count": {
+                    "type": "integer"
+                },
+                "sub_cards_done": {
+                    "type": "integer"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.CardTag"
+                    }
+                },
+                "time_spent_minutes": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "watchers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.User"
+                    }
+                }
+            }
+        },
         "handlers.tokenResponse": {
             "type": "object",
             "properties": {
@@ -1611,6 +2093,10 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "project_id": {
+                    "description": "nil = personal key; set = scoped to that project",
+                    "type": "integer"
+                },
                 "user_id": {
                     "type": "integer"
                 }
@@ -1635,7 +2121,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "owner_type": {
-                    "description": "\"chat_message\" | \"conv_message\" | \"card_comment\"",
+                    "description": "\"chat_message\" | \"conv_message\" | \"card_comment\" | \"ticket_message\"",
                     "type": "string"
                 },
                 "size_bytes": {
@@ -1670,6 +2156,12 @@ const docTemplate = `{
                 "card_number": {
                     "type": "integer"
                 },
+                "closed": {
+                    "type": "boolean"
+                },
+                "closed_at": {
+                    "type": "string"
+                },
                 "column_id": {
                     "type": "integer"
                 },
@@ -1694,6 +2186,18 @@ const docTemplate = `{
                 "due_date": {
                     "type": "string"
                 },
+                "epic": {
+                    "$ref": "#/definitions/models.Epic"
+                },
+                "epic_id": {
+                    "type": "integer"
+                },
+                "external_issue_ref": {
+                    "type": "string"
+                },
+                "external_issue_url": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -1703,6 +2207,9 @@ const docTemplate = `{
                         "$ref": "#/definitions/models.Label"
                     }
                 },
+                "parent_card_id": {
+                    "type": "integer"
+                },
                 "position": {
                     "type": "number"
                 },
@@ -1710,6 +2217,18 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "project_id": {
+                    "type": "integer"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "story_points": {
+                    "type": "integer"
+                },
+                "sub_card_count": {
+                    "type": "integer"
+                },
+                "sub_cards_done": {
                     "type": "integer"
                 },
                 "tags": {
@@ -1738,6 +2257,12 @@ const docTemplate = `{
         "models.CardComment": {
             "type": "object",
             "properties": {
+                "attachments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Attachment"
+                    }
+                },
                 "body": {
                     "type": "string"
                 },
@@ -1752,6 +2277,12 @@ const docTemplate = `{
                 },
                 "is_edited": {
                     "type": "boolean"
+                },
+                "time_entry_id": {
+                    "type": "integer"
+                },
+                "time_spent_minutes": {
+                    "type": "integer"
                 },
                 "updated_at": {
                     "type": "string"
@@ -1854,6 +2385,179 @@ const docTemplate = `{
                 }
             }
         },
+        "models.Contract": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "customer_id": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "end_date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price_per_hour": {
+                    "type": "number"
+                },
+                "price_per_km": {
+                    "type": "number"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "time_slots": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ContractTimeSlot"
+                    }
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ContractTimeSlot": {
+            "type": "object",
+            "properties": {
+                "contract_id": {
+                    "type": "integer"
+                },
+                "day_type": {
+                    "type": "string"
+                },
+                "end_day_offset": {
+                    "type": "integer"
+                },
+                "end_time": {
+                    "type": "string"
+                },
+                "hourly_rate": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "multiplication_factor": {
+                    "type": "number"
+                },
+                "start_time": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Customer": {
+            "type": "object",
+            "properties": {
+                "billing_city": {
+                    "type": "string"
+                },
+                "billing_country": {
+                    "type": "string"
+                },
+                "billing_postal_code": {
+                    "type": "string"
+                },
+                "billing_street": {
+                    "description": "Billing address",
+                    "type": "string"
+                },
+                "color": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by_id": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_hidden": {
+                    "type": "boolean"
+                },
+                "logo_url": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "po_reference": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "integer"
+                },
+                "time_tracking_only": {
+                    "type": "boolean"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "vat_number": {
+                    "description": "Billing identifiers",
+                    "type": "string"
+                }
+            }
+        },
+        "models.Epic": {
+            "type": "object",
+            "properties": {
+                "card_count": {
+                    "description": "Computed at query time",
+                    "type": "integer"
+                },
+                "color": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "done_count": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "number"
+                },
+                "project_id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Label": {
             "type": "object",
             "properties": {
@@ -1880,6 +2584,13 @@ const docTemplate = `{
         "models.Project": {
             "type": "object",
             "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "board_type": {
+                    "description": "\"kanban\" | \"scrum\"",
+                    "type": "string"
+                },
                 "chat_messages": {
                     "type": "array",
                     "items": {
@@ -1895,6 +2606,12 @@ const docTemplate = `{
                         "$ref": "#/definitions/models.Column"
                     }
                 },
+                "contract": {
+                    "$ref": "#/definitions/models.Contract"
+                },
+                "contract_id": {
+                    "type": "integer"
+                },
                 "created_at": {
                     "type": "string"
                 },
@@ -1904,6 +2621,12 @@ const docTemplate = `{
                 "created_by_id": {
                     "type": "integer"
                 },
+                "customer": {
+                    "$ref": "#/definitions/models.Customer"
+                },
+                "customer_id": {
+                    "type": "integer"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -1911,6 +2634,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "is_archived": {
+                    "type": "boolean"
+                },
+                "is_closed": {
                     "type": "boolean"
                 },
                 "key_prefix": {
@@ -1931,8 +2657,17 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "position": {
+                    "type": "integer"
+                },
                 "slug": {
                     "type": "string"
+                },
+                "time_tracking_only": {
+                    "type": "boolean"
+                },
+                "undeclarable_minutes": {
+                    "type": "integer"
                 },
                 "updated_at": {
                     "type": "string"
@@ -1972,19 +2707,47 @@ const docTemplate = `{
         "models.User": {
             "type": "object",
             "properties": {
+                "accent_color": {
+                    "description": "\"blue\" | \"red\" | \"green\" | \"orange\"",
+                    "type": "string"
+                },
                 "avatar_url": {
                     "type": "string"
+                },
+                "board_enabled": {
+                    "type": "boolean"
+                },
+                "calendar_color_mode": {
+                    "description": "\"customer\" | \"project\"",
+                    "type": "string"
+                },
+                "can_create_projects": {
+                    "type": "boolean"
                 },
                 "can_view_reports": {
                     "type": "boolean"
                 },
+                "chat_enabled": {
+                    "type": "boolean"
+                },
+                "close_to_tray_enabled": {
+                    "type": "boolean"
+                },
                 "created_at": {
+                    "type": "string"
+                },
+                "dashboard_default": {
+                    "description": "\"boards\" | \"tickets\"",
                     "type": "string"
                 },
                 "date_time_format": {
                     "type": "string"
                 },
                 "display_name": {
+                    "type": "string"
+                },
+                "distance_unit": {
+                    "description": "\"km\" | \"miles\"",
                     "type": "string"
                 },
                 "email": {
@@ -2002,13 +2765,22 @@ const docTemplate = `{
                 "font_size": {
                     "type": "string"
                 },
+                "fri_work_end": {
+                    "type": "string"
+                },
+                "fri_work_start": {
+                    "type": "string"
+                },
                 "global_role": {
-                    "description": "\"admin\" | \"user\" | \"viewer\"",
+                    "description": "\"admin\" | \"user\" | \"viewer\" | \"metrics\" | \"backup\" | \"customer\"",
                     "type": "string"
                 },
                 "gravatar_url": {
                     "description": "Computed — not stored in DB",
                     "type": "string"
+                },
+                "helpdesk_enabled": {
+                    "type": "boolean"
                 },
                 "id": {
                     "type": "integer"
@@ -2025,23 +2797,95 @@ const docTemplate = `{
                 "locale": {
                     "type": "string"
                 },
+                "lunch_break_minutes": {
+                    "type": "integer"
+                },
+                "mon_work_end": {
+                    "type": "string"
+                },
+                "mon_work_start": {
+                    "type": "string"
+                },
+                "must_change_password": {
+                    "type": "boolean"
+                },
+                "password_changed_at": {
+                    "type": "string"
+                },
+                "sat_work_end": {
+                    "type": "string"
+                },
+                "sat_work_start": {
+                    "type": "string"
+                },
                 "settings_updated_at": {
                     "type": "string"
                 },
+                "show_breadcrumbs": {
+                    "type": "boolean"
+                },
                 "sidebar_position": {
+                    "type": "string"
+                },
+                "sun_work_end": {
+                    "type": "string"
+                },
+                "sun_work_start": {
                     "type": "string"
                 },
                 "theme": {
                     "description": "\"light\" | \"dark\" | \"system\"",
                     "type": "string"
                 },
+                "thu_work_end": {
+                    "type": "string"
+                },
+                "thu_work_start": {
+                    "type": "string"
+                },
+                "time_notation": {
+                    "description": "\"decimal\" | \"hhmm\"",
+                    "type": "string"
+                },
+                "time_tracking_enabled": {
+                    "type": "boolean"
+                },
+                "time_tracking_view_default": {
+                    "description": "\"table\" | \"calendar\"",
+                    "type": "string"
+                },
+                "time_tracking_viewer": {
+                    "type": "boolean"
+                },
                 "timezone": {
+                    "type": "string"
+                },
+                "totp_enabled": {
+                    "type": "boolean"
+                },
+                "tray_icon_enabled": {
+                    "type": "boolean"
+                },
+                "tue_work_end": {
+                    "type": "string"
+                },
+                "tue_work_start": {
                     "type": "string"
                 },
                 "updated_at": {
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                },
+                "wed_work_end": {
+                    "type": "string"
+                },
+                "wed_work_start": {
+                    "type": "string"
+                },
+                "week_start": {
+                    "description": "\"monday\" | \"sunday\"",
                     "type": "string"
                 }
             }

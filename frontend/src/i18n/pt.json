@@ -986,7 +986,10 @@
     "docs_auth": "Autenticar com cabeçalho",
     "docs_add": "Adicionar ticket",
     "docs_comment": "Adicionar comentário",
-    "docs_move": "Mover ticket"
+    "docs_move": "Mover ticket",
+    "docs_columns": "Listar colunas",
+    "docs_list": "Listar tickets",
+    "docs_get": "Obter ticket"
   },
   "gantt": {
     "title": "Gantt",

@@ -986,7 +986,10 @@
     "docs_auth": "Autentiser med header",
     "docs_add": "Legg til sak",
     "docs_comment": "Legg til kommentar",
-    "docs_move": "Flytt sak"
+    "docs_move": "Flytt sak",
+    "docs_columns": "List kolonner",
+    "docs_list": "List saker",
+    "docs_get": "Hent sak"
   },
   "gantt": {
     "title": "Gantt",

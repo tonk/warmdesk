@@ -203,6 +203,22 @@
             <h3>{{ $t('apikeys.docs_title') }}</h3>
             <p>{{ $t('apikeys.docs_auth') }}: <code>X-API-Key: cwk_…</code></p>
             <div class="api-endpoint">
+              <span class="method get">GET</span>
+              <code>/api/v1/ticket/{{ slug }}/columns</code>
+              <span class="endpoint-desc">{{ $t('apikeys.docs_columns') }}</span>
+            </div>
+            <div class="api-endpoint">
+              <span class="method get">GET</span>
+              <code>/api/v1/ticket/{{ slug }}/cards?column=Backlog&amp;include_closed=false</code>
+              <span class="endpoint-desc">{{ $t('apikeys.docs_list') }}</span>
+            </div>
+            <div class="api-endpoint">
+              <span class="method get">GET</span>
+              <code>/api/v1/ticket/{{ slug }}/cards/:cardId</code>
+              <span class="endpoint-desc">{{ $t('apikeys.docs_get') }}</span>
+            </div>
+            <div class="api-endpoint api-endpoint-gap" aria-hidden="true"></div>
+            <div class="api-endpoint">
               <span class="method post">POST</span>
               <code>/api/v1/ticket/{{ slug }}/cards</code>
               <span class="endpoint-desc">{{ $t('apikeys.docs_add') }}</span>
@@ -912,6 +928,8 @@ async function permanentDeleteCard(card) {
 .api-body { font-size: 12px; background: var(--color-bg); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); margin-bottom: 16px; }
 .method { font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; color: #fff; }
 .method.post { background: #10b981; }
+.method.get { background: #3b82f6; }
+.api-endpoint-gap { height: 12px; }
 
 /* ── Invite multi-select ─────────────────────────────────── */
 .invite-search-wrap { margin-bottom: 6px; }

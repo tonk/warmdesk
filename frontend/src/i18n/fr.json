@@ -950,7 +950,10 @@
     "docs_auth": "Authentifiez-vous avec l'en-tête",
     "docs_add": "Ajouter un ticket",
     "docs_comment": "Ajouter un commentaire",
-    "docs_move": "Déplacer un ticket"
+    "docs_move": "Déplacer un ticket",
+    "docs_columns": "Lister les colonnes",
+    "docs_list": "Lister les tickets",
+    "docs_get": "Obtenir un ticket"
   },
   "report": {
     "title": "Rapport de temps",

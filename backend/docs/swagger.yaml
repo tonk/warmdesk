@@ -1,4 +1,3 @@
----
 basePath: /api/v1
 definitions:
   handlers.loginRequest:
@@ -30,6 +29,91 @@ definitions:
     - password
     - username
     type: object
+  handlers.ticketAPICard:
+    properties:
+      assignee:
+        $ref: '#/definitions/models.User'
+      assignee_id:
+        type: integer
+      assignees:
+        items:
+          $ref: '#/definitions/models.User'
+        type: array
+      attachments:
+        items:
+          $ref: '#/definitions/models.Attachment'
+        type: array
+      card_number:
+        type: integer
+      closed:
+        type: boolean
+      closed_at:
+        type: string
+      column_id:
+        type: integer
+      column_name:
+        type: string
+      comments:
+        items:
+          $ref: '#/definitions/models.CardComment'
+        type: array
+      created_at:
+        type: string
+      created_by:
+        $ref: '#/definitions/models.User'
+      created_by_id:
+        type: integer
+      description:
+        type: string
+      due_date:
+        type: string
+      epic:
+        $ref: '#/definitions/models.Epic'
+      epic_id:
+        type: integer
+      external_issue_ref:
+        type: string
+      external_issue_url:
+        type: string
+      id:
+        type: integer
+      key:
+        type: string
+      labels:
+        items:
+          $ref: '#/definitions/models.Label'
+        type: array
+      parent_card_id:
+        type: integer
+      position:
+        type: number
+      priority:
+        type: string
+      project_id:
+        type: integer
+      start_date:
+        type: string
+      story_points:
+        type: integer
+      sub_card_count:
+        type: integer
+      sub_cards_done:
+        type: integer
+      tags:
+        items:
+          $ref: '#/definitions/models.CardTag'
+        type: array
+      time_spent_minutes:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: string
+      watchers:
+        items:
+          $ref: '#/definitions/models.User'
+        type: array
+    type: object
   handlers.tokenResponse:
     properties:
       access_token:
@@ -50,6 +134,9 @@ definitions:
         type: string
       name:
         type: string
+      project_id:
+        description: nil = personal key; set = scoped to that project
+        type: integer
       user_id:
         type: integer
     type: object
@@ -66,7 +153,7 @@ definitions:
       owner_id:
         type: integer
       owner_type:
-        description: '"chat_message" | "conv_message" | "card_comment"'
+        description: '"chat_message" | "conv_message" | "card_comment" | "ticket_message"'
         type: string
       size_bytes:
         type: integer
@@ -89,6 +176,10 @@ definitions:
         type: array
       card_number:
         type: integer
+      closed:
+        type: boolean
+      closed_at:
+        type: string
       column_id:
         type: integer
       comments:
@@ -105,17 +196,35 @@ definitions:
         type: string
       due_date:
         type: string
+      epic:
+        $ref: '#/definitions/models.Epic'
+      epic_id:
+        type: integer
+      external_issue_ref:
+        type: string
+      external_issue_url:
+        type: string
       id:
         type: integer
       labels:
         items:
           $ref: '#/definitions/models.Label'
         type: array
+      parent_card_id:
+        type: integer
       position:
         type: number
       priority:
         type: string
       project_id:
+        type: integer
+      start_date:
+        type: string
+      story_points:
+        type: integer
+      sub_card_count:
+        type: integer
+      sub_cards_done:
         type: integer
       tags:
         items:
@@ -134,6 +243,10 @@ definitions:
     type: object
   models.CardComment:
     properties:
+      attachments:
+        items:
+          $ref: '#/definitions/models.Attachment'
+        type: array
       body:
         type: string
       card_id:
@@ -144,6 +257,10 @@ definitions:
         type: integer
       is_edited:
         type: boolean
+      time_entry_id:
+        type: integer
+      time_spent_minutes:
+        type: integer
       updated_at:
         type: string
       user:
@@ -210,6 +327,121 @@ definitions:
       wip_limit:
         type: integer
     type: object
+  models.Contract:
+    properties:
+      created_at:
+        type: string
+      currency:
+        type: string
+      customer_id:
+        type: integer
+      description:
+        type: string
+      end_date:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      price_per_hour:
+        type: number
+      price_per_km:
+        type: number
+      start_date:
+        type: string
+      time_slots:
+        items:
+          $ref: '#/definitions/models.ContractTimeSlot'
+        type: array
+      updated_at:
+        type: string
+    type: object
+  models.ContractTimeSlot:
+    properties:
+      contract_id:
+        type: integer
+      day_type:
+        type: string
+      end_day_offset:
+        type: integer
+      end_time:
+        type: string
+      hourly_rate:
+        type: number
+      id:
+        type: integer
+      label:
+        type: string
+      multiplication_factor:
+        type: number
+      start_time:
+        type: string
+    type: object
+  models.Customer:
+    properties:
+      billing_city:
+        type: string
+      billing_country:
+        type: string
+      billing_postal_code:
+        type: string
+      billing_street:
+        description: Billing address
+        type: string
+      color:
+        type: string
+      created_at:
+        type: string
+      created_by_id:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      is_hidden:
+        type: boolean
+      logo_url:
+        type: string
+      name:
+        type: string
+      po_reference:
+        type: string
+      position:
+        type: integer
+      time_tracking_only:
+        type: boolean
+      updated_at:
+        type: string
+      vat_number:
+        description: Billing identifiers
+        type: string
+    type: object
+  models.Epic:
+    properties:
+      card_count:
+        description: Computed at query time
+        type: integer
+      color:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      done_count:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+      position:
+        type: number
+      project_id:
+        type: integer
+      status:
+        type: string
+      updated_at:
+        type: string
+    type: object
   models.Label:
     properties:
       color:
@@ -227,6 +459,11 @@ definitions:
     type: object
   models.Project:
     properties:
+      avatar:
+        type: string
+      board_type:
+        description: '"kanban" | "scrum"'
+        type: string
       chat_messages:
         items:
           $ref: '#/definitions/models.ChatMessage'
@@ -237,17 +474,27 @@ definitions:
         items:
           $ref: '#/definitions/models.Column'
         type: array
+      contract:
+        $ref: '#/definitions/models.Contract'
+      contract_id:
+        type: integer
       created_at:
         type: string
       created_by:
         $ref: '#/definitions/models.User'
       created_by_id:
         type: integer
+      customer:
+        $ref: '#/definitions/models.Customer'
+      customer_id:
+        type: integer
       description:
         type: string
       id:
         type: integer
       is_archived:
+        type: boolean
+      is_closed:
         type: boolean
       key_prefix:
         type: string
@@ -261,8 +508,14 @@ definitions:
         type: array
       name:
         type: string
+      position:
+        type: integer
       slug:
         type: string
+      time_tracking_only:
+        type: boolean
+      undeclarable_minutes:
+        type: integer
       updated_at:
         type: string
     type: object
@@ -288,15 +541,35 @@ definitions:
     type: object
   models.User:
     properties:
+      accent_color:
+        description: '"blue" | "red" | "green" | "orange"'
+        type: string
       avatar_url:
         type: string
+      board_enabled:
+        type: boolean
+      calendar_color_mode:
+        description: '"customer" | "project"'
+        type: string
+      can_create_projects:
+        type: boolean
       can_view_reports:
         type: boolean
+      chat_enabled:
+        type: boolean
+      close_to_tray_enabled:
+        type: boolean
       created_at:
+        type: string
+      dashboard_default:
+        description: '"boards" | "tickets"'
         type: string
       date_time_format:
         type: string
       display_name:
+        type: string
+      distance_unit:
+        description: '"km" | "miles"'
         type: string
       email:
         type: string
@@ -308,12 +581,18 @@ definitions:
         type: string
       font_size:
         type: string
+      fri_work_end:
+        type: string
+      fri_work_start:
+        type: string
       global_role:
-        description: '"admin" | "user" | "viewer"'
+        description: '"admin" | "user" | "viewer" | "metrics" | "backup" | "customer"'
         type: string
       gravatar_url:
         description: Computed — not stored in DB
         type: string
+      helpdesk_enabled:
+        type: boolean
       id:
         type: integer
       is_active:
@@ -324,18 +603,67 @@ definitions:
         type: string
       locale:
         type: string
+      lunch_break_minutes:
+        type: integer
+      mon_work_end:
+        type: string
+      mon_work_start:
+        type: string
+      must_change_password:
+        type: boolean
+      password_changed_at:
+        type: string
+      sat_work_end:
+        type: string
+      sat_work_start:
+        type: string
       settings_updated_at:
         type: string
+      show_breadcrumbs:
+        type: boolean
       sidebar_position:
+        type: string
+      sun_work_end:
+        type: string
+      sun_work_start:
         type: string
       theme:
         description: '"light" | "dark" | "system"'
         type: string
+      thu_work_end:
+        type: string
+      thu_work_start:
+        type: string
+      time_notation:
+        description: '"decimal" | "hhmm"'
+        type: string
+      time_tracking_enabled:
+        type: boolean
+      time_tracking_view_default:
+        description: '"table" | "calendar"'
+        type: string
+      time_tracking_viewer:
+        type: boolean
       timezone:
+        type: string
+      totp_enabled:
+        type: boolean
+      tray_icon_enabled:
+        type: boolean
+      tue_work_end:
+        type: string
+      tue_work_start:
         type: string
       updated_at:
         type: string
       username:
+        type: string
+      wed_work_end:
+        type: string
+      wed_work_start:
+        type: string
+      week_start:
+        description: '"monday" | "sunday"'
         type: string
     type: object
 host: localhost:8080
@@ -594,6 +922,11 @@ paths:
       - auth
   /projects:
     get:
+      parameters:
+      - description: Set to 'true' to include closed projects
+        in: query
+        name: include_closed
+        type: string
       produces:
       - application/json
       responses:
@@ -745,6 +1078,58 @@ paths:
       summary: Update a project (owner/admin only)
       tags:
       - projects
+  /projects/{projectSlug}/api-keys:
+    get:
+      parameters:
+      - description: Project slug
+        in: path
+        name: projectSlug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.APIKey'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List API keys for a project
+      tags:
+      - api-keys
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Project slug
+        in: path
+        name: projectSlug
+        required: true
+        type: string
+      - description: Key name
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a project-scoped API key
+      tags:
+      - api-keys
   /projects/{projectSlug}/cards/{cardId}:
     delete:
       parameters:
@@ -1146,7 +1531,33 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Search cards, topics, and projects
+      summary: Search cards, messages, tickets, and time entries
+      tags:
+      - search
+  /search/replace/apply:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Apply a previously previewed search-and-replace to an explicit set
+        of rows
+      tags:
+      - search
+  /search/replace/preview:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Preview a search-and-replace across cards, card comments, DMs, tickets,
+        and time entries
       tags:
       - search
   /system/settings:
@@ -1163,6 +1574,60 @@ paths:
       tags:
       - system
   /ticket/{projectSlug}/cards:
+    get:
+      description: |-
+        Returns open cards by default, ordered by column then position.
+        Filter by lane with column_id or column (case-insensitive name).
+      parameters:
+      - description: Project slug
+        in: path
+        name: projectSlug
+        required: true
+        type: string
+      - description: Only cards in this column
+        in: query
+        name: column_id
+        type: integer
+      - description: Only cards in the column with this name (case-insensitive)
+        in: query
+        name: column
+        type: string
+      - description: Also return closed cards
+        in: query
+        name: include_closed
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.ticketAPICard'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: List a project's cards via API key (read-only)
+      tags:
+      - ticket
     post:
       consumes:
       - application/json
@@ -1207,6 +1672,49 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Create a card via API key (CI/CD integration)
+      tags:
+      - ticket
+  /ticket/{projectSlug}/cards/{cardId}:
+    get:
+      parameters:
+      - description: Project slug
+        in: path
+        name: projectSlug
+        required: true
+        type: string
+      - description: Card ID
+        in: path
+        name: cardId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.ticketAPICard'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get a single card via API key (read-only)
       tags:
       - ticket
   /ticket/{projectSlug}/cards/{cardId}/comments:
@@ -1302,6 +1810,40 @@ paths:
       summary: Move a card to a different column via API key
       tags:
       - ticket
+  /ticket/{projectSlug}/columns:
+    get:
+      parameters:
+      - description: Project slug
+        in: path
+        name: projectSlug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Column'
+            type: array
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: List a project's columns (lanes) via API key
+      tags:
+      - ticket
   /users:
     get:
       produces:
@@ -1318,6 +1860,20 @@ paths:
       summary: List all active users
       tags:
       - users
+  /version:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Server version
+      tags:
+      - system
 securityDefinitions:
   ApiKeyAuth:
     description: API key for the Ticket API (CI/CD automation).

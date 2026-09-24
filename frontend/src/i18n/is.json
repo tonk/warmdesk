@@ -986,7 +986,10 @@
     "docs_auth": "Auðkenna með haus",
     "docs_add": "Bæta við miða",
     "docs_comment": "Bæta við athugasemd",
-    "docs_move": "Færa miða"
+    "docs_move": "Færa miða",
+    "docs_columns": "Sýna dálka",
+    "docs_list": "Sýna miða",
+    "docs_get": "Sækja miða"
   },
   "gantt": {
     "title": "Gantt-rit",

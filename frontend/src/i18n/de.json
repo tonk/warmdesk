@@ -950,7 +950,10 @@
     "docs_auth": "Authentifizieren mit Header",
     "docs_add": "Ticket hinzufügen",
     "docs_comment": "Kommentar hinzufügen",
-    "docs_move": "Ticket verschieben"
+    "docs_move": "Ticket verschieben",
+    "docs_columns": "Spalten auflisten",
+    "docs_list": "Tickets auflisten",
+    "docs_get": "Ticket abrufen"
   },
   "report": {
     "title": "Zeitbericht",
