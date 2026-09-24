@@ -1,0 +1,55 @@
+---
+title: "v0.30.0: Managing Cards End to End Through the Ticket API"
+date: "2026-09-24"
+author: "Ton Kersten"
+description: "The Ticket API can now update a card's fields and close or reopen it, with a partial PATCH that only touches what you send. Cards can be addressed by key (ANSI-12) and lanes by name, and creating a card takes priority, dates, and story points."
+draft: false
+---
+:doctype: article
+:icons!:
+
+`v0.29.0` taught the Ticket API to read a board. That immediately showed the next gap: an agent that had read the Backlog was asked to set a priority and a start date on three cards and fix the title of a fourth, and it couldn't. The API could create, comment, and move, but not change a card that already existed.
+
+`v0.30.0` closes that gap, and smooths off a few rough edges while it's at it.
+
+== Updating a card
+
+[source,bash]
+----
+curl -X PATCH \
+  -H "X-API-Key: $WARMDESK_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"priority": "medium", "start_date": "2026-09-24"}' \
+  "https://warmdesk.example.com/api/v1/ticket/ansible-fundamentals/cards/ANSI-4"
+----
+
+It's a *partial* update: only the fields in the body change, so sending just a priority never wipes the title. You can set `title`, `description`, `priority` (`none`, `low`, `medium`, `high`, `critical`), `start_date`, `due_date`, and `story_points`, and `"closed": true` or `false` to close or reopen the card.
+
+A few rules keep it predictable:
+
+* An explicit `null` clears a date or the story points.
+* Dates can be `YYYY-MM-DD` or a full RFC 3339 timestamp; a due date before the start date is refused.
+* Anything invalid, including a field the endpoint doesn't know, returns a `400` and changes *nothing*, not even the valid fields in the same request.
+* It needs member access, like the other write endpoints.
+
+Every change shows up in the card's activity history under the API key's user, and open boards update live.
+
+== Cards by key, lanes by name
+
+Scripts and people think in `ANSI-12` and "Done", not in database ids. Every Ticket API endpoint that takes a card now accepts its key as well as its numeric id, and creating or moving a card accepts `"column": "Done"` (case-insensitive) instead of a `column_id`. A CI step that closes a card on deploy no longer needs a lookup first:
+
+[source,bash]
+----
+curl -X PATCH -H "X-API-Key: $WARMDESK_KEY" -H "Content-Type: application/json" \
+  -d '{"column": "Done"}' "$BASE/my-project/cards/PRJ-42/move"
+curl -X PATCH -H "X-API-Key: $WARMDESK_KEY" -H "Content-Type: application/json" \
+  -d '{"closed": true}'   "$BASE/my-project/cards/PRJ-42"
+----
+
+== Richer card creation
+
+`POST /cards` now also takes `priority`, `start_date`, `due_date`, and `story_points`, validated the same way as an update. Until now `priority` was silently dropped on create, so an invalid value is now a `400` rather than ignored. Unknown fields are still ignored on create, so existing pipelines keep working. Create and move also return the card with its `key` and `column_name`.
+
+== Where to find it
+
+The full reference, with a table of fields and error codes, is in the link:../../docs/api/#_ticket_api[API reference]; the endpoints are also listed in *Project Settings → API Keys* and in the Bruno and Postman collections. link:../../download/[Download v0.30.0] or upgrade in place; there are no database changes.

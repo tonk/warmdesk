@@ -8,9 +8,10 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.29.0)
+## Latest release (v0.30.0)
 
-- **Added** — Read-only Ticket API endpoints: list a project's columns and cards (filterable by lane, e.g. `?column=Backlog`) or fetch a single card with its comments, using the same `X-API-Key` as the write endpoints.
+- **Added** — Update cards through the Ticket API: change title, description, priority, dates, or story points, and close or reopen a card, with a partial `PATCH` that only touches the fields you send.
+- **Added** — Refer to cards by key (`ANSI-12`) and to lanes by name (`"column": "Done"`) in Ticket API calls, and set priority, dates, and story points when creating a card.
 
 ## Experiment
 

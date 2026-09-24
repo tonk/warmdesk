@@ -897,3 +897,8 @@ Create an application that has all these features and requirements
 - Add Copy/Paste to the time-tracking calendar's right-click menu: copy a block, then paste it into an empty slot to create a new entry with the same customer, project, activity, distance, and location
 - Add read-only Ticket API endpoints (`GET /api/v1/ticket/{slug}/columns`, `/cards`, `/cards/{id}`) so an API key — including a project-scoped one — can list lanes and cards (filterable by column name or id, open cards only unless include_closed=true) or fetch a card with its comments without mutating anything
 - Regenerate the Swagger spec, restoring the card comment list/create endpoints whose annotations were dropped in v0.9.0
+- Add PATCH /api/v1/ticket/{slug}/cards/{id} for partial card updates via API key (title, description, priority, closed, start/due date, story points), with explicit null clearing nullable fields, strict validation that rejects unknown or invalid fields without applying anything, history entries under the key's user, and a live board update
+- Accept a card key (e.g. ANSI-12) wherever the Ticket API takes a card id, and a lane name ("column") wherever it takes a column_id
+- Accept priority, start/due date, and story points when creating a card through the Ticket API, and return the enriched card (key, column_name) from create and move
+- Bring the website's user guide, admin guide, and API reference up to date, add release posts for v0.20–v0.29, and fix broken download and docs links in older blog posts
+- Fix API key docs that still advertised the unsupported ?api_key= query parameter

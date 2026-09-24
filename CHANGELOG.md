@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.30.0 — 2026-09-24
+
+### Added
+- **Update cards through the Ticket API** — `PATCH /api/v1/ticket/{slug}/cards/{id}` changes a card's title, description, priority, start/due date, or story points, and can close or reopen it. Only the fields you send are changed; `null` clears a date or story points; any invalid or unknown field is rejected with a `400` and nothing is changed. Changes appear in the card's activity history and update open boards live.
+- **Address cards by key** — every Ticket API endpoint that takes a card now accepts its key (e.g. `ANSI-12`) as well as the numeric id.
+- **Lanes by name** — creating or moving a card through the Ticket API accepts `"column": "Done"` (case-insensitive) as an alternative to `column_id`.
+- **More fields when creating a card** — `POST /api/v1/ticket/{slug}/cards` now accepts `priority`, `start_date`, `due_date`, and `story_points`.
+
+### Changed
+- Creating a card through the Ticket API with an invalid `priority` now returns a `400` instead of silently ignoring it.
+- The Ticket API's create and move endpoints now return the card with its `key` and `column_name`, the same shape as `GET /cards/{id}`.
+
+### Fixed
+- **Website documentation had fallen behind** — the online user guide, admin guide, and API reference are up to date again (the API reference documented Ticket API paths and fields that don't exist), release posts for v0.20–v0.29 are published, and the download links in older blog posts no longer lead to a 404.
+- **API key docs promised a `?api_key=` query parameter** that isn't supported; they now document the `X-API-Key` header and `Authorization: ApiKey <key>`, and explain personal vs project-scoped keys.
+
 ## v0.29.0 — 2026-09-24
 
 ### Added
