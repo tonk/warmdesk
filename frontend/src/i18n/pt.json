@@ -437,7 +437,12 @@
     "hide_closed": "Ocultar fechados",
     "board_closed": "Este quadro está fechado.",
     "close_board": "Fechar quadro",
-    "reopen_board": "Reabrir quadro"
+    "reopen_board": "Reabrir quadro",
+    "view_table": "Vista de tabela",
+    "view_lanes": "Vista de colunas",
+    "card_ref": "Ref",
+    "table_column": "Coluna",
+    "table_no_cards": "Nenhum cartão para mostrar."
   },
   "chat": {
     "title": "Chat da equipa",

@@ -460,7 +460,12 @@
     "hide_closed": "Hide Closed",
     "board_closed": "This board is closed.",
     "close_board": "Close Board",
-    "reopen_board": "Reopen Board"
+    "reopen_board": "Reopen Board",
+    "view_table": "Table View",
+    "view_lanes": "Lane View",
+    "card_ref": "Ref",
+    "table_column": "Column",
+    "table_no_cards": "No cards to show."
   },
   "chat": {
     "title": "Team Chat",

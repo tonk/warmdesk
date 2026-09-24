@@ -437,7 +437,12 @@
     "hide_closed": "Nascondi chiusi",
     "board_closed": "Questa bacheca è chiusa.",
     "close_board": "Chiudi bacheca",
-    "reopen_board": "Riapri bacheca"
+    "reopen_board": "Riapri bacheca",
+    "view_table": "Vista tabella",
+    "view_lanes": "Vista colonne",
+    "card_ref": "Rif",
+    "table_column": "Colonna",
+    "table_no_cards": "Nessuna scheda da mostrare."
   },
   "chat": {
     "title": "Chat del team",

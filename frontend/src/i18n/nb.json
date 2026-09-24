@@ -437,7 +437,12 @@
     "hide_closed": "Skjul lukkede",
     "board_closed": "Dette boardet er stengt.",
     "close_board": "Lukk board",
-    "reopen_board": "Gjenåpne board"
+    "reopen_board": "Gjenåpne board",
+    "view_table": "Tabellvisning",
+    "view_lanes": "Kolonnevisning",
+    "card_ref": "Ref",
+    "table_column": "Kolonne",
+    "table_no_cards": "Ingen kort å vise."
   },
   "chat": {
     "title": "Teamchat",

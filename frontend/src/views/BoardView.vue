@@ -33,6 +33,12 @@
           💬 {{ $t('topics.title') }}
         </RouterLink>
         <button
+          class="btn btn-ghost btn-sm view-toggle-btn"
+          :aria-pressed="viewMode === 'table'"
+          :title="viewMode === 'table' ? $t('board.view_lanes') : $t('board.view_table')"
+          @click="toggleViewMode"
+        >{{ viewMode === 'table' ? '🗂' : '☰' }} {{ viewMode === 'table' ? $t('board.view_lanes') : $t('board.view_table') }}</button>
+        <button
           :class="['btn btn-sm', showClosed ? 'btn-secondary' : 'btn-warning']"
           @click="toggleShowClosed"
         >{{ showClosed ? $t('board.hide_closed') : $t('board.show_closed') }}<span v-if="!showClosed && closedCardCount > 0" class="closed-count-badge">{{ closedCardCount }}</span></button>
@@ -48,12 +54,12 @@
     </div>
 
     <div class="board-body">
-      <div class="board-columns-wrap">
-        <div v-if="boardStore.loading" class="board-loading">
-          <div class="spinner" style="width:40px;height:40px;border-width:3px"></div>
-        </div>
+      <div v-if="boardStore.loading" class="board-loading">
+        <div class="spinner" style="width:40px;height:40px;border-width:3px"></div>
+      </div>
 
-        <div v-else class="board-columns" ref="columnsEl">
+      <div v-else-if="viewMode === 'lanes'" class="board-columns-wrap">
+        <div class="board-columns" ref="columnsEl">
           <BoardColumn
             v-for="col in boardStore.columns"
             :key="col.id"
@@ -69,6 +75,85 @@
             @edit-column="openEditColumn"
           />
         </div>
+      </div>
+
+      <div v-else class="board-table-wrap">
+        <table class="data-table board-table">
+          <thead>
+            <tr>
+              <th scope="col">{{ $t('board.card_ref') }}</th>
+              <th scope="col">
+                <button type="button" class="th-sort-btn" @click="toggleTableSort('title')">
+                  {{ $t('board.card_title') }}
+                  <span v-if="tableSortField === 'title'" aria-hidden="true">{{ tableSortDir === 'asc' ? '▲' : '▼' }}</span>
+                </button>
+              </th>
+              <th scope="col">
+                <button type="button" class="th-sort-btn" @click="toggleTableSort('column')">
+                  {{ $t('board.table_column') }}
+                  <span v-if="tableSortField === 'column'" aria-hidden="true">{{ tableSortDir === 'asc' ? '▲' : '▼' }}</span>
+                </button>
+              </th>
+              <th scope="col">
+                <button type="button" class="th-sort-btn" @click="toggleTableSort('priority')">
+                  {{ $t('board.priority') }}
+                  <span v-if="tableSortField === 'priority'" aria-hidden="true">{{ tableSortDir === 'asc' ? '▲' : '▼' }}</span>
+                </button>
+              </th>
+              <th scope="col">
+                <button type="button" class="th-sort-btn" @click="toggleTableSort('assignee')">
+                  {{ $t('board.assignee') }}
+                  <span v-if="tableSortField === 'assignee'" aria-hidden="true">{{ tableSortDir === 'asc' ? '▲' : '▼' }}</span>
+                </button>
+              </th>
+              <th scope="col">
+                <button type="button" class="th-sort-btn" @click="toggleTableSort('due_date')">
+                  {{ $t('board.due_date') }}
+                  <span v-if="tableSortField === 'due_date'" aria-hidden="true">{{ tableSortDir === 'asc' ? '▲' : '▼' }}</span>
+                </button>
+              </th>
+              <th scope="col">
+                <button type="button" class="th-sort-btn" @click="toggleTableSort('story_points')">
+                  {{ $t('board.story_points') }}
+                  <span v-if="tableSortField === 'story_points'" aria-hidden="true">{{ tableSortDir === 'asc' ? '▲' : '▼' }}</span>
+                </button>
+              </th>
+              <th scope="col">
+                <button type="button" class="th-sort-btn" @click="toggleTableSort('time_spent')">
+                  {{ $t('board.time_spent') }}
+                  <span v-if="tableSortField === 'time_spent'" aria-hidden="true">{{ tableSortDir === 'asc' ? '▲' : '▼' }}</span>
+                </button>
+              </th>
+              <th scope="col">{{ $t('board.closed') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="card in sortedTableCards" :key="card.id" :class="{ 'row-closed': card.closed }">
+              <td>{{ tableCardRef(card) }}</td>
+              <td>
+                <button type="button" class="row-title-btn" @click="openCardDetail(card)">{{ card.title }}</button>
+              </td>
+              <td>
+                <span class="table-column-dot" :style="{ background: card.columnColor || 'var(--color-text-muted)' }" aria-hidden="true"></span>
+                {{ card.columnName }}
+              </td>
+              <td>
+                <span v-if="card.priority !== 'none'" :class="`badge priority-${card.priority}`">{{ $t(`board.priorities.${card.priority}`) }}</span>
+              </td>
+              <td>{{ card.assignee ? (card.assignee.display_name || card.assignee.username) : '—' }}<span v-if="(card.assignees || []).length > 1">, +{{ (card.assignees || []).length - 1 }}</span></td>
+              <td>{{ card.due_date ? formatDate(card.due_date) : '—' }}</td>
+              <td>{{ card.story_points ?? '—' }}</td>
+              <td>{{ fmtCardTime(card.time_spent_minutes) }}</td>
+              <td>
+                <span v-if="card.closed" class="badge">{{ $t('board.closed') }}</span>
+                <span v-else>—</span>
+              </td>
+            </tr>
+            <tr v-if="!sortedTableCards.length">
+              <td colspan="9" class="table-empty">{{ $t('board.table_no_cards') }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -146,6 +231,7 @@ import { useUIStore } from '@/stores/ui'
 import { useSidebarStore } from '@/stores/sidebar'
 import { useAuthStore } from '@/stores/auth'
 import { useWebSocket } from '@/composables/useWebSocket'
+import { useDateFormat } from '@/composables/useDateFormat'
 import { projectsApi } from '@/api/projects'
 import { resolveAssetUrl } from '@/api/serverConfig'
 
@@ -158,6 +244,7 @@ const projectStore = useProjectStore()
 const ui = useUIStore()
 const sidebarStore = useSidebarStore()
 const auth = useAuthStore()
+const { formatDate } = useDateFormat()
 
 const showAddColumn = ref(false)
 const showEditColumn = ref(false)
@@ -176,6 +263,80 @@ function toggleShowClosed() {
 const closedCardCount = computed(() =>
   boardStore.columns.reduce((sum, col) => sum + (col.cards || []).filter(c => c.closed).length, 0)
 )
+
+const viewMode = ref(localStorage.getItem('board_view_mode') === 'table' ? 'table' : 'lanes')
+function toggleViewMode() {
+  viewMode.value = viewMode.value === 'lanes' ? 'table' : 'lanes'
+  localStorage.setItem('board_view_mode', viewMode.value)
+}
+
+const tableSortField = ref('')
+const tableSortDir = ref('asc')
+function toggleTableSort(field) {
+  if (tableSortField.value === field) {
+    tableSortDir.value = tableSortDir.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    tableSortField.value = field
+    tableSortDir.value = 'asc'
+  }
+}
+
+const PRIORITY_ORDER = { none: 0, low: 1, medium: 2, high: 3, critical: 4 }
+
+const allTableCards = computed(() => {
+  const rows = []
+  for (const col of boardStore.columns) {
+    const cards = showClosed.value ? (col.cards || []) : (col.cards || []).filter(c => !c.closed)
+    for (const card of cards) rows.push({ ...card, columnName: col.name, columnColor: col.color })
+  }
+  return rows
+})
+
+const sortedTableCards = computed(() => {
+  const rows = allTableCards.value
+  const field = tableSortField.value
+  if (!field) return rows
+  return [...rows].sort((a, b) => {
+    let av, bv
+    if (field === 'due_date') {
+      av = a.due_date ? new Date(a.due_date).getTime() : Infinity
+      bv = b.due_date ? new Date(b.due_date).getTime() : Infinity
+    } else if (field === 'priority') {
+      av = PRIORITY_ORDER[a.priority] ?? 0
+      bv = PRIORITY_ORDER[b.priority] ?? 0
+    } else if (field === 'assignee') {
+      av = (a.assignee?.display_name || a.assignee?.username || '').toLowerCase()
+      bv = (b.assignee?.display_name || b.assignee?.username || '').toLowerCase()
+    } else if (field === 'column') {
+      av = (a.columnName || '').toLowerCase()
+      bv = (b.columnName || '').toLowerCase()
+    } else if (field === 'story_points') {
+      av = a.story_points ?? -1
+      bv = b.story_points ?? -1
+    } else if (field === 'time_spent') {
+      av = a.time_spent_minutes ?? 0
+      bv = b.time_spent_minutes ?? 0
+    } else {
+      av = (a.title || '').toLowerCase()
+      bv = (b.title || '').toLowerCase()
+    }
+    if (av < bv) return tableSortDir.value === 'asc' ? -1 : 1
+    if (av > bv) return tableSortDir.value === 'asc' ? 1 : -1
+    return 0
+  })
+})
+
+function tableCardRef(card) {
+  const prefix = projectStore.currentProject?.key_prefix
+  return prefix && card.card_number ? `${prefix}-${card.card_number}` : '—'
+}
+
+function fmtCardTime(minutes) {
+  if (!minutes) return '0m'
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  return h > 0 ? (m > 0 ? `${h}h ${m}m` : `${h}h`) : `${m}m`
+}
 
 const projectMembers = ref([])
 
@@ -498,4 +659,52 @@ async function onCardMoved({ cardId, fromColumnId, toColumnId, newIndex }) {
   align-items: center;
   border-bottom: 1px solid var(--color-warning-border, #fde68a);
 }
+
+.view-toggle-btn[aria-pressed="true"] { background: var(--color-primary); color: #fff; }
+
+.board-table-wrap { height: 100%; overflow: auto; padding: 20px; }
+
+.board-table { width: 100%; border-collapse: collapse; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); }
+.board-table th, .board-table td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--color-border); font-size: 13px; vertical-align: middle; white-space: nowrap; }
+.board-table th { font-weight: 600; color: var(--color-text-muted); font-size: 12px; background: var(--color-bg); }
+.board-table tbody tr:hover { background: var(--color-bg); }
+.board-table tr.row-closed { opacity: 0.6; }
+
+.th-sort-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.th-sort-btn:hover { color: var(--color-text); }
+
+.row-title-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: var(--color-primary);
+  text-align: left;
+  cursor: pointer;
+  white-space: normal;
+}
+.row-title-btn:hover { text-decoration: underline; }
+
+.table-column-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.table-empty { text-align: center; color: var(--color-text-muted); padding: 24px; }
 </style>

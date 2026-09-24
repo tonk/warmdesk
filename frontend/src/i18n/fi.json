@@ -437,7 +437,12 @@
     "hide_closed": "Piilota suljetut",
     "board_closed": "Tämä taulu on suljettu.",
     "close_board": "Sulje taulu",
-    "reopen_board": "Avaa taulu uudelleen"
+    "reopen_board": "Avaa taulu uudelleen",
+    "view_table": "Taulukkonäkymä",
+    "view_lanes": "Sarakenäkymä",
+    "card_ref": "Viite",
+    "table_column": "Sarake",
+    "table_no_cards": "Ei kortteja näytettäväksi."
   },
   "chat": {
     "title": "Tiimichatti",

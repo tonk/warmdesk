@@ -437,7 +437,12 @@
     "hide_closed": "Dölj stängda",
     "board_closed": "Denna anslagstavla är stängd.",
     "close_board": "Stäng anslagstavla",
-    "reopen_board": "Öppna anslagstavla igen"
+    "reopen_board": "Öppna anslagstavla igen",
+    "view_table": "Tabellvy",
+    "view_lanes": "Kolumnvy",
+    "card_ref": "Ref",
+    "table_column": "Kolumn",
+    "table_no_cards": "Inga kort att visa."
   },
   "chat": {
     "title": "Teamchatt",

@@ -437,7 +437,12 @@
     "hide_closed": "Fela lokuð",
     "board_closed": "Þetta borð er lokað.",
     "close_board": "Loka borði",
-    "reopen_board": "Opna borð aftur"
+    "reopen_board": "Opna borð aftur",
+    "view_table": "Töfluskoðun",
+    "view_lanes": "Dálkaskoðun",
+    "card_ref": "Tilv",
+    "table_column": "Dálkur",
+    "table_no_cards": "Engin spjöld til að sýna."
   },
   "chat": {
     "title": "Liðsspjall",

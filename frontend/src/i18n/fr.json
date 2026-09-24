@@ -437,7 +437,12 @@
     "hide_closed": "Masquer les fermées",
     "board_closed": "Ce tableau est fermé.",
     "close_board": "Fermer le tableau",
-    "reopen_board": "Rouvrir le tableau"
+    "reopen_board": "Rouvrir le tableau",
+    "view_table": "Vue tableau",
+    "view_lanes": "Vue colonnes",
+    "card_ref": "Réf",
+    "table_column": "Colonne",
+    "table_no_cards": "Aucune carte à afficher."
   },
   "chat": {
     "title": "Chat d'équipe",

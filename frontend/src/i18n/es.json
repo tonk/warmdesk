@@ -437,7 +437,12 @@
     "hide_closed": "Ocultar cerrados",
     "board_closed": "Este tablero está cerrado.",
     "close_board": "Cerrar tablero",
-    "reopen_board": "Reabrir tablero"
+    "reopen_board": "Reabrir tablero",
+    "view_table": "Vista de tabla",
+    "view_lanes": "Vista de columnas",
+    "card_ref": "Ref",
+    "table_column": "Columna",
+    "table_no_cards": "No hay tarjetas para mostrar."
   },
   "chat": {
     "title": "Chat del equipo",
