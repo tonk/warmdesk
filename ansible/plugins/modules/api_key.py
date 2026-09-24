@@ -25,7 +25,8 @@ notes:
   - Personal keys authenticate as the user whose credentials are used to call
     this module.  They carry the same permissions as that user.
   - Project keys are scoped to a single project and authenticate via the
-    C(X-API-Key) header or C(?api_key=) query parameter on the Ticket API.
+    C(X-API-Key) header on any route for that project (including the Ticket
+    API).  Query-parameter keys are not supported.
   - Revoking a key is permanent.  To rotate a key, delete it (C(state=absent))
     and re-create it in a subsequent task; the new plain-text key will be
     returned at creation time.

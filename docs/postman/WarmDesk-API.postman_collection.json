@@ -2708,7 +2708,7 @@
             "url": {
               "raw": "{{baseUrl}}/api/v1/ticket/{{projectSlug}}/cards"
             },
-            "description": "Authenticate with X-API-Key header or ?api_key= query param.\n  Generate an API key in User Settings or Project Settings.",
+            "description": "Authenticate with the X-API-Key header.\n  Generate an API key in User Settings or Project Settings.",
             "auth": {
               "type": "noauth"
             },

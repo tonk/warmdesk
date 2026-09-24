@@ -600,7 +600,7 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 	if !ttMode {
 		v1.GET("/ws/:projectSlug", wsHandler.HandleWS)
 
-		// Ticket API — authenticated via X-API-Key header or ?api_key= query param
+		// Ticket API — authenticated via X-API-Key header
 		ticket := v1.Group("/ticket")
 		ticket.Use(middleware.APIKeyAuth())
 		{

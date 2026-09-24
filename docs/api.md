@@ -98,8 +98,16 @@ The frontend refreshes them silently via `POST /api/v1/auth/refresh` using the
 
 ### API Keys (automation / CI-CD)
 
-API keys are personal (per user, not per project). Generate one in the UI under
-**Project Settings → API Keys**, or via the API while authenticated with a JWT:
+There are two kinds of key, both acting as the user who created them:
+
+- **Personal keys** (**User Settings → API Keys**, or the API call below) work
+  across all your projects.
+- **Project keys** (**Project Settings → API Keys**) are locked to one project
+  and only work on routes that contain that project's slug
+  (`/api/v1/projects/{slug}/...`, `/api/v1/ticket/{slug}/...`); anything else
+  returns `key is scoped to a specific project`.
+
+Create a personal key via the API while authenticated with a JWT:
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/api-keys \
@@ -116,6 +124,10 @@ Pass the key in the `X-API-Key` header:
 ```
 X-API-Key: <key>
 ```
+
+Tools that can only set the `Authorization` header (e.g. Prometheus) can use
+`Authorization: ApiKey <key>` instead. Keys in a query parameter
+(`?api_key=`) are not accepted.
 
 API keys work on all authenticated endpoints, not just the Ticket API.
 

@@ -206,7 +206,7 @@ See [INSTALL.md](INSTALL.md) for full options and deployment instructions.
 
 Automate ticket management from CI/CD pipelines or external tools using API keys.
 
-API keys are personal (per user). Generate one under **Project Settings → API Keys**, or via the API while authenticated with a JWT:
+API keys act as the user who created them. Personal keys (**User Settings → API Keys**) work across all your projects; project keys (**Project Settings → API Keys**) are locked to that one project. Create a personal key via the API while authenticated with a JWT:
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/api-keys \
@@ -226,7 +226,7 @@ POST  /api/v1/ticket/{slug}/cards/{id}/comments      — add a comment
 PATCH /api/v1/ticket/{slug}/cards/{id}/move          — move to a column
 ```
 
-Pass the key in the `X-API-Key` header or as `?api_key=` query parameter. API keys work on all authenticated endpoints, not just the Ticket API.
+Pass the key in the `X-API-Key` header (or as `Authorization: ApiKey <key>`); query-parameter keys are not supported. API keys work on all authenticated endpoints, not just the Ticket API.
 
 ## Git Integration
 
