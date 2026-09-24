@@ -101,6 +101,7 @@ const auth = useAuthStore()
 
 const ctxMenu = ref(null)
 const modalState = ref(null) // { entry } | { prefill }
+const copiedEntry = ref(null) // entry last copied via the right-click menu, ready to paste
 
 const zoomIndex = ref(loadZoomIndex())
 const pxPerHour = computed(() => ZOOM_LEVELS[zoomIndex.value])
@@ -146,7 +147,10 @@ function onSlotContextMenu({ x, y, date, startTime }) {
   if (props.readOnly) return
   ctxMenu.value = {
     x, y,
-    items: [{ key: 'create', label: t('timeTracking.new_entry') }],
+    items: [
+      { key: 'create', label: t('timeTracking.new_entry') },
+      { key: 'paste', label: t('common.paste'), disabled: !copiedEntry.value },
+    ],
     target: { date, startTime },
   }
 }
@@ -157,6 +161,7 @@ function onBlockContextMenu({ x, y, entry }) {
     x, y,
     items: [
       { key: 'edit', label: t('common.edit') },
+      { key: 'copy', label: t('common.copy') },
       { key: 'delete', label: t('common.delete'), danger: true },
     ],
     target: entry,
@@ -170,6 +175,29 @@ function onCtxSelect(key) {
   if (key === 'create') openCreateModal(target)
   else if (key === 'edit') openEditModal(target)
   else if (key === 'delete') emit('delete-entry', target)
+  else if (key === 'copy') copiedEntry.value = target
+  else if (key === 'paste') pasteEntry(target)
+}
+
+function pasteEntry({ date, startTime }) {
+  if (props.readOnly || !copiedEntry.value) return
+  const source = copiedEntry.value
+  const startMinutes = parseWallClock(startTime)
+  const endMinutes = Math.min(24 * 60 - 1, startMinutes + source.minutes)
+  emit('save-entry', {
+    id: undefined,
+    customer_id: source.customer_id ?? null,
+    project_id: source.project_id ?? null,
+    contract_id: source.contract_id ?? null,
+    date,
+    minutes: endMinutes - startMinutes,
+    description: source.description || '',
+    is_holiday: source.is_holiday || false,
+    start_time: fmtWallClock(startMinutes),
+    end_time: fmtWallClock(endMinutes),
+    distance: source.distance ?? null,
+    location_id: source.location_id ?? null,
+  })
 }
 
 function openEditModal(entry) {
