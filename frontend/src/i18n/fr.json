@@ -948,9 +948,11 @@
     "personal_description": "Les clés personnelles donnent un accès complet en tant que vous sur tous vos projets.",
     "docs_title": "Points de terminaison de l'API",
     "docs_auth": "Authentifiez-vous avec l'en-tête",
+    "docs_card_ref": ":cardId est l'identifiant numérique de la carte ou sa clé (ex. {example}) ; les colonnes s'indiquent par id (column_id) ou par nom (column).",
     "docs_add": "Ajouter un ticket",
     "docs_comment": "Ajouter un commentaire",
     "docs_move": "Déplacer un ticket",
+    "docs_update": "Modifier un ticket",
     "docs_columns": "Lister les colonnes",
     "docs_list": "Lister les tickets",
     "docs_get": "Obtenir un ticket"

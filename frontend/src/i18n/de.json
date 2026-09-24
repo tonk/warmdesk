@@ -948,9 +948,11 @@
     "personal_description": "Persönliche Schlüssel gewähren vollen Zugriff als Sie über alle Ihre Projekte hinweg.",
     "docs_title": "API-Endpunkte",
     "docs_auth": "Authentifizieren mit Header",
+    "docs_card_ref": ":cardId ist die numerische Karten-ID oder ihr Schlüssel (z. B. {example}); Spalten per ID (column_id) oder Name (column).",
     "docs_add": "Ticket hinzufügen",
     "docs_comment": "Kommentar hinzufügen",
     "docs_move": "Ticket verschieben",
+    "docs_update": "Ticket aktualisieren",
     "docs_columns": "Spalten auflisten",
     "docs_list": "Tickets auflisten",
     "docs_get": "Ticket abrufen"

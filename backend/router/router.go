@@ -609,6 +609,7 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 			ticket.GET("/:projectSlug/cards/:cardId", handlers.TicketGetCard)
 			ticket.POST("/:projectSlug/cards", handlers.TicketAdd)
 			ticket.POST("/:projectSlug/cards/:cardId/comments", handlers.TicketComment)
+			ticket.PATCH("/:projectSlug/cards/:cardId", handlers.TicketUpdateCard)
 			ticket.PATCH("/:projectSlug/cards/:cardId/move", handlers.TicketMove)
 		}
 	}

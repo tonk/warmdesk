@@ -135,10 +135,18 @@ API keys work on all authenticated endpoints, not just the Ticket API.
 
 ## 2. Ticket API
 
-The Ticket API lets CI/CD pipelines and external tools read cards, create
-cards, add comments, and move cards without a user account. All endpoints sit
+The Ticket API lets CI/CD pipelines and external tools read cards, create and
+update cards, add comments, and move cards without a user account. All endpoints sit
 under `/api/v1/ticket/` and require API key authentication. The read endpoints
 (`GET`) need only viewer access to the project and never modify anything.
+
+**Addressing cards and lanes**
+
+- `{cardId}` in a path is either the card's numeric `id` or its key, e.g.
+  `ANSI-12` (prefix case-insensitive). A key or id from another project always
+  returns `404`.
+- Wherever a lane is expected (create, move), send either `column_id` (number)
+  or `column` (lane name, case-insensitive) — not both.
 
 ### List columns (lanes)
 
@@ -196,21 +204,25 @@ POST /api/v1/ticket/{projectSlug}/cards
 {
   "title":       "Deploy v1.2.3 to production",
   "description": "Automated deploy triggered by tag v1.2.3",
-  "column_id":   5
+  "column":      "Backlog",
+  "priority":    "high"
 }
 ```
 
 | Field | Type | Required | Notes |
 |-------|------|----------|-------|
 | `title` | string | yes | Card title |
+| `column_id` / `column` | number / string | one of them | Target lane by id, or by name (case-insensitive) |
 | `description` | string | no | Markdown body |
-| `column_id` | number | yes | Target column ID (must belong to the project) |
+| `priority` | string | no | `none` (default), `low`, `medium`, `high`, `critical` |
+| `start_date` / `due_date` | string | no | `YYYY-MM-DD` or RFC 3339; due must not be before start |
+| `story_points` | integer | no | Non-negative |
 
-Note: `priority` is not accepted by this endpoint — new cards are created with
-the model default (`none`) regardless of what's sent.
+Invalid values return `400` and nothing is created. Unrecognised fields are
+ignored here (unlike the update endpoint), so existing callers keep working.
 
-**Response** `201 Created` — the created `Card` object (id, card_number, title,
-description, column_id, project_id, position, priority, timestamps, etc.).
+**Response** `201 Created` — the created card in the same shape as
+`GET /cards/{cardId}` (including `key` and `column_name`).
 
 ### Add a comment
 
@@ -228,6 +240,55 @@ POST /api/v1/ticket/{projectSlug}/cards/{cardId}/comments
 
 **Response** `201 Created` — the created comment object.
 
+### Update a card
+
+```
+PATCH /api/v1/ticket/{projectSlug}/cards/{cardId}
+```
+
+A **partial update**: only the fields present in the body change; a field you
+leave out keeps its current value. `{cardId}` is the card's `id` or key
+(`ANSI-12`). Requires member access. Lane and position are changed with
+`/move`, not here.
+
+**Body** — any combination of:
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `title` | string | Must not be empty |
+| `description` | string | Markdown |
+| `priority` | string | One of `none`, `low`, `medium`, `high`, `critical` |
+| `closed` | boolean | `true` closes the card (sets `closed_at`), `false` reopens it |
+| `start_date` | string \| null | `YYYY-MM-DD` or RFC 3339; `null` clears it |
+| `due_date` | string \| null | Same; must not be before `start_date` (checked against the card's resulting dates) |
+| `story_points` | integer \| null | Non-negative; `null` clears it |
+
+A plain `YYYY-MM-DD` date is stored as midnight UTC. Dates come back as RFC
+3339 timestamps (e.g. `"2026-09-24T00:00:00Z"`), the same as every other card
+endpoint.
+
+```bash
+curl -X PATCH \
+  -H "X-API-Key: $API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"priority": "medium", "start_date": "2026-09-24"}' \
+  "https://warmdesk.example.com/api/v1/ticket/my-project/cards/ANSI-4"
+```
+
+**Response** `200 OK` — the updated card in the same shape as
+`GET /cards/{cardId}` (with `key`, `column_name`, and `comments`). Changes are
+recorded in the card's activity history under the API key's user and pushed
+live to open boards.
+
+**Errors** (`{"error": "..."}`)
+
+| Status | When |
+|--------|------|
+| `400` | Invalid JSON, unknown field, empty title, unknown priority, non-boolean `closed`, unparseable date, `due_date` before `start_date`, negative/non-integer `story_points`. Nothing is changed when any field is invalid. |
+| `401` | Missing or invalid API key |
+| `403` | The key's user has less than member access |
+| `404` | The card doesn't exist or belongs to another project |
+
 ### Move a card to a column
 
 ```
@@ -238,18 +299,18 @@ PATCH /api/v1/ticket/{projectSlug}/cards/{cardId}/move
 
 ```json
 {
-  "column_id": 8,
-  "position":  1000
+  "column":   "Done",
+  "position": 1000
 }
 ```
 
 | Field | Type | Required | Notes |
 |-------|------|----------|-------|
-| `column_id` | number | yes | Target column ID |
+| `column_id` / `column` | number / string | one of them | Target lane by id, or by name (case-insensitive) |
 | `position` | number | no | Sort order within the column; omit to append at the end |
 
-**Response** `200 OK` — the updated `Card` object (with `CreatedBy`, `Assignee`,
-and `Labels` preloaded), not a bare `{ok:true}`.
+**Response** `200 OK` — the moved card in the same shape as
+`GET /cards/{cardId}` (including `key` and `column_name`).
 
 ### Example: full CI pipeline workflow
 
@@ -258,30 +319,35 @@ API_KEY="cwk_a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6"
 BASE="https://warmdesk.example.com/api/v1/ticket"
 PROJECT="my-project"
 
-# 1. Create a deploy card (column_id 3 = "Backlog" in this example)
+# 1. Create a deploy card in the Backlog lane
 CARD=$(curl -s -X POST "$BASE/$PROJECT/cards" \
   -H "X-API-Key: $API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"title":"Deploy v1.2.3","column_id":3}')
+  -d '{"title":"Deploy v1.2.3","column":"Backlog","priority":"high"}')
 
-CARD_ID=$(echo $CARD | jq .id)
+CARD_KEY=$(echo "$CARD" | jq -r .key)   # e.g. PRJ-42; the numeric .id works too
 
 # 2. Move it to "In Progress"
-curl -s -X PATCH "$BASE/$PROJECT/cards/$CARD_ID/move" \
+curl -s -X PATCH "$BASE/$PROJECT/cards/$CARD_KEY/move" \
   -H "X-API-Key: $API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"column_id": 5}'
+  -d '{"column": "In Progress"}'
 
-# 3. After tests pass, comment and move to Done
-curl -s -X POST "$BASE/$PROJECT/cards/$CARD_ID/comments" \
+# 3. After tests pass, comment, move to Done, and close it
+curl -s -X POST "$BASE/$PROJECT/cards/$CARD_KEY/comments" \
   -H "X-API-Key: $API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"body":"All tests passed. Deployed to production."}'
 
-curl -s -X PATCH "$BASE/$PROJECT/cards/$CARD_ID/move" \
+curl -s -X PATCH "$BASE/$PROJECT/cards/$CARD_KEY/move" \
   -H "X-API-Key: $API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"column_id": 8}'
+  -d '{"column": "Done"}'
+
+curl -s -X PATCH "$BASE/$PROJECT/cards/$CARD_KEY" \
+  -H "X-API-Key: $API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"closed": true}'
 ```
 
 ---

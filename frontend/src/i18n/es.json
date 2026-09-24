@@ -948,9 +948,11 @@
     "personal_description": "Las claves personales dan acceso completo como usted en todos sus proyectos.",
     "docs_title": "Endpoints de la API",
     "docs_auth": "Autentíquese con el encabezado",
+    "docs_card_ref": ":cardId es el id numérico de la tarjeta o su clave (p. ej. {example}); las columnas se indican por id (column_id) o nombre (column).",
     "docs_add": "Agregar ticket",
     "docs_comment": "Agregar comentario",
     "docs_move": "Mover ticket",
+    "docs_update": "Actualizar ticket",
     "docs_columns": "Listar columnas",
     "docs_list": "Listar tickets",
     "docs_get": "Obtener ticket"

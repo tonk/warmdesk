@@ -948,9 +948,11 @@
     "personal_description": "Persoonlijke sleutels geven volledige toegang als uzelf over al uw projecten heen.",
     "docs_title": "API-eindpunten",
     "docs_auth": "Authenticeer met header",
+    "docs_card_ref": ":cardId is het numerieke kaart-id of de sleutel (bijv. {example}); lanes kun je opgeven met id (column_id) of naam (column).",
     "docs_add": "Ticket toevoegen",
     "docs_comment": "Reactie toevoegen",
     "docs_move": "Ticket verplaatsen",
+    "docs_update": "Ticket bijwerken",
     "docs_columns": "Kolommen ophalen",
     "docs_list": "Tickets ophalen",
     "docs_get": "Ticket ophalen"

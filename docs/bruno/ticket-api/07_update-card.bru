@@ -1,0 +1,30 @@
+meta {
+  name: Update Card (Ticket API)
+  type: http
+  seq: 7
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/ticket/{{projectSlug}}/cards/{{cardId}}
+  body: json
+  auth: none
+}
+
+headers {
+  X-API-Key: {{apiKey}}
+}
+
+body:json {
+  {
+    "priority": "medium",
+    "start_date": "2026-09-24"
+  }
+}
+
+docs {
+  Partial update; requires member access. Only fields present are changed.
+  {{cardId}} may be the numeric id or the card key (e.g. ANSI-4).
+  Fields: title, description, priority (none/low/medium/high/critical), closed (true/false),
+  start_date / due_date (YYYY-MM-DD or RFC 3339, null clears), story_points (null clears).
+  Unknown or invalid fields return 400 and change nothing.
+}

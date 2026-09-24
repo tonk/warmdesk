@@ -984,9 +984,11 @@
     "personal_description": "As chaves pessoais fornecem acesso total como você em todos os seus projetos. Use-as para scripts ou ferramentas que abrangem múltiplos projetos.",
     "docs_title": "Endpoints de API",
     "docs_auth": "Autenticar com cabeçalho",
+    "docs_card_ref": ":cardId é o id numérico do cartão ou a sua chave (ex.: {example}); as colunas indicam-se por id (column_id) ou nome (column).",
     "docs_add": "Adicionar ticket",
     "docs_comment": "Adicionar comentário",
     "docs_move": "Mover ticket",
+    "docs_update": "Atualizar ticket",
     "docs_columns": "Listar colunas",
     "docs_list": "Listar tickets",
     "docs_get": "Obter ticket"

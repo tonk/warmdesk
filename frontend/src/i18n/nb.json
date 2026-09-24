@@ -984,9 +984,11 @@
     "personal_description": "Personlige nøkler gir full tilgang som deg på tvers av alle prosjektene dine. Bruk dem til skript eller verktøy som spenner over flere prosjekter.",
     "docs_title": "API-endepunkter",
     "docs_auth": "Autentiser med header",
+    "docs_card_ref": ":cardId er kortets numeriske id eller nøkkel (f.eks. {example}); kolonner angis med id (column_id) eller navn (column).",
     "docs_add": "Legg til sak",
     "docs_comment": "Legg til kommentar",
     "docs_move": "Flytt sak",
+    "docs_update": "Oppdater sak",
     "docs_columns": "List kolonner",
     "docs_list": "List saker",
     "docs_get": "Hent sak"

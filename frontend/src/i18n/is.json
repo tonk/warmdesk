@@ -984,9 +984,11 @@
     "personal_description": "Persónulegir lyklar gefa þér fullan aðgang yfir öll verkefnin þín. Notaðu þá fyrir skriftur eða verkfæri sem ná yfir mörg verkefni.",
     "docs_title": "API-endapunktar",
     "docs_auth": "Auðkenna með haus",
+    "docs_card_ref": ":cardId er tölulegt auðkenni spjaldsins eða lykill þess (t.d. {example}); dálka má tilgreina með auðkenni (column_id) eða nafni (column).",
     "docs_add": "Bæta við miða",
     "docs_comment": "Bæta við athugasemd",
     "docs_move": "Færa miða",
+    "docs_update": "Uppfæra miða",
     "docs_columns": "Sýna dálka",
     "docs_list": "Sýna miða",
     "docs_get": "Sækja miða"

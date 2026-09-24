@@ -984,9 +984,11 @@
     "personal_description": "Personlige nøgler giver fuld adgang som dig på tværs af alle dine projekter. Brug dem til scripts eller værktøjer, der spænder over flere projekter.",
     "docs_title": "API-endpoints",
     "docs_auth": "Godkend med header",
+    "docs_card_ref": ":cardId er kortets numeriske id eller nøgle (f.eks. {example}); kolonner angives med id (column_id) eller navn (column).",
     "docs_add": "Tilføj billet",
     "docs_comment": "Tilføj kommentar",
     "docs_move": "Flyt billet",
+    "docs_update": "Opdater billet",
     "docs_columns": "Vis kolonner",
     "docs_list": "Vis billetter",
     "docs_get": "Hent billet"

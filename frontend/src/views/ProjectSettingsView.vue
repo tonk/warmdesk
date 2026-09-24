@@ -202,6 +202,7 @@
           <div class="api-docs">
             <h3>{{ $t('apikeys.docs_title') }}</h3>
             <p>{{ $t('apikeys.docs_auth') }}: <code>X-API-Key: cwk_…</code></p>
+            <p>{{ $t('apikeys.docs_card_ref', { example: (project?.key_prefix || 'PRJ') + '-12' }) }}</p>
             <div class="api-endpoint">
               <span class="method get">GET</span>
               <code>/api/v1/ticket/{{ slug }}/columns</code>
@@ -223,7 +224,7 @@
               <code>/api/v1/ticket/{{ slug }}/cards</code>
               <span class="endpoint-desc">{{ $t('apikeys.docs_add') }}</span>
             </div>
-            <pre class="api-body">{"title": "…", "description": "…", "column_id": 1}</pre>
+            <pre class="api-body">{"title": "…", "description": "…", "column": "Backlog", "priority": "high"}</pre>
             <div class="api-endpoint">
               <span class="method post">POST</span>
               <code>/api/v1/ticket/{{ slug }}/cards/:cardId/comments</code>
@@ -232,10 +233,16 @@
             <pre class="api-body">{"body": "…"}</pre>
             <div class="api-endpoint">
               <span class="method patch">PATCH</span>
+              <code>/api/v1/ticket/{{ slug }}/cards/:cardId</code>
+              <span class="endpoint-desc">{{ $t('apikeys.docs_update') }}</span>
+            </div>
+            <pre class="api-body">{"priority": "medium", "start_date": "2026-09-24", "closed": false}</pre>
+            <div class="api-endpoint">
+              <span class="method patch">PATCH</span>
               <code>/api/v1/ticket/{{ slug }}/cards/:cardId/move</code>
               <span class="endpoint-desc">{{ $t('apikeys.docs_move') }}</span>
             </div>
-            <pre class="api-body">{"column_id": 2, "position": 1000}</pre>
+            <pre class="api-body">{"column": "Done", "position": 1000}</pre>
           </div>
         </div>
 

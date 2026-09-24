@@ -81,8 +81,12 @@ The `GET` endpoints need only viewer access and never change anything; the other
 |`GET` |`/api/v1/ticket/{slug}/cards/{cardId}` |Get one card, with its comments
 |`POST` |`/api/v1/ticket/{slug}/cards` |Create a card
 |`POST` |`/api/v1/ticket/{slug}/cards/{cardId}/comments` |Add a comment
+|`PATCH` |`/api/v1/ticket/{slug}/cards/{cardId}` |Update a card's fields (partial)
 |`PATCH` |`/api/v1/ticket/{slug}/cards/{cardId}/move` |Move a card to another column
 |===
+
+*Addressing cards and lanes:* `{cardId}` is either the numeric `id` or the card's key (`ANSI-12`, prefix case-insensitive); a card from another project always returns `404`.
+Wherever a lane is expected (create, move), send `column_id` (number) or `column` (lane name, case-insensitive), not both.
 
 === Read a lane
 
@@ -108,8 +112,9 @@ curl -s -H "X-API-Key: cwk_abc123..." \
 
 === Create a card
 
-Look up the target `column_id` with `GET /columns` first.
-`priority` is not accepted here; new cards get the default (`none`).
+`title` and a lane (`column_id` or `column`) are required.
+Optionally set `description`, `priority` (default `none`), `start_date`, `due_date`, and `story_points`, with the same rules as the update endpoint below.
+Invalid values return `400` and nothing is created; unrecognised fields are ignored, so existing callers keep working.
 
 [source,bash]
 ----
@@ -119,16 +124,45 @@ curl -X POST \
   -d '{
     "title": "Security scan found CVE-2026-1234",
     "description": "**Severity:** High\n\nFound in dependency `foo@1.2.3`.",
-    "column_id": 5
+    "column": "Backlog",
+    "priority": "high"
   }' \
   "https://warmdesk.example.com/api/v1/ticket/myproject/cards"
 ----
 
-Returns `201 Created` with the new card.
+Returns `201 Created` with the new card, including its `key`.
+
+=== Update a card
+
+`PATCH /cards/{cardId}` is a partial update: only fields present in the body change, and a field you leave out keeps its value.
+Lane and position go through `/move`.
+
+[cols="1,1,4",options="header"]
+|===
+|Field |Type |Notes
+|`title` |string |Must not be empty
+|`description` |string |Markdown
+|`priority` |string |One of `none`, `low`, `medium`, `high`, `critical`
+|`closed` |boolean |`true` closes the card, `false` reopens it
+|`start_date` |string or null |`YYYY-MM-DD` or RFC 3339; `null` clears it
+|`due_date` |string or null |Same; must not be before `start_date`
+|`story_points` |integer or null |Non-negative; `null` clears it
+|===
+
+Dates are returned as RFC 3339 timestamps (a plain date is stored as midnight UTC).
+Any invalid or unknown field returns `400` and changes nothing; a card from another project returns `404`; less than member access returns `403`.
+The response is the updated card in the same shape as `GET /cards/{cardId}`, the change is logged in the card's activity history, and open boards update live.
+
+[source,bash]
+----
+curl -X PATCH \
+  -H "X-API-Key: cwk_abc123..." \
+  -H "Content-Type: application/json" \
+  -d '{"priority": "medium", "start_date": "2026-09-24"}' \
+  "https://warmdesk.example.com/api/v1/ticket/myproject/cards/ANSI-4"
+----
 
 === Add a comment / move a card
-
-`{cardId}` is the card's numeric `id` from the create/list response, not its `key`.
 
 [source,bash]
 ----
@@ -137,14 +171,21 @@ curl -X POST \
   -H "X-API-Key: cwk_abc123..." \
   -H "Content-Type: application/json" \
   -d '{"body": "Deployment to production succeeded. Build #4242."}' \
-  "https://warmdesk.example.com/api/v1/ticket/myproject/cards/42/comments"
+  "https://warmdesk.example.com/api/v1/ticket/myproject/cards/MYPROJ-42/comments"
 
-# Move the card to column 8 (omit position to append at the end)
+# Move the card to the Done lane (omit position to append at the end)
 curl -X PATCH \
   -H "X-API-Key: cwk_abc123..." \
   -H "Content-Type: application/json" \
-  -d '{"column_id": 8}' \
-  "https://warmdesk.example.com/api/v1/ticket/myproject/cards/42/move"
+  -d '{"column": "Done"}' \
+  "https://warmdesk.example.com/api/v1/ticket/myproject/cards/MYPROJ-42/move"
+
+# Close it
+curl -X PATCH \
+  -H "X-API-Key: cwk_abc123..." \
+  -H "Content-Type: application/json" \
+  -d '{"closed": true}' \
+  "https://warmdesk.example.com/api/v1/ticket/myproject/cards/MYPROJ-42"
 ----
 
 == Webhooks

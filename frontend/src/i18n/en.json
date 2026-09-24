@@ -1103,9 +1103,11 @@
     "personal_description": "Personal keys give full access as you across all your projects. Use them for scripts or tools that span multiple projects.",
     "docs_title": "API Endpoints",
     "docs_auth": "Authenticate with header",
+    "docs_card_ref": ":cardId is the numeric card id or its key (e.g. {example}); lanes can be given by id (column_id) or name (column).",
     "docs_add": "Add ticket",
     "docs_comment": "Add comment",
     "docs_move": "Move ticket",
+    "docs_update": "Update ticket",
     "docs_columns": "List columns",
     "docs_list": "List tickets",
     "docs_get": "Get ticket"

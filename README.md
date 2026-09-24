@@ -223,8 +223,11 @@ GET   /api/v1/ticket/{slug}/cards                    — list cards (?column=Bac
 GET   /api/v1/ticket/{slug}/cards/{id}               — get a card with comments
 POST  /api/v1/ticket/{slug}/cards                    — create a card
 POST  /api/v1/ticket/{slug}/cards/{id}/comments      — add a comment
+PATCH /api/v1/ticket/{slug}/cards/{id}               — update title/description/priority/dates/story points, close/reopen (partial)
 PATCH /api/v1/ticket/{slug}/cards/{id}/move          — move to a column
 ```
+
+`{id}` is the numeric card id or its key (e.g. `PRJ-42`); lanes can be given as `column_id` or `column` (name).
 
 Pass the key in the `X-API-Key` header (or as `Authorization: ApiKey <key>`); query-parameter keys are not supported. API keys work on all authenticated endpoints, not just the Ticket API.
 
@@ -381,7 +384,7 @@ See [INSTALL.md](INSTALL.md) for full instructions including:
 - **Time tracking PDF options** — the weekly timesheet export and the time-tracking report tab both offer the same PDF Font and PDF Language selects as the main report view; selections are persisted in localStorage; when the report is grouped by Customer a *New page per customer* checkbox appears — each customer is exported to its own page with the full document header repeated and no cross-customer grand total; optional per-row distance and undeclarable-time columns show billable vs. unbillable time and mileage on every entry, not just totals, and the undeclarable/billable breakdown is available for every grouping
 - **Company branding** — set a company name and separate light/dark logos (JPG, PNG, GIF, WebP, or SVG); light logo shown on the login screen's light theme, dark logo on dark theme; logos also appear on reports
 - **Configurable initial columns** — admin can define which columns are created when a new project is made (defaults to "Backlog")
-- **Ticket API** — list columns and cards (filterable by lane) or fetch a card with comments, create cards, add comments, and move cards via API key (for CI/CD pipelines and external integrations); API keys also work on all other authenticated endpoints
+- **Ticket API** — list columns and cards (filterable by lane) or fetch a card with comments, create and update cards, add comments, and move cards via API key (for CI/CD pipelines and external integrations); API keys also work on all other authenticated endpoints
 - **Project-scoped API keys** — keys created in Project Settings are locked to that project; personal API keys in User Settings give full access across all projects
 - **Typing indicator** — animated indicator in project chat shows who is currently typing
 - **@mention autocomplete** — `@username` dropdown in project chat, card descriptions, and card comments

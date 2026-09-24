@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/tonk/warmdesk/database"
@@ -15,46 +17,315 @@ import (
 	"gorm.io/gorm"
 )
 
+// ticketAPICard is a Card enriched with the name of its column and its
+// human-readable key (e.g. "ANSI-12"), so API clients can filter by lane
+// name without a separate column lookup.
+type ticketAPICard struct {
+	models.Card
+	ColumnName string `json:"column_name"`
+	Key        string `json:"key"`
+}
+
+// ticketAPIPriorities are the priority values a card accepts.
+var ticketAPIPriorities = map[string]bool{"none": true, "low": true, "medium": true, "high": true, "critical": true}
+
+// ticketAPIProject resolves the project from the path and checks that the
+// API key's user has at least minRole access. Writes the error response and
+// returns nil on failure.
+func ticketAPIProject(c *gin.Context, minRole string) *models.Project {
+	project, err := services.GetProjectBySlug(c.Param("projectSlug"))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "project not found"})
+		return nil
+	}
+	if err := services.RequireProjectRole(project.ID, middleware.GetUserID(c), middleware.GetGlobalRole(c), minRole); err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
+		return nil
+	}
+	return project
+}
+
+func ticketAPICardKey(project *models.Project, card *models.Card) string {
+	if project.KeyPrefix == "" || card.CardNumber == 0 {
+		return ""
+	}
+	return project.KeyPrefix + "-" + strconv.Itoa(card.CardNumber)
+}
+
+// ticketAPIFindCard loads the card named by the :cardId path parameter, which
+// is either the numeric card id or the card's key ("ANSI-12", prefix
+// case-insensitive). Cards of other projects are never found. Writes the error
+// response and returns nil on failure.
+func ticketAPIFindCard(c *gin.Context, project *models.Project) *models.Card {
+	ref := c.Param("cardId")
+	q := database.DB.Where("project_id = ?", project.ID)
+	if id, err := strconv.ParseUint(ref, 10, 64); err == nil {
+		q = q.Where("id = ?", id)
+	} else {
+		i := strings.LastIndex(ref, "-")
+		num, err := strconv.Atoi(ref[i+1:])
+		if i <= 0 || err != nil || num <= 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid card id"})
+			return nil
+		}
+		if !strings.EqualFold(ref[:i], project.KeyPrefix) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "card not found"})
+			return nil
+		}
+		q = q.Where("card_number = ?", num)
+	}
+	var card models.Card
+	if err := q.First(&card).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "card not found"})
+		return nil
+	}
+	return &card
+}
+
+// ticketAPIColumn resolves the target column from a request body's
+// "column_id" (number) or "column" (name, case-insensitive) field. Returns
+// (nil, "") when neither is present, or an error message for a 400.
+func ticketAPIColumn(project *models.Project, body map[string]json.RawMessage) (*models.Column, string) {
+	rawID, hasID := body["column_id"]
+	rawName, hasName := body["column"]
+	if hasID && hasName {
+		return nil, "give column_id or column, not both"
+	}
+	var col models.Column
+	switch {
+	case hasID:
+		var id uint
+		if json.Unmarshal(rawID, &id) != nil || id == 0 {
+			return nil, "column_id must be a positive integer"
+		}
+		if database.DB.Where("id = ? AND project_id = ?", id, project.ID).First(&col).Error != nil {
+			return nil, "column not found in project"
+		}
+	case hasName:
+		var name string
+		if json.Unmarshal(rawName, &name) != nil || strings.TrimSpace(name) == "" {
+			return nil, "column must be a non-empty string"
+		}
+		if database.DB.Where("project_id = ? AND LOWER(name) = LOWER(?)", project.ID, strings.TrimSpace(name)).
+			Order("position ASC").First(&col).Error != nil {
+			return nil, "column not found in project"
+		}
+	default:
+		return nil, ""
+	}
+	return &col, ""
+}
+
+// parseTicketAPIDate accepts "YYYY-MM-DD" or an RFC 3339 timestamp. A plain
+// date is stored as midnight UTC, the same as the web UI's card editor does.
+func parseTicketAPIDate(s string) (time.Time, error) {
+	if t, err := time.Parse("2006-01-02", s); err == nil {
+		return t, nil
+	}
+	return time.Parse(time.RFC3339Nano, s)
+}
+
+// ticketAPICardFields validates the editable card fields in body against the
+// card's current values and returns the column updates plus the history
+// events for fields that actually change. Keys listed in passthrough are
+// skipped (handled by the caller); any other unknown key is an error when
+// strict is set and ignored otherwise. A non-empty msg means a 400; nothing
+// has been written at that point.
+func ticketAPICardFields(body map[string]json.RawMessage, card *models.Card, passthrough map[string]bool, strict bool) (updates map[string]interface{}, history []models.CardHistory, msg string) {
+	updates = map[string]interface{}{}
+	isNull := func(raw json.RawMessage) bool { return string(raw) == "null" }
+	record := func(eventType, detail string) {
+		history = append(history, models.CardHistory{CardID: card.ID, EventType: eventType, Detail: detail})
+	}
+	newStart, newDue := card.StartDate, card.DueDate
+
+	for key, raw := range body {
+		if passthrough[key] {
+			continue
+		}
+		switch key {
+		case "title":
+			var s string
+			if isNull(raw) || json.Unmarshal(raw, &s) != nil || strings.TrimSpace(s) == "" {
+				return nil, nil, "title must be a non-empty string"
+			}
+			if s != card.Title {
+				updates["title"] = s
+				record("title_changed", s)
+			}
+		case "description":
+			var s string
+			if isNull(raw) || json.Unmarshal(raw, &s) != nil {
+				return nil, nil, "description must be a string"
+			}
+			if s != card.Description {
+				updates["description"] = s
+				record("description_changed", "")
+			}
+		case "priority":
+			var s string
+			if isNull(raw) || json.Unmarshal(raw, &s) != nil || !ticketAPIPriorities[s] {
+				return nil, nil, "priority must be one of: none, low, medium, high, critical"
+			}
+			if s != card.Priority {
+				updates["priority"] = s
+				record("priority_changed", s)
+			}
+		case "closed":
+			var b bool
+			if isNull(raw) || json.Unmarshal(raw, &b) != nil {
+				return nil, nil, "closed must be true or false"
+			}
+			if b != card.Closed {
+				updates["closed"] = b
+				if b {
+					updates["closed_at"] = time.Now()
+					record("closed", "")
+				} else {
+					updates["closed_at"] = nil
+					record("reopened", "")
+				}
+			}
+		case "start_date", "due_date":
+			var t *time.Time
+			if !isNull(raw) {
+				var s string
+				if json.Unmarshal(raw, &s) != nil {
+					return nil, nil, key + " must be a date string (YYYY-MM-DD or RFC 3339) or null"
+				}
+				parsed, err := parseTicketAPIDate(s)
+				if err != nil {
+					return nil, nil, key + " must be a date string (YYYY-MM-DD or RFC 3339) or null"
+				}
+				t = &parsed
+			}
+			if key == "start_date" {
+				newStart = t
+			} else {
+				newDue = t
+			}
+		case "story_points":
+			if isNull(raw) {
+				updates["story_points"] = nil
+				continue
+			}
+			var n int
+			if json.Unmarshal(raw, &n) != nil || n < 0 {
+				return nil, nil, "story_points must be a non-negative integer or null"
+			}
+			updates["story_points"] = n
+		default:
+			if strict {
+				return nil, nil, "unknown field: " + key
+			}
+		}
+	}
+
+	if newStart != nil && newDue != nil && newDue.Before(*newStart) {
+		return nil, nil, "due_date must not be before start_date"
+	}
+	dateStr := func(t *time.Time) string {
+		if t == nil {
+			return ""
+		}
+		return t.Format("2006-01-02")
+	}
+	for _, d := range []struct {
+		key, event string
+		old, new   *time.Time
+	}{
+		{"start_date", "start_date_changed", card.StartDate, newStart},
+		{"due_date", "due_date_changed", card.DueDate, newDue},
+	} {
+		if _, sent := body[d.key]; !sent {
+			continue
+		}
+		if d.new == nil {
+			updates[d.key] = nil
+		} else {
+			updates[d.key] = *d.new
+		}
+		if dateStr(d.old) != dateStr(d.new) {
+			detail := dateStr(d.new)
+			if detail == "" {
+				detail = "cleared"
+			}
+			record(d.event, detail)
+		}
+	}
+	return updates, history, ""
+}
+
+// ticketAPIRespond reloads the card with its associations and writes it in
+// the ticketAPICard shape.
+func ticketAPIRespond(c *gin.Context, status int, project *models.Project, card *models.Card, withComments bool) {
+	q := database.DB.Preload("CreatedBy").Preload("Assignee").Preload("Assignees").
+		Preload("Labels").Preload("Tags").Preload("Epic")
+	if withComments {
+		q = q.Preload("Comments", func(db *gorm.DB) *gorm.DB { return db.Order("created_at ASC") }).
+			Preload("Comments.User")
+	}
+	q.First(card, card.ID)
+	var col models.Column
+	database.DB.Select("name").First(&col, card.ColumnID)
+	c.JSON(status, ticketAPICard{Card: *card, ColumnName: col.Name, Key: ticketAPICardKey(project, card)})
+}
+
+// ticketAPIBody decodes the request body into raw fields so an absent key can
+// be told apart from an explicit null. Writes a 400 and returns nil on failure.
+func ticketAPIBody(c *gin.Context) map[string]json.RawMessage {
+	var body map[string]json.RawMessage
+	if err := c.ShouldBindJSON(&body); err != nil || body == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+		return nil
+	}
+	return body
+}
+
 // TicketAdd godoc
 // @Summary      Create a card via API key (CI/CD integration)
+// @Description  Requires title and one of column_id / column (lane name, case-insensitive).
+// @Description  Optional: description, priority, start_date, due_date, story_points.
 // @Tags         ticket
 // @Accept       json
 // @Produce      json
 // @Security     ApiKeyAuth
 // @Param        projectSlug path string true "Project slug"
-// @Param        body body map[string]interface{} true "Card details (title required)"
-// @Success      201 {object} models.Card
+// @Param        body body map[string]interface{} true "Card details (title and column_id or column required)"
+// @Success      201 {object} ticketAPICard
 // @Failure      400 {object} map[string]string
 // @Failure      403 {object} map[string]string
 // @Failure      404 {object} map[string]string
 // @Router       /ticket/{projectSlug}/cards [post]
 func TicketAdd(c *gin.Context) {
 	userID := middleware.GetUserID(c)
-	slug := c.Param("projectSlug")
-
-	project, err := services.GetProjectBySlug(slug)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "project not found"})
+	project := ticketAPIProject(c, "member")
+	if project == nil {
 		return
 	}
-	if err := services.RequireProjectRole(project.ID, userID, middleware.GetGlobalRole(c), "member"); err != nil {
-		c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
+	body := ticketAPIBody(c)
+	if body == nil {
 		return
 	}
 
-	var req struct {
-		Title       string `json:"title" binding:"required"`
-		Description string `json:"description"`
-		ColumnID    uint   `json:"column_id" binding:"required"`
+	col, msg := ticketAPIColumn(project, body)
+	if msg == "" && col == nil {
+		msg = "column_id or column is required"
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+	if msg != "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": msg})
 		return
 	}
-
-	var col models.Column
-	if err := database.DB.Where("id = ? AND project_id = ?", req.ColumnID, project.ID).First(&col).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "column not found in project"})
+	if _, ok := body["title"]; !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "title must be a non-empty string"})
+		return
+	}
+	// Validate against a blank card; unknown fields are ignored on create, as
+	// they always have been, so existing CI callers keep working.
+	draft := models.Card{Priority: "none"}
+	updates, _, msg := ticketAPICardFields(body, &draft, map[string]bool{"column_id": true, "column": true}, false)
+	if msg != "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": msg})
 		return
 	}
 
@@ -70,24 +341,26 @@ func TicketAdd(c *gin.Context) {
 	card := models.Card{
 		ColumnID:    col.ID,
 		ProjectID:   project.ID,
-		Title:       req.Title,
-		Description: req.Description,
+		Title:       updates["title"].(string),
 		Position:    maxPos.Pos + 1000,
 		CreatedByID: userID,
 		CardNumber:  updatedProject.CardCounter,
 	}
+	delete(updates, "title")
 	if err := database.DB.Create(&card).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
 		return
+	}
+	if len(updates) > 0 {
+		database.DB.Model(&card).Updates(updates)
 	}
 	database.DB.Create(&models.CardHistory{CardID: card.ID, UserID: userID, EventType: "created"})
 	database.DB.Preload("CreatedBy").Preload("Assignee").Preload("Labels").Preload("Tags").First(&card, card.ID)
 
 	appws.BroadcastToProject(project.ID, appws.Message{Type: appws.TypeBoardCardCreated, Payload: card})
-	c.JSON(http.StatusCreated, card)
+	ticketAPIRespond(c, http.StatusCreated, project, &card, false)
 }
 
-// TicketComment adds a comment to a card via API key authentication.
 // TicketComment godoc
 // @Summary      Add a comment to a card via API key
 // @Tags         ticket
@@ -95,7 +368,7 @@ func TicketAdd(c *gin.Context) {
 // @Produce      json
 // @Security     ApiKeyAuth
 // @Param        projectSlug path string true "Project slug"
-// @Param        cardId path int true "Card ID"
+// @Param        cardId path string true "Card ID or key (e.g. ANSI-12)"
 // @Param        body body map[string]string true "Comment body"
 // @Success      201 {object} models.CardComment
 // @Failure      400 {object} map[string]string
@@ -103,27 +376,12 @@ func TicketAdd(c *gin.Context) {
 // @Router       /ticket/{projectSlug}/cards/{cardId}/comments [post]
 func TicketComment(c *gin.Context) {
 	userID := middleware.GetUserID(c)
-	slug := c.Param("projectSlug")
-
-	project, err := services.GetProjectBySlug(slug)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "project not found"})
+	project := ticketAPIProject(c, "viewer")
+	if project == nil {
 		return
 	}
-	if err := services.RequireProjectRole(project.ID, userID, middleware.GetGlobalRole(c), "viewer"); err != nil {
-		c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
-		return
-	}
-
-	cardID, err := strconv.ParseUint(c.Param("cardId"), 10, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid card id"})
-		return
-	}
-
-	var card models.Card
-	if err := database.DB.Where("id = ? AND project_id = ?", cardID, project.ID).First(&card).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "card not found"})
+	card := ticketAPIFindCard(c, project)
+	if card == nil {
 		return
 	}
 
@@ -147,63 +405,50 @@ func TicketComment(c *gin.Context) {
 	c.JSON(http.StatusCreated, comment)
 }
 
-// TicketMove moves a card to another column via API key authentication.
-// PATCH /api/v1/ticket/:projectSlug/cards/:cardId/move
 // TicketMove godoc
 // @Summary      Move a card to a different column via API key
+// @Description  Target lane by column_id or column (name, case-insensitive); optional position.
 // @Tags         ticket
 // @Accept       json
 // @Produce      json
 // @Security     ApiKeyAuth
 // @Param        projectSlug path string true "Project slug"
-// @Param        cardId path int true "Card ID"
-// @Param        body body map[string]interface{} true "column_id and optional position"
-// @Success      200 {object} models.Card
+// @Param        cardId path string true "Card ID or key (e.g. ANSI-12)"
+// @Param        body body map[string]interface{} true "column_id or column, and optional position"
+// @Success      200 {object} ticketAPICard
 // @Failure      400 {object} map[string]string
 // @Failure      404 {object} map[string]string
 // @Router       /ticket/{projectSlug}/cards/{cardId}/move [patch]
 func TicketMove(c *gin.Context) {
 	userID := middleware.GetUserID(c)
-	slug := c.Param("projectSlug")
-
-	project, err := services.GetProjectBySlug(slug)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "project not found"})
+	project := ticketAPIProject(c, "member")
+	if project == nil {
 		return
 	}
-	if err := services.RequireProjectRole(project.ID, userID, middleware.GetGlobalRole(c), "member"); err != nil {
-		c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
+	card := ticketAPIFindCard(c, project)
+	if card == nil {
 		return
 	}
-
-	cardID, err := strconv.ParseUint(c.Param("cardId"), 10, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid card id"})
+	body := ticketAPIBody(c)
+	if body == nil {
 		return
 	}
 
-	var card models.Card
-	if err := database.DB.Where("id = ? AND project_id = ?", cardID, project.ID).First(&card).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "card not found"})
+	col, msg := ticketAPIColumn(project, body)
+	if msg == "" && col == nil {
+		msg = "column_id or column is required"
+	}
+	if msg != "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": msg})
 		return
 	}
-
-	var req struct {
-		ColumnID uint    `json:"column_id" binding:"required"`
-		Position float64 `json:"position"`
+	var pos float64
+	if raw, ok := body["position"]; ok && string(raw) != "null" {
+		if json.Unmarshal(raw, &pos) != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "position must be a number"})
+			return
+		}
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
-		return
-	}
-
-	var col models.Column
-	if err := database.DB.Where("id = ? AND project_id = ?", req.ColumnID, project.ID).First(&col).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "column not found in project"})
-		return
-	}
-
-	pos := req.Position
 	if pos == 0 {
 		var maxPos struct{ Pos float64 }
 		database.DB.Model(&models.Card{}).Select("COALESCE(MAX(position), 0) as pos").Where("column_id = ?", col.ID).Scan(&maxPos)
@@ -211,7 +456,7 @@ func TicketMove(c *gin.Context) {
 	}
 
 	oldColumnID := card.ColumnID
-	database.DB.Model(&card).Updates(map[string]interface{}{"column_id": col.ID, "position": pos})
+	database.DB.Model(card).Updates(map[string]interface{}{"column_id": col.ID, "position": pos})
 
 	if oldColumnID != col.ID {
 		database.DB.Create(&models.CardHistory{
@@ -226,47 +471,14 @@ func TicketMove(c *gin.Context) {
 	appws.BroadcastToProject(project.ID, appws.Message{
 		Type: appws.TypeBoardCardMoved,
 		Payload: map[string]interface{}{
-			"card_id":       card.ID,
+			"card_id":        card.ID,
 			"from_column_id": oldColumnID,
-			"to_column_id":  col.ID,
-			"position":      pos,
+			"to_column_id":   col.ID,
+			"position":       pos,
 		},
 	})
 
-	database.DB.Preload("CreatedBy").Preload("Assignee").Preload("Labels").First(&card, card.ID)
-	c.JSON(http.StatusOK, card)
-}
-
-// ticketAPICard is a Card enriched with the name of its column and its
-// human-readable key (e.g. "ANSI-12"), so API clients can filter by lane
-// name without a separate column lookup.
-type ticketAPICard struct {
-	models.Card
-	ColumnName string `json:"column_name"`
-	Key        string `json:"key"`
-}
-
-// ticketAPIProject resolves the project from the path and checks that the
-// API key's user has at least viewer access. Writes the error response and
-// returns nil on failure.
-func ticketAPIProject(c *gin.Context) *models.Project {
-	project, err := services.GetProjectBySlug(c.Param("projectSlug"))
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "project not found"})
-		return nil
-	}
-	if err := services.RequireProjectRole(project.ID, middleware.GetUserID(c), middleware.GetGlobalRole(c), "viewer"); err != nil {
-		c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
-		return nil
-	}
-	return project
-}
-
-func ticketAPICardKey(project *models.Project, card *models.Card) string {
-	if project.KeyPrefix == "" || card.CardNumber == 0 {
-		return ""
-	}
-	return project.KeyPrefix + "-" + strconv.Itoa(card.CardNumber)
+	ticketAPIRespond(c, http.StatusOK, project, card, false)
 }
 
 // TicketListColumns godoc
@@ -280,7 +492,7 @@ func ticketAPICardKey(project *models.Project, card *models.Card) string {
 // @Failure      404 {object} map[string]string
 // @Router       /ticket/{projectSlug}/columns [get]
 func TicketListColumns(c *gin.Context) {
-	project := ticketAPIProject(c)
+	project := ticketAPIProject(c, "viewer")
 	if project == nil {
 		return
 	}
@@ -306,7 +518,7 @@ func TicketListColumns(c *gin.Context) {
 // @Failure      404 {object} map[string]string
 // @Router       /ticket/{projectSlug}/cards [get]
 func TicketListCards(c *gin.Context) {
-	project := ticketAPIProject(c)
+	project := ticketAPIProject(c, "viewer")
 	if project == nil {
 		return
 	}
@@ -374,33 +586,75 @@ func TicketListCards(c *gin.Context) {
 // @Produce      json
 // @Security     ApiKeyAuth
 // @Param        projectSlug path string true "Project slug"
-// @Param        cardId      path int    true "Card ID"
+// @Param        cardId      path string true "Card ID or key (e.g. ANSI-12)"
 // @Success      200 {object} ticketAPICard
 // @Failure      400 {object} map[string]string
 // @Failure      403 {object} map[string]string
 // @Failure      404 {object} map[string]string
 // @Router       /ticket/{projectSlug}/cards/{cardId} [get]
 func TicketGetCard(c *gin.Context) {
-	project := ticketAPIProject(c)
+	project := ticketAPIProject(c, "viewer")
 	if project == nil {
 		return
 	}
-	cardID, err := strconv.ParseUint(c.Param("cardId"), 10, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid card id"})
+	card := ticketAPIFindCard(c, project)
+	if card == nil {
 		return
 	}
-	var card models.Card
-	if err := database.DB.Where("id = ? AND project_id = ?", cardID, project.ID).
-		Preload("CreatedBy").Preload("Assignee").Preload("Assignees").
-		Preload("Labels").Preload("Tags").Preload("Epic").
-		Preload("Comments", func(db *gorm.DB) *gorm.DB { return db.Order("created_at ASC") }).
-		Preload("Comments.User").
-		First(&card).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "card not found"})
+	ticketAPIRespond(c, http.StatusOK, project, card, true)
+}
+
+// TicketUpdateCard godoc
+// @Summary      Partially update a card via API key
+// @Description  Only fields present in the body are changed; an explicit null clears
+// @Description  start_date, due_date, or story_points. Unknown fields are rejected.
+// @Tags         ticket
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        projectSlug path string true "Project slug"
+// @Param        cardId path string true "Card ID or key (e.g. ANSI-12)"
+// @Param        body body map[string]interface{} true "Any of: title, description, priority, closed, start_date, due_date, story_points"
+// @Success      200 {object} ticketAPICard
+// @Failure      400 {object} map[string]string
+// @Failure      403 {object} map[string]string
+// @Failure      404 {object} map[string]string
+// @Router       /ticket/{projectSlug}/cards/{cardId} [patch]
+func TicketUpdateCard(c *gin.Context) {
+	userID := middleware.GetUserID(c)
+	project := ticketAPIProject(c, "member")
+	if project == nil {
 		return
 	}
-	var col models.Column
-	database.DB.Select("name").First(&col, card.ColumnID)
-	c.JSON(http.StatusOK, ticketAPICard{Card: card, ColumnName: col.Name, Key: ticketAPICardKey(project, &card)})
+	card := ticketAPIFindCard(c, project)
+	if card == nil {
+		return
+	}
+	body := ticketAPIBody(c)
+	if body == nil {
+		return
+	}
+
+	updates, history, msg := ticketAPICardFields(body, card, nil, true)
+	if msg != "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": msg})
+		return
+	}
+
+	if len(updates) > 0 {
+		// Model().Updates() bumps updated_at.
+		if err := database.DB.Model(card).Updates(updates).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+			return
+		}
+		for i := range history {
+			history[i].UserID = userID
+			database.DB.Create(&history[i])
+		}
+	}
+
+	ticketAPIRespond(c, http.StatusOK, project, card, true)
+	if len(updates) > 0 {
+		appws.BroadcastToProject(project.ID, appws.Message{Type: appws.TypeBoardCardUpdated, Payload: *card})
+	}
 }

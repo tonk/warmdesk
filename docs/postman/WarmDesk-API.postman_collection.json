@@ -2839,6 +2839,35 @@
               "type": "noauth"
             }
           }
+        },
+        {
+          "name": "Update Card (Ticket API)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/ticket/{{projectSlug}}/cards/{{cardId}}"
+            },
+            "description": "Partial update; requires member access. Only fields present are changed. {{cardId}} may be the numeric id or the card key (e.g. ANSI-4).\nFields: title, description, priority (none/low/medium/high/critical), closed (true/false), start_date / due_date (YYYY-MM-DD or RFC 3339, null clears), story_points (null clears).\nUnknown or invalid fields return 400 and change nothing.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"priority\": \"medium\",\n    \"start_date\": \"2026-09-24\"\n  }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
         }
       ]
     },

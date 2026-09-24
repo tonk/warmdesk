@@ -1512,6 +1512,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "Requires title and one of column_id / column (lane name, case-insensitive).\nOptional: description, priority, start_date, due_date, story_points.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1531,7 +1532,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Card details (title required)",
+                        "description": "Card details (title and column_id or column required)",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -1545,7 +1546,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.Card"
+                            "$ref": "#/definitions/handlers.ticketAPICard"
                         }
                     },
                     "400": {
@@ -1601,11 +1602,90 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "description": "Card ID",
+                        "type": "string",
+                        "description": "Card ID or key (e.g. ANSI-12)",
                         "name": "cardId",
                         "in": "path",
                         "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ticketAPICard"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Only fields present in the body are changed; an explicit null clears\nstart_date, due_date, or story_points. Unknown fields are rejected.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ticket"
+                ],
+                "summary": "Partially update a card via API key",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project slug",
+                        "name": "projectSlug",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Card ID or key (e.g. ANSI-12)",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Any of: title, description, priority, closed, start_date, due_date, story_points",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
                     }
                 ],
                 "responses": {
@@ -1671,8 +1751,8 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "description": "Card ID",
+                        "type": "string",
+                        "description": "Card ID or key (e.g. ANSI-12)",
                         "name": "cardId",
                         "in": "path",
                         "required": true
@@ -1725,6 +1805,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "Target lane by column_id or column (name, case-insensitive); optional position.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1744,14 +1825,14 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "description": "Card ID",
+                        "type": "string",
+                        "description": "Card ID or key (e.g. ANSI-12)",
                         "name": "cardId",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "column_id and optional position",
+                        "description": "column_id or column, and optional position",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -1765,7 +1846,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Card"
+                            "$ref": "#/definitions/handlers.ticketAPICard"
                         }
                     },
                     "400": {

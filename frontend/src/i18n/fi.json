@@ -984,9 +984,11 @@
     "personal_description": "Henkilökohtaiset avaimet antavat täyden pääsyn sinuna kaikkiin projekteihisi. Käytä niitä skripteissä tai työkaluissa, jotka kattavat useita projekteja.",
     "docs_title": "API-päätepisteet",
     "docs_auth": "Todenna otsikolla",
+    "docs_card_ref": ":cardId on kortin numeerinen id tai avain (esim. {example}); sarakkeet annetaan id:llä (column_id) tai nimellä (column).",
     "docs_add": "Lisää tiketti",
     "docs_comment": "Lisää kommentti",
     "docs_move": "Siirrä tiketti",
+    "docs_update": "Päivitä tiketti",
     "docs_columns": "Listaa sarakkeet",
     "docs_list": "Listaa tiketit",
     "docs_get": "Hae tiketti"

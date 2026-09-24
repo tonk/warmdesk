@@ -984,9 +984,11 @@
     "personal_description": "Personliga nycklar ger fullständig åtkomst som dig över alla dina projekt. Använd dem för skript eller verktyg som spänner över flera projekt.",
     "docs_title": "API-slutpunkter",
     "docs_auth": "Autentisera med header",
+    "docs_card_ref": ":cardId är kortets numeriska id eller nyckel (t.ex. {example}); kolumner anges med id (column_id) eller namn (column).",
     "docs_add": "Lägg till ärende",
     "docs_comment": "Lägg till kommentar",
     "docs_move": "Flytta ärende",
+    "docs_update": "Uppdatera ärende",
     "docs_columns": "Lista kolumner",
     "docs_list": "Lista ärenden",
     "docs_get": "Hämta ärende"
