@@ -207,7 +207,7 @@ The response (`201`) is the card in the target project; `key` is its new key.
 
 A move keeps the card itself, so its comments, checklist, attachments, history, links and time spent come along. What changes:
 
-* The card gets the next number in the target project (`MYPROJ-42` becomes e.g. `OPS-7`). The old key keeps resolving wherever a key is accepted: the Ticket API, git webhooks, card references and ticket links.
+* The card gets the next number in the target project (`MYPROJ-42` becomes e.g. `OPS-7`). The old key keeps resolving wherever a key is accepted: the Ticket API, git webhooks, card references and ticket links. The numeric card `id` stays the same, but paths are per project, so use the target project's slug after the move; paths under the old project return `404`.
 * Labels are matched by name onto the target project's labels; missing ones are created there with the same colour.
 * Epic and sprint are cleared, as both belong to the source project.
 * Assignees and watchers who cannot see the target project are removed.

@@ -216,6 +216,7 @@ func transferCard(c *gin.Context, source *models.Project, card *models.Card, tar
 		var moved models.Card
 		if database.DB.Preload("Labels").Preload("Assignee").Preload("Assignees").Preload("Tags").
 			First(&moved, m.ID).Error == nil {
+			fillSubCardCounts(&moved)
 			ws.BroadcastToProject(target.ID, ws.Message{Type: ws.TypeBoardCardCreated, Payload: moved})
 			if m.ID == card.ID {
 				result.Card = &moved
@@ -229,6 +230,18 @@ func transferCard(c *gin.Context, source *models.Project, card *models.Card, tar
 		result.Card = &moved
 	}
 	return result, nil
+}
+
+// fillSubCardCounts sets the computed SubCardCount/SubCardsDone fields, which
+// are not stored columns and stay zero unless a handler fills them in.
+func fillSubCardCounts(card *models.Card) {
+	var total, done int64
+	database.DB.Model(&models.Card{}).Where("parent_card_id = ?", card.ID).Count(&total)
+	if total > 0 {
+		database.DB.Model(&models.Card{}).Where("parent_card_id = ? AND closed = true", card.ID).Count(&done)
+	}
+	card.SubCardCount = int(total)
+	card.SubCardsDone = int(done)
 }
 
 // copyCardToProject creates a copy of original at the bottom of col in target.

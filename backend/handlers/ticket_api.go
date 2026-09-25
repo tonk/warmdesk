@@ -279,6 +279,7 @@ func ticketAPIRespond(c *gin.Context, status int, project *models.Project, card 
 			Preload("Comments.User")
 	}
 	q.First(card, card.ID)
+	fillSubCardCounts(card)
 	var col models.Column
 	database.DB.Select("name").First(&col, card.ColumnID)
 	c.JSON(status, ticketAPICard{Card: *card, ColumnName: col.Name, Key: ticketAPICardKey(project, card)})

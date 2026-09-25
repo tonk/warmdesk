@@ -228,6 +228,7 @@ func TestTransferCardSubCards(t *testing.T) {
 		code, out := f.transfer(t, parent, fmt.Sprintf(`{"target_project_slug":"dst","column_id":%d,"action":"move"}`, f.dstBacklog.ID), nil)
 		require.Equal(t, http.StatusCreated, code)
 		assert.ElementsMatch(t, []uint{child.ID, grandchild.ID}, out.MovedSubCardIDs)
+		assert.Equal(t, 1, out.SubCardCount, "the response counts the direct sub-card that came along")
 
 		var p, ch, gc models.Card
 		f.db.First(&p, parent.ID)
@@ -305,6 +306,7 @@ func TestTransferCardRejections(t *testing.T) {
 func TestTicketTransfer(t *testing.T) {
 	f := newTransferFixture(t)
 	card := f.card(t, f.srcTodo, 12, "Via API", nil)
+	f.card(t, f.srcTodo, 13, "Sub-card", &card.ID)
 
 	call := func(handler gin.HandlerFunc, method, slug, ref, body string, scope *uint) (int, map[string]interface{}) {
 		c, w := ginTestContext(t, method, "/ticket/"+slug+"/cards/"+ref, body)
@@ -337,6 +339,7 @@ func TestTicketTransfer(t *testing.T) {
 		code, out := call(TicketTransfer, http.MethodPost, "src", "src-12", `{"target_project":"dst","column":"backlog"}`, nil)
 		require.Equal(t, http.StatusCreated, code, out)
 		assert.Equal(t, "DST-47", out["key"])
+		assert.EqualValues(t, 1, out["sub_card_count"])
 		assert.Equal(t, "Backlog", out["column_name"])
 		assert.EqualValues(t, card.ID, out["id"])
 

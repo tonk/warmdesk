@@ -346,7 +346,10 @@ What changes:
 
 - The card gets the next number in the target project (`PRJ-12` becomes e.g.
   `OPS-47`). The old key keeps resolving everywhere a key is accepted
-  (Ticket API, git webhooks, card references, ticket links).
+  (Ticket API, git webhooks, card references, ticket links). The numeric
+  card `id` does not change, but paths are per project: after the move, use
+  the target project's slug (`/ticket/{target}/cards/{id}` or
+  `/ticket/{target}/cards/PRJ-12`). Paths under the old project return `404`.
 - Labels are matched by name (case-insensitive) onto the target project's
   labels; missing ones are created there with the same colour.
 - Epic and sprint membership are cleared — both belong to the source project.
