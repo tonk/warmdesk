@@ -311,8 +311,8 @@ EXAMPLES = r'''
     title: "{{ item.title }}"
     priority: "{{ item.priority | default('none') }}"
   loop:
-    - {title: "Setup CI pipeline",  priority: high}
-    - {title: "Write runbook",      priority: medium}
+    - {title: "Setup CI pipeline", priority: high}
+    - {title: "Write runbook", priority: medium}
     - {title: "Review access list", priority: low}
   register: card_results
 

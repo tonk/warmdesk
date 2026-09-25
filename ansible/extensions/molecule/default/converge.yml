@@ -452,6 +452,206 @@
         fail_msg: "user absent idempotency failed"
 
     # =========================================================================
+    # card module — move to another project (move_to_project)
+    # The projects are not removed afterwards: project deletion is a soft
+    # delete that keeps the slug and key prefix taken, so a converge re-run on
+    # the same database could not recreate them. Everything below reads the
+    # slugs, key prefixes and card numbers from registered results, so a
+    # re-run simply moves a fresh card.
+    # =========================================================================
+
+    - name: "[card_move] Customer for the move projects"
+      ansilabnl.warmdesk.customer:
+        warmdesk_url: "{{ warmdesk_url }}"
+        warmdesk_api_key: "{{ warmdesk_api_key }}"
+        name: "Molecule Move Customer"
+        state: present
+
+    - name: "[card_move] Source and target projects"
+      ansilabnl.warmdesk.project:
+        warmdesk_url: "{{ warmdesk_url }}"
+        warmdesk_api_key: "{{ warmdesk_api_key }}"
+        name: "{{ item }}"
+        customer: "Molecule Move Customer"
+        state: present
+      loop:
+        - "Molecule Move Source"
+        - "Molecule Move Target"
+      register: move_projects
+
+    - name: "[card_move] Remember both projects"
+      ansible.builtin.set_fact:
+        move_src: "{{ move_projects.results[0].project }}"
+        move_dst: "{{ move_projects.results[1].project }}"
+
+    - name: "[card_move] Done column in both projects"
+      ansilabnl.warmdesk.column:
+        warmdesk_url: "{{ warmdesk_url }}"
+        warmdesk_api_key: "{{ warmdesk_api_key }}"
+        project: "{{ item }}"
+        name: Done
+        state: present
+      loop:
+        - "{{ move_src.slug }}"
+        - "{{ move_dst.slug }}"
+      register: move_done_cols
+
+    - name: "[card_move] Label in the source project only"
+      ansilabnl.warmdesk.label:
+        warmdesk_url: "{{ warmdesk_url }}"
+        warmdesk_api_key: "{{ warmdesk_api_key }}"
+        project: "{{ move_src.slug }}"
+        name: Infra
+        color: "#00aa00"
+        state: present
+      register: move_label
+
+    - name: "[card_move] Create the card to move"
+      ansilabnl.warmdesk.card:
+        warmdesk_url: "{{ warmdesk_url }}"
+        warmdesk_api_key: "{{ warmdesk_api_key }}"
+        project: "{{ move_src.slug }}"
+        column: Backlog
+        title: "Molecule move card {{ lookup('ansible.builtin.pipe', 'date +%s%N') }}"
+        priority: high
+      register: move_card
+
+    - name: "[card_move] Add a label, a comment and a sub-card (no modules for these)"
+      ansible.builtin.uri:
+        url: "{{ warmdesk_url }}/api/v1/projects/{{ move_src.slug }}/cards/{{ move_card.card.id }}/{{ item.path }}"
+        method: POST
+        headers:
+          X-API-Key: "{{ warmdesk_api_key }}"
+        body_format: json
+        body: "{{ item.body }}"
+        status_code: [200, 201]
+      loop:
+        - {path: "labels/{{ move_label.label.id }}", body: {}}
+        - {path: "comments", body: {body: "must survive the move"}}
+        - {path: "subcards", body: {title: "Molecule move sub-card"}}
+      register: move_extras
+
+    - name: "[card_move] Put the sub-card in Done, to check lane mapping by name"
+      ansible.builtin.uri:
+        url: "{{ warmdesk_url }}/api/v1/projects/{{ move_src.slug }}/cards/{{ move_extras.results[2].json.id }}/move"
+        method: PATCH
+        headers:
+          X-API-Key: "{{ warmdesk_api_key }}"
+        body_format: json
+        body:
+          column_id: "{{ move_done_cols.results[0].column.id }}"
+          position: 1000
+        status_code: 200
+
+    - name: "[card_move] Remember the old references"
+      ansible.builtin.set_fact:
+        move_old_ref: "{{ move_card.card.card_ref }}"
+        move_old_sub_ref: "{{ move_src.key_prefix }}-{{ move_extras.results[2].json.card_number }}"
+
+    - name: "[card_move] Move in check mode"
+      ansilabnl.warmdesk.card:
+        warmdesk_url: "{{ warmdesk_url }}"
+        warmdesk_api_key: "{{ warmdesk_api_key }}"
+        project: "{{ move_src.slug }}"
+        title: irrelevant
+        card_number: "{{ move_old_ref }}"
+        move_to_project: "{{ move_dst.slug }}"
+        move_to_column: Backlog
+      check_mode: true
+      register: move_check
+
+    - name: "[card_move] Assert check mode reported a change but left the card in place"
+      ansible.builtin.assert:
+        that:
+          - move_check.changed
+          - lookup('ansilabnl.warmdesk.card', move_old_ref, project=move_src.slug,
+                   url=warmdesk_url, api_key=warmdesk_api_key).id == move_card.card.id
+        fail_msg: "check-mode move failed: {{ move_check }}"
+
+    - name: "[card_move] Move the card to the target project"
+      ansilabnl.warmdesk.card:
+        warmdesk_url: "{{ warmdesk_url }}"
+        warmdesk_api_key: "{{ warmdesk_api_key }}"
+        project: "{{ move_src.slug }}"
+        title: irrelevant
+        card_number: "{{ move_old_ref }}"
+        move_to_project: "{{ move_dst.slug }}"
+        move_to_column: Backlog
+      register: move_result
+
+    - name: "[card_move] Assert the card moved and was renumbered"
+      ansible.builtin.assert:
+        that:
+          - move_result.changed
+          - move_result.card.id == move_card.card.id
+          - move_result.card.project_id == move_dst.id
+          - move_result.card.card_ref.startswith(move_dst.key_prefix ~ '-')
+          - move_result.card.previous_key == move_old_ref
+          - move_result.card.moved_sub_card_ids | length == 1
+        fail_msg: "move failed: {{ move_result }}"
+
+    - name: "[card_move] Move again (idempotency)"
+      ansilabnl.warmdesk.card:
+        warmdesk_url: "{{ warmdesk_url }}"
+        warmdesk_api_key: "{{ warmdesk_api_key }}"
+        project: "{{ move_src.slug }}"
+        title: irrelevant
+        card_number: "{{ move_old_ref }}"
+        move_to_project: "{{ move_dst.slug }}"
+        move_to_column: Backlog
+      register: move_again
+
+    - name: "[card_move] Assert no change when already moved"
+      ansible.builtin.assert:
+        that:
+          - not move_again.changed
+          - move_again.card.card_ref == move_result.card.card_ref
+        fail_msg: "move idempotency failed: {{ move_again }}"
+
+    - name: "[card_move] Fetch the moved card and its sub-card"
+      ansible.builtin.uri:
+        url: "{{ warmdesk_url }}/api/v1/{{ item }}"
+        headers:
+          X-API-Key: "{{ warmdesk_api_key }}"
+        status_code: 200
+      loop:
+        - "projects/{{ move_dst.slug }}/cards/{{ move_card.card.id }}"
+        - "projects/{{ move_dst.slug }}/cards/{{ move_extras.results[2].json.id }}"
+        - "cards/resolve/{{ move_old_sub_ref }}"
+      register: move_fetch
+
+    - name: "[card_move] Assert comment, label and sub-card came along"
+      ansible.builtin.assert:
+        that:
+          - move_fetch.results[0].json.comments | map(attribute='body') | list == ['must survive the move']
+          - move_fetch.results[0].json.labels | map(attribute='name') | list == ['Infra']
+          - move_fetch.results[0].json.labels[0].project_id == move_dst.id
+          - move_fetch.results[1].json.parent_card_id == move_card.card.id
+          - move_fetch.results[1].json.column_id == move_done_cols.results[1].column.id
+          - move_fetch.results[2].json.project_slug == move_dst.slug
+        fail_msg: "moved card lost data: {{ move_fetch.results | map(attribute='json') | list }}"
+
+    - name: "[card_move] Look up the card by its old reference in the target project"
+      ansible.builtin.set_fact:
+        move_lookup_new: "{{ lookup('ansilabnl.warmdesk.card', move_old_ref, project=move_dst.slug,
+                                    url=warmdesk_url, api_key=warmdesk_api_key) }}"
+
+    - name: "[card_move] Look up the old reference in the source project"
+      ansible.builtin.set_fact:
+        move_lookup_old: "{{ lookup('ansilabnl.warmdesk.card', move_old_ref, project=move_src.slug,
+                                    url=warmdesk_url, api_key=warmdesk_api_key) }}"
+      ignore_errors: true
+      register: move_lookup_old_result
+
+    - name: "[card_move] Assert both lookups follow the move"
+      ansible.builtin.assert:
+        that:
+          - move_lookup_new.id == move_card.card.id
+          - move_lookup_old_result is failed
+          - ("moved to project \"" ~ move_dst.slug ~ "\" as " ~ move_result.card.card_ref) in move_lookup_old_result.msg
+        fail_msg: "lookup did not follow the move: {{ move_lookup_old_result.msg | default('') }}"
+
+    # =========================================================================
     # check_mode smoke test
     # =========================================================================
 
