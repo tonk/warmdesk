@@ -12,8 +12,10 @@ get {
 
 params:query {
   period: month
-  user_id:
-  project_slug:
+  year:
+  month:
+  project: {{projectSlug}}
+  assignees:
 }
 
 auth:bearer {
@@ -21,6 +23,7 @@ auth:bearer {
 }
 
 docs {
-  period: "all", "year", "month", or "week"
-  user_id and project_slug are optional filters.
+  Board time report (time spent on cards). period: "all" (default), "year", "month", or "week".
+  year / month / week pick the period (default: the current one; week is the ISO week number).
+  project: a project slug (default: all projects you can view). assignees: comma-separated user ids.
 }

@@ -1221,25 +1221,31 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/reports/time",
+              "raw": "{{baseUrl}}/api/v1/reports/time?period=month&year=&month=&project={{projectSlug}}&assignees=",
               "query": [
                 {
                   "key": "period",
                   "value": "month"
                 },
                 {
-                  "key": "user_id",
-                  "value": "",
-                  "disabled": true
+                  "key": "year",
+                  "value": ""
                 },
                 {
-                  "key": "project_slug",
-                  "value": "",
-                  "disabled": true
+                  "key": "month",
+                  "value": ""
+                },
+                {
+                  "key": "project",
+                  "value": "{{projectSlug}}"
+                },
+                {
+                  "key": "assignees",
+                  "value": ""
                 }
               ]
             },
-            "description": "period: \"all\", \"year\", \"month\", or \"week\"\n  user_id and project_slug are optional filters.",
+            "description": "Board time report (time spent on cards). period: \"all\" (default), \"year\", \"month\", or \"week\".\nyear / month / week pick the period (default: the current one; week is the ISO week number).\nproject: a project slug (default: all projects you can view). assignees: comma-separated user ids.",
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -1299,13 +1305,14 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"project_slug\": \"{{projectSlug}}\",\n    \"date\": \"2026-05-08\",\n    \"minutes\": 120,\n    \"description\": \"Sprint planning and backlog grooming\"\n  }",
+              "raw": "{\n  \"customer_id\": 1,\n  \"project_id\": 1,\n  \"date\": \"2026-05-08\",\n  \"start_time\": \"09:00\",\n  \"end_time\": \"11:00\",\n  \"minutes\": 120,\n  \"description\": \"Sprint planning and backlog grooming\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
-            }
+            },
+            "description": "customer_id / project_id: optional (see GET /time-tracking-projects, /projects, /customers). date (YYYY-MM-DD) and minutes (> 0) are required; start_time / end_time (HH:MM) are optional."
           }
         }
       ]

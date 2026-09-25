@@ -16,9 +16,16 @@ auth:bearer {
 
 body:json {
   {
-    "project_slug": "{{projectSlug}}",
+    "customer_id": 1,
+    "project_id": 1,
     "date": "2026-05-08",
+    "start_time": "09:00",
+    "end_time": "11:00",
     "minutes": 120,
     "description": "Sprint planning and backlog grooming"
   }
+}
+
+docs {
+  customer_id / project_id: optional (see GET /time-tracking-projects, /projects, /customers). date (YYYY-MM-DD) and minutes (> 0) are required; start_time / end_time (HH:MM) are optional.
 }
