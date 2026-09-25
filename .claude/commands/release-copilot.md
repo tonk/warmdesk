@@ -42,6 +42,12 @@ Usage (manual):
 6. Update website version
 - In `website/hugo.toml`, update `warmdesk_version = "v{version}"` and `release_date = "{YYYY-MM-DD}"` under `[params]`, and `"warmdesk-version" = "v{version}"` under `[markup.asciidocext.attributes]`.
 
+Also update the homepage "What's new" strip and write the release post — the version above changes immediately, so skipping these leaves the homepage showing the *previous* release's highlights under the new version:
+- Write a release blog post `website/content/blog/release-{version without v}.adoc`, in the same front-matter and style as the most recent `release-*.adoc` posts (title `"v{version}: …"`, date, author, one-sentence description; sections for what changed and an *Upgrade* section).
+- In `website/hugo.toml` under `[params]`: set `release_blog = "blog/release-{version without v}/"` and replace `release_highlights` with 2–3 bullets for this release.
+- If the release adds or changes anything users see, update the matching website pages too (`website/content/docs/*.adoc`, `download.adoc`, the homepage feature cards in `website/themes/warmdesk/layouts/index.html`).
+- Check the site builds: `cd website && hugo --destination "$(mktemp -d)" --quiet`.
+
 7. Bump Ansible collection version
 - In `ansible/galaxy.yml`, increment `version` by one patch level (e.g. `0.3.1` → `0.3.2`). Only if commits since the last tag touched files under `ansible/`.
 
@@ -51,7 +57,7 @@ Usage (manual):
 9. Commit and tag (use this template)
 
 ```bash
-git add CHANGELOG.md README.md what.md website/hugo.toml ansible/galaxy.yml docs/admin-guide.adoc docs/user-guide.adoc
+git add CHANGELOG.md README.md what.md website/ ansible/galaxy.yml docs/admin-guide.adoc docs/user-guide.adoc
 
 git commit -m "chore: release v{version} — CHANGELOG, README, what.md\n\nCo-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
 
