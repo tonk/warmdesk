@@ -106,6 +106,7 @@ jobs:
           go build -ldflags="-s -w" -o ../dist-amd64/warmdesk-export ./cmd/export
           go build -ldflags="-s -w" -o ../dist-amd64/warmdesk-import ./cmd/importer
           go build -ldflags="-s -w -X main.version=${{ env.RELEASE_TAG }}" -o ../dist-amd64/warmdesk-training ./cmd/training
+          go build -ldflags="-s -w -X main.version=${{ env.RELEASE_TAG }}" -o ../dist-amd64/warmdesk-timer ./cmd/timer
 
       - name: Build backend (linux/arm64)
         env:
@@ -120,6 +121,21 @@ jobs:
           go build -ldflags="-s -w" -o ../dist-arm64/warmdesk-export ./cmd/export
           go build -ldflags="-s -w" -o ../dist-arm64/warmdesk-import ./cmd/importer
           go build -ldflags="-s -w -X main.version=${{ env.RELEASE_TAG }}" -o ../dist-arm64/warmdesk-training ./cmd/training
+          go build -ldflags="-s -w -X main.version=${{ env.RELEASE_TAG }}" -o ../dist-arm64/warmdesk-timer ./cmd/timer
+
+      - name: Build warmdesk-timer for workstations
+        env:
+          CGO_ENABLED: 0
+        run: |
+          # The timer CLI runs on the user's own machine, so besides being in
+          # the server tarballs it is published standalone for every desktop OS.
+          cd backend
+          for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 windows/arm64; do
+            os=${target%/*}; arch=${target#*/}; ext=""
+            [ "$os" = windows ] && ext=".exe"
+            GOOS=$os GOARCH=$arch go build -ldflags="-s -w -X main.version=${{ env.RELEASE_TAG }}" \
+              -o ../warmdesk-timer-${{ env.RELEASE_TAG }}-${os}-${arch}${ext} ./cmd/timer
+          done
 
       - name: Assemble distributions
         run: |
@@ -150,7 +166,8 @@ jobs:
           echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
           gpgconf --kill gpg-agent
           for f in warmdesk-${{ env.RELEASE_TAG }}-linux-amd64.tar.gz \
-                   warmdesk-${{ env.RELEASE_TAG }}-linux-arm64.tar.gz; do
+                   warmdesk-${{ env.RELEASE_TAG }}-linux-arm64.tar.gz \
+                   warmdesk-timer-${{ env.RELEASE_TAG }}-*; do
             gpg --batch --yes --pinentry-mode loopback \
               --passphrase "$GPG_PASSPHRASE" \
               --detach-sign --armor --local-user "$GPG_KEY_ID" "$f"
@@ -166,7 +183,8 @@ jobs:
             warmdesk-${{ env.RELEASE_TAG }}-linux-amd64.tar.gz \
             warmdesk-${{ env.RELEASE_TAG }}-linux-arm64.tar.gz \
             $(ls warmdesk-${{ env.RELEASE_TAG }}-linux-amd64.tar.gz.asc 2>/dev/null || true) \
-            $(ls warmdesk-${{ env.RELEASE_TAG }}-linux-arm64.tar.gz.asc 2>/dev/null || true)
+            $(ls warmdesk-${{ env.RELEASE_TAG }}-linux-arm64.tar.gz.asc 2>/dev/null || true) \
+            warmdesk-timer-${{ env.RELEASE_TAG }}-*
 
   # ── Tauri desktop clients ────────────────────────────────────────────────────
   release-desktop:
@@ -208,6 +226,14 @@ jobs:
             clang \
             mold \
             rpm
+
+      - name: Set up Go
+        # scripts/build-timer.mjs builds warmdesk-timer into the .deb/.rpm
+        if: matrix.os == 'ubuntu-24.04'
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache-dependency-path: backend/go.sum
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable

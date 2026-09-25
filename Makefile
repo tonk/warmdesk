@@ -85,6 +85,7 @@ build-backend:
 	cd $(BACKEND) && go build -ldflags="-s -w" -o ../$(DIST_DIR)/$(BINARY)-import ./cmd/importer
 	cd $(BACKEND) && go build -ldflags="-s -w -X main.version=$(VERSION)" -o ../$(DIST_DIR)/$(BINARY)-training ./cmd/training
 	cd $(BACKEND) && go build -ldflags="-s -w" -o ../$(DIST_DIR)/$(BINARY)-db-convert ./cmd/db-convert
+	cd $(BACKEND) && go build -ldflags="-s -w -X main.version=$(VERSION)" -o ../$(DIST_DIR)/$(BINARY)-timer ./cmd/timer
 
 # Build everything for linux/arm64 (server + embedded web assets).
 # No C cross-compiler required — the SQLite driver (glebarez/sqlite) is pure Go.
@@ -107,6 +108,7 @@ build-backend-arm64:
 	cd $(BACKEND) && GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o ../$(DIST_ARM64)/$(BINARY)-import ./cmd/importer
 	cd $(BACKEND) && GOOS=linux GOARCH=arm64 go build -ldflags="-s -w -X main.version=$(VERSION)" -o ../$(DIST_ARM64)/$(BINARY)-training ./cmd/training
 	cd $(BACKEND) && GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o ../$(DIST_ARM64)/$(BINARY)-db-convert ./cmd/db-convert
+	cd $(BACKEND) && GOOS=linux GOARCH=arm64 go build -ldflags="-s -w -X main.version=$(VERSION)" -o ../$(DIST_ARM64)/$(BINARY)-timer ./cmd/timer
 
 
 # Run in development mode (two terminals needed)

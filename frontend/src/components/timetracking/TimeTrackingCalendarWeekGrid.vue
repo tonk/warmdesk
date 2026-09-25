@@ -148,8 +148,12 @@ const scheduledByDay = computed(() => {
         segment: 'start',
       })
 
+      // Ending exactly at midnight (end_time "00:00", e.g. the first half of a
+      // timer split at midnight) is not overnight: there is nothing to show on
+      // the next day, where a zero-length continuation would still be drawn at
+      // the minimum block height.
       const nextIso = addDaysISO(d.iso, 1)
-      if (result[nextIso]) {
+      if (endM > 0 && result[nextIso]) {
         result[nextIso].push({
           ...base,
           top: 0,

@@ -69,6 +69,7 @@ dist/
   warmdesk-seed          # demo data seeder
   warmdesk-export        # migration: WarmDesk → Jira / Trello / OpenProject / Ryver
   warmdesk-import        # migration: Jira / Trello / OpenProject / Ryver → WarmDesk
+  warmdesk-timer         # command-line time-tracking timer (runs on a user's machine)
   web/                   # compiled frontend assets
   warmdesk.yaml.example  # annotated server config template
   warmdesk-migrate.yaml.example  # migration tool config template

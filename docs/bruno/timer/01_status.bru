@@ -1,0 +1,19 @@
+meta {
+  name: Timer Status
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/timer
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  Running timer, or {"running": false}.
+}

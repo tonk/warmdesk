@@ -455,6 +455,7 @@ func AutoMigrate(db *gorm.DB) error {
 		&models.TimeEntryRowOrder{},
 		&models.TimeEntryWeekRowOrder{},
 		&models.TimeMacroLibrary{},
+		&models.TimeTimer{},
 		&models.NewsItem{},
 		&models.PasskeyCredential{},
 		&models.MFATrustedDevice{},

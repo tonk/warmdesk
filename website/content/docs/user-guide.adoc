@@ -376,6 +376,23 @@ The ⚙ button on the time-tracking tab bar manages lightweight projects and cus
 A project can have *undeclarable minutes* (e.g. travel time) that are subtracted from declarable totals in the sheet, report, and exports.
 Projects and customers created by an administrator are marked *Global (created by admin)* and are visible to everyone.
 
+=== Timer from the command line
+
+`warmdesk-timer` starts a timer when you begin and books the time when you stop.
+The Linux desktop packages (`.deb`, `.rpm`) install it as `/usr/bin/warmdesk-timer`; it also comes with the server download and as a single file for Linux, macOS, and Windows on the release page.
+Give it your server and a personal API key (*Settings → API Keys*) through `WARMDESK_URL` / `WARMDESK_API_KEY` or a `timer.yaml` config file with `url:` and `api_key:`.
+
+[source,bash]
+----
+warmdesk-timer start Website -m "homepage"   # or: start Travel -c Acme
+warmdesk-timer status
+warmdesk-timer stop                          # stop --at 17:30 if you forgot
+----
+
+Starting while a timer runs books the running one first.
+Time is rounded up to whole 15 minutes and split at midnight; the entries show up in the weekly grid, calendar, and reports like any other.
+Run `warmdesk-timer projects` to see what you can book on, and `warmdesk-timer help` for all options.
+
 === Reports
 
 The *Report* tab shows your own entries for a week, month, year, or custom range, grouped by period, customer, project, or customer + project.

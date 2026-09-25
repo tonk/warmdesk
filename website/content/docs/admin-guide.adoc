@@ -503,6 +503,9 @@ Desktop clients on Linux (`.deb`, `.rpm`, AppImage) and macOS can be updated wit
 |`warmdesk-import` / `warmdesk-export`
 |Move projects from/to Jira, Trello, OpenProject, or Ryver (Ryver imports also bring chat history). Configure with `warmdesk-migrate.yaml`; `user_map` attributes imported cards, comments, and messages to the right WarmDesk accounts; `--dry-run` previews
 
+|`warmdesk-timer`
+|Command-line time-tracking timer for users: `start`, `stop`, `status`, `cancel`, `projects`. Runs on the user's own machine with a personal API key; installed by the desktop `.deb`/`.rpm` packages as `/usr/bin/warmdesk-timer`, and published standalone for Linux, macOS, and Windows on the release page (see the user guide)
+
 |`warmdesk-training`
 |Creates (or `--reset` removes) isolated training slots — one user, customer, contract, and project each
 

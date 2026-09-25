@@ -50,3 +50,19 @@ type TimeEntry struct {
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
+
+// TimeTimer is a user's running time-tracking timer — at most one per user.
+// Stopping it turns the elapsed time into regular TimeEntry rows (see
+// handlers/timer.go); nothing else reads it.
+type TimeTimer struct {
+	UserID      uint      `gorm:"primaryKey;autoIncrement:false" json:"user_id"`
+	CustomerID  *uint     `json:"customer_id"`
+	Customer    *Customer `gorm:"foreignKey:CustomerID" json:"customer,omitempty"`
+	ProjectID   *uint     `json:"project_id"`
+	Project     *Project  `gorm:"foreignKey:ProjectID" json:"project,omitempty"`
+	Description string    `json:"description"`
+	// TimeZone is the IANA zone the timer was started in; entry dates and
+	// wall-clock times are computed in it when the timer stops.
+	TimeZone  string    `gorm:"size:100" json:"time_zone"`
+	StartedAt time.Time `gorm:"not null" json:"started_at"`
+}

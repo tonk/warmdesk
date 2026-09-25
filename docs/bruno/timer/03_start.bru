@@ -1,0 +1,27 @@
+meta {
+  name: Start Timer
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/timer/start
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "project_id": 1,
+    "description": "homepage",
+    "time_zone": "Europe/Amsterdam"
+  }
+}
+
+docs {
+  project_id and/or customer_id (see Timer Targets). A running timer is stopped and booked first (returned as stopped_entries).
+}

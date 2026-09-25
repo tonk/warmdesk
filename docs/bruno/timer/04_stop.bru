@@ -1,0 +1,19 @@
+meta {
+  name: Stop Timer
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/timer/stop
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  Books the time: rounded up to whole 15 minutes, split at midnight. Optional body {"end": "<RFC 3339>"} for a forgotten timer.
+}

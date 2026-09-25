@@ -15,6 +15,7 @@
 8. [Invoices](#8-invoices)
 9. [Invoice Templates](#9-invoice-templates)
 10. [Customer Contacts](#10-customer-contacts)
+11. [Time-Tracking Timer](#11-time-tracking-timer)
 
 See also: [Interactive API (Swagger UI)](#interactive-api-swagger-ui) · [Bruno Collection](#bruno-collection)
 
@@ -78,6 +79,7 @@ collections as plain text files — no account or cloud sync required.
 | `invoice-templates` | List, create, update, delete invoice templates (admin) |
 | `admin` | User management, system settings, backup |
 | `ticket-api` | Create card, add comment, move card, transfer card to another project (API key auth) |
+| `timer` | Time-tracking timer: status, targets, start, stop, cancel |
 
 ---
 
@@ -1122,3 +1124,55 @@ DELETE /api/v1/customers/{customerId}/contacts/{contactId}
 ```
 
 **Response** `200 OK` — `{ "message": "deleted" }` (not `204 No Content`).
+
+---
+
+## 11. Time-Tracking Timer
+
+One running timer per user, kept on the server. Stopping it books the elapsed
+time as ordinary time entries, so they show in the weekly grid, calendar and
+reports. The `warmdesk-timer` command-line tool is a thin client for these
+endpoints. All of them need the `time_tracking_enabled` feature (admins always
+have it) and work with a session or a **personal** API key; project-scoped keys
+are refused because these routes have no project in their path.
+
+| Method | Path | Action |
+|--------|------|--------|
+| `GET` | `/api/v1/timer` | Running timer, or `{"running": false}` |
+| `GET` | `/api/v1/timer/targets` | Projects and customers the timer can be started on |
+| `POST` | `/api/v1/timer/start` | Start a timer (books a running one first) |
+| `POST` | `/api/v1/timer/stop` | Stop and book the time |
+| `DELETE` | `/api/v1/timer` | Discard the running timer; `204`, nothing booked |
+
+### Start
+
+```json
+{ "project_id": 7, "customer_id": 3, "description": "homepage", "time_zone": "Europe/Amsterdam" }
+```
+
+| Field | Notes |
+|-------|-------|
+| `project_id` / `customer_id` | At least one. A board project brings its own customer (another `customer_id` is a `400`); a time-tracking-only project can be combined with any customer from `/timer/targets`. |
+| `description` | Optional; copied to every booked entry. |
+| `time_zone` | IANA zone the entries' dates and times are computed in. Default: the user's time zone setting. |
+
+**Response** `201 Created` — `{running, timer, stopped_entries}`; `stopped_entries`
+holds what was booked from a timer that was still running.
+
+### Stop
+
+Optional body `{ "end": "2026-09-25T17:30:00+02:00" }` books a forgotten timer up
+to that moment; it must lie between the timer's start and now (`400` otherwise).
+
+**Response** `200 OK` — the booked time entries. `404` when no timer runs.
+
+How the time is booked:
+
+- The duration is rounded **up** to whole 15 minutes (at least 15), counted from
+  the start truncated to the minute.
+- The rounded span is split at every local midnight, so each entry stays within
+  one day; an entry that runs to midnight has `end_time` `"00:00"`, and a full
+  day in between is `00:00`–`00:00` with 1440 minutes.
+- Entries carry `start_time`/`end_time` matching their `minutes`, the timer's
+  project, customer and description.
+

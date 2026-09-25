@@ -376,6 +376,13 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 		protected.GET("/invoice-templates", handlers.ListInvoiceTemplates)
 
 		// Time entries (personal time registration)
+		// Time-tracking timer (one running timer per user; stop books time entries)
+		protected.GET("/timer", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimer)
+		protected.GET("/timer/targets", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimerTargets)
+		protected.POST("/timer/start", middleware.RequireFeature("time_tracking_enabled"), handlers.StartTimer)
+		protected.POST("/timer/stop", middleware.RequireFeature("time_tracking_enabled"), handlers.StopTimer)
+		protected.DELETE("/timer", middleware.RequireFeature("time_tracking_enabled"), handlers.CancelTimer)
+
 		protected.GET("/time-entries", middleware.RequireFeature("time_tracking_enabled"), handlers.ListTimeEntries)
 		protected.POST("/time-entries", middleware.RequireFeature("time_tracking_enabled"), handlers.CreateTimeEntry)
 		protected.PUT("/time-entries/:id", middleware.RequireFeature("time_tracking_enabled"), handlers.UpdateTimeEntry)

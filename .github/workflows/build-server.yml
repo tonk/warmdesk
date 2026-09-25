@@ -77,6 +77,7 @@ jobs:
           go build -ldflags="-s -w" -o ../dist-amd64/warmdesk-export ./cmd/export
           go build -ldflags="-s -w" -o ../dist-amd64/warmdesk-import ./cmd/importer
           go build -ldflags="-s -w" -o ../dist-amd64/warmdesk-training ./cmd/training
+          go build -ldflags="-s -w -X main.version=dev-${SHA}" -o ../dist-amd64/warmdesk-timer ./cmd/timer
 
       - name: Build backend (linux/arm64)
         env:
@@ -92,6 +93,7 @@ jobs:
           go build -ldflags="-s -w" -o ../dist-arm64/warmdesk-export ./cmd/export
           go build -ldflags="-s -w" -o ../dist-arm64/warmdesk-import ./cmd/importer
           go build -ldflags="-s -w" -o ../dist-arm64/warmdesk-training ./cmd/training
+          go build -ldflags="-s -w -X main.version=dev-${SHA}" -o ../dist-arm64/warmdesk-timer ./cmd/timer
 
       - name: Assemble distributions
         run: |

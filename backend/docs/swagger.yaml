@@ -114,6 +114,44 @@ definitions:
           $ref: '#/definitions/models.User'
         type: array
     type: object
+  handlers.timerResponse:
+    properties:
+      elapsed_minutes:
+        type: integer
+      running:
+        type: boolean
+      stopped_entries:
+        items:
+          $ref: '#/definitions/models.TimeEntry'
+        type: array
+      timer:
+        $ref: '#/definitions/models.TimeTimer'
+    type: object
+  handlers.timerTarget:
+    properties:
+      customer_id:
+        description: 'Projects only: the board project''s own customer, if any.'
+        type: integer
+      customer_name:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      time_tracking_only:
+        type: boolean
+    type: object
+  handlers.timerTargets:
+    properties:
+      customers:
+        items:
+          $ref: '#/definitions/handlers.timerTarget'
+        type: array
+      projects:
+        items:
+          $ref: '#/definitions/handlers.timerTarget'
+        type: array
+    type: object
   handlers.tokenResponse:
     properties:
       access_token:
@@ -505,6 +543,41 @@ definitions:
         description: Billing identifiers
         type: string
     type: object
+  models.CustomerLocation:
+    properties:
+      address_line1:
+        type: string
+      address_line2:
+        type: string
+      city:
+        type: string
+      contact_email:
+        type: string
+      contact_name:
+        type: string
+      contact_phone:
+        type: string
+      country:
+        type: string
+      created_at:
+        type: string
+      customer_id:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+      phone:
+        type: string
+      postal_code:
+        type: string
+      region:
+        type: string
+      travel_distance:
+        type: number
+      updated_at:
+        type: string
+    type: object
   models.Epic:
     properties:
       card_count:
@@ -625,6 +698,240 @@ definitions:
         type: string
       user:
         $ref: '#/definitions/models.User'
+      user_id:
+        type: integer
+    type: object
+  models.SlaPolicy:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      name:
+        type: string
+      priority_filter:
+        type: string
+      resolution_time_minutes:
+        type: integer
+      response_time_minutes:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  models.Ticket:
+    properties:
+      assigned_to:
+        $ref: '#/definitions/models.User'
+      assigned_to_id:
+        type: integer
+      attachments:
+        items:
+          $ref: '#/definitions/models.Attachment'
+        type: array
+      checklist_items:
+        items:
+          $ref: '#/definitions/models.TicketChecklistItem'
+        type: array
+      checklist_template_id:
+        type: integer
+      close_at:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        $ref: '#/definitions/models.User'
+      created_by_id:
+        type: integer
+      customer:
+        $ref: '#/definitions/models.Customer'
+      customer_id:
+        type: integer
+      description:
+        type: string
+      email_message_id:
+        type: string
+      first_response_at:
+        type: string
+      from_email:
+        type: string
+      from_name:
+        type: string
+      group:
+        $ref: '#/definitions/models.UserGroup'
+      group_id:
+        type: integer
+      id:
+        type: integer
+      is_spam:
+        type: boolean
+      messages:
+        items:
+          $ref: '#/definitions/models.TicketMessage'
+        type: array
+      owner:
+        $ref: '#/definitions/models.User'
+      owner_id:
+        type: integer
+      priority:
+        type: string
+      raw_email:
+        type: string
+      reminder_at:
+        type: string
+      sla_policy:
+        $ref: '#/definitions/models.SlaPolicy'
+      sla_policy_id:
+        type: integer
+      sla_resolution_breached:
+        type: boolean
+      sla_resolution_deadline:
+        type: string
+      sla_response_breached:
+        type: boolean
+      sla_response_deadline:
+        type: string
+      status:
+        type: string
+      tags:
+        items:
+          $ref: '#/definitions/models.TicketTag'
+        type: array
+      title:
+        type: string
+      type:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.TicketChecklistItem:
+    properties:
+      body:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      is_completed:
+        type: boolean
+      position:
+        type: number
+      ticket_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  models.TicketMessage:
+    properties:
+      attachments:
+        items:
+          $ref: '#/definitions/models.Attachment'
+        type: array
+      body:
+        type: string
+      created_at:
+        type: string
+      email_sent:
+        type: boolean
+      from_name:
+        type: string
+      id:
+        type: integer
+      is_private:
+        type: boolean
+      parent_id:
+        type: integer
+      replies:
+        items:
+          $ref: '#/definitions/models.TicketMessage'
+        type: array
+      ticket_id:
+        type: integer
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/models.User'
+      user_id:
+        type: integer
+    type: object
+  models.TicketTag:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      ticket_id:
+        type: integer
+    type: object
+  models.TimeEntry:
+    properties:
+      contract:
+        $ref: '#/definitions/models.Contract'
+      contract_id:
+        type: integer
+      created_at:
+        type: string
+      customer:
+        $ref: '#/definitions/models.Customer'
+      customer_id:
+        type: integer
+      date:
+        type: string
+      description:
+        type: string
+      distance:
+        type: number
+      end_time:
+        type: string
+      id:
+        type: integer
+      is_holiday:
+        type: boolean
+      location:
+        $ref: '#/definitions/models.CustomerLocation'
+      location_id:
+        type: integer
+      minutes:
+        type: integer
+      project:
+        $ref: '#/definitions/models.Project'
+      project_id:
+        type: integer
+      start_time:
+        type: string
+      ticket:
+        $ref: '#/definitions/models.Ticket'
+      ticket_id:
+        type: integer
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/models.User'
+      user_id:
+        type: integer
+    type: object
+  models.TimeTimer:
+    properties:
+      customer:
+        $ref: '#/definitions/models.Customer'
+      customer_id:
+        type: integer
+      description:
+        type: string
+      project:
+        $ref: '#/definitions/models.Project'
+      project_id:
+        type: integer
+      started_at:
+        type: string
+      time_zone:
+        description: |-
+          TimeZone is the IANA zone the timer was started in; entry dates and
+          wall-clock times are computed in it when the timer stops.
+        type: string
       user_id:
         type: integer
     type: object
@@ -753,6 +1060,23 @@ definitions:
         type: string
       week_start:
         description: '"monday" | "sunday"'
+        type: string
+    type: object
+  models.UserGroup:
+    properties:
+      avatar:
+        type: string
+      conversation_id:
+        type: integer
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updated_at:
         type: string
     type: object
 host: localhost:8080
@@ -2112,6 +2436,130 @@ paths:
       summary: List a project's columns (lanes) via API key
       tags:
       - ticket
+  /timer:
+    delete:
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      - ApiKeyAuth: []
+      summary: Discard the running timer without booking any time
+      tags:
+      - time-tracking
+    get:
+      description: Returns running=false when no timer is running.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.timerResponse'
+      security:
+      - BearerAuth: []
+      - ApiKeyAuth: []
+      summary: Show the running time-tracking timer
+      tags:
+      - time-tracking
+  /timer/start:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Needs project_id and/or customer_id (see GET /timer/targets). A board project brings its
+        own customer. A timer that is already running is stopped first and booked; those entries
+        are returned as stopped_entries. time_zone is an IANA zone name (default: the user's setting).
+      parameters:
+      - description: project_id, customer_id, description, time_zone
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.timerResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      - ApiKeyAuth: []
+      summary: Start the time-tracking timer
+      tags:
+      - time-tracking
+  /timer/stop:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        The duration is rounded up to whole 15 minutes and booked as time entries, split at
+        midnight. Optional "end" (RFC 3339) books a timer that was forgotten: it must lie between
+        the start and now.
+      parameters:
+      - description: optional end (RFC 3339)
+        in: body
+        name: body
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.TimeEntry'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      - ApiKeyAuth: []
+      summary: Stop the time-tracking timer and book the time
+      tags:
+      - time-tracking
+  /timer/targets:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.timerTargets'
+      security:
+      - BearerAuth: []
+      - ApiKeyAuth: []
+      summary: List the projects and customers a timer can be started on
+      tags:
+      - time-tracking
   /users:
     get:
       produces:

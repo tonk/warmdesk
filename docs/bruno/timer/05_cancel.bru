@@ -1,0 +1,19 @@
+meta {
+  name: Cancel Timer
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/timer
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  Discards the running timer without booking anything (204).
+}

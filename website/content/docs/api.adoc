@@ -216,6 +216,23 @@ A move keeps the card itself, so its comments, checklist, attachments, history, 
 A copy creates a new card with the title, description, priority, due date and tags.
 Sessions and personal keys can also use `POST /api/v1/projects/{slug}/cards/{cardId}/transfer` with `target_project_slug`, `column_id`, `action` and `sub_cards`.
 
+== Time-tracking timer
+
+One running timer per user, kept on the server; stopping it books the time as ordinary time entries.
+The `warmdesk-timer` command-line tool uses these endpoints. They need time tracking enabled for the user and a session or a *personal* API key (project-scoped keys are refused).
+
+[cols="1,3,3",options="header"]
+|===
+|Method |Path |Action
+|`GET` |`/api/v1/timer` |Running timer, or `{"running": false}`
+|`GET` |`/api/v1/timer/targets` |Projects and customers you can start a timer on
+|`POST` |`/api/v1/timer/start` |Start (`project_id` and/or `customer_id`, optional `description`, `time_zone`); a running timer is booked first
+|`POST` |`/api/v1/timer/stop` |Stop and book; optional `end` (RFC 3339) for a forgotten timer
+|`DELETE` |`/api/v1/timer` |Discard without booking
+|===
+
+The duration is rounded up to whole 15 minutes and split at midnight into one entry per day, in the timer's time zone (default: the user's setting).
+
 == Webhooks
 
 === Generic webhook (chat notifications)

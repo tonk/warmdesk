@@ -79,6 +79,7 @@ func allModels() []interface{} {
 		&models.GroupProjectAccess{},
 		&models.GroupCustomerAccess{},
 		&models.TimeEntry{},
+		&models.TimeTimer{},
 		&models.NewsItem{},
 		&models.PasskeyCredential{},
 		&models.MFATrustedDevice{},

@@ -1249,6 +1249,50 @@ Projects and customers created by a *global admin* are labelled *Global (created
 Non-admin users see these global entries alongside their own, but cannot edit or delete them.
 Projects and customers you create yourself are private — only you see them unless another admin chooses to edit them.
 
+=== Timer from the command line
+
+`warmdesk-timer` is a small command-line tool that starts a timer when you begin working and books the time when you stop.
+The Linux desktop packages (`.deb` and `.rpm`) install it as `/usr/bin/warmdesk-timer`, so it's ready to use.
+It also ships in the server download, and on the GitHub release page as a single file for Linux, macOS, and Windows.
+
+*Setting up.* Create a personal API key under *Settings → API Keys* (a project API key does not work), then tell the tool where your server is, either once in a config file or through environment variables:
+
+[source,yaml]
+----
+# ~/.config/warmdesk/timer.yaml   (macOS: ~/Library/Application Support/warmdesk/timer.yaml,
+#                                  Windows: %AppData%\warmdesk\timer.yaml)
+url: https://warmdesk.example.com
+api_key: cwk_...
+----
+
+or `WARMDESK_URL` and `WARMDESK_API_KEY`; the `--url` and `--key` options override both.
+
+*Using it.*
+
+[source,bash]
+----
+warmdesk-timer projects                          # what you can book on
+warmdesk-timer start Website -m "homepage"       # a board project brings its customer
+warmdesk-timer start Travel -c Acme              # time-tracking project + customer
+warmdesk-timer status                            # Running: Website (Acme) — homepage — since 09:03, 1h 12m
+warmdesk-timer stop                              # books the time
+warmdesk-timer stop --at 17:30                   # forgot to stop: book up to 17:30
+warmdesk-timer cancel                            # throw the timer away, book nothing
+----
+
+Names are matched without regard to case, and any unique part of a name is enough (`web` finds _Website_).
+When a name fits several projects, the tool lists them; add `-c` with the customer to pick one.
+
+*How the time is booked.*
+
+* Starting a timer while one is running stops and books the running one first, so switching tasks is a single `start`.
+* The duration is rounded *up* to whole 15 minutes (a timer of 1–15 minutes books 15), counted from the minute you started.
+* A timer that runs past midnight is split into one entry per day.
+* The entries appear in the weekly grid, the calendar, and every report like entries you made by hand, and you can edit them there.
+* Only one timer runs at a time, and it lives on the server: you can start it on one computer and stop it on another.
+
+Because each timer is rounded up on its own, an entry can end a little after the next timer started; both show in the calendar, partly side by side.
+
 === Report tab
 
 The *Report* tab shows your own logged time entries, filtered and grouped for review or export.
