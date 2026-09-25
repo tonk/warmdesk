@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.32.1 — 2026-09-25
+
+### Fixed
+- **Moving a card reported no sub-cards** — after a move to another project the response said `sub_card_count: 0` even when sub-cards had come along, and the target board showed the moved card without its sub-card progress until you reloaded the page. The Ticket API returned `0` for every card as well. All of these now report the real count.
+
+### Changed
+- The API docs now spell out that a moved card keeps its numeric id, but paths are per project: use the target project's slug after a move; paths under the old project return `404`.
+
 ## v0.32.0 — 2026-09-25
 
 ### Added

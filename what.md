@@ -908,3 +908,4 @@ Create an application that has all these features and requirements
 - Add POST /api/v1/ticket/{slug}/cards/{id}/transfer to move or copy a card to another project by key and lane name
 - Check a project-scoped API key against the transfer's target project, and require project access for resolving a card reference
 - Add move_to_project and sub_cards to the Ansible card module, and let the card lookup follow old card numbers
+- Fill in sub-card counts in card transfer and Ticket API responses and in the live board update for a moved card
