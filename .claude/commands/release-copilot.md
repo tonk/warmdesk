@@ -63,8 +63,12 @@ Note: commits created by you must include the Copilot co-author trailer above wh
 10. Push
 
 ```bash
-git push && git push --tags
+for remote in origin home; do
+  git push "$remote" main "v{version}"
+done
 ```
+
+Push to **both** `origin` (GitHub) and `home` — a plain `git push` only reaches `origin`. Push only this release's tag, not `--tags`. Don't push to the `codeberg` remote; that hosting was dropped.
 
 Optional: Use the Copilot CLI "release" skill (automates the steps above):
 

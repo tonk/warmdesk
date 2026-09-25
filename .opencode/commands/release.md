@@ -59,13 +59,23 @@ Only do this if any commits since the last tag touched files under `ansible/`.
 ## 8. Commit and tag
 ```bash
 git add CHANGELOG.md README.md what.md website/hugo.toml ansible/galaxy.yml
-git commit -m "chore: release v{version} — CHANGELOG, README, what.md\n\nCo-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
+git commit -F - <<'MSG'
+chore: release v{version} — CHANGELOG, README, what.md
+
+Co-Authored-By: {model attribution}
+MSG
 git tag -a v{version} -m "Release v{version}"
 ```
 
+End the message with a `Co-Authored-By:` line naming the model actually running this release (e.g. `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`). Don't copy a model name from an older release commit — it goes stale.
+
 ## 9. Push
 ```bash
-git push && git push --tags
+for remote in origin home; do
+  git push "$remote" main "v{version}"
+done
 ```
+
+Push to **both** `origin` (GitHub) and `home` — a plain `git push` only reaches `origin`. Push only this release's tag, not `--tags`. Don't push to the `codeberg` remote; that hosting was dropped.
 
 Report what was pushed when done.
