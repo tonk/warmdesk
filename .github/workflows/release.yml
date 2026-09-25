@@ -168,7 +168,8 @@ jobs:
           gpgconf --kill gpg-agent
           for f in warmdesk-${{ env.RELEASE_TAG }}-linux-amd64.tar.gz \
                    warmdesk-${{ env.RELEASE_TAG }}-linux-arm64.tar.gz \
-                   warmdesk-timer-${{ env.RELEASE_TAG }}-*; do
+                   warmdesk-timer-${{ env.RELEASE_TAG }}-* \
+                   timer.yaml.example; do
             gpg --batch --yes --pinentry-mode loopback \
               --passphrase "$GPG_PASSPHRASE" \
               --detach-sign --armor --local-user "$GPG_KEY_ID" "$f"
@@ -186,7 +187,8 @@ jobs:
             $(ls warmdesk-${{ env.RELEASE_TAG }}-linux-amd64.tar.gz.asc 2>/dev/null || true) \
             $(ls warmdesk-${{ env.RELEASE_TAG }}-linux-arm64.tar.gz.asc 2>/dev/null || true) \
             warmdesk-timer-${{ env.RELEASE_TAG }}-* \
-            timer.yaml.example
+            timer.yaml.example \
+            $(ls timer.yaml.example.asc 2>/dev/null || true)
 
   # ── Tauri desktop clients ────────────────────────────────────────────────────
   release-desktop:
