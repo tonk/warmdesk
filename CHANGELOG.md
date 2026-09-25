@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.34.0 — 2026-09-25
+
+### Added
+- **Timer button in the top bar** — a stopwatch next to the help button starts the time-tracking timer from any page: pick a project and customer (a board project fills in its own customer), optionally add a description, and click *Start*. While it runs, the button shows the elapsed time; click it to *Stop and book*, *Switch…* to another task (the running timer is booked first), or *Discard* it. It's the same timer as `warmdesk-timer`, so you can start it in the browser and stop it from a terminal: every open WarmDesk window — browser tabs and the desktop apps — follows along immediately, and an open *Log Time* tab reloads when time is booked. Your last pick is remembered in the browser.
+- **Default project and customer for `warmdesk-timer`** — set `project:` and `customer:` in `timer.yaml` (or `WARMDESK_PROJECT` / `WARMDESK_CUSTOMER`) and a plain `warmdesk-timer start` is enough. A name on the command line replaces the default.
+- **`timer.yaml.example`** — an annotated example of the timer's config file: where it goes on Linux, macOS, and Windows, which settings win, and which API key to use. It comes with the server download, is attached to every release, and is installed as `/usr/share/doc/warmdesk/timer.yaml.example` by the Linux desktop packages. The User Guide has a new *Configuring the timer* section.
+
+### Fixed
+- **Bruno and Postman examples for time entries and the time report** — *Create Time Entry* sent `project_slug`, which the API ignores (it takes `project_id`), and *Time Report* offered `project_slug` / `user_id` filters it doesn't read (it takes `project` and `assignees`).
+
+### Changed
+- The website caught up with the last releases: release posts for v0.31.0 – v0.33.0, a correct *What's new* strip on the homepage, the timer downloads on the download page, and the table view in the online User Guide.
+
 ## v0.33.0 — 2026-09-25
 
 ### Added

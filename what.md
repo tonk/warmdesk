@@ -912,3 +912,7 @@ Create an application that has all these features and requirements
 - Add a server-side time-tracking timer (one per user) with GET/POST/DELETE /api/v1/timer endpoints that book the elapsed time as time entries, rounded up to 15 minutes and split at midnight in the user's time zone
 - Add the warmdesk-timer command-line tool (start, stop, stop --at, status, cancel, projects) and ship it in the server tarballs, as standalone Linux/macOS/Windows release assets, and in the Linux desktop .deb/.rpm
 - Stop drawing a stray next-day block for calendar entries that end exactly at midnight
+- Add a timer button to the top bar that starts, stops, switches, and discards the server-side timer, follows changes from other clients through a timer.changed user WebSocket message, reloads the Log Time week when time is booked, and hides itself on servers without the timer
+- Add optional default project and customer settings (timer.yaml, WARMDESK_PROJECT, WARMDESK_CUSTOMER) to warmdesk-timer, with explicit command-line values beating conflicting defaults
+- Ship an annotated timer.yaml.example in the server tarballs, the release assets, and the Linux desktop packages, and document the timer's config file in the user guide
+- Fix the Bruno/Postman time-entry and time-report examples to use the parameters the API actually reads

@@ -8,10 +8,10 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.33.0)
+## Latest release (v0.34.0)
 
-- **Added** — `warmdesk-timer`, a command-line timer: `start` a project when you begin, `stop` when you're done, and the time is booked as regular time entries (rounded up to 15 minutes, split at midnight). Installed by the Linux desktop `.deb`/`.rpm`, and available for Linux, macOS, and Windows.
-- **Fixed** — The time-tracking calendar no longer shows a stray block after an entry that ends at midnight.
+- **Added** — A timer button in the top bar: start and stop time tracking from any page, in the browser and the desktop apps. It's the same timer as `warmdesk-timer`, and every open window follows along live.
+- **Added** — A default project and customer in `timer.yaml` make a plain `warmdesk-timer start` enough; `timer.yaml.example` documents the file.
 
 ## Experiment
 

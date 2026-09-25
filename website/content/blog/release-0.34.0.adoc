@@ -1,0 +1,51 @@
+---
+title: "v0.34.0: The timer, one click away"
+date: "2026-09-25"
+author: "Ton Kersten"
+description: "A timer button in the top bar starts and stops time tracking from any page, in the browser and the desktop apps, and stays in sync with warmdesk-timer. The command-line timer gains a default project and customer."
+draft: false
+---
+:doctype: article
+:icons!:
+
+`v0.33.0` brought a time-tracking timer to the command line. Not everyone lives in a terminal, though, and even those who do have WarmDesk open in a browser tab all day. `v0.34.0` puts the same timer one click away.
+
+== A stopwatch in the top bar
+
+With time tracking enabled, the top bar has a stopwatch button next to the help button, on every page.
+
+* *Start.* Click it, pick a project and a customer, optionally add a description, and click *Start*. A board project fills in its own customer; a time-tracking project can be combined with any customer. The panel remembers your last pick.
+* *Running.* The button shows the elapsed time, `1:12`, so you can see at a glance that the clock is running.
+* *Stop, switch, or discard.* Click the button again for *Stop and book*, *Switch…* to start timing something else (the running timer is booked first), or *Discard* to throw the timer away without booking anything.
+
+The time is booked exactly as with `warmdesk-timer`: rounded up to whole 15 minutes, split at midnight, and shown in the weekly grid, the calendar, and every report.
+
+== One timer, everywhere
+
+The button and `warmdesk-timer` are the same timer. Start it in the browser and stop it from a terminal, or the other way round, and every open WarmDesk window follows along straight away: browser tabs and the desktop apps alike. An open *Log Time* tab reloads by itself when time is booked, so the entry is simply there.
+
+The desktop apps get the button with this release too, since they bundle the same interface. If a newer desktop app connects to a server older than `v0.33.0`, which has no timer, the button stays out of the way instead of failing when you click it.
+
+== A default project for `warmdesk-timer`
+
+If you mostly time the same thing, tell the command-line timer once:
+
+[source,yaml]
+----
+url: https://warmdesk.example.com
+api_key: cwk_...
+project: Support
+customer: Acme Corp
+----
+
+Now a plain `warmdesk-timer start` is enough. A name on the command line still wins: `warmdesk-timer start Website` times _Website_, and `-c Globex` picks another customer. `WARMDESK_PROJECT` and `WARMDESK_CUSTOMER` work as well.
+
+The file's format is now documented properly. `timer.yaml.example` explains where the file goes on Linux, macOS, and Windows, which settings win, and which API key to use. It comes with the server download, is attached to every release, and the Linux desktop packages install it as `/usr/share/doc/warmdesk/timer.yaml.example`. The User Guide has a new link:../../docs/user-guide/#_configuring_the_timer_timer_yaml[Configuring the timer] section.
+
+== Also fixed
+
+The Bruno and Postman collections' examples for creating a time entry and for the time report used parameters the API doesn't read; they now match it.
+
+== Upgrade
+
+Download `v0.34.0` from the link:../../download[download page] or pull the latest release tag. No database migration is needed.
