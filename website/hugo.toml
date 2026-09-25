@@ -15,14 +15,14 @@ enableEmoji = true
   # Social preview image (absolute URL built via absURL). Prefer ≥1200×630 PNG/JPEG for best crawler support.
   og_image = "images/logo-full.svg"
   # Release info — update both this and warmdesk-version in [markup.asciidocext.attributes] on each release
-  warmdesk_version = "v0.34.0"
+  warmdesk_version = "v0.34.1"
   release_date     = "2026-09-25"
   # Blog post slug for the current release (linked from the homepage "What's new" strip)
-  release_blog     = "blog/release-0.34.0/"
+  release_blog     = "blog/release-0.34.1/"
   # Release highlights shown in the "What's new" strip on the homepage (2-3 bullets)
   release_highlights = [
-    "**Added — Timer button in the top bar** — start and stop time tracking from any page, in the browser and the desktop apps; it's the same timer as `warmdesk-timer`, and every open window follows along live.",
-    "**Added — Defaults for `warmdesk-timer`** — a default project and customer in `timer.yaml` make a plain `warmdesk-timer start` enough; `timer.yaml.example` documents the file.",
+    "**Added — The timer in the tray** — the desktop app's tray menu shows what's running, with *Stop and book* and *Switch…*, or starts your last project with one click.",
+    "**Always in sync** — tray, top-bar button, and `warmdesk-timer` are the same timer; change it anywhere and the others follow.",
   ]
 
 [markup]
@@ -41,7 +41,7 @@ enableEmoji = true
       "source-highlighter" = "highlight.js"
       "sectanchors" = ""
       "sectlinks" = ""
-      "warmdesk-version" = "v0.34.0"
+      "warmdesk-version" = "v0.34.1"
 
   # Chroma off — fenced Markdown code stays plain <pre><code>; AsciiDoc uses hljs (see theme head).
   [markup.highlight]

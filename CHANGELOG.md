@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.34.1 — 2026-09-25
+
+### Added
+- **The timer in the desktop app's tray menu** — completing v0.34.0's timer. The tray menu now shows what's running and since when, with *Stop and book* and *Switch…* while a timer runs; otherwise *Start: \<last project\>* restarts your last pick with one click, and *Start timer…* opens the window with the timer panel. Starting or stopping from the tray while the window is hidden also shows a desktop notification with what was booked. The menu follows the timer everywhere — stop it from `warmdesk-timer` or the browser and the tray updates too — and stays out of the way when time tracking is off.
+
 ## v0.34.0 — 2026-09-25
 
 ### Added

@@ -916,3 +916,4 @@ Create an application that has all these features and requirements
 - Add optional default project and customer settings (timer.yaml, WARMDESK_PROJECT, WARMDESK_CUSTOMER) to warmdesk-timer, with explicit command-line values beating conflicting defaults
 - Ship an annotated timer.yaml.example in the server tarballs, the release assets, and the Linux desktop packages, and document the timer's config file in the user guide
 - Fix the Bruno/Postman time-entry and time-report examples to use the parameters the API actually reads
+- Add the time-tracking timer to the desktop tray menu (status, stop and book, switch, one-click start of the last pick, start timer…), kept in sync with the timer from every client

@@ -1,0 +1,32 @@
+---
+title: "v0.34.1: The timer in the tray"
+date: "2026-09-25"
+author: "Ton Kersten"
+description: "The desktop app's tray menu gets the time-tracking timer: see what's running, stop and book, switch, or start your last project with one click, without opening the window."
+draft: false
+---
+:doctype: article
+:icons!:
+
+`v0.34.0` put the timer in the top bar. In the desktop app there's a place that's even closer at hand: the tray icon, which stays put while the window is minimised or closed to the tray. `v0.34.1` completes the timer there.
+
+== What the tray menu shows
+
+The first line of the tray menu now tells you what the timer is doing: *No timer running*, or what's being timed and since when, like _⏱ Support (Acme Corp) — since 09:03_.
+
+* *While a timer runs:* *Stop and book* books the time, and *Switch…* brings the window up with the panel for timing something else (the running timer is booked first).
+* *When none runs:* *Start: Support (Acme Corp)* restarts your last pick with one click, and *Start timer…* opens the window with the timer panel to pick something else.
+
+Discarding a timer stays in the panel, since it asks for confirmation first.
+
+If the window is hidden when you start or stop from the tray, a desktop notification tells you what was booked.
+
+== Always in sync
+
+The tray, the top-bar button, and `warmdesk-timer` are one and the same timer. Stop it from a terminal or in a browser tab, and the tray menu switches to _No timer running_ by itself. When time tracking is off for you, or the server is older than `v0.33.0` and has no timer, the tray menu is just *WarmDesk* and *Quit*, as before.
+
+See the System tray section of the link:../../docs/user-guide/[User Guide] for more.
+
+== Upgrade
+
+Download `v0.34.1` from the link:../../download[download page] or pull the latest release tag; the tray menu comes with the updated desktop app. No database migration is needed.
