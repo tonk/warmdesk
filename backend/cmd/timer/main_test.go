@@ -89,6 +89,86 @@ func TestLoadConfigPrecedence(t *testing.T) {
 	assert.ErrorContains(t, err, "API key are required")
 }
 
+func TestResolveStartDefaults(t *testing.T) {
+	acme, globex := uint(10), uint(11)
+	targets := targetList{
+		Projects: []target{
+			{ID: 1, Name: "Website", CustomerID: &acme, CustomerName: "Acme"},
+			{ID: 2, Name: "Website", CustomerID: &globex, CustomerName: "Globex"},
+			{ID: 3, Name: "Travel", TimeTrackingOnly: true},
+			{ID: 4, Name: "Intranet", CustomerID: &acme, CustomerName: "Acme"},
+		},
+		Customers: []target{{ID: 10, Name: "Acme"}, {ID: 11, Name: "Globex"}},
+	}
+	id := func(tg *target) uint {
+		if tg == nil {
+			return 0
+		}
+		return tg.ID
+	}
+	cases := []struct {
+		name                  string
+		project               string
+		projectDefault        bool
+		customer              string
+		customerDefault       bool
+		wantProject, wantCust uint
+		wantErr               string
+	}{
+		{"defaults only: time-tracking project + customer", "Travel", true, "Acme", true, 3, 10, ""},
+		{"default customer gives way to an explicit board project's own", "Intranet", false, "Globex", true, 4, 0, ""},
+		{"explicit project with a fitting default customer keeps it", "Intranet", false, "Acme", true, 4, 10, ""},
+		{"default project that doesn't fit an explicit customer is left out", "Intranet", true, "Globex", false, 0, 11, ""},
+		{"explicit customer narrows a same-named default project", "Website", true, "Globex", false, 2, 11, ""},
+		{"explicit customer narrows a same-named explicit project", "Website", false, "Acme", false, 1, 10, ""},
+		{"both explicit and incompatible is an error", "Intranet", false, "Globex", false, 0, 0, "no project matches"},
+		{"ambiguous default project says where it came from", "Website", true, "", true, 0, 0, "default project from the config file"},
+		{"unknown default customer says where it came from", "Travel", false, "Nope", true, 0, 0, "default customer from the config file"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			cust, proj, err := resolveStart(targets, tc.project, tc.projectDefault, tc.customer, tc.customerDefault)
+			if tc.wantErr != "" {
+				assert.ErrorContains(t, err, tc.wantErr)
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, tc.wantProject, id(proj), "project")
+			assert.Equal(t, tc.wantCust, id(cust), "customer")
+		})
+	}
+}
+
+func TestConfigDefaults(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "timer.yaml")
+	require.NoError(t, os.WriteFile(path, []byte("url: https://x\napi_key: k\nproject: Travel\ncustomer: Acme\n"), 0o600))
+	t.Setenv("WARMDESK_URL", "")
+	t.Setenv("WARMDESK_API_KEY", "")
+	t.Setenv("WARMDESK_PROJECT", "")
+	t.Setenv("WARMDESK_CUSTOMER", "")
+	cfg, err := loadConfig(path, "", "", true)
+	require.NoError(t, err)
+	assert.Equal(t, "Travel", cfg.Project)
+	assert.Equal(t, "Acme", cfg.Customer)
+
+	t.Setenv("WARMDESK_PROJECT", "Website")
+	cfg, _ = loadConfig(path, "", "", true)
+	assert.Equal(t, "Website", cfg.Project, "environment beats the file")
+	assert.Equal(t, "Acme", cfg.Customer)
+}
+
+// The shipped example must stay a valid config.
+func TestExampleConfig(t *testing.T) {
+	t.Setenv("WARMDESK_URL", "")
+	t.Setenv("WARMDESK_API_KEY", "")
+	cfg, err := loadConfig(filepath.Join("..", "..", "..", "timer.yaml.example"), "", "", true)
+	require.NoError(t, err)
+	assert.Equal(t, "https://warmdesk.example.com", cfg.URL)
+	assert.Regexp(t, `^cwk_[0-9a-f]{48}$`, cfg.APIKey, "same shape as a generated key")
+	assert.Empty(t, cfg.Project, "the defaults are commented out in the example")
+	assert.Empty(t, cfg.Customer)
+}
+
 // TestEndToEnd drives the CLI against the real timer handlers.
 func TestEndToEnd(t *testing.T) {
 	gin.SetMode(gin.TestMode)
@@ -130,6 +210,13 @@ func TestEndToEnd(t *testing.T) {
 
 	t.Setenv("WARMDESK_URL", "")
 	t.Setenv("WARMDESK_API_KEY", "")
+	t.Setenv("WARMDESK_PROJECT", "")
+	t.Setenv("WARMDESK_CUSTOMER", "")
+	// Keep the developer's own timer.yaml out of the default config path.
+	home := t.TempDir()
+	t.Setenv("XDG_CONFIG_HOME", home)
+	t.Setenv("HOME", home)
+	t.Setenv("AppData", home)
 	cli := func(args ...string) (string, error) {
 		var out bytes.Buffer
 		all := append([]string{"--url", srv.URL, "--key", "secret"}, args...)
@@ -178,6 +265,19 @@ func TestEndToEnd(t *testing.T) {
 	_, err = cli("start")
 	var ue usageError
 	assert.ErrorAs(t, err, &ue)
+
+	t.Setenv("WARMDESK_PROJECT", "travel")
+	t.Setenv("WARMDESK_CUSTOMER", "acme")
+	out, err = cli("start")
+	require.NoError(t, err)
+	assert.Contains(t, out, "Started Travel (Acme) at ", "defaults from the environment")
+	out, err = cli("start", "Website")
+	require.NoError(t, err)
+	assert.Contains(t, out, "Started Website (Acme) at ", "an explicit project wins")
+	_, err = cli("cancel")
+	require.NoError(t, err)
+	t.Setenv("WARMDESK_PROJECT", "")
+	t.Setenv("WARMDESK_CUSTOMER", "")
 
 	_, err = cli("start", "Website", "-c", "globex")
 	assert.ErrorContains(t, err, "no customer matches")

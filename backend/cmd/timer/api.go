@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -137,6 +138,15 @@ func describe(project, customer *named, desc string) string {
 	return s
 }
 
+// errNoMatch is what matchTarget's error matches (errors.Is) when nothing
+// matched at all, as opposed to several matches.
+var errNoMatch = errors.New("no match")
+
+type noMatchError struct{ msg string }
+
+func (e noMatchError) Error() string        { return e.msg }
+func (e noMatchError) Is(target error) bool { return target == errNoMatch }
+
 // matchTarget finds the one target named by query: an exact
 // (case-insensitive) name wins, else a unique name containing query. Errors
 // list the candidates so the user can be more specific.
@@ -160,7 +170,7 @@ func matchTarget(list []target, query, kind string) (*target, error) {
 	case 1:
 		return &matches[0], nil
 	case 0:
-		return nil, fmt.Errorf("no %s matches %q; run \"warmdesk-timer projects\" to see what you can pick", kind, query)
+		return nil, noMatchError{fmt.Sprintf("no %s matches %q; run \"warmdesk-timer projects\" to see what you can pick", kind, query)}
 	}
 	names := make([]string, len(matches))
 	for i, m := range matches {

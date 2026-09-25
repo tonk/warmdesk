@@ -1131,8 +1131,10 @@ DELETE /api/v1/customers/{customerId}/contacts/{contactId}
 
 One running timer per user, kept on the server. Stopping it books the elapsed
 time as ordinary time entries, so they show in the weekly grid, calendar and
-reports. The `warmdesk-timer` command-line tool is a thin client for these
-endpoints. All of them need the `time_tracking_enabled` feature (admins always
+reports. The `warmdesk-timer` command-line tool and the top-bar timer button in
+the web interface are clients for these endpoints. Every start, stop and
+cancel also sends `timer.changed` (`{"running": bool, "booked": n}`) over the
+user WebSocket (`/api/v1/ws/user`), so other open clients can follow. All of them need the `time_tracking_enabled` feature (admins always
 have it) and work with a session or a **personal** API key; project-scoped keys
 are refused because these routes have no project in their path.
 

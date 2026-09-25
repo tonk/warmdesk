@@ -105,6 +105,7 @@
           </div>
         </div>
       </div>
+      <TimerButton v-if="showTimer" />
       <button
         type="button"
         class="btn-icon"
@@ -198,6 +199,7 @@ import { avatarUrl } from '@/composables/useAvatar'
 import { fetchBinary, triggerDownload } from '@/api/client'
 import { useUIStore } from '@/stores/ui'
 import GlobalSearch from '@/components/common/GlobalSearch.vue'
+import TimerButton from '@/components/layout/TimerButton.vue'
 import AboutModal from '@/components/common/AboutModal.vue'
 import HelpPanelModal from '@/components/common/HelpPanelModal.vue'
 
@@ -205,6 +207,8 @@ const props = defineProps({ presenceCount: { type: Number, default: 0 } })
 const emit = defineEmits(['open-shortcuts'])
 
 const auth = useAuthStore()
+// The timer endpoints need the time_tracking_enabled feature (admins always have it).
+const showTimer = computed(() => !!auth.user && (auth.isAdmin || !!auth.user.time_tracking_enabled))
 const systemStore = useSystemStore()
 const router = useRouter()
 const route = useRoute()

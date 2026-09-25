@@ -1,0 +1,45 @@
+---
+# timer.yaml — configuration for warmdesk-timer, the command-line time-tracking timer
+#
+# Copy this file to the default location for your system (create the
+# directory if needed):
+#   Linux    ~/.config/warmdesk/timer.yaml   ($XDG_CONFIG_HOME/warmdesk/timer.yaml if set)
+#   macOS    ~/Library/Application Support/warmdesk/timer.yaml
+#   Windows  %AppData%\warmdesk\timer.yaml
+# or keep it anywhere and point to it with: warmdesk-timer --config FILE ...
+#
+# The file holds an API key, so make it readable by you only:
+#   chmod 600 ~/.config/warmdesk/timer.yaml
+#
+# Every setting can also come from the environment or the command line.
+# First match wins:
+#   1. the command line: --url, --key; for "start" the project name and -c
+#   2. environment variables: WARMDESK_URL, WARMDESK_API_KEY,
+#      WARMDESK_PROJECT, WARMDESK_CUSTOMER
+#   3. this file
+# The file is optional when url and api_key are set another way.
+
+# Base URL of your WarmDesk server, as you open it in the browser
+# (no trailing /api/v1).
+url: https://warmdesk.example.com
+
+# A *personal* API key: WarmDesk → avatar menu → Settings → API Keys.
+# Project API keys (Project Settings → API Keys) are limited to one project
+# and cannot use the timer. Time tracking must be enabled for your account.
+api_key: cwk_0123456789abcdef0123456789abcdef0123456789abcdef
+
+# ── Defaults for "warmdesk-timer start" (optional) ─────────────────────────────
+#
+# With these set, a plain "warmdesk-timer start" times this project and
+# customer. Names are matched like on the command line: case doesn't matter
+# and a unique part of the name is enough ("warmdesk-timer projects" lists
+# what you can pick). A name on the command line replaces the default:
+#   warmdesk-timer start               -> the defaults below
+#   warmdesk-timer start Website       -> project Website; the default customer
+#                                         is kept unless Website belongs to
+#                                         another customer
+#   warmdesk-timer start -c Globex     -> customer Globex; the default project
+#                                         is kept only if it fits Globex
+
+# project: Support
+# customer: Acme Corp

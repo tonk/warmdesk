@@ -56,6 +56,7 @@ all: build
 build: build-frontend docs-pdf-guides embed-web build-backend
 	@cp warmdesk.yaml.example $(DIST_DIR)/warmdesk.yaml.example
 	@cp warmdesk-migrate.yaml.example $(DIST_DIR)/warmdesk-migrate.yaml.example
+	@cp timer.yaml.example $(DIST_DIR)/timer.yaml.example
 	@cp -r deploy $(DIST_DIR)/deploy
 	@cp deploy/get_warmdesk $(DIST_DIR)/get_warmdesk
 	@cp INSTALL.md $(DIST_DIR)/INSTALL.md
@@ -92,6 +93,7 @@ build-backend:
 build-arm64: build-frontend docs-pdf-guides embed-web build-backend-arm64
 	@cp warmdesk.yaml.example $(DIST_ARM64)/warmdesk.yaml.example
 	@cp warmdesk-migrate.yaml.example $(DIST_ARM64)/warmdesk-migrate.yaml.example
+	@cp timer.yaml.example $(DIST_ARM64)/timer.yaml.example
 	@cp -r deploy $(DIST_ARM64)/deploy
 	@cp deploy/get_warmdesk $(DIST_ARM64)/get_warmdesk
 	@cp INSTALL.md $(DIST_ARM64)/INSTALL.md

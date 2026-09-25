@@ -58,6 +58,7 @@ import { useSystemStore } from '@/stores/system'
 import { useUIStore } from '@/stores/ui'
 import { useNotificationsStore } from '@/stores/notifications'
 import { useTicketsStore } from '@/stores/tickets'
+import { useTimerStore } from '@/stores/timer'
 import { useProjectChatUnread } from '@/composables/useProjectChatUnread'
 import { useTrayUnread } from '@/composables/useTrayUnread'
 import AppHeader from '@/components/layout/AppHeader.vue'
@@ -86,6 +87,7 @@ const systemStore = useSystemStore()
 const ui = useUIStore()
 const notificationsStore = useNotificationsStore()
 const ticketsStore = useTicketsStore()
+const timerStore = useTimerStore()
 const showShortcuts = ref(false)
 const showA11y = ref(false)
 
@@ -365,6 +367,8 @@ async function connectUserWs() {
         lkGroupCall.handleGroupInvite(msg.payload)
       } else if (msg.type && msg.type.startsWith('call.')) {
         call.handleSignal(msg)
+      } else if (msg.type === 'timer.changed') {
+        timerStore.onChanged(msg.payload)
       } else if (msg.type === 'ticket.created') {
         if (auth.helpdeskEnabled) {
           ticketsStore.fetchInboxCount()

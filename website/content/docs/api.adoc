@@ -319,6 +319,7 @@ wss://warmdesk.example.com/api/v1/ws/user?token=<jwt>
 ----
 
 Delivers user-level events: DM messages, @mentions, and card notifications.
+`timer.changed` (`{"running": bool, "booked": n}`) is sent whenever the user's time-tracking timer is started, stopped, or discarded from any client; `booked` is the number of time entries the change created.
 
 == Prometheus metrics
 

@@ -12,6 +12,7 @@ import (
 	"github.com/tonk/warmdesk/middleware"
 	"github.com/tonk/warmdesk/models"
 	"github.com/tonk/warmdesk/services"
+	"github.com/tonk/warmdesk/ws"
 	"gorm.io/gorm"
 )
 
@@ -209,6 +210,16 @@ func loadTimer(userID uint) (*models.TimeTimer, error) {
 	return &timer, err
 }
 
+// notifyTimerChanged tells the user's other open clients (web tabs, the
+// desktop app) that the timer changed, so they refresh it and, when time was
+// booked, their time sheet.
+func notifyTimerChanged(userID uint, running bool, booked int) {
+	ws.BroadcastToUser(userID, ws.Message{
+		Type:    ws.TypeTimerChanged,
+		Payload: gin.H{"running": running, "booked": booked},
+	})
+}
+
 func preloadEntries(entries []models.TimeEntry) []models.TimeEntry {
 	for i := range entries {
 		database.DB.Preload("Customer").Preload("Project").First(&entries[i], entries[i].ID)
@@ -348,6 +359,7 @@ func StartTimer(c *gin.Context) {
 		return
 	}
 	timer, _ := loadTimer(userID)
+	notifyTimerChanged(userID, true, len(stopped))
 	c.JSON(http.StatusCreated, timerResponse{Running: true, Timer: timer, StoppedEntries: preloadEntries(stopped)})
 }
 
@@ -412,6 +424,7 @@ func StopTimer(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to stop timer"})
 		return
 	}
+	notifyTimerChanged(userID, false, len(entries))
 	c.JSON(http.StatusOK, preloadEntries(entries))
 }
 
@@ -424,7 +437,8 @@ func StopTimer(c *gin.Context) {
 // @Failure      404 {object} map[string]string
 // @Router       /timer [delete]
 func CancelTimer(c *gin.Context) {
-	res := database.DB.Where("user_id = ?", middleware.GetUserID(c)).Delete(&models.TimeTimer{})
+	userID := middleware.GetUserID(c)
+	res := database.DB.Where("user_id = ?", userID).Delete(&models.TimeTimer{})
 	if res.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
 		return
@@ -433,5 +447,6 @@ func CancelTimer(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "no timer running"})
 		return
 	}
+	notifyTimerChanged(userID, false, 0)
 	c.Status(http.StatusNoContent)
 }

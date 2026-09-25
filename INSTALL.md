@@ -73,6 +73,7 @@ dist/
   web/                   # compiled frontend assets
   warmdesk.yaml.example  # annotated server config template
   warmdesk-migrate.yaml.example  # migration tool config template
+  timer.yaml.example     # warmdesk-timer config template (per user, on their own machine)
   deploy/                # systemd / nginx / Apache templates
   docs/                  # user, API, and admin documentation (PDFs built by make build)
 ```

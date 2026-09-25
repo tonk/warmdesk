@@ -4,7 +4,7 @@
 //
 // Usage:
 //
-//	warmdesk-timer start [-c CUSTOMER] [-m DESCRIPTION] [PROJECT]
+//	warmdesk-timer start [-c CUSTOMER] [-m DESCRIPTION] [PROJECT]   (defaults from the config)
 //	warmdesk-timer stop [--at HH:MM]
 //	warmdesk-timer status
 //	warmdesk-timer cancel
@@ -15,7 +15,8 @@
 // Connection settings, first match wins: the --url/--key flags, the
 // WARMDESK_URL/WARMDESK_API_KEY environment variables, then the config file
 // (default: <user config dir>/warmdesk/timer.yaml) with "url:" and
-// "api_key:". The key must be a personal API key (Settings → API Keys);
+// "api_key:", plus optional "project:" and "customer:" defaults for start
+// (WARMDESK_PROJECT/WARMDESK_CUSTOMER in the environment). The key must be a personal API key (Settings → API Keys);
 // project-scoped keys cannot use the timer.
 package main
 
@@ -39,7 +40,8 @@ const usage = `warmdesk-timer — start and stop WarmDesk time tracking
 
 Usage:
   warmdesk-timer start [-c CUSTOMER] [-m DESCRIPTION] [PROJECT]
-                               start a timer (stops and books a running one)
+                               start a timer (stops and books a running one);
+                               without PROJECT/-c, the configured defaults are used
   warmdesk-timer stop [--at HH:MM]
                                stop and book the time (--at: when you actually stopped)
   warmdesk-timer status        show the running timer
@@ -53,8 +55,13 @@ Names match case-insensitively; a unique part of a name is enough.
 Global flags (before the command):
   --url URL        WarmDesk base URL          (env WARMDESK_URL)
   --key KEY        personal API key           (env WARMDESK_API_KEY)
-  --config FILE    config file with url: and api_key:
+  --config FILE    config file with url:, api_key:, and the optional
+                   project: and customer: defaults for start
+                   (env WARMDESK_PROJECT, WARMDESK_CUSTOMER)
                    (default %s)
+
+An annotated timer.yaml.example ships with WarmDesk (server download, release
+page, and /usr/share/doc/warmdesk/ from the Linux desktop packages).
 `
 
 func main() {
@@ -78,6 +85,10 @@ func usagef(format string, a ...interface{}) error { return usageError{fmt.Sprin
 type config struct {
 	URL    string `yaml:"url"`
 	APIKey string `yaml:"api_key"`
+	// Defaults for "start" when the command line doesn't name a project or
+	// customer (-c). Matched like names on the command line.
+	Project  string `yaml:"project"`
+	Customer string `yaml:"customer"`
 }
 
 func defaultConfigPath() string {
@@ -106,6 +117,7 @@ func loadConfig(path, flagURL, flagKey string, explicitPath bool) (config, error
 		val string
 	}{
 		{&cfg.URL, os.Getenv("WARMDESK_URL")}, {&cfg.APIKey, os.Getenv("WARMDESK_API_KEY")},
+		{&cfg.Project, os.Getenv("WARMDESK_PROJECT")}, {&cfg.Customer, os.Getenv("WARMDESK_CUSTOMER")},
 		{&cfg.URL, flagURL}, {&cfg.APIKey, flagKey},
 	} {
 		if o.val != "" {
@@ -114,6 +126,8 @@ func loadConfig(path, flagURL, flagKey string, explicitPath bool) (config, error
 	}
 	cfg.URL = strings.TrimRight(strings.TrimSpace(cfg.URL), "/")
 	cfg.APIKey = strings.TrimSpace(cfg.APIKey)
+	cfg.Project = strings.TrimSpace(cfg.Project)
+	cfg.Customer = strings.TrimSpace(cfg.Customer)
 	if cfg.URL == "" || cfg.APIKey == "" {
 		return cfg, fmt.Errorf("WarmDesk URL and API key are required: set WARMDESK_URL and WARMDESK_API_KEY, "+
 			"use --url/--key, or put url: and api_key: in %s", path)
@@ -152,7 +166,7 @@ func run(args []string, out io.Writer, now time.Time) error {
 
 	switch cmd {
 	case "start":
-		return cmdStart(api, cmdArgs, out)
+		return cmdStart(api, cfg, cmdArgs, out)
 	case "stop":
 		return cmdStop(api, cmdArgs, out, now)
 	case "status":
@@ -186,7 +200,7 @@ func parseInterleaved(fs *flag.FlagSet, args []string) ([]string, error) {
 	}
 }
 
-func cmdStart(api *client, args []string, out io.Writer) error {
+func cmdStart(api *client, cfg config, args []string, out io.Writer) error {
 	fs := flag.NewFlagSet("start", flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
 	customer := fs.String("c", "", "")
@@ -200,45 +214,36 @@ func cmdStart(api *client, args []string, out io.Writer) error {
 	if len(pos) > 1 {
 		return usagef("give one project name (quote names with spaces)")
 	}
-	project := ""
+	// The command line wins; the configured defaults fill in what it leaves out.
+	project, projectIsDefault := cfg.Project, true
 	if len(pos) == 1 {
-		project = pos[0]
+		project, projectIsDefault = pos[0], false
 	}
-	if project == "" && *customer == "" {
-		return usagef("start needs a project, a customer (-c), or both")
+	customerName, customerIsDefault := cfg.Customer, true
+	if *customer != "" {
+		customerName, customerIsDefault = *customer, false
+	}
+	if project == "" && customerName == "" {
+		return usagef("start needs a project, a customer (-c), or both — or set project/customer in the config file")
 	}
 
 	var targets targetList
 	if err := api.do("GET", "/timer/targets", nil, &targets); err != nil {
 		return err
 	}
+	cust, proj, err := resolveStart(targets, project, projectIsDefault, customerName, customerIsDefault)
+	if err != nil {
+		return err
+	}
 	body := map[string]interface{}{"description": *desc}
 	if zone := localZoneName(); zone != "" {
 		body["time_zone"] = zone
 	}
-	var cust *target
-	if *customer != "" {
-		if cust, err = matchTarget(targets.Customers, *customer, "customer"); err != nil {
-			return err
-		}
+	if cust != nil {
 		body["customer_id"] = cust.ID
 	}
-	if project != "" {
-		candidates := targets.Projects
-		if cust != nil {
-			// Board projects of another customer can't be combined with it.
-			candidates = nil
-			for _, p := range targets.Projects {
-				if p.CustomerID == nil || *p.CustomerID == cust.ID {
-					candidates = append(candidates, p)
-				}
-			}
-		}
-		p, err := matchTarget(candidates, project, "project")
-		if err != nil {
-			return err
-		}
-		body["project_id"] = p.ID
+	if proj != nil {
+		body["project_id"] = proj.ID
 	}
 
 	var res timerState
@@ -250,6 +255,62 @@ func cmdStart(api *client, args []string, out io.Writer) error {
 	}
 	fmt.Fprintf(out, "Started %s at %s.\n", res.Timer.label(), res.Timer.StartedAt.Local().Format("15:04"))
 	return nil
+}
+
+// resolveStart matches the project and customer names for "start". A board
+// project belongs to one customer, so the two can conflict; an explicit
+// (command-line) value then beats a configured default, which is dropped:
+//   - a default customer gives way to an explicit project's own customer;
+//   - a default project that doesn't fit an explicit customer is left out.
+//
+// When both are explicit they must fit together, and the customer narrows
+// down same-named projects.
+func resolveStart(targets targetList, project string, projectIsDefault bool, customer string, customerIsDefault bool) (*target, *target, error) {
+	fromConfig := func(err error, kind string, isDefault bool) error {
+		if isDefault {
+			return fmt.Errorf("default %s from the config file or environment: %w", kind, err)
+		}
+		return err
+	}
+	var cust *target
+	if customer != "" {
+		c, err := matchTarget(targets.Customers, customer, "customer")
+		if err != nil {
+			return nil, nil, fromConfig(err, "customer", customerIsDefault)
+		}
+		cust = c
+	}
+	if project == "" {
+		return cust, nil, nil
+	}
+	fits := func(p target) bool { return cust == nil || p.CustomerID == nil || *p.CustomerID == cust.ID }
+
+	if cust != nil && !customerIsDefault {
+		var candidates []target
+		for _, p := range targets.Projects {
+			if fits(p) {
+				candidates = append(candidates, p)
+			}
+		}
+		proj, err := matchTarget(candidates, project, "project")
+		switch {
+		case err == nil:
+			return cust, proj, nil
+		case projectIsDefault && errors.Is(err, errNoMatch):
+			return cust, nil, nil // the default project isn't one of this customer's
+		default:
+			return nil, nil, fromConfig(err, "project", projectIsDefault)
+		}
+	}
+
+	proj, err := matchTarget(targets.Projects, project, "project")
+	if err != nil {
+		return nil, nil, fromConfig(err, "project", projectIsDefault)
+	}
+	if !fits(*proj) {
+		cust = nil // a default customer gives way to the project's own
+	}
+	return cust, proj, nil
 }
 
 func cmdStop(api *client, args []string, out io.Writer, now time.Time) error {

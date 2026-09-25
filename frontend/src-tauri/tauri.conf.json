@@ -48,7 +48,8 @@
           "/usr/share/icons/hicolor/128x128/apps/warmdesk-timetracking-test.png": "icons/timetracking-test-128.png",
           "/usr/share/icons/hicolor/256x256/apps/warmdesk-timetracking-test.png": "icons/timetracking-test-256.png",
           "/usr/share/icons/hicolor/512x512/apps/warmdesk-timetracking-test.png": "icons/timetracking-test-512.png",
-          "/usr/bin/warmdesk-timer": "bin/warmdesk-timer"
+          "/usr/bin/warmdesk-timer": "bin/warmdesk-timer",
+          "/usr/share/doc/warmdesk/timer.yaml.example": "../../timer.yaml.example"
         }
       },
       "rpm": {
@@ -70,7 +71,8 @@
           "/usr/share/icons/hicolor/128x128/apps/warmdesk-timetracking-test.png": "icons/timetracking-test-128.png",
           "/usr/share/icons/hicolor/256x256/apps/warmdesk-timetracking-test.png": "icons/timetracking-test-256.png",
           "/usr/share/icons/hicolor/512x512/apps/warmdesk-timetracking-test.png": "icons/timetracking-test-512.png",
-          "/usr/bin/warmdesk-timer": "bin/warmdesk-timer"
+          "/usr/bin/warmdesk-timer": "bin/warmdesk-timer",
+          "/usr/share/doc/warmdesk/timer.yaml.example": "../../timer.yaml.example"
         }
       }
     }

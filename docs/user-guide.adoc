@@ -1249,29 +1249,36 @@ Projects and customers created by a *global admin* are labelled *Global (created
 Non-admin users see these global entries alongside their own, but cannot edit or delete them.
 Projects and customers you create yourself are private — only you see them unless another admin chooses to edit them.
 
+=== Timer in the top bar
+
+When time tracking is enabled for you, the top bar has a stopwatch button next to the help button.
+Click it to start a timer: pick a project (and a customer, unless the project already belongs to one), optionally add a description, and click *Start*.
+The panel remembers your last choice in this browser.
+
+While the timer runs, the button shows the elapsed time (`1:12`).
+Click it again to:
+
+* *Stop and book* — books the time and tells you how much was booked;
+* *Switch…* — start timing something else; the current timer is booked first;
+* *Discard* — throw the timer away without booking anything.
+
+The time is booked exactly as with the command-line timer below: rounded up to whole 15 minutes, split at midnight, and shown in the weekly grid, calendar, and reports.
+The top-bar button and the command-line timer are the same timer, so you can start it in the browser and stop it from a terminal or another computer; open WarmDesk windows follow along straight away, and an open *Log Time* tab reloads when time is booked.
+
 === Timer from the command line
 
 `warmdesk-timer` is a small command-line tool that starts a timer when you begin working and books the time when you stop.
 The Linux desktop packages (`.deb` and `.rpm`) install it as `/usr/bin/warmdesk-timer`, so it's ready to use.
 It also ships in the server download, and on the GitHub release page as a single file for Linux, macOS, and Windows.
 
-*Setting up.* Create a personal API key under *Settings → API Keys* (a project API key does not work), then tell the tool where your server is, either once in a config file or through environment variables:
-
-[source,yaml]
-----
-# ~/.config/warmdesk/timer.yaml   (macOS: ~/Library/Application Support/warmdesk/timer.yaml,
-#                                  Windows: %AppData%\warmdesk\timer.yaml)
-url: https://warmdesk.example.com
-api_key: cwk_...
-----
-
-or `WARMDESK_URL` and `WARMDESK_API_KEY`; the `--url` and `--key` options override both.
+*Setting up.* See <<_configuring_the_timer_timer_yaml,Configuring the timer>> below: create a personal API key and put it, with your server address, in `timer.yaml`.
 
 *Using it.*
 
 [source,bash]
 ----
 warmdesk-timer projects                          # what you can book on
+warmdesk-timer start                             # the default project/customer from timer.yaml
 warmdesk-timer start Website -m "homepage"       # a board project brings its customer
 warmdesk-timer start Travel -c Acme              # time-tracking project + customer
 warmdesk-timer status                            # Running: Website (Acme) — homepage — since 09:03, 1h 12m
@@ -1292,6 +1299,73 @@ When a name fits several projects, the tool lists them; add `-c` with the custom
 * Only one timer runs at a time, and it lives on the server: you can start it on one computer and stop it on another.
 
 Because each timer is rounded up on its own, an entry can end a little after the next timer started; both show in the calendar, partly side by side.
+
+==== Configuring the timer (`timer.yaml`)
+
+`warmdesk-timer` needs two things: the address of your WarmDesk server and a *personal* API key.
+
+. Create the key in WarmDesk under the avatar menu → *Settings → API Keys*.
+  A project API key (*Project Settings → API Keys*) does not work: it is limited to one project.
+  Time tracking must be enabled for your account.
+. Put both in `timer.yaml`, in the configuration directory for your system (create the `warmdesk` directory if it doesn't exist):
++
+[cols="1,3",options="header"]
+|===
+|System |Location
+
+|Linux
+|`~/.config/warmdesk/timer.yaml` (or `$XDG_CONFIG_HOME/warmdesk/timer.yaml` when that is set)
+
+|macOS
+|`~/Library/Application Support/warmdesk/timer.yaml`
+
+|Windows
+|`%AppData%\warmdesk\timer.yaml`
+|===
++
+Anywhere else works too; pass it with `--config FILE`.
+`warmdesk-timer help` prints the default location on your machine.
+. The file contains an API key, so make it readable by you only, e.g. `chmod 600 ~/.config/warmdesk/timer.yaml`.
+
+The complete file, with the optional defaults for `start`:
+
+[source,yaml]
+----
+# Base URL of your WarmDesk server, as you open it in the browser (no /api/v1).
+url: https://warmdesk.example.com
+
+# A personal API key from Settings → API Keys.
+api_key: cwk_0123456789abcdef0123456789abcdef0123456789abcdef
+
+# Optional: what a plain "warmdesk-timer start" times.
+project: Support
+customer: Acme Corp
+----
+
+`url` and `api_key` are required; `project` and `customer` are optional defaults for `warmdesk-timer start`.
+With them set, `warmdesk-timer start` on its own starts a timer on that project and customer.
+They are matched like names on the command line (case doesn't matter, a unique part is enough), and a name on the command line replaces them:
+
+* `warmdesk-timer start Website` times _Website_; the default customer is kept, unless _Website_ belongs to another customer, in which case that customer is used.
+* `warmdesk-timer start -c Globex` times customer _Globex_; the default project is kept only if it can be combined with _Globex_.
+
+An annotated copy, `timer.yaml.example`, comes with the server download, is attached to every GitHub release, and is installed as `/usr/share/doc/warmdesk/timer.yaml.example` by the Linux desktop packages.
+On Linux you can start from it with:
+
+[source,bash]
+----
+mkdir -p ~/.config/warmdesk
+cp /usr/share/doc/warmdesk/timer.yaml.example ~/.config/warmdesk/timer.yaml
+chmod 600 ~/.config/warmdesk/timer.yaml
+$EDITOR ~/.config/warmdesk/timer.yaml
+----
+
+The file is optional: every setting can also come from the environment or the command line.
+When a setting is given in more than one place, the first match wins:
+
+. the command line: `--url` and `--key`, and for `start` the project name and `-c`,
+. the environment variables `WARMDESK_URL`, `WARMDESK_API_KEY`, `WARMDESK_PROJECT`, and `WARMDESK_CUSTOMER`,
+. `timer.yaml`.
 
 === Report tab
 

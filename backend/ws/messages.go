@@ -58,6 +58,10 @@ const (
 
 	// Server -> Client: personal notifications
 	TypeMentionNotification = "mention.notification"
+	// The user's time-tracking timer was started, stopped, or discarded
+	// (from any client). Payload: {"running": bool, "booked": n} — booked is
+	// the number of time entries the change created.
+	TypeTimerChanged = "timer.changed"
 
 	// Server -> Client: git card links
 	TypeCardLinkCreated = "card.link.created"

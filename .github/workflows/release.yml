@@ -143,6 +143,7 @@ jobs:
             mkdir -p dist-${ARCH}
             cp warmdesk.yaml.example dist-${ARCH}/warmdesk.yaml.example
             cp warmdesk-migrate.yaml.example dist-${ARCH}/warmdesk-migrate.yaml.example
+            cp timer.yaml.example dist-${ARCH}/timer.yaml.example
             cp -r deploy dist-${ARCH}/deploy
             cp INSTALL.md dist-${ARCH}/INSTALL.md
             cp README.md dist-${ARCH}/README.md
@@ -184,7 +185,8 @@ jobs:
             warmdesk-${{ env.RELEASE_TAG }}-linux-arm64.tar.gz \
             $(ls warmdesk-${{ env.RELEASE_TAG }}-linux-amd64.tar.gz.asc 2>/dev/null || true) \
             $(ls warmdesk-${{ env.RELEASE_TAG }}-linux-arm64.tar.gz.asc 2>/dev/null || true) \
-            warmdesk-timer-${{ env.RELEASE_TAG }}-*
+            warmdesk-timer-${{ env.RELEASE_TAG }}-* \
+            timer.yaml.example
 
   # ── Tauri desktop clients ────────────────────────────────────────────────────
   release-desktop:

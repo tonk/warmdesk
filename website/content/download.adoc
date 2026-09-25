@@ -79,7 +79,7 @@ For other machines it is a single file with nothing to install:
 |===
 
 On Linux and macOS, make the file executable (`chmod +x`) and put it on your `PATH` as `warmdesk-timer`.
-Setting it up takes a personal API key; see link:../docs/user-guide/#_timer_from_the_command_line[Timer from the command line] in the User Guide.
+Setting it up takes your server address and a personal API key in a small config file; start from the annotated link:{url-download-latest}/timer.yaml.example[`timer.yaml.example`] and see link:../docs/user-guide/#_configuring_the_timer_timer_yaml[Configuring the timer] in the User Guide.
 
 Most release files ship with a matching `.asc` detached GPG signature.
 See link:../docs/install/#desktop-apps[Installation — Desktop apps] and the link:../blog/gpg-signed-releases/[GPG-signed releases] blog post for verifying downloads.

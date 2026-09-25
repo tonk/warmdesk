@@ -1411,6 +1411,7 @@ import { Chart, registerables } from 'chart.js'
 import { useAuthStore } from '@/stores/auth'
 import { useUIStore } from '@/stores/ui'
 import { useSystemStore } from '@/stores/system'
+import { useTimerStore } from '@/stores/timer'
 import { timeEntriesApi } from '@/api/timeEntries'
 import { customersApi } from '@/api/customers'
 import { projectsApi } from '@/api/projects'
@@ -2189,6 +2190,10 @@ const weekDistanceTotal = computed(() =>
 // activity keys, not dates) but every cell reads empty since the stale
 // entries' dates no longer match the displayed week's columns.
 let loadWeekToken = 0
+
+// Time booked by the timer (header button, CLI, another tab) lands in this
+// week's grid without a manual reload.
+watch(() => useTimerStore().bookedVersion, () => { loadWeek() })
 
 async function loadWeek() {
   const myToken = ++loadWeekToken
