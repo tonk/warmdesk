@@ -1,0 +1,48 @@
+---
+title: "v0.33.0: A timer on the command line"
+date: "2026-09-25"
+author: "Ton Kersten"
+description: "warmdesk-timer starts a timer when you begin working and books the time on your project when you stop: rounded up to 15 minutes, split at midnight, and visible in the weekly grid, calendar, and reports."
+draft: false
+---
+:doctype: article
+:icons!:
+
+Logging time afterwards means reconstructing your day: when did that call start, how long was the server migration really? A timer you start when you begin and stop when you're done takes the guessing out. `v0.33.0` adds one, on the command line.
+
+== Start, stop, done
+
+[source,bash]
+----
+warmdesk-timer start Website -m "homepage"   # a board project brings its own customer
+warmdesk-timer status                        # Running: Website (Acme) — homepage — since 09:03, 1h 12m
+warmdesk-timer stop                          # Booked 1h 15m on Website (Acme)
+----
+
+Stopping books the time as ordinary time entries, so they appear in the weekly grid, the calendar, and every report, and you can edit them there like any other entry.
+
+* *Names are forgiving.* Matching ignores case, and any unique part of a name is enough: `web` finds _Website_. If a name fits several projects, the tool lists them; add `-c` with the customer to pick one. `warmdesk-timer projects` shows everything you can book on.
+* *Switching tasks is one command.* Starting a new timer books the running one first.
+* *Rounded up to 15 minutes.* A timer of 1 to 15 minutes books 15, 50 minutes books an hour.
+* *Split at midnight.* A timer that runs past midnight becomes one entry per day.
+* *Forgot to stop?* `warmdesk-timer stop --at 17:30` books up to 17:30 instead of now. `cancel` throws a timer away without booking anything.
+
+The timer lives on the server, not on your laptop: start it on one computer and stop it on another, and a reboot doesn't lose it.
+
+Because every timer is rounded up on its own, an entry can end a little after the next timer started. The minutes are what you asked for; the calendar just shows the two entries side by side for a while.
+
+== Getting it
+
+* The Linux desktop `.deb` and `.rpm` install it as `/usr/bin/warmdesk-timer`.
+* It's in the server download.
+* For everything else there's a single file for Linux, macOS, and Windows, on amd64 and arm64, on the link:../../download/#timer[download page].
+
+It needs your server's address and a personal API key from *Settings → API Keys*, in `WARMDESK_URL` and `WARMDESK_API_KEY` or a small `timer.yaml`. The details are in link:../../docs/user-guide/#_timer_from_the_command_line[Timer from the command line] in the User Guide. For your own integrations, the API behind it is documented in the link:../../docs/api/[API reference].
+
+== Also fixed
+
+The time-tracking calendar drew an entry that ends exactly at midnight as an overnight entry, with a small stray block at the top of the next day. It now ends where it should.
+
+== Upgrade
+
+Download `v0.33.0` from the link:../../download[download page] or pull the latest release tag. The timer's table is created automatically on startup.

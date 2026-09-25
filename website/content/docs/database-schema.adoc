@@ -35,6 +35,8 @@ This avoids renumbering the entire list on every drag-and-drop.
 Each project has a `card_counter INTEGER` column (not exposed via the API — its JSON tag is `"-"` — but it is a real,
 persisted column). The backend increments it atomically when creating a card and uses the result as the human-readable
 number (e.g. `PRJ-42`).
+When a card moves to another project it takes the next number there, and its old key is kept in
+`card_key_aliases` so references to it keep resolving.
 
 === Polymorphic attachments
 
@@ -332,6 +334,24 @@ when listing. There is **no** `ref_type` column — every row means the same gen
 |`source_card_id` |BIGINT |FK → cards, not null, index, uniqueIndex(`idx_card_ref_pair`) |
 |`target_card_id` |BIGINT |FK → cards, not null, index, uniqueIndex(`idx_card_ref_pair`) |
 |`created_at` |TIMESTAMP | |
+|===
+
+=== card_key_aliases
+
+Former keys of cards that moved to another project, so `PRJ-12` keeps pointing at the card after it became `OPS-47`.
+Every card-key lookup (card references, ticket links, git webhooks, the Ticket API) tries the live key first and then
+this table. The prefix is stored as text, not as a project id, because external references carry the text. A card
+that moved several times has one row per former key. Rows are removed with the card.
+
+[cols="2,2,1,4",options="header"]
+|===
+|Column |Type |Constraints |Notes
+
+|`id` |BIGINT |PK, auto |
+|`created_at` |TIMESTAMP | |
+|`key_prefix` |VARCHAR(10) |not null, uniqueIndex(`idx_card_key_alias`) |Old project's key prefix, upper case
+|`card_number` |INTEGER |not null, uniqueIndex(`idx_card_key_alias`) |Old card number
+|`card_id` |BIGINT |not null, index |The card it now points at
 |===
 
 === card_histories
@@ -733,6 +753,23 @@ localStorage value, persisted server-side for cross-device sync).
 
 |`user_id` |BIGINT |PK |
 |`payload` |TEXT |not null |JSON blob
+|===
+
+=== time_timers
+
+A user's running time-tracking timer — at most one per user. Stopping it books the elapsed time (rounded up to whole
+15 minutes, split at midnight) as `time_entries` rows and deletes the timer row.
+
+[cols="2,2,1,4",options="header"]
+|===
+|Column |Type |Constraints |Notes
+
+|`user_id` |BIGINT |PK |One timer per user
+|`customer_id` |BIGINT |nullable |
+|`project_id` |BIGINT |nullable |
+|`description` |TEXT |nullable |Copied to every booked entry
+|`time_zone` |VARCHAR(100) |nullable |IANA zone the entries' dates and times are computed in
+|`started_at` |TIMESTAMP |not null |
 |===
 
 ---

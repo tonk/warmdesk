@@ -1,6 +1,6 @@
 ---
 title: "Download"
-description: "Get the WarmDesk server binary or desktop apps for Linux, macOS, and Windows"
+description: "Get the WarmDesk server binary, desktop apps, and command-line timer for Linux, macOS, and Windows"
 ---
 :icons!:
 :url-releases-latest: https://github.com/tonk/warmdesk/releases/latest
@@ -36,7 +36,7 @@ macOS or Windows hosts: build from source — see link:../docs/install/#_build_f
 [#desktop-client]
 == Desktop client
 
-WarmDesk ships **link:../docs/install/#_desktop_apps[Tauri]** desktop builds for Linux, macOS, and Windows.
+WarmDesk ships **link:../docs/install/#desktop-apps[Tauri]** desktop builds for Linux, macOS, and Windows.
 The desktop app is **only the client**: it wraps the same web UI as the browser and connects to **your** WarmDesk server URL (configured on first launch).
 The server binary is never bundled inside the desktop package.
 
@@ -57,5 +57,29 @@ Click an asset below to download the current `{warmdesk-version}` build (URLs us
 |link:{url-download-latest}/WarmDesk-{warmdesk-version}-universal.dmg[universal `.dmg`]
 |===
 
+[#timer]
+== Command-line timer
+
+`warmdesk-timer` starts and stops time tracking from a terminal: `warmdesk-timer start Website` when you begin, `warmdesk-timer stop` when you're done, and the time is booked on your WarmDesk server.
+The Linux `.deb` and `.rpm` desktop packages above already install it as `/usr/bin/warmdesk-timer`, and it is part of the server tarballs.
+For other machines it is a single file with nothing to install:
+
+[cols="1,3", options="header"]
+|===
+|Platform |Download (latest)
+
+|Linux
+|link:{url-download-latest}/warmdesk-timer-{warmdesk-version}-linux-amd64[amd64], link:{url-download-latest}/warmdesk-timer-{warmdesk-version}-linux-arm64[arm64]
+
+|macOS
+|link:{url-download-latest}/warmdesk-timer-{warmdesk-version}-darwin-arm64[Apple Silicon], link:{url-download-latest}/warmdesk-timer-{warmdesk-version}-darwin-amd64[Intel]
+
+|Windows
+|link:{url-download-latest}/warmdesk-timer-{warmdesk-version}-windows-amd64.exe[x64 `.exe`], link:{url-download-latest}/warmdesk-timer-{warmdesk-version}-windows-arm64.exe[ARM64 `.exe`]
+|===
+
+On Linux and macOS, make the file executable (`chmod +x`) and put it on your `PATH` as `warmdesk-timer`.
+Setting it up takes a personal API key; see link:../docs/user-guide/#_timer_from_the_command_line[Timer from the command line] in the User Guide.
+
 Most release files ship with a matching `.asc` detached GPG signature.
-See link:../docs/install/#_desktop_apps[Installation — Desktop apps] and the link:../blog/gpg-signed-releases/[GPG-signed releases] blog post for verifying downloads.
+See link:../docs/install/#desktop-apps[Installation — Desktop apps] and the link:../blog/gpg-signed-releases/[GPG-signed releases] blog post for verifying downloads.

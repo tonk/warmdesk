@@ -269,6 +269,9 @@ Pre-built Tauri 2 desktop apps are attached to the
 The desktop app wraps the same Vue 3 frontend.
 On launch it prompts for the server URL and stores credentials in `sessionStorage`.
 
+The `.deb` and `.rpm` also install `warmdesk-timer`, the command-line time-tracking timer, as `/usr/bin/warmdesk-timer`.
+For other systems it is a standalone download; see link:../../download/#timer[Download].
+
 == Horizontal scaling
 
 To run multiple instances behind a load balancer:

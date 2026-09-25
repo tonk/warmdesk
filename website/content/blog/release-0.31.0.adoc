@@ -1,0 +1,27 @@
+---
+title: "v0.31.0: A table view for the board"
+date: "2026-09-24"
+author: "Ton Kersten"
+description: "Switch a board from lanes to a flat, sortable table of every card: reference, title, column, priority, assignee, due date, story points, time spent, and closed state."
+draft: false
+---
+:doctype: article
+:icons!:
+
+Lanes are great for moving work along, and awkward for questions that cut across them: which cards are due this week, who has the most on their plate, what has the most time on it. `v0.31.0` adds a second way to look at a board.
+
+== Lanes or a table
+
+The *Table View* button in the board toolbar swaps the lanes for one table with every card in the project. Each row shows the card's reference, title, column, priority, assignee, due date, story points, time spent, and whether it's closed.
+
+* *Click a column header* to sort by it; click it again to reverse the order.
+* *Click a card's title* to open it, in the same card panel as the lane view.
+* *Hide Closed* applies to both views.
+
+The button then reads *Lane View* and takes you back. Your choice is remembered in the browser, so a board you always read as a table opens as a table.
+
+See the Kanban board section of the link:../../docs/user-guide/[User Guide] for more.
+
+== Upgrade
+
+Download `v0.31.0` from the link:../../download[download page] or pull the latest release tag. No database migration is needed.

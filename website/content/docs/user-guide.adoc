@@ -114,6 +114,12 @@ Click *+ Add card* at the bottom of a column to create a new card.
 Drag cards between columns and within a column to reorder them, or use a column's sort controls (date, assignee, priority).
 Click a card to open the card detail panel.
 
+=== Table view
+
+The *Table View* button in the board toolbar swaps the lanes for a flat, sortable table of every card in the project: reference, title, column, priority, assignee, due date, story points, time spent, and closed state.
+Click a column header to sort (click again to reverse), and a title to open the card.
+*Hide Closed* works in both views, and your choice of view is remembered in this browser.
+
 === Gantt chart
 
 Click *Gantt* in the board toolbar for a timeline of every card with a start or due date.
@@ -241,6 +247,7 @@ Add yourself or colleagues as watchers to receive notifications when the card is
 
 Every card gets a sequential number like `PRJ-42`.
 Type this number in any chat message or comment to generate a clickable badge that opens the card, or use it in commit messages to link git events to the card.
+A card moved to another project gets a new number there, but its old number keeps working everywhere.
 
 == Topics (threaded discussions)
 

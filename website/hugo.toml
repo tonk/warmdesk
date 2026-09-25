@@ -18,11 +18,12 @@ enableEmoji = true
   warmdesk_version = "v0.33.0"
   release_date     = "2026-09-25"
   # Blog post slug for the current release (linked from the homepage "What's new" strip)
-  release_blog     = "blog/ticket-api-card-updates/"
+  release_blog     = "blog/release-0.33.0/"
   # Release highlights shown in the "What's new" strip on the homepage (2-3 bullets)
   release_highlights = [
-    "**Added — Update cards through the Ticket API** — change a card's title, description, priority, dates, or story points, or close and reopen it, with a partial `PATCH` that only touches what you send.",
-    "**Added — Cards by key, lanes by name** — use `ANSI-12` instead of a numeric id, and `\"column\": \"Done\"` instead of a `column_id`; creating a card now also takes priority, dates, and story points.",
+    "**Added — Command-line timer** — `warmdesk-timer start Website` when you begin, `warmdesk-timer stop` when you're done: the time is booked as regular time entries, rounded up to 15 minutes and split at midnight.",
+    "**Where to get it** — installed by the Linux desktop `.deb`/`.rpm`, and a single-file download for Linux, macOS, and Windows.",
+    "**Fixed** — the time-tracking calendar no longer shows a stray block after an entry that ends at midnight.",
   ]
 
 [markup]

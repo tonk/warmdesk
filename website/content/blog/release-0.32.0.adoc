@@ -1,0 +1,51 @@
+---
+title: "v0.32.0: Moving a card to another project, for real"
+date: "2026-09-25"
+author: "Ton Kersten"
+description: "Moving a card to another project now keeps its comments, checklist, attachments, history, and links, and its old number keeps working. Plus a Ticket API endpoint for it, Ansible support, and two security fixes."
+draft: false
+---
+:doctype: article
+:icons!:
+
+WarmDesk has had *Transfer → Move Here* on cards for a long time, and it quietly did less than its name suggested. It created a new card in the other project with the title, description, priority, due date, and tags, and deleted the original. The comments, checklist, attachments, history, git links, and time spent stayed behind on a deleted card.
+
+`v0.32.0` makes it a real move.
+
+== What moves, and what changes
+
+The card itself moves, so everything attached to it comes along: comments, checklist, attachments, activity history, git and ticket links, card references, and time spent. A few things change because they belong to a project:
+
+* *The number.* The card gets the next number in the target project, so `PRJ-12` becomes, say, `OPS-47`.
+* *Labels* are matched by name to the target project's labels. Labels the target doesn't have are created there with the same colour.
+* *Epic and sprint* are cleared.
+* *Assignees and watchers* who can't see the target project are removed from the card.
+* *Sub-cards* move along, landing in the target column with the same name as the one they're in, or you can leave them behind.
+
+The transfer panel explains this before you click, and the card's history records the move, from old number to new.
+
+== The old number keeps working
+
+A card number ends up in commit messages, ticket texts, chat, and other tools. Renumbering would break all of those, so WarmDesk keeps the old number as an alias. `PRJ-12` still finds the card after it became `OPS-47`: in card references, ticket links, git webhooks, the card-number badges in chat, and the Ticket API. A card that moves several times answers to every number it has had.
+
+== In the Ticket API and Ansible
+
+`POST /api/v1/ticket/{slug}/cards/{key}/transfer` moves (or copies) a card by key, to a lane given by name:
+
+[source,bash]
+----
+curl -X POST -H "X-API-Key: $WARMDESK_KEY" -H "Content-Type: application/json" \
+  -d '{"target_project": "operations", "column": "Backlog"}' \
+  "https://warmdesk.example.com/api/v1/ticket/my-project/cards/PRJ-12/transfer"
+----
+
+The Ansible collection's `card` module gained `move_to_project` and `sub_cards`, and a second run recognises the moved card by its old number, so it reports no change. The `card` lookup follows old numbers too, and tells you where a moved card went.
+
+== Two security fixes
+
+* *Project API keys could write into other projects.* A transfer's target project was never checked against a project key's scope, so a key meant for one project could copy or move cards into any project its user could reach. Project keys are now limited to their own project for transfers as well; moving a card needs a personal key.
+* *Card numbers revealed cards you can't see.* Resolving a number like `PRJ-42` returned the card's title and project to any logged-in user. It now requires access to that project.
+
+== Upgrade
+
+Download `v0.32.0` from the link:../../download[download page] or pull the latest release tag. The new alias table is created automatically on startup.

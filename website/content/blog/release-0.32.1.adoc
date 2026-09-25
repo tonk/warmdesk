@@ -1,0 +1,19 @@
+---
+title: "v0.32.1: Sub-card counts after a move"
+date: "2026-09-25"
+author: "Ton Kersten"
+description: "Moving a card to another project now reports its sub-card count correctly, and the target board shows the moved card's sub-card progress right away."
+draft: false
+---
+:doctype: article
+:icons!:
+
+A small fix to `v0.32.0`'s card moves, found in testing the same day.
+
+After moving a card that has sub-cards, the response reported `sub_card_count: 0`, even though the sub-cards had come along and were still attached. The target board showed the moved card without its sub-card progress until you reloaded the page. The Ticket API had the same gap and reported `0` for every card. All of these now report the real count.
+
+The API documentation also spells out one thing that confused a tester: a moved card keeps its numeric id, but paths are per project. After a move, use the target project's slug; paths under the old project return `404`. The old card *number* (`PRJ-12`) keeps working, as before.
+
+== Upgrade
+
+Download `v0.32.1` from the link:../../download[download page] or pull the latest release tag. No database migration is needed.
