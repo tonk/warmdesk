@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.32.0 — 2026-09-25
+
+### Added
+- **Move a card to another project for real** — *Transfer → Move Here* now moves the card itself instead of copying it and deleting the original, so its comments, checklist, attachments, history, git links, ticket links, and time spent come along. The card gets a new number in the target project (e.g. `PRJ-12` becomes `OPS-47`), and its **old number keeps working**: card references, ticket links, git commit messages, and the Ticket API still find it. Labels are matched by name (missing ones are created with the same colour), the epic and sprint are cleared, and assignees and watchers without access to the target project are removed. Sub-cards can move along or stay behind. The transfer panel explains all this before you move, and the card history records the move.
+- **Transfer through the Ticket API** — `POST /api/v1/ticket/{slug}/cards/{id}/transfer` moves (or copies) a card to another project, accepting card keys and lane names. Asking for a moved card by its old key in its old project returns a `404` that names the new key and project.
+- **Ansible collection** — the `card` module gains `move_to_project` and `sub_cards` (idempotent: a second run recognises the moved card by its old number); the `card` lookup follows old card numbers and says where a moved card went.
+
+### Fixed
+- **Project-scoped API keys could write into other projects** — a transfer's target project was never checked against the key's scope, so a key limited to one project could copy or move cards into any project its user could access. Project keys are now limited to their own project for transfers too (transferring needs a personal key).
+- **Card references revealed cards in projects you can't see** — resolving a reference like `PRJ-42` returned the card's title and project to any logged-in user; it now requires access to that project.
+- Permanently deleting a card now also removes its card-to-card references, which were left behind before.
+
 ## v0.31.0 — 2026-09-24
 
 ### Added

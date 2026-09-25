@@ -903,3 +903,8 @@ Create an application that has all these features and requirements
 - Bring the website's user guide, admin guide, and API reference up to date, add release posts for v0.20–v0.29, and fix broken download and docs links in older blog posts
 - Fix API key docs that still advertised the unsupported ?api_key= query parameter
 - Add a table view toggle to the project board — a sortable, flat table of every card (ref, title, column, priority, assignee, due date, story points, time spent, closed) alongside the existing kanban lanes; per-browser preference remembered
+- Make moving a card to another project a real move that keeps comments, checklist, attachments, history, links, and time spent; renumber it in the target project and keep the old key resolvable through a card key alias table used by every card-key lookup
+- Map labels by name, clear epic and sprint, drop assignees and watchers without target access, and move or detach sub-cards when a card changes project
+- Add POST /api/v1/ticket/{slug}/cards/{id}/transfer to move or copy a card to another project by key and lane name
+- Check a project-scoped API key against the transfer's target project, and require project access for resolving a card reference
+- Add move_to_project and sub_cards to the Ansible card module, and let the card lookup follow old card numbers

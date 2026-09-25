@@ -149,7 +149,7 @@ options:
         are limited to one project and cannot move cards out of it.
     type: str
     required: false
-    version_added: "0.7.0"
+    version_added: "0.6.4"
   sub_cards:
     description:
       - What happens to the card's sub-cards when I(move_to_project) moves it.
@@ -159,7 +159,7 @@ options:
     type: str
     choices: [move, detach]
     default: move
-    version_added: "0.7.0"
+    version_added: "0.6.4"
   state:
     description:
       - C(present) — ensure the card exists and its fields match.

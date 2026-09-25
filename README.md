@@ -8,9 +8,10 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.31.0)
+## Latest release (v0.32.0)
 
-- **Added** — Table view for the project board: toggle between the kanban lanes and a flat, sortable table of every card (ref, title, column, priority, assignee, due date, story points, time spent, closed).
+- **Added** — Moving a card to another project keeps its comments, checklist, attachments, and history; the card is renumbered there and its old number keeps working. Also available through the Ticket API and the Ansible collection.
+- **Fixed** — Project-scoped API keys can no longer copy or move cards into other projects, and card references no longer reveal cards in projects you can't see.
 
 ## Experiment
 
