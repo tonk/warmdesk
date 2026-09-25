@@ -909,3 +909,6 @@ Create an application that has all these features and requirements
 - Check a project-scoped API key against the transfer's target project, and require project access for resolving a card reference
 - Add move_to_project and sub_cards to the Ansible card module, and let the card lookup follow old card numbers
 - Fill in sub-card counts in card transfer and Ticket API responses and in the live board update for a moved card
+- Add a server-side time-tracking timer (one per user) with GET/POST/DELETE /api/v1/timer endpoints that book the elapsed time as time entries, rounded up to 15 minutes and split at midnight in the user's time zone
+- Add the warmdesk-timer command-line tool (start, stop, stop --at, status, cancel, projects) and ship it in the server tarballs, as standalone Linux/macOS/Windows release assets, and in the Linux desktop .deb/.rpm
+- Stop drawing a stray next-day block for calendar entries that end exactly at midnight

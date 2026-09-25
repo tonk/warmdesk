@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.33.0 — 2026-09-25
+
+### Added
+- **Command-line timer (`warmdesk-timer`)** — `warmdesk-timer start Website` when you begin, `warmdesk-timer stop` when you're done, and the time is booked on that project as regular time entries that show up in the weekly grid, the calendar, and every report. The duration is rounded up to whole 15 minutes, and a timer that runs past midnight is split into one entry per day. Starting a new timer books the running one first, so switching tasks is a single command; `stop --at 17:30` books a timer you forgot to stop, `cancel` throws one away, and `status` / `projects` show what's running and what you can book on. Names match without regard to case and a unique part is enough. The timer lives on the server, so you can start it on one computer and stop it on another. It needs a personal API key (*Settings → API Keys*).
+- **Where to get it** — the Linux desktop `.deb` and `.rpm` install it as `/usr/bin/warmdesk-timer`; it is also in the server download and on the release page as a single file for Linux, macOS, and Windows (amd64 and arm64).
+- **Timer API** — `GET/POST/DELETE /api/v1/timer…` (status, targets, start, stop, cancel) for your own integrations.
+
+### Fixed
+- **Calendar showed a stray block after an entry ending at midnight** — an entry ending exactly at `00:00` was drawn as an overnight entry, with a small extra block at the top of the next day.
+
 ## v0.32.1 — 2026-09-25
 
 ### Fixed
