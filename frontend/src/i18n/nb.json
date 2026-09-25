@@ -2286,6 +2286,10 @@
     "replace_partial": "{updated} erstattet, {skipped} hoppet over"
   },
   "timer": {
+    "tray_idle": "Ingen tidtaker går",
+    "tray_running": "⏱ {label} — siden {time}",
+    "tray_start": "Start tidtaker…",
+    "tray_start_last": "Start: {label}",
     "button_idle": "Start tidtaker",
     "button_running": "Tidtaker går: {label}, {duration}",
     "running_title": "Tidtaker går",

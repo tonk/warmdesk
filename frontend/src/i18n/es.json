@@ -2286,6 +2286,10 @@
     "replace_partial": "{updated} reemplazados, {skipped} omitidos"
   },
   "timer": {
+    "tray_idle": "Ningún temporizador en marcha",
+    "tray_running": "⏱ {label} — desde {time}",
+    "tray_start": "Iniciar temporizador…",
+    "tray_start_last": "Iniciar: {label}",
     "button_idle": "Iniciar temporizador",
     "button_running": "Temporizador en marcha: {label}, {duration}",
     "running_title": "Temporizador en marcha",

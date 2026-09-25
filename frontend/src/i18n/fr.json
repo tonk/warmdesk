@@ -2286,6 +2286,10 @@
     "replace_partial": "{updated} remplacés, {skipped} ignorés"
   },
   "timer": {
+    "tray_idle": "Aucun minuteur en cours",
+    "tray_running": "⏱ {label} — depuis {time}",
+    "tray_start": "Démarrer le minuteur…",
+    "tray_start_last": "Démarrer : {label}",
     "button_idle": "Démarrer le minuteur",
     "button_running": "Minuteur en cours : {label}, {duration}",
     "running_title": "Minuteur en cours",

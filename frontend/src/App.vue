@@ -61,6 +61,7 @@ import { useTicketsStore } from '@/stores/tickets'
 import { useTimerStore } from '@/stores/timer'
 import { useProjectChatUnread } from '@/composables/useProjectChatUnread'
 import { useTrayUnread } from '@/composables/useTrayUnread'
+import { useTrayTimer } from '@/composables/useTrayTimer'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import ToastContainer from '@/components/common/ToastContainer.vue'
@@ -120,6 +121,7 @@ async function checkWelcomeNews(userID) {
 }
 const { projectChatUnread, projectChatUnreadSource } = useProjectChatUnread()
 useTrayUnread()
+useTrayTimer()
 const call = useWebRTCCall()
 const lkGroupCall = useLiveKitGroupCall()
 const route = useRoute()

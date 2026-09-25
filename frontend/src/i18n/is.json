@@ -2286,6 +2286,10 @@
     "replace_partial": "{updated} skipt út, {skipped} sleppt"
   },
   "timer": {
+    "tray_idle": "Enginn tímamælir í gangi",
+    "tray_running": "⏱ {label} — frá {time}",
+    "tray_start": "Ræsa tímamæli…",
+    "tray_start_last": "Ræsa: {label}",
     "button_idle": "Ræsa tímamæli",
     "button_running": "Tímamælir í gangi: {label}, {duration}",
     "running_title": "Tímamælir í gangi",

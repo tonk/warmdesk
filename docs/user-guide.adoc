@@ -105,6 +105,9 @@ Profile data (localStorage, login session) is stored under `<data dir>/profiles/
 
 The desktop app can show a system tray icon with an unread-notification badge (cards, tickets, chat).
 The tray menu lets you show/hide the main window or quit the app.
+When time tracking is enabled for you, the tray menu also has the timer: its first line shows what is running and since when ("No timer running" otherwise).
+While a timer runs, the menu offers *Stop and book* and *Switch…*; when none runs, *Start: <last project>* restarts your last pick with one click, and *Start timer…* opens the window with the timer panel.
+Stopping or starting from the tray while the window is hidden also shows a desktop notification with what was booked (if chat notifications are on).
 Optionally, closing the window can be configured to minimise it to the tray instead of quitting — both are toggled in User Settings.
 When connected to a test/staging server, the tray icon turns orange and its title gets a "(TEST)" suffix, so it's never mistaken for a production connection.
 
@@ -1263,6 +1266,7 @@ Click it again to:
 * *Discard* — throw the timer away without booking anything.
 
 The time is booked exactly as with the command-line timer below: rounded up to whole 15 minutes, split at midnight, and shown in the weekly grid, calendar, and reports.
+In the desktop app, the tray menu has the timer too (see <<_system_tray,System tray>>).
 The top-bar button and the command-line timer are the same timer, so you can start it in the browser and stop it from a terminal or another computer; open WarmDesk windows follow along straight away, and an open *Log Time* tab reloads when time is booked.
 
 === Timer from the command line

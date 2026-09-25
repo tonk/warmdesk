@@ -46,7 +46,7 @@ If your administrator allows it, you can mark a device as trusted to skip MFA on
 WarmDesk is also available as a native desktop app (Linux AppImage, macOS DMG, Windows installer) that asks for your server URL on first run.
 
 * *Profiles* — connect to several WarmDesk servers with fully separate sessions and settings (`warmdesk --create-profile customer-a`, then `warmdesk --profile customer-a`).
-* *System tray* — an optional tray icon shows an unread badge; closing the window can minimise it to the tray.
+* *System tray* — an optional tray icon shows an unread badge; closing the window can minimise it to the tray. With time tracking enabled, the tray menu also has the timer: what's running, *Stop and book*, *Switch…*, and a one-click *Start* of your last project.
 When connected to a test server, the tray icon turns orange and gets a "(TEST)" suffix.
 
 == Interface overview
@@ -388,7 +388,7 @@ Projects and customers created by an administrator are marked *Global (created b
 With time tracking enabled, the stopwatch button in the top bar starts a timer: pick a project (and a customer if the project has none), add a description, and click *Start*.
 While it runs, the button shows the elapsed time; click it to *Stop and book*, *Switch…* to another task (the running timer is booked first), or *Discard* it.
 Time is rounded up to whole 15 minutes and split at midnight.
-It's the same timer as `warmdesk-timer` below: start it in the browser, stop it in a terminal, and every open WarmDesk window follows along.
+The desktop app's tray menu has the timer as well. It's the same timer as `warmdesk-timer` below: start it in the browser, stop it in a terminal, and every open WarmDesk window follows along.
 
 === Timer from the command line
 

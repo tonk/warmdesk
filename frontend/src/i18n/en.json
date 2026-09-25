@@ -2283,6 +2283,10 @@
     "replace_partial": "Replaced {updated}, skipped {skipped}"
   },
   "timer": {
+    "tray_idle": "No timer running",
+    "tray_running": "⏱ {label} — since {time}",
+    "tray_start": "Start timer…",
+    "tray_start_last": "Start: {label}",
     "button_idle": "Start timer",
     "button_running": "Timer running: {label}, {duration}",
     "running_title": "Timer running",

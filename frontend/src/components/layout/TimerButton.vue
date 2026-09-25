@@ -99,12 +99,11 @@ import { useI18n } from 'vue-i18n'
 import { useTimerStore } from '@/stores/timer'
 import { useUIStore } from '@/stores/ui'
 import { timerApi } from '@/api/timer'
+import { timerLabel, timerDuration, timerBookedMessage, timerStartedAt } from '@/utils/timerFormat'
 
 const { t } = useI18n()
 const timerStore = useTimerStore()
 const ui = useUIStore()
-
-const LAST_KEY = 'warmdesk_timer_last' // this browser's last pick, a convenience only
 
 const open = ref(false)
 const switching = ref(false)
@@ -133,19 +132,11 @@ const elapsedMinutes = computed(() => {
   const started = timerStore.timer?.started_at
   return started ? Math.max(0, Math.floor((now.value - new Date(started).getTime()) / 60000)) : 0
 })
-const startedAt = computed(() => {
-  const started = timerStore.timer?.started_at
-  return started ? new Date(started).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''
-})
+const startedAt = computed(() => timerStartedAt(timerStore.timer))
 
-function labelFor(project, customer, desc) {
-  let s = project && customer ? `${project} (${customer})` : (project || customer || '')
-  if (desc) s += ` — ${desc}`
-  return s
-}
 const runningLabel = computed(() => {
   const tm = timerStore.timer
-  return tm ? labelFor(tm.project?.name, tm.customer?.name, tm.description) : ''
+  return tm ? timerLabel(tm.project?.name, tm.customer?.name, tm.description) : ''
 })
 const buttonLabel = computed(() => timerStore.running
   ? t('timer.button_running', { label: runningLabel.value, duration: duration(elapsedMinutes.value) })
@@ -155,7 +146,7 @@ function clock(min) {
   return `${Math.floor(min / 60)}:${String(min % 60).padStart(2, '0')}`
 }
 function duration(min) {
-  return min < 60 ? t('timer.minutes', { m: min }) : t('timer.hours_minutes', { h: Math.floor(min / 60), m: String(min % 60).padStart(2, '0') })
+  return timerDuration(t, min)
 }
 
 function onProjectChange() {
@@ -169,8 +160,7 @@ async function loadTargets() {
   } catch {
     targets.value = { projects: [], customers: [] }
   }
-  let last = null
-  try { last = JSON.parse(localStorage.getItem(LAST_KEY) || 'null') } catch {}
+  const last = timerStore.lastPick
   if (last && projectId.value == null && customerId.value == null) {
     if (targets.value.projects.some(p => p.id === last.projectId)) projectId.value = last.projectId
     if (targets.value.customers.some(c => c.id === last.customerId)) customerId.value = last.customerId
@@ -205,9 +195,7 @@ async function beginSwitch() {
 }
 
 function bookedMessage(entries) {
-  const total = entries.reduce((sum, e) => sum + (e.minutes || 0), 0)
-  const e = entries[0]
-  return t('timer.booked', { duration: duration(total), label: labelFor(e?.project?.name, e?.customer?.name, e?.description) })
+  return timerBookedMessage(t, entries)
 }
 
 function apiError(e) {
@@ -219,7 +207,12 @@ async function start() {
   busy.value = true
   try {
     const data = await timerStore.start({ projectId: projectId.value, customerId: customerId.value, description: description.value.trim() })
-    try { localStorage.setItem(LAST_KEY, JSON.stringify({ projectId: projectId.value, customerId: customerId.value })) } catch {}
+    const cust = targets.value.customers.find(c => c.id === customerId.value) || projectCustomer.value
+    timerStore.rememberPick({
+      projectId: projectId.value,
+      customerId: customerId.value,
+      label: timerLabel(selectedProject.value?.name, cust?.name),
+    })
     if (data?.stopped_entries?.length) ui.success(bookedMessage(data.stopped_entries))
     ui.success(t('timer.started', { label: runningLabel.value }))
     description.value = ''
@@ -271,6 +264,17 @@ watch(() => timerStore.running, (running) => {
     tick = setInterval(() => { now.value = Date.now() }, 15000)
   }
 }, { immediate: true })
+
+// The tray menu asks for the panel ("Start timer…", "Switch…").
+watch(() => timerStore.panelRequest.n, async () => {
+  if (!timerStore.available) return
+  if (timerStore.panelRequest.switching && timerStore.running) {
+    open.value = true
+    await beginSwitch()
+  } else {
+    await openPanel()
+  }
+})
 
 function onDocumentClick(e) {
   if (open.value && rootRef.value && !rootRef.value.contains(e.target)) close()

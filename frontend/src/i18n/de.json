@@ -2286,6 +2286,10 @@
     "replace_partial": "{updated} ersetzt, {skipped} übersprungen"
   },
   "timer": {
+    "tray_idle": "Kein Timer aktiv",
+    "tray_running": "⏱ {label} — seit {time}",
+    "tray_start": "Timer starten…",
+    "tray_start_last": "Starten: {label}",
     "button_idle": "Timer starten",
     "button_running": "Timer läuft: {label}, {duration}",
     "running_title": "Timer läuft",

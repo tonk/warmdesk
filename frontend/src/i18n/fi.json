@@ -2286,6 +2286,10 @@
     "replace_partial": "{updated} korvattu, {skipped} ohitettu"
   },
   "timer": {
+    "tray_idle": "Ei käynnissä olevaa ajastinta",
+    "tray_running": "⏱ {label} — alkaen {time}",
+    "tray_start": "Käynnistä ajastin…",
+    "tray_start_last": "Käynnistä: {label}",
     "button_idle": "Käynnistä ajastin",
     "button_running": "Ajastin käynnissä: {label}, {duration}",
     "running_title": "Ajastin käynnissä",

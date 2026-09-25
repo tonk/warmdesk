@@ -2286,6 +2286,10 @@
     "replace_partial": "{updated} sostituite, {skipped} saltate"
   },
   "timer": {
+    "tray_idle": "Nessun timer in corso",
+    "tray_running": "⏱ {label} — da {time}",
+    "tray_start": "Avvia timer…",
+    "tray_start_last": "Avvia: {label}",
     "button_idle": "Avvia timer",
     "button_running": "Timer in corso: {label}, {duration}",
     "running_title": "Timer in corso",

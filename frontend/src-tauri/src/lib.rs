@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use tauri::image::Image;
 use tauri::menu::{MenuBuilder, MenuItemBuilder};
 use tauri::tray::TrayIconBuilder;
+use tauri::Emitter;
 use tauri::Manager;
 
 fn png_to_image(bytes: &[u8]) -> Result<Image<'static>, String> {
@@ -446,6 +447,7 @@ pub fn run() {
             set_default_profile,
             delete_profile,
             set_tray_unread,
+            set_tray_timer,
         ])
         .on_page_load(move |window, _payload| {
             let js = build_init_js(
@@ -544,15 +546,7 @@ pub fn run() {
             // ── System tray icon ────────────────────────────────────────────
             let tray_icon = png_to_image(include_bytes!("../icons/tray-icon.png"))
                 .expect("failed to load tray icon");
-            let show_item = MenuItemBuilder::with_id("show", "WarmDesk")
-                .build(app)?;
-            let quit_item = MenuItemBuilder::with_id("quit", "Quit")
-                .build(app)?;
-            let tray_menu = MenuBuilder::new(app)
-                .item(&show_item)
-                .separator()
-                .item(&quit_item)
-                .build()?;
+            let tray_menu = build_tray_menu(app.handle(), None)?;
             TrayIconBuilder::with_id("main")
                 .icon(tray_icon)
                 .title("WarmDesk")
@@ -582,6 +576,24 @@ pub fn run() {
                         }
                         "quit" => {
                             app.exit(0);
+                        }
+                        id if id.starts_with(TRAY_TIMER_PREFIX) => {
+                            let action = &id[TRAY_TIMER_PREFIX.len()..];
+                            // Actions that open the timer panel need the window.
+                            if action == "start" || action == "switch" {
+                                if let Some(w) = app.get_webview_window("main") {
+                                    if w.is_minimized().unwrap_or(false) {
+                                        let _ = w.unminimize();
+                                    }
+                                    let _ = w.show();
+                                    let _ = w.set_focus();
+                                }
+                            }
+                            // The web app owns the timer (API, auth); it listens
+                            // for this event and performs the action.
+                            if let Err(e) = app.emit_to("main", "tray-timer", action) {
+                                eprintln!("[tray] emit tray-timer failed: {e}");
+                            }
                         }
                         _ => {}
                     }
@@ -783,6 +795,77 @@ fn set_tray_unread(
     .map_err(|e| e.to_string())?;
 
     Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// Tray menu with the time-tracking timer
+// ---------------------------------------------------------------------------
+
+/// Menu item ids for timer actions start with this; the rest is the action
+/// sent to the web app in the "tray-timer" event.
+const TRAY_TIMER_PREFIX: &str = "timer:";
+
+/// One timer action in the tray menu, as sent by the web app.
+#[derive(Deserialize)]
+struct TrayTimerAction {
+    id: String,
+    label: String,
+}
+
+/// The timer part of the tray menu. The web app sends it already translated
+/// and whenever the timer changes (see useTrayTimer.js).
+#[derive(Deserialize)]
+struct TrayTimer {
+    status: String,
+    actions: Vec<TrayTimerAction>,
+}
+
+/// Builds the tray menu: the timer section (when given), then "WarmDesk"
+/// (show/hide) and "Quit".
+fn build_tray_menu<M: Manager<tauri::Wry>>(
+    manager: &M,
+    timer: Option<&TrayTimer>,
+) -> tauri::Result<tauri::menu::Menu<tauri::Wry>> {
+    let mut builder = MenuBuilder::new(manager);
+    if let Some(timer) = timer {
+        let status = MenuItemBuilder::with_id("timer-status", &timer.status)
+            .enabled(false)
+            .build(manager)?;
+        builder = builder.item(&status);
+        for action in &timer.actions {
+            let item = MenuItemBuilder::with_id(format!("{TRAY_TIMER_PREFIX}{}", action.id), &action.label)
+                .build(manager)?;
+            builder = builder.item(&item);
+        }
+        builder = builder.separator();
+    }
+    let show_item = MenuItemBuilder::with_id("show", "WarmDesk").build(manager)?;
+    let quit_item = MenuItemBuilder::with_id("quit", "Quit").build(manager)?;
+    builder.item(&show_item).separator().item(&quit_item).build()
+}
+
+/// Updates the timer section of the tray menu. `timer` is null when the user
+/// can't use the timer (not logged in, time tracking off, or a server without
+/// it), which leaves only "WarmDesk" and "Quit".
+#[tauri::command]
+fn set_tray_timer(app: tauri::AppHandle, timer: Option<TrayTimer>) -> Result<(), String> {
+    // Like set_tray_unread: tray/menu changes must run on the main thread.
+    let app_handle = app.clone();
+    app.run_on_main_thread(move || {
+        let Some(tray) = app_handle.tray_by_id("main") else {
+            eprintln!("[tray] set_tray_timer: tray not found");
+            return;
+        };
+        match build_tray_menu(&app_handle, timer.as_ref()) {
+            Ok(menu) => {
+                if let Err(e) = tray.set_menu(Some(menu)) {
+                    eprintln!("[tray] set_menu failed: {e}");
+                }
+            }
+            Err(e) => eprintln!("[tray] build menu failed: {e}"),
+        }
+    })
+    .map_err(|e| e.to_string())
 }
 
 // ---------------------------------------------------------------------------

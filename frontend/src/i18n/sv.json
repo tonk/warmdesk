@@ -2286,6 +2286,10 @@
     "replace_partial": "{updated} ersatta, {skipped} överhoppade"
   },
   "timer": {
+    "tray_idle": "Ingen timer igång",
+    "tray_running": "⏱ {label} — sedan {time}",
+    "tray_start": "Starta timer…",
+    "tray_start_last": "Starta: {label}",
     "button_idle": "Starta timer",
     "button_running": "Timer igång: {label}, {duration}",
     "running_title": "Timer igång",

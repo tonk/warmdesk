@@ -160,6 +160,19 @@ describe('TimerButton', () => {
     w.unmount()
   })
 
+  it('opens its panel when the tray asks, in switch mode while running', async () => {
+    timerApi.get.mockResolvedValue({ data: {
+      running: true, timer: { project: { name: 'Website' }, started_at: new Date().toISOString() },
+    } })
+    const w = mountButton()
+    await flushPromises()
+    useTimerStore().requestPanel(true)
+    await flushPromises()
+    expect(w.find('#timer-panel-title').text()).toBe('Switch to another task')
+    expect(timerApi.targets).toHaveBeenCalled()
+    w.unmount()
+  })
+
   it('picks up a change made elsewhere (CLI, other tab)', async () => {
     const w = mountButton()
     await flushPromises()
