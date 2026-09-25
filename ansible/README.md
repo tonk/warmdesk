@@ -71,7 +71,7 @@ Any parameter set in `module_defaults` can still be overridden per task by suppl
 | `ansilabnl.warmdesk.project_member` | Manage project membership and roles |
 | `ansilabnl.warmdesk.column` | Manage Kanban columns in a project |
 | `ansilabnl.warmdesk.label` | Manage card labels in a project |
-| `ansilabnl.warmdesk.card` | Manage cards on a Kanban board |
+| `ansilabnl.warmdesk.card` | Manage cards on a Kanban board, including moving them to another project (`move_to_project`) |
 | `ansilabnl.warmdesk.checklist_item` | Manage checklist items on a card |
 | `ansilabnl.warmdesk.card_comment` | Manage comments on a card |
 
@@ -114,7 +114,7 @@ Any parameter set in `module_defaults` can still be overridden per task by suppl
 
 | Plugin | Description |
 |---|---|
-| `ansilabnl.warmdesk.card` | Look up one or more cards by reference |
+| `ansilabnl.warmdesk.card` | Look up one or more cards by reference (a moved card is also found by its old reference) |
 | `ansilabnl.warmdesk.project` | Look up projects by slug |
 | `ansilabnl.warmdesk.customer` | Look up customers by name |
 | `ansilabnl.warmdesk.contract` | Look up contracts by name |

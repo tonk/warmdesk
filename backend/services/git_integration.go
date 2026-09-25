@@ -38,15 +38,9 @@ func LinkCardsFromText(text string, template models.CardLink) []models.CardLink 
 			continue
 		}
 
-		// Find the project with this key_prefix.
-		var project models.Project
-		if err := database.DB.Where("key_prefix = ?", prefix).First(&project).Error; err != nil {
-			continue
-		}
-
-		// Find the card within that project.
-		var card models.Card
-		if err := database.DB.Where("project_id = ? AND card_number = ?", project.ID, cardNum).First(&card).Error; err != nil {
+		// Find the card, following the alias of a card that moved projects.
+		card, err := FindCardByKey(prefix, cardNum)
+		if err != nil {
 			continue
 		}
 

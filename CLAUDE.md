@@ -216,6 +216,11 @@ Projects have an `IsClosed` field (`is_closed` in JSON). A closed board is hidde
 - `ListStarredProjects` (`handlers/starred.go`) filters out closed projects.
 - `AdminListProjects` (`handlers/admin_project.go`) supports `?closed=true` (only closed) and `?closed=hide` (only open).
 
+### Moving cards between projects
+`transferCard` (`handlers/card_transfer.go`) backs both `POST /projects/:slug/cards/:id/transfer` and the Ticket API's `POST /ticket/:slug/cards/:id/transfer`. A move keeps the same `cards` row (comments, checklist, attachments, history and links stay attached by `card_id`) and renumbers it in the target project; the old key is kept as a `CardKeyAlias` row (prefix string + number → card id). **Every card-key lookup must go through `services.FindCardByKey`** (live key first, then alias) — not a raw `key_prefix`/`card_number` join — or references to moved cards silently stop resolving. Labels are remapped by name, epic/sprint cleared, assignees/watchers without target access removed, sub-cards moved or detached. All reads happen before the transaction because the in-memory SQLite test DB has one database per pool connection.
+
+Project-scoped API keys are only checked against the `:projectSlug` path parameter by `AuthenticateAPIKey`; a handler that writes to a second project named in the body must call `middleware.APIKeyAllowsProject(c, projectID)` for it.
+
 ### Adding a new route
 1. Add handler function to the appropriate `handlers/*.go` file (or a new file).
 2. Register the route in `router/router.go` under the correct group (`protected`, `admin`, `projects`, etc.).

@@ -1,0 +1,24 @@
+meta {
+  name: Transfer Card to Another Project
+  type: http
+  seq: 15
+}
+
+post {
+  url: {{baseUrl}}/api/v1/projects/{{projectSlug}}/cards/{{cardId}}/transfer
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "target_project_slug": "operations",
+    "column_id": 12,
+    "action": "move",
+    "sub_cards": "move"
+  }
+}

@@ -473,6 +473,36 @@
           }
         },
         {
+          "name": "Transfer Card to Another Project",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/projects/{{projectSlug}}/cards/{{cardId}}/transfer"
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"target_project_slug\": \"operations\",\n    \"column_id\": 12,\n    \"action\": \"move\",\n    \"sub_cards\": \"move\"\n  }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Copy or move a card to a column in another project. action: copy|move (required); sub_cards: move|detach. A move keeps the card (comments, checklist, attachments, history), gives it a new number in the target project, and keeps the old key resolvable. Response includes key, previous_key and moved_sub_card_ids."
+          }
+        },
+        {
           "name": "Delete Card",
           "request": {
             "method": "DELETE",
@@ -2861,6 +2891,35 @@
             "body": {
               "mode": "raw",
               "raw": "{\n    \"priority\": \"medium\",\n    \"start_date\": \"2026-09-24\"\n  }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Transfer Card to Another Project (Ticket API)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/ticket/{{projectSlug}}/cards/{{cardId}}/transfer"
+            },
+            "description": "Move (default) or copy a card to a lane in another project; requires member access to both projects, and a project key must be scoped to the target project. {{cardId}} may be the numeric id or the card key (e.g. ANSI-4).\nFields: target_project (slug, required), column_id or column (lane in the target project, required), action (move/copy), sub_cards (move/detach).\nA move keeps comments, checklist, attachments and history; the card is renumbered in the target project and its old key keeps resolving.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"target_project\": \"operations\",\n    \"column\": \"Backlog\"\n  }",
               "options": {
                 "raw": {
                   "language": "json"

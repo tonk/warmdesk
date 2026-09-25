@@ -483,9 +483,15 @@
             </select>
           </div>
         </div>
+        <p id="transfer-move-note" class="form-hint transfer-note">{{ $t('board.transfer_move_note') }}</p>
+        <fieldset v-if="subCards.length" class="transfer-subcards">
+          <legend class="form-label">{{ $t('board.transfer_sub_cards', { n: subCards.length }) }}</legend>
+          <label class="transfer-radio"><input type="radio" v-model="transferSubCards" value="move" /> {{ $t('board.transfer_sub_cards_move') }}</label>
+          <label class="transfer-radio"><input type="radio" v-model="transferSubCards" value="detach" /> {{ $t('board.transfer_sub_cards_detach') }}</label>
+        </fieldset>
         <div class="transfer-actions">
           <button class="btn btn-secondary btn-sm" @click="executeTransfer('copy')" :disabled="!transferColumnId || transferring">{{ $t('board.transfer_copy') }}</button>
-          <button class="btn btn-secondary btn-sm" @click="executeTransfer('move')" :disabled="!transferColumnId || transferring">{{ $t('board.transfer_move') }}</button>
+          <button class="btn btn-secondary btn-sm" @click="executeTransfer('move')" :disabled="!transferColumnId || transferring" aria-describedby="transfer-move-note">{{ $t('board.transfer_move') }}</button>
           <button class="btn btn-ghost btn-sm" @click="showTransferPanel = false">{{ $t('common.cancel') }}</button>
         </div>
       </div>
@@ -754,6 +760,7 @@ const transferColumnId = ref('')
 const transferColumns = ref([])
 const transferProjects = ref([])
 const transferring = ref(false)
+const transferSubCards = ref('move')
 
 const checklistPct = computed(() => {
   if (!checklist.value.length) return 0
@@ -769,7 +776,7 @@ function activityIcon(type) {
     created: '✦', column_move: '→', closed: '✓', reopened: '↑',
     deleted: '✗', restored: '↩', title_changed: '✎', priority_changed: '⚑', assignee_changed: '◉',
     comment_added: '✉', start_date_changed: '▷', due_date_changed: '⏱',
-    description_changed: '¶',
+    description_changed: '¶', project_moved: '⇄',
   }
   return icons[type] || '•'
 }
@@ -789,6 +796,7 @@ function activityLabel(h) {
     case 'start_date_changed': return `${t('board.history_start_date_changed')}: ${h.detail}`
     case 'due_date_changed': return `${t('board.history_due_date_changed')}: ${h.detail}`
     case 'description_changed': return t('board.history_description_changed')
+    case 'project_moved': return `${t('board.history_project_moved')}: ${h.detail}`
     default: return h.detail || h.event_type
   }
 }
@@ -1493,7 +1501,9 @@ async function toggleTransferPanel() {
   if (showTransferPanel.value && !transferProjects.value.length) {
     try {
       const { data } = await projectsApi.list()
-      transferProjects.value = (data || []).filter(p => !p.is_archived)
+      // Copying within this project is the separate Copy button; a move
+      // within it is a column change.
+      transferProjects.value = (data || []).filter(p => !p.is_archived && p.slug !== props.projectSlug)
     } catch {}
   }
 }
@@ -1512,15 +1522,23 @@ async function executeTransfer(action) {
   if (!transferProjectSlug.value || !transferColumnId.value) return
   transferring.value = true
   try {
-    await projectsApi.transferCard(props.projectSlug, props.card.id, {
+    const { data } = await projectsApi.transferCard(props.projectSlug, props.card.id, {
       target_project_slug: transferProjectSlug.value,
       column_id: parseInt(transferColumnId.value),
-      action
+      action,
+      sub_cards: transferSubCards.value
     })
     if (action === 'move') {
       boardStore.removeCard({ card_id: props.card.id, column_id: props.card.column_id })
+      for (const sc of subCards.value) {
+        if (data?.moved_sub_card_ids?.includes(sc.id)) {
+          boardStore.removeCard({ card_id: sc.id, column_id: sc.column_id })
+        }
+      }
     }
-    ui.success(action === 'copy' ? t('board.copy_card_success') : t('board.move_card_success'))
+    ui.success(action === 'copy'
+      ? t('board.copy_card_success')
+      : (data?.key ? t('board.move_card_success_key', { key: data.key }) : t('board.move_card_success')))
     emit('close')
   } catch {
     ui.error(`Failed to ${action} card`)
@@ -1846,6 +1864,10 @@ function renderMarkdown(text) {
 .transfer-section { margin-top: 24px; border-top: 1px solid var(--color-border); padding-top: 20px; }
 .transfer-section h4 { margin-bottom: 12px; font-size: 14px; color: var(--color-text-muted); }
 .transfer-actions { display: flex; gap: 8px; margin-top: 8px; }
+.transfer-note { margin: 4px 0 8px; }
+.transfer-subcards { border: none; padding: 0; margin: 0 0 8px; display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.transfer-subcards legend { width: 100%; margin-bottom: 4px; }
+.transfer-radio { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
 
 .history-section { margin-top: 24px; border-top: 1px solid var(--color-border); padding-top: 20px; }
 .history-section h4 { margin-bottom: 12px; font-size: 14px; color: var(--color-text-muted); }

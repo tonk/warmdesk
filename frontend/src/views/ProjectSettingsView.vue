@@ -243,6 +243,12 @@
               <span class="endpoint-desc">{{ $t('apikeys.docs_move') }}</span>
             </div>
             <pre class="api-body">{"column": "Done", "position": 1000}</pre>
+            <div class="api-endpoint">
+              <span class="method post">POST</span>
+              <code>/api/v1/ticket/{{ slug }}/cards/:cardId/transfer</code>
+              <span class="endpoint-desc">{{ $t('apikeys.docs_transfer') }}</span>
+            </div>
+            <pre class="api-body">{"target_project": "…", "column": "Backlog", "action": "move"}</pre>
           </div>
         </div>
 

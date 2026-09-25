@@ -230,7 +230,7 @@ MIME type is detected server-side; the client-supplied content type is ignored.
 === Copy, transfer, and close
 
 * *Copy Card* duplicates the card in the same column.
-* *Transfer* copies or moves the card to another project or column.
+* *Transfer* copies or moves the card to another project. A move keeps the comments, checklist, attachments, and history; the card gets a new number there, and its old number keeps working. Labels are matched by name, the epic and sprint are cleared, assignees without access to the target project are removed, and sub-cards can move along or stay behind.
 * *Close Card* marks it done (it stays visible, struck through); *Reopen Card* restores it.
 
 === Watchers

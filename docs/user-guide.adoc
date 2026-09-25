@@ -722,9 +722,20 @@ Checklist items, comments, and attachments are *not* copied, and only a single o
 
 === Transfer card
 
-Click *Transfer* in the card detail footer to copy or move the card to a different project or column.
-Choose the destination project and column from the dropdowns, then click *Copy* or *Move*.
-Move also removes the card from its original column.
+Click *Transfer* in the card detail footer to copy or move the card to a different project.
+Choose the destination project and column from the dropdowns, then click *Copy Here* or *Move Here*.
+
+*Copy Here* creates a new card in the other project with the title, description, priority, due date, and tags; the original stays where it is.
+
+*Move Here* moves the card itself, so its comments, checklist, attachments, history, git links, and time spent come along. What changes:
+
+* The card gets a new number in the target project (for example `PRJ-12` becomes `OPS-47`). The old number keeps working: links, references in commit messages, and the Ticket API still find the card under its old number.
+* Labels are matched by name to the labels of the target project; labels that don't exist there are created with the same colour.
+* The epic and sprint are cleared, because those belong to the original project.
+* Assignees and watchers who have no access to the target project are removed from the card.
+* If the card has sub-cards, you choose whether they move along or stay behind. Sub-cards that move along keep their column when the target project has a column with the same name.
+
+The card history shows the move with the old and new number.
 
 === Close / reopen a card
 

@@ -180,11 +180,8 @@ func CreateCardRef(c *gin.Context) {
 	}
 
 	// Find the target card
-	var targetCard models.Card
-	if err := database.DB.
-		Joins("JOIN projects ON projects.id = cards.project_id").
-		Where("projects.key_prefix = ? AND cards.card_number = ? AND cards.deleted_at IS NULL", targetPrefix, targetNumber).
-		First(&targetCard).Error; err != nil {
+	targetCard, err := services.FindCardByKey(targetPrefix, targetNumber)
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("card %s not found", req.Ref)})
 		return
 	}

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -713,102 +712,6 @@ func CopyCard(c *gin.Context) {
 	c.JSON(http.StatusCreated, newCard)
 }
 
-// TransferCard copies or moves a card to a column in another project.
-func TransferCard(c *gin.Context) {
-	userID := middleware.GetUserID(c)
-	slug := c.Param("projectSlug")
-	cardID, err := strconv.ParseUint(c.Param("cardId"), 10, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid card id"})
-		return
-	}
-
-	var req struct {
-		TargetProjectSlug string `json:"target_project_slug" binding:"required"`
-		ColumnID          uint   `json:"column_id" binding:"required"`
-		Action            string `json:"action" binding:"required"` // "copy" or "move"
-	}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
-		return
-	}
-	if req.Action != "copy" && req.Action != "move" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "action must be 'copy' or 'move'"})
-		return
-	}
-
-	sourceProject, err := services.GetProjectBySlug(slug)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "source project not found"})
-		return
-	}
-	if err := services.RequireProjectRole(sourceProject.ID, userID, middleware.GetGlobalRole(c), "member"); err != nil {
-		c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
-		return
-	}
-
-	targetProject, err := services.GetProjectBySlug(req.TargetProjectSlug)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "target project not found"})
-		return
-	}
-	if err := services.RequireProjectRole(targetProject.ID, userID, middleware.GetGlobalRole(c), "member"); err != nil {
-		c.JSON(http.StatusForbidden, gin.H{"error": "forbidden in target project"})
-		return
-	}
-
-	// Verify target column belongs to target project
-	var targetColumn models.Column
-	if err := database.DB.Where("id = ? AND project_id = ?", req.ColumnID, targetProject.ID).First(&targetColumn).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "column not found in target project"})
-		return
-	}
-
-	var original models.Card
-	if err := database.DB.Preload("Tags").Where("id = ? AND project_id = ?", cardID, sourceProject.ID).First(&original).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "card not found"})
-		return
-	}
-
-	var maxPos float64
-	database.DB.Model(&models.Card{}).Where("column_id = ?", req.ColumnID).Select("COALESCE(MAX(position), 0)").Scan(&maxPos)
-
-	database.DB.Model(&models.Project{}).Where("id = ?", targetProject.ID).
-		UpdateColumn("card_counter", gorm.Expr("card_counter + 1"))
-	var updatedProject models.Project
-	database.DB.Select("card_counter").First(&updatedProject, targetProject.ID)
-
-	newCard := models.Card{
-		ColumnID:    req.ColumnID,
-		ProjectID:   targetProject.ID,
-		Title:       original.Title,
-		Description: original.Description,
-		Priority:    original.Priority,
-		DueDate:     original.DueDate,
-		CreatedByID: userID,
-		Position:    maxPos + 1000,
-		CardNumber:  updatedProject.CardCounter,
-	}
-	database.DB.Create(&newCard)
-
-	for _, tag := range original.Tags {
-		database.DB.Create(&models.CardTag{CardID: newCard.ID, Name: tag.Name})
-	}
-
-	database.DB.Preload("Labels").Preload("Assignee").Preload("Assignees").Preload("Tags").First(&newCard, newCard.ID)
-	ws.BroadcastToProject(targetProject.ID, ws.Message{Type: ws.TypeBoardCardCreated, Payload: newCard})
-
-	if req.Action == "move" {
-		database.DB.Delete(&original)
-		ws.BroadcastToProject(sourceProject.ID, ws.Message{
-			Type:    ws.TypeBoardCardDeleted,
-			Payload: map[string]uint{"card_id": original.ID, "column_id": original.ColumnID},
-		})
-	}
-
-	c.JSON(http.StatusCreated, newCard)
-}
-
 func UpdateAssignee(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	slug := c.Param("projectSlug")
@@ -849,37 +752,34 @@ func UpdateAssignee(c *gin.Context) {
 
 // ResolveCardRef GET /api/v1/cards/resolve/:ref
 // Resolves a card reference like "PRJ-42" to its project slug and card ID.
+// Requires viewer access to the card's project.
 func ResolveCardRef(c *gin.Context) {
-	ref := c.Param("ref")
-	sep := strings.LastIndex(ref, "-")
-	if sep <= 0 {
+	prefix, number, ok := services.ParseCardKey(c.Param("ref"))
+	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid ref"})
 		return
 	}
-	prefix := strings.ToUpper(ref[:sep])
-	number, err := strconv.Atoi(ref[sep+1:])
-	if err != nil || number < 1 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid ref"})
-		return
-	}
-
-	var result struct {
-		ID          uint   `json:"id"`
-		CardNumber  int    `json:"card_number"`
-		KeyPrefix   string `json:"key_prefix"`
-		ProjectSlug string `json:"project_slug"`
-		Title       string `json:"title"`
-	}
-	if err := database.DB.
-		Table("cards").
-		Select("cards.id, cards.card_number, projects.key_prefix, projects.slug as project_slug, cards.title").
-		Joins("JOIN projects ON projects.id = cards.project_id").
-		Where("projects.key_prefix = ? AND cards.card_number = ? AND cards.deleted_at IS NULL", prefix, number).
-		Scan(&result).Error; err != nil || result.ID == 0 {
+	card, err := services.FindCardByKey(prefix, number)
+	// 404 rather than 403 without access, so the endpoint can't be used to
+	// probe which card keys exist in other projects.
+	if err != nil || services.RequireProjectRole(card.ProjectID, middleware.GetUserID(c), middleware.GetGlobalRole(c), "viewer") != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "card not found"})
 		return
 	}
-	c.JSON(http.StatusOK, result)
+	var project models.Project
+	if err := database.DB.Select("key_prefix, slug").First(&project, card.ProjectID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "card not found"})
+		return
+	}
+	// A card found through an alias reports its current key, so links to a
+	// moved card land on the right board.
+	c.JSON(http.StatusOK, gin.H{
+		"id":           card.ID,
+		"card_number":  card.CardNumber,
+		"key_prefix":   project.KeyPrefix,
+		"project_slug": project.Slug,
+		"title":        card.Title,
+	})
 }
 
 // DeletedCardItem is a soft-deleted card shown in project settings.
@@ -983,8 +883,9 @@ func PermanentDeleteCard(c *gin.Context) {
 	db.Where("card_id = ?", card.ID).Delete(&models.CardAssignee{})
 	db.Where("card_id = ?", card.ID).Delete(&models.CardLabel{})
 	db.Where("card_id = ?", card.ID).Delete(&models.CardTag{})
-	db.Where("card_id = ? OR target_card_id = ?", card.ID, card.ID).Delete(&models.CardReference{})
+	db.Where("source_card_id = ? OR target_card_id = ?", card.ID, card.ID).Delete(&models.CardReference{})
 	db.Exec("DELETE FROM card_watchers WHERE card_id = ?", card.ID)
+	db.Where("card_id = ?", card.ID).Delete(&models.CardKeyAlias{})
 
 	// Hard-delete the card
 	db.Unscoped().Delete(&card)

@@ -198,6 +198,7 @@ func AdminPurgeProject(c *gin.Context) {
 		db.Exec("DELETE FROM card_watchers WHERE card_id IN ?", cardIDs)
 		db.Where("card_id IN ?", cardIDs).Delete(&models.CardTag{})
 		db.Where("card_id IN ?", cardIDs).Delete(&models.CardLink{})
+		db.Where("card_id IN ?", cardIDs).Delete(&models.CardKeyAlias{})
 	}
 	db.Unscoped().Where("project_id = ?", id).Delete(&models.Card{})
 	db.Unscoped().Where("project_id = ?", id).Delete(&models.Column{})

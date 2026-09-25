@@ -105,28 +105,17 @@ func CreateTicketCardLink(c *gin.Context) {
 	if req.CardID != nil {
 		cardID = *req.CardID
 	} else if req.Ref != "" {
-		sep := strings.LastIndex(req.Ref, "-")
-		if sep <= 0 {
+		prefix, number, ok := services.ParseCardKey(req.Ref)
+		if !ok {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid ref format, use PROJECT-123"})
 			return
 		}
-		prefix := strings.ToUpper(req.Ref[:sep])
-		number, err := strconv.Atoi(req.Ref[sep+1:])
-		if err != nil || number < 1 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid ref"})
-			return
-		}
-		var result struct{ ID uint }
-		if err := database.DB.
-			Table("cards").
-			Select("cards.id").
-			Joins("JOIN projects ON projects.id = cards.project_id").
-			Where("projects.key_prefix = ? AND cards.card_number = ? AND cards.deleted_at IS NULL", prefix, number).
-			Scan(&result).Error; err != nil || result.ID == 0 {
+		card, err := services.FindCardByKey(prefix, number)
+		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "card not found"})
 			return
 		}
-		cardID = result.ID
+		cardID = card.ID
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "card_id or ref required"})
 		return

@@ -106,11 +106,34 @@ def resolve_group_id(client, name):
     raise WarmDeskAPIError(404, 'Group not found: %s' % name)
 
 
-def find_card_by_number(client, project_slug, card_ref):
+def resolve_card_ref(client, card_ref):
+    """Resolve a card reference like 'EDA-42' anywhere on the server.
+
+    Uses GET /cards/resolve/{ref}, which also follows the old reference of a
+    card that was moved to another project (the server keeps it as an alias).
+    Returns a dict with C(id), C(card_number), C(key_prefix) and
+    C(project_slug) of the card's *current* location, or None when the
+    reference is unknown or not visible to the caller. Project-scoped API keys
+    cannot use this endpoint (it has no project in its path); for them this
+    also returns None.
+    """
+    try:
+        return client.get('/cards/resolve/%s' % card_ref)
+    except WarmDeskAPIError as exc:
+        if exc.status in (403, 404):
+            return None
+        raise
+
+
+def find_card_by_number(client, project_slug, card_ref, follow_moves=False):
     """Return a card dict given a card reference like 'EDA-42'.
 
     Iterates all columns in the project to locate the card.  Returns None if
     not found (so callers can decide whether to fail or treat it as absent).
+
+    With *follow_moves*, a reference that isn't a live card of the project is
+    also tried as the old reference of a card that was moved *into* this
+    project from another one (see resolve_card_ref).
     """
     project = client.get('/projects/%s' % project_slug)
     for col in project.get('columns', []):
@@ -118,4 +141,8 @@ def find_card_by_number(client, project_slug, card_ref):
             ref = '%s-%d' % (project.get('key_prefix', ''), card['card_number'])
             if ref == card_ref:
                 return client.get('/projects/%s/cards/%d' % (project_slug, card['id']))
+    if follow_moves:
+        resolved = resolve_card_ref(client, card_ref)
+        if resolved and resolved.get('project_slug') == project_slug:
+            return client.get('/projects/%s/cards/%d' % (project_slug, resolved['id']))
     return None

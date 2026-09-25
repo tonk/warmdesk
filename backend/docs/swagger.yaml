@@ -121,6 +121,95 @@ definitions:
       refresh_token:
         type: string
     type: object
+  handlers.transferCardResponse:
+    properties:
+      assignee:
+        $ref: '#/definitions/models.User'
+      assignee_id:
+        type: integer
+      assignees:
+        items:
+          $ref: '#/definitions/models.User'
+        type: array
+      attachments:
+        items:
+          $ref: '#/definitions/models.Attachment'
+        type: array
+      card_number:
+        type: integer
+      closed:
+        type: boolean
+      closed_at:
+        type: string
+      column_id:
+        type: integer
+      comments:
+        items:
+          $ref: '#/definitions/models.CardComment'
+        type: array
+      created_at:
+        type: string
+      created_by:
+        $ref: '#/definitions/models.User'
+      created_by_id:
+        type: integer
+      description:
+        type: string
+      due_date:
+        type: string
+      epic:
+        $ref: '#/definitions/models.Epic'
+      epic_id:
+        type: integer
+      external_issue_ref:
+        type: string
+      external_issue_url:
+        type: string
+      id:
+        type: integer
+      key:
+        type: string
+      labels:
+        items:
+          $ref: '#/definitions/models.Label'
+        type: array
+      moved_sub_card_ids:
+        items:
+          type: integer
+        type: array
+      parent_card_id:
+        type: integer
+      position:
+        type: number
+      previous_key:
+        type: string
+      priority:
+        type: string
+      project_id:
+        type: integer
+      start_date:
+        type: string
+      story_points:
+        type: integer
+      sub_card_count:
+        type: integer
+      sub_cards_done:
+        type: integer
+      tags:
+        items:
+          $ref: '#/definitions/models.CardTag'
+        type: array
+      time_spent_minutes:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: string
+      watchers:
+        items:
+          $ref: '#/definitions/models.User'
+        type: array
+    type: object
   models.APIKey:
     properties:
       created_at:
@@ -1377,6 +1466,68 @@ paths:
       summary: Move a card to a different column or position
       tags:
       - cards
+  /projects/{projectSlug}/cards/{cardId}/transfer:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        action "copy" creates a new card with the title, description, priority, due date and tags.
+        action "move" keeps the card itself (comments, checklist, attachments, history, links, time spent)
+        and gives it the next number in the target project; its old key (e.g. PRJ-12) keeps resolving.
+        Labels are matched by name (missing ones are created), epic and sprints are cleared, and
+        assignees/watchers without access to the target project are removed.
+        sub_cards: "move" (default) moves sub-cards along, "detach" leaves them in the source project.
+        Requires member access to both projects; a project-scoped API key must be scoped to the target.
+      parameters:
+      - description: Source project slug
+        in: path
+        name: projectSlug
+        required: true
+        type: string
+      - description: Card ID
+        in: path
+        name: cardId
+        required: true
+        type: integer
+      - description: target_project_slug, column_id, action (copy|move), optional
+          sub_cards (move|detach)
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.transferCardResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      - ApiKeyAuth: []
+      summary: Copy or move a card to a column in another project
+      tags:
+      - cards
   /projects/{projectSlug}/columns/{columnId}/cards:
     get:
       parameters:
@@ -1868,6 +2019,63 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Move a card to a different column via API key
+      tags:
+      - ticket
+  /ticket/{projectSlug}/cards/{cardId}/transfer:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Body: target_project (slug, required), column_id or column (lane name in the target project,
+        case-insensitive, required), action "move" (default) or "copy", sub_cards "move" (default) or "detach".
+        See POST /projects/{projectSlug}/cards/{cardId}/transfer for what a move changes. The response is
+        the card in the target project, with its new key; the old key keeps resolving.
+      parameters:
+      - description: Source project slug
+        in: path
+        name: projectSlug
+        required: true
+        type: string
+      - description: Card ID or key (e.g. ANSI-12)
+        in: path
+        name: cardId
+        required: true
+        type: string
+      - description: target_project, column_id or column, optional action and sub_cards
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.ticketAPICard'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Move or copy a card to another project via API key
       tags:
       - ticket
   /ticket/{projectSlug}/columns:

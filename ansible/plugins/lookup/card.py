@@ -15,8 +15,12 @@ description:
   - Each reference is resolved by scanning the project's columns and cards via
     C(GET /api/v1/projects/:slug), then fetching the full card detail via
     C(GET /api/v1/projects/:slug/cards/:id).
+  - A card that was moved to this project from another one is also found by
+    its old reference (e.g. C(OLD-12) after it became C(EDA-42)); the server
+    keeps old references as aliases.
   - Raises C(AnsibleError) when a requested card reference is not found in the
-    project.
+    project. When the card was moved to another project, the error names its
+    new project and reference.
 notes:
   - Card references are of the form C(<KEY_PREFIX>-<number>), e.g. C(EDA-42).
     The key prefix is the project's C(key_prefix) field (uppercase letters and
@@ -195,6 +199,7 @@ from ansible_collections.ansilabnl.warmdesk.plugins.module_utils.warmdesk_api im
 )
 from ansible_collections.ansilabnl.warmdesk.plugins.module_utils.warmdesk_resolve import (
     find_card_by_number,
+    resolve_card_ref,
 )
 
 
@@ -248,7 +253,7 @@ class LookupModule(LookupBase):
 
         for card_ref in flat_terms:
             try:
-                card = find_card_by_number(client, project_slug, card_ref)
+                card = find_card_by_number(client, project_slug, card_ref, follow_moves=True)
             except WarmDeskAPIError as e:
                 raise AnsibleError(
                     'WarmDesk API error %d looking up card "%s" in project "%s": %s'
@@ -256,6 +261,17 @@ class LookupModule(LookupBase):
                 )
 
             if card is None:
+                try:
+                    moved = resolve_card_ref(client, card_ref)
+                except WarmDeskAPIError:
+                    moved = None
+                if moved:
+                    raise AnsibleError(
+                        'card lookup: card "%s" is not in project "%s"; it was moved to '
+                        'project "%s" as %s-%d.'
+                        % (card_ref, project_slug, moved.get('project_slug'),
+                           moved.get('key_prefix'), moved.get('card_number'))
+                    )
                 raise AnsibleError(
                     'card lookup: card "%s" not found in project "%s".'
                     % (card_ref, project_slug)

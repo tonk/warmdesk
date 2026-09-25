@@ -225,6 +225,7 @@ POST  /api/v1/ticket/{slug}/cards                    — create a card
 POST  /api/v1/ticket/{slug}/cards/{id}/comments      — add a comment
 PATCH /api/v1/ticket/{slug}/cards/{id}               — update title/description/priority/dates/story points, close/reopen (partial)
 PATCH /api/v1/ticket/{slug}/cards/{id}/move          — move to a column
+POST  /api/v1/ticket/{slug}/cards/{id}/transfer      — move or copy to another project (personal key)
 ```
 
 `{id}` is the numeric card id or its key (e.g. `PRJ-42`); lanes can be given as `column_id` or `column` (name).
@@ -345,7 +346,7 @@ See [INSTALL.md](INSTALL.md) for full instructions including:
 - **Gantt chart** — timeline view per project; cards with a start or due date appear as bars; click any bar to open the card detail; zoom between day, week, and month views
 - **Card sorting** — sort column cards by date, assignee, or priority (ascending / descending)
 - **Copy card** — duplicate a card within the same column with one click
-- **Transfer card** — copy or move a card to any other project you have access to; choose the destination project and column
+- **Transfer card** — copy or move a card to any other project you have access to; choose the destination project and column. A move keeps comments, checklist, attachments, and history, and the card's old number (e.g. `PRJ-12`) keeps resolving after it is renumbered in the target project
 - **Close / reopen cards** — mark cards as closed; closed cards stay on the board with a strikethrough and muted style and can be reopened at any time
 - **Linked cards (cross-references)** — link any two cards across projects; linked cards appear in the card detail with their reference, title, current column, and open/closed status; opening a linked card shows a ← back link to return to the originating card; remove a link at any time
 - **Comment replies** — reply to any comment; replies are visually indented
@@ -384,7 +385,7 @@ See [INSTALL.md](INSTALL.md) for full instructions including:
 - **Time tracking PDF options** — the weekly timesheet export and the time-tracking report tab both offer the same PDF Font and PDF Language selects as the main report view; selections are persisted in localStorage; when the report is grouped by Customer a *New page per customer* checkbox appears — each customer is exported to its own page with the full document header repeated and no cross-customer grand total; optional per-row distance and undeclarable-time columns show billable vs. unbillable time and mileage on every entry, not just totals, and the undeclarable/billable breakdown is available for every grouping
 - **Company branding** — set a company name and separate light/dark logos (JPG, PNG, GIF, WebP, or SVG); light logo shown on the login screen's light theme, dark logo on dark theme; logos also appear on reports
 - **Configurable initial columns** — admin can define which columns are created when a new project is made (defaults to "Backlog")
-- **Ticket API** — list columns and cards (filterable by lane) or fetch a card with comments, create and update cards, add comments, and move cards via API key (for CI/CD pipelines and external integrations); API keys also work on all other authenticated endpoints
+- **Ticket API** — list columns and cards (filterable by lane) or fetch a card with comments, create and update cards, add comments, and move cards (also to another project) via API key (for CI/CD pipelines and external integrations); API keys also work on all other authenticated endpoints
 - **Project-scoped API keys** — keys created in Project Settings are locked to that project; personal API keys in User Settings give full access across all projects
 - **Typing indicator** — animated indicator in project chat shows who is currently typing
 - **@mention autocomplete** — `@username` dropdown in project chat, card descriptions, and card comments

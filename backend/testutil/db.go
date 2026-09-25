@@ -16,6 +16,14 @@ func SetupTestDB() (*gorm.DB, func()) {
 	if err != nil {
 		panic("failed to connect to test database: " + err.Error())
 	}
+	// Same join-table setup as database.AutoMigrate, so card_labels gets
+	// models.CardLabel's CreatedAt column here too.
+	if err := db.SetupJoinTable(&models.Card{}, "Labels", &models.CardLabel{}); err != nil {
+		panic("failed to set up card_labels: " + err.Error())
+	}
+	if err := db.SetupJoinTable(&models.Label{}, "Cards", &models.CardLabel{}); err != nil {
+		panic("failed to set up card_labels: " + err.Error())
+	}
 	if err := db.AutoMigrate(allModels()...); err != nil {
 		panic("failed to migrate test database: " + err.Error())
 	}
@@ -78,6 +86,7 @@ func allModels() []interface{} {
 		&models.TicketTag{},
 		&models.TicketLink{},
 		&models.TicketCardLink{},
+		&models.CardKeyAlias{},
 		&models.TicketMessage{},
 		&models.TicketHistory{},
 		&models.TicketView{},

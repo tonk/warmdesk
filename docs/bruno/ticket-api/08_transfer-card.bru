@@ -1,0 +1,29 @@
+meta {
+  name: Transfer Card to Another Project (Ticket API)
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/api/v1/ticket/{{projectSlug}}/cards/{{cardId}}/transfer
+  body: json
+  auth: none
+}
+
+headers {
+  X-API-Key: {{apiKey}}
+}
+
+body:json {
+  {
+    "target_project": "operations",
+    "column": "Backlog"
+  }
+}
+
+docs {
+  Move (default) or copy a card to a lane in another project. Optional: action (move/copy),
+  sub_cards (move/detach). A move keeps comments, checklist, attachments and history; the card
+  gets a new number in the target project and its old key keeps resolving. A project key must
+  be scoped to the target project.
+}

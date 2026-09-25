@@ -54,32 +54,45 @@ func ticketAPICardKey(project *models.Project, card *models.Card) string {
 
 // ticketAPIFindCard loads the card named by the :cardId path parameter, which
 // is either the numeric card id or the card's key ("ANSI-12", prefix
-// case-insensitive). Cards of other projects are never found. Writes the error
-// response and returns nil on failure.
+// case-insensitive). A former key of a card that moved into this project
+// (see models.CardKeyAlias) resolves too. Cards of other projects are never
+// found; for a card that moved away the 404 names its new key when the caller
+// may see it. Writes the error response and returns nil on failure.
 func ticketAPIFindCard(c *gin.Context, project *models.Project) *models.Card {
 	ref := c.Param("cardId")
-	q := database.DB.Where("project_id = ?", project.ID)
+	var card models.Card
 	if id, err := strconv.ParseUint(ref, 10, 64); err == nil {
-		q = q.Where("id = ?", id)
-	} else {
-		i := strings.LastIndex(ref, "-")
-		num, err := strconv.Atoi(ref[i+1:])
-		if i <= 0 || err != nil || num <= 0 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid card id"})
-			return nil
-		}
-		if !strings.EqualFold(ref[:i], project.KeyPrefix) {
+		if err := database.DB.Where("project_id = ? AND id = ?", project.ID, id).First(&card).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "card not found"})
 			return nil
 		}
-		q = q.Where("card_number = ?", num)
+		return &card
 	}
-	var card models.Card
-	if err := q.First(&card).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "card not found"})
+	prefix, num, ok := services.ParseCardKey(ref)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid card id"})
 		return nil
 	}
-	return &card
+	if prefix == strings.ToUpper(project.KeyPrefix) &&
+		database.DB.Where("project_id = ? AND card_number = ?", project.ID, num).First(&card).Error == nil {
+		return &card
+	}
+	moved, err := services.FindCardByAlias(prefix, num)
+	if err == nil && moved.ProjectID == project.ID {
+		return moved
+	}
+	resp := gin.H{"error": "card not found"}
+	if err == nil && middleware.APIKeyAllowsProject(c, moved.ProjectID) &&
+		services.RequireProjectRole(moved.ProjectID, middleware.GetUserID(c), middleware.GetGlobalRole(c), "viewer") == nil {
+		var target models.Project
+		if database.DB.Select("key_prefix, slug").First(&target, moved.ProjectID).Error == nil {
+			resp["error"] = "card moved to another project"
+			resp["moved_to"] = ticketAPICardKey(&target, moved)
+			resp["project"] = target.Slug
+		}
+	}
+	c.JSON(http.StatusNotFound, resp)
+	return nil
 }
 
 // ticketAPIColumn resolves the target column from a request body's

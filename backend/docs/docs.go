@@ -1120,6 +1120,90 @@ const docTemplate = `{
                 }
             }
         },
+        "/projects/{projectSlug}/cards/{cardId}/transfer": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    },
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "action \"copy\" creates a new card with the title, description, priority, due date and tags.\naction \"move\" keeps the card itself (comments, checklist, attachments, history, links, time spent)\nand gives it the next number in the target project; its old key (e.g. PRJ-12) keeps resolving.\nLabels are matched by name (missing ones are created), epic and sprints are cleared, and\nassignees/watchers without access to the target project are removed.\nsub_cards: \"move\" (default) moves sub-cards along, \"detach\" leaves them in the source project.\nRequires member access to both projects; a project-scoped API key must be scoped to the target.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cards"
+                ],
+                "summary": "Copy or move a card to a column in another project",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Source project slug",
+                        "name": "projectSlug",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "target_project_slug, column_id, action (copy|move), optional sub_cards (move|detach)",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.transferCardResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/projects/{projectSlug}/columns/{columnId}/cards": {
             "get": {
                 "security": [
@@ -1870,6 +1954,87 @@ const docTemplate = `{
                 }
             }
         },
+        "/ticket/{projectSlug}/cards/{cardId}/transfer": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Body: target_project (slug, required), column_id or column (lane name in the target project,\ncase-insensitive, required), action \"move\" (default) or \"copy\", sub_cards \"move\" (default) or \"detach\".\nSee POST /projects/{projectSlug}/cards/{cardId}/transfer for what a move changes. The response is\nthe card in the target project, with its new key; the old key keeps resolving.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ticket"
+                ],
+                "summary": "Move or copy a card to another project via API key",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Source project slug",
+                        "name": "projectSlug",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Card ID or key (e.g. ANSI-12)",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "target_project, column_id or column, optional action and sub_cards",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ticketAPICard"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/ticket/{projectSlug}/columns": {
             "get": {
                 "security": [
@@ -2152,6 +2317,140 @@ const docTemplate = `{
                 },
                 "refresh_token": {
                     "type": "string"
+                }
+            }
+        },
+        "handlers.transferCardResponse": {
+            "type": "object",
+            "properties": {
+                "assignee": {
+                    "$ref": "#/definitions/models.User"
+                },
+                "assignee_id": {
+                    "type": "integer"
+                },
+                "assignees": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.User"
+                    }
+                },
+                "attachments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Attachment"
+                    }
+                },
+                "card_number": {
+                    "type": "integer"
+                },
+                "closed": {
+                    "type": "boolean"
+                },
+                "closed_at": {
+                    "type": "string"
+                },
+                "column_id": {
+                    "type": "integer"
+                },
+                "comments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.CardComment"
+                    }
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "$ref": "#/definitions/models.User"
+                },
+                "created_by_id": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "due_date": {
+                    "type": "string"
+                },
+                "epic": {
+                    "$ref": "#/definitions/models.Epic"
+                },
+                "epic_id": {
+                    "type": "integer"
+                },
+                "external_issue_ref": {
+                    "type": "string"
+                },
+                "external_issue_url": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "labels": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Label"
+                    }
+                },
+                "moved_sub_card_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "parent_card_id": {
+                    "type": "integer"
+                },
+                "position": {
+                    "type": "number"
+                },
+                "previous_key": {
+                    "type": "string"
+                },
+                "priority": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "integer"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "story_points": {
+                    "type": "integer"
+                },
+                "sub_card_count": {
+                    "type": "integer"
+                },
+                "sub_cards_done": {
+                    "type": "integer"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.CardTag"
+                    }
+                },
+                "time_spent_minutes": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "watchers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.User"
+                    }
                 }
             }
         },

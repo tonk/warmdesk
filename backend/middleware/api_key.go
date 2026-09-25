@@ -53,7 +53,27 @@ func AuthenticateAPIKey(c *gin.Context, raw string) bool {
 	c.Set(ContextUserID, key.UserID)
 	c.Set(ContextUsername, key.User.Username)
 	c.Set(ContextGlobalRole, key.User.GlobalRole)
+	if key.ProjectID != nil {
+		c.Set(ContextAPIKeyProjectID, *key.ProjectID)
+	}
 	return true
+}
+
+// ContextAPIKeyProjectID holds the project a project-scoped API key is
+// limited to. Absent for unscoped keys and for cookie/JWT sessions.
+const ContextAPIKeyProjectID = "api_key_project_id"
+
+// APIKeyAllowsProject reports whether the request's credentials may act on
+// projectID. The scope check in AuthenticateAPIKey only sees the
+// :projectSlug path parameter; handlers that act on a second project named in
+// the request body (e.g. a card transfer target) must call this for it.
+func APIKeyAllowsProject(c *gin.Context, projectID uint) bool {
+	v, ok := c.Get(ContextAPIKeyProjectID)
+	if !ok {
+		return true
+	}
+	scoped, _ := v.(uint)
+	return scoped == projectID
 }
 
 // APIKeyAuth authenticates requests using the X-API-Key header.

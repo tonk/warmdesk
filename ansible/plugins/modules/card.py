@@ -19,6 +19,11 @@ description:
     preferred lookup key; I(title) is used as a fallback only for I(present).
   - Optional I(move_to_column) — if the card exists in a different column a
     PATCH move request is issued automatically.
+  - Optional I(move_to_project) — moves the card to another project (into
+    I(move_to_column) there). The card keeps its comments, checklist,
+    attachments and history, and gets a new number in the target project;
+    its old reference keeps working. This is idempotent, as a card that already lives in
+    I(move_to_project) is recognised by its old I(card_number).
   - Requires at least I(member) role on the project (or global admin).
 options:
   project:
@@ -131,6 +136,30 @@ options:
         target column.
     type: str
     required: false
+  move_to_project:
+    description:
+      - Slug of another project to move the card to.
+      - Requires I(card_number) and I(move_to_column) (a column name in the
+        target project).
+      - The server matches labels by name (creating missing ones), clears the
+        epic and sprint, and removes assignees and watchers without access to
+        the target project. I(epic_id) and I(assignee) therefore refer to the
+        target project once the card has moved.
+      - Needs a personal API key (or username/password); project-scoped keys
+        are limited to one project and cannot move cards out of it.
+    type: str
+    required: false
+    version_added: "0.7.0"
+  sub_cards:
+    description:
+      - What happens to the card's sub-cards when I(move_to_project) moves it.
+      - C(move) — sub-cards move along (into the target column with the same
+        name as their current column, else I(move_to_column)).
+      - C(detach) — sub-cards stay in the source project without a parent.
+    type: str
+    choices: [move, detach]
+    default: move
+    version_added: "0.7.0"
   state:
     description:
       - C(present) — ensure the card exists and its fields match.
@@ -146,7 +175,9 @@ notes:
   - Date fields accept C(null) as a string to explicitly clear the date on an
     existing card.
   - The move operation (PATCH) is performed I(after) any field update (PUT),
-    so both may fire in a single module run.
+    so both may fire in a single module run. The same holds for
+    I(move_to_project), where fields are updated in the source project first, then
+    the card is transferred.
   - C(description) cannot be cleared to empty through this API — the server
     treats an empty value the same as "not supplied" and leaves the stored
     description untouched. This module's idempotency check does the same, so
@@ -198,6 +229,21 @@ EXAMPLES = r'''
     title: Placeholder title
     card_number: EDA-42
     move_to_column: In Review
+
+- name: Move card EDA-42 to the ops-board project (Backlog column there)
+  ansilabnl.warmdesk.card:
+    warmdesk_url: https://warmdesk.example.com
+    warmdesk_api_key: "{{ lookup('env', 'WARMDESK_API_KEY') }}"
+    project: my-project
+    title: irrelevant
+    card_number: EDA-42
+    move_to_project: ops-board
+    move_to_column: Backlog
+  register: moved
+
+- name: Show the card's new reference
+  ansible.builtin.debug:
+    msg: "EDA-42 is now {{ moved.card.card_ref }}"
 
 - name: Update priority of a known card by number
   ansilabnl.warmdesk.card:
@@ -375,9 +421,17 @@ card:
       description: >
         Full card reference combining the project key prefix and the card
         number (e.g. C(GF00-4)).  Use this value as I(card_number) in
-        subsequent module calls.
+        subsequent module calls.  After I(move_to_project) this is the new
+        reference in the target project.
       type: str
       sample: "GF00-4"
+    previous_key:
+      description: >
+        Reference the card had before I(move_to_project) moved it; only
+        returned by the run that performed the move.
+      type: str
+      returned: when the card was moved to another project
+      sample: "EDA-42"
 '''
 
 from ansible.module_utils.basic import AnsibleModule
@@ -389,6 +443,7 @@ from ansible_collections.ansilabnl.warmdesk.plugins.module_utils.warmdesk_api im
 )
 from ansible_collections.ansilabnl.warmdesk.plugins.module_utils.warmdesk_resolve import (
     find_card_by_number,
+    resolve_card_ref,
     resolve_column_id,
     resolve_user_id,
 )
@@ -500,12 +555,15 @@ def run_module():
         external_issue_ref=dict(type='str', required=False),
         epic_id=dict(type='str', required=False),
         move_to_column=dict(type='str', required=False),
+        move_to_project=dict(type='str', required=False),
+        sub_cards=dict(type='str', default='move', choices=['move', 'detach']),
         state=dict(type='str', default='present', choices=['present', 'absent']),
     ))
 
     module = AnsibleModule(
         argument_spec=argument_spec,
         supports_check_mode=True,
+        required_by={'move_to_project': ('card_number', 'move_to_column')},
     )
 
     project = module.params['project']
@@ -525,7 +583,14 @@ def run_module():
     external_issue_ref = module.params['external_issue_ref']
     epic_id_raw = module.params['epic_id']
     move_to_column = module.params['move_to_column']
+    move_to_project = module.params['move_to_project']
+    sub_cards = module.params['sub_cards']
     state = module.params['state']
+
+    if move_to_project and state == 'absent':
+        module.fail_json(msg='move_to_project cannot be combined with state=absent.')
+    if move_to_project == project:
+        module.fail_json(msg='move_to_project must differ from project; use move_to_column to move within a project.')
 
     # Normalise dates: 'null' string → None means "clear"; omitted stays _UNSET
     def _norm_date(raw):
@@ -576,10 +641,23 @@ def run_module():
     if card_number:
         try:
             existing = find_card_by_number(client, project, card_number)
+            if existing is None and move_to_project:
+                # A previous run may already have moved it: the old reference
+                # then resolves (via the server's alias) into the target.
+                resolved = resolve_card_ref(client, card_number)
+                if resolved and resolved.get('project_slug') == move_to_project:
+                    existing = client.get('/projects/%s/cards/%d' % (move_to_project, resolved['id']))
+                    project = move_to_project
+                    move_to_project = None
         except WarmDeskAPIError as exc:
             module.fail_json(
                 msg='Error looking up card "%s": %s (HTTP %s)' % (
                     card_number, exc.message, exc.status)
+            )
+        if existing is None and move_to_project:
+            module.fail_json(
+                msg='Card "%s" not found in project "%s" or "%s".' % (
+                    card_number, project, move_to_project)
             )
     elif column_name:
         try:
@@ -700,6 +778,38 @@ def run_module():
                     msg='Failed to update card: %s (HTTP %s)' % (exc.message, exc.status)
                 )
             changed = True
+
+    # ----------------------------------------------------------------
+    # Optional move to another project (also places it in move_to_column)
+    # ----------------------------------------------------------------
+    if move_to_project and result_card is not None:
+        try:
+            target_col_id = resolve_column_id(client, move_to_project, move_to_column)
+        except WarmDeskAPIError as exc:
+            module.fail_json(
+                msg='Cannot resolve move_to_column "%s" in project "%s": %s (HTTP %s)' % (
+                    move_to_column, move_to_project, exc.message, exc.status)
+            )
+        if module.check_mode:
+            module.exit_json(changed=True, card=result_card)
+        try:
+            result_card = client.post(
+                '/projects/%s/cards/%d/transfer' % (project, result_card['id']),
+                {
+                    'target_project_slug': move_to_project,
+                    'column_id': target_col_id,
+                    'action': 'move',
+                    'sub_cards': sub_cards,
+                },
+            )
+        except WarmDeskAPIError as exc:
+            module.fail_json(
+                msg='Failed to move card to project "%s": %s (HTTP %s)' % (
+                    move_to_project, exc.message, exc.status)
+            )
+        changed = True
+        project = move_to_project
+        move_to_column = None  # the transfer already placed it there
 
     # ----------------------------------------------------------------
     # Optional move

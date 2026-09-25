@@ -65,7 +65,7 @@ collections as plain text files — no account or cloud sync required.
 | `system` | Server version, public settings |
 | `projects` | CRUD, members, labels, star/unstar |
 | `columns` | CRUD |
-| `cards` | CRUD, move, comments, checklist, labels, history, cross-references |
+| `cards` | CRUD, move, transfer to another project, comments, checklist, labels, history, cross-references |
 | `scrum` | Backlog, sprints (create/start/complete), releases |
 | `charts` | Velocity, burndown, burnup, CFD, cycle time, throughput, release burndown |
 | `topics` | List, create, get, reply |
@@ -77,7 +77,7 @@ collections as plain text files — no account or cloud sync required.
 | `invoices` | Global invoice list |
 | `invoice-templates` | List, create, update, delete invoice templates (admin) |
 | `admin` | User management, system settings, backup |
-| `ticket-api` | Create card, add comment, move card (API key auth) |
+| `ticket-api` | Create card, add comment, move card, transfer card to another project (API key auth) |
 
 ---
 
@@ -105,7 +105,10 @@ There are two kinds of key, both acting as the user who created them:
 - **Project keys** (**Project Settings → API Keys**) are locked to one project
   and only work on routes that contain that project's slug
   (`/api/v1/projects/{slug}/...`, `/api/v1/ticket/{slug}/...`); anything else
-  returns `key is scoped to a specific project`.
+  returns `key is scoped to a specific project`. A transfer to another project
+  (`.../cards/{cardId}/transfer`) also needs the key to be valid for the
+  *target* project, so a project key can never write outside its own project —
+  transferring a card needs a personal key.
 
 Create a personal key via the API while authenticated with a JWT:
 
@@ -136,7 +139,7 @@ API keys work on all authenticated endpoints, not just the Ticket API.
 ## 2. Ticket API
 
 The Ticket API lets CI/CD pipelines and external tools read cards, create and
-update cards, add comments, and move cards without a user account. All endpoints sit
+update cards, add comments, and move cards (also to another project) without a user account. All endpoints sit
 under `/api/v1/ticket/` and require API key authentication. The read endpoints
 (`GET`) need only viewer access to the project and never modify anything.
 
@@ -144,7 +147,10 @@ under `/api/v1/ticket/` and require API key authentication. The read endpoints
 
 - `{cardId}` in a path is either the card's numeric `id` or its key, e.g.
   `ANSI-12` (prefix case-insensitive). A key or id from another project always
-  returns `404`.
+  returns `404`. A card that was moved to another project keeps answering to
+  its old key in its new project (see [Card References](#6-card-references));
+  asking for it in the old project returns `404` with `moved_to` (the new key)
+  and `project` (the new slug), when the key's user can see that project.
 - Wherever a lane is expected (create, move), send either `column_id` (number)
   or `column` (lane name, case-insensitive) — not both.
 
@@ -311,6 +317,62 @@ PATCH /api/v1/ticket/{projectSlug}/cards/{cardId}/move
 
 **Response** `200 OK` — the moved card in the same shape as
 `GET /cards/{cardId}` (including `key` and `column_name`).
+
+### Move or copy a card to another project
+
+```
+POST /api/v1/ticket/{projectSlug}/cards/{cardId}/transfer
+```
+
+**Body**
+
+```json
+{
+  "target_project": "operations",
+  "column":         "Backlog"
+}
+```
+
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| `target_project` | string | yes | Slug of the target project |
+| `column_id` / `column` | number / string | one of them | Lane in the *target* project, by id or by name (case-insensitive) |
+| `action` | string | no | `move` (default) or `copy` |
+| `sub_cards` | string | no | `move` (default): sub-cards move along; `detach`: they stay behind and lose their parent |
+
+A **move** keeps the card itself, so its comments, checklist, attachments,
+history, git links, ticket links, card references and time spent come along.
+What changes:
+
+- The card gets the next number in the target project (`PRJ-12` becomes e.g.
+  `OPS-47`). The old key keeps resolving everywhere a key is accepted
+  (Ticket API, git webhooks, card references, ticket links).
+- Labels are matched by name (case-insensitive) onto the target project's
+  labels; missing ones are created there with the same colour.
+- Epic and sprint membership are cleared — both belong to the source project.
+- Assignees and watchers who cannot see the target project are removed.
+- Sub-cards that move along land in the target lane of the same name as their
+  current lane, or else in the requested lane. A parent card in the source
+  project is detached from the moved card.
+- The card history records a `project_moved` event (`PRJ-12 → OPS-47`).
+
+A **copy** creates a new card with the title, description, priority, due date
+and tags; the original stays where it is.
+
+**Response** `201 Created` — the card in the target project in the same shape
+as `GET /cards/{cardId}`; `key` is the new key.
+
+| Status | Cause |
+|--------|-------|
+| `400` | Missing `target_project` or lane, unknown lane, unknown field, invalid `action`/`sub_cards`, or a move within the same project (use `/move`) |
+| `403` | Less than member access to either project, or a project key (these are limited to one project, so a transfer needs a personal key) |
+| `404` | Card or target project not found |
+
+The same operation is available for sessions and personal keys as
+`POST /api/v1/projects/{projectSlug}/cards/{cardId}/transfer` with
+`target_project_slug`, `column_id` (number only), `action` (required) and
+`sub_cards`; it returns the card plus `key`, `previous_key` and
+`moved_sub_card_ids`.
 
 ### Example: full CI pipeline workflow
 
@@ -609,6 +671,11 @@ A card reference is a string in the format `PREFIX-NUMBER` where:
 - `NUMBER` is the card's sequential number within the project (e.g. `42`)
 
 Examples: `PRJ-1`, `WEBAPP-99`, `API-200`
+
+When a card moves to another project it is renumbered there, and its old
+reference is kept as an alias: `PRJ-42` keeps pointing at the card after it
+became `OPS-7`, so references in old commit messages and tickets still work.
+A card that moves several times answers to all of its former references.
 
 The prefix is auto-generated from the project name when the project is created
 (first letters of each word, padded to 3 characters). It is visible in the card

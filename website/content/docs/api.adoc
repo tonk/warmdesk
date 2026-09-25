@@ -65,6 +65,7 @@ curl -H "X-API-Key: cwk_abc123..." \
 
 API keys carry the same project permissions as the user who created them, and work on all authenticated endpoints, not just the Ticket API.
 A project-scoped key only works on routes that contain its own project's slug (e.g. `/api/v1/projects/{slug}/...` or `/api/v1/ticket/{slug}/...`); anything else returns `key is scoped to a specific project`.
+A card transfer (`.../cards/{cardId}/transfer`) additionally needs the key to be valid for the _target_ project, so a project key can never write outside its own project; transferring a card needs a personal key.
 Keys with the `backup` global role can trigger backups without a full admin account.
 
 == Ticket API
@@ -83,9 +84,11 @@ The `GET` endpoints need only viewer access and never change anything; the other
 |`POST` |`/api/v1/ticket/{slug}/cards/{cardId}/comments` |Add a comment
 |`PATCH` |`/api/v1/ticket/{slug}/cards/{cardId}` |Update a card's fields (partial)
 |`PATCH` |`/api/v1/ticket/{slug}/cards/{cardId}/move` |Move a card to another column
+|`POST` |`/api/v1/ticket/{slug}/cards/{cardId}/transfer` |Move or copy a card to another project
 |===
 
 *Addressing cards and lanes:* `{cardId}` is either the numeric `id` or the card's key (`ANSI-12`, prefix case-insensitive); a card from another project always returns `404`.
+A card that moved to another project keeps answering to its old key in its new project; asking for it in the old project returns `404` with `moved_to` (the new key) and `project` (the new slug), when the key's user can see that project.
 Wherever a lane is expected (create, move), send `column_id` (number) or `column` (lane name, case-insensitive), not both.
 
 === Read a lane
@@ -187,6 +190,31 @@ curl -X PATCH \
   -d '{"closed": true}' \
   "https://warmdesk.example.com/api/v1/ticket/myproject/cards/MYPROJ-42"
 ----
+
+=== Move a card to another project
+
+[source,bash]
+----
+curl -X POST \
+  -H "X-API-Key: cwk_abc123..." \
+  -H "Content-Type: application/json" \
+  -d '{"target_project": "operations", "column": "Backlog"}' \
+  "https://warmdesk.example.com/api/v1/ticket/myproject/cards/MYPROJ-42/transfer"
+----
+
+Body fields: `target_project` (slug, required), `column_id` or `column` (lane in the target project, required), `action` (`move`, the default, or `copy`) and `sub_cards` (`move`, the default, or `detach`).
+The response (`201`) is the card in the target project; `key` is its new key.
+
+A move keeps the card itself, so its comments, checklist, attachments, history, links and time spent come along. What changes:
+
+* The card gets the next number in the target project (`MYPROJ-42` becomes e.g. `OPS-7`). The old key keeps resolving wherever a key is accepted: the Ticket API, git webhooks, card references and ticket links.
+* Labels are matched by name onto the target project's labels; missing ones are created there with the same colour.
+* Epic and sprint are cleared, as both belong to the source project.
+* Assignees and watchers who cannot see the target project are removed.
+* Sub-cards that move along land in the target lane with the same name as their current lane, or else in the requested lane.
+
+A copy creates a new card with the title, description, priority, due date and tags.
+Sessions and personal keys can also use `POST /api/v1/projects/{slug}/cards/{cardId}/transfer` with `target_project_slug`, `column_id`, `action` and `sub_cards`.
 
 == Webhooks
 

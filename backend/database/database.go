@@ -462,6 +462,7 @@ func AutoMigrate(db *gorm.DB) error {
 		&models.TicketTag{},
 		&models.TicketLink{},
 		&models.TicketCardLink{},
+		&models.CardKeyAlias{},
 		&models.TicketMessage{},
 		&models.TicketHistory{},
 		&models.TicketView{},
