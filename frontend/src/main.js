@@ -6,6 +6,7 @@ import { i18n, initLocale } from './i18n'
 import { useSystemStore } from '@/stores/system'
 import { useAuthStore } from '@/stores/auth'
 import { setRuntimeServerUrl } from '@/api/serverConfig'
+import { installExternalLinkHandler } from '@/utils/externalLinks'
 import './styles/main.css'
 import '@fontsource/inter/400.css'
 import '@fontsource/inter/500.css'
@@ -31,6 +32,7 @@ import '@fontsource/source-code-pro/600.css'
 async function init() {
   if (window.__TAURI_INTERNALS__) {
     window.addEventListener('contextmenu', e => e.preventDefault())
+    installExternalLinkHandler()
 
     const httpPlugin = await import('@tauri-apps/plugin-http')
     const tauriFetch =

@@ -12,6 +12,7 @@
 </template>
 
 <script setup>
+import { openExternal } from '@/utils/externalLinks'
 import { ref } from 'vue'
 
 const props = defineProps({
@@ -20,13 +21,7 @@ const props = defineProps({
   downloadUrl: { type: String, default: null }
 })
 
-async function openLink(url) {
-  if (window.__TAURI_INTERNALS__) {
-    await window.__TAURI_INTERNALS__.invoke('plugin:opener|open_url', { url, with: null })
-  } else {
-    window.open(url, '_blank', 'noopener,noreferrer')
-  }
-}
+const openLink = openExternal
 
 const DISMISS_KEY = 'update_dismissed'
 

@@ -217,6 +217,26 @@ fn build_init_js(server_url: Option<&str>, profile: &Profile) -> String {
 // ---------------------------------------------------------------------------
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
+/// True for URLs that belong to the bundled frontend (or the Vite dev server
+/// in debug builds) and may be loaded in the main window. Everything else
+/// (git servers, documentation, attachments on the WarmDesk server, …) is
+/// opened in the default browser by the `on_navigation` handler.
+fn is_app_url(url: &tauri::Url) -> bool {
+    match url.scheme() {
+        "tauri" | "asset" | "about" | "data" | "blob" => true,
+        "http" | "https" => {
+            let host = url.host_str().unwrap_or("");
+            if host == "tauri.localhost" || host.ends_with(".localhost") {
+                return true;
+            }
+            cfg!(debug_assertions)
+                && matches!(host, "localhost" | "127.0.0.1")
+                && url.port() == Some(5173)
+        }
+        _ => false,
+    }
+}
+
 pub fn run() {
     let args: Vec<String> = std::env::args().collect();
 
@@ -469,6 +489,19 @@ pub fn run() {
             .inner_size(1280.0, 800.0)
             .min_inner_size(900.0, 600.0)
             .data_directory(profile_data_dir_for_setup)
+            .on_navigation({
+                let handle = app.handle().clone();
+                move |url| {
+                    if is_app_url(url) {
+                        return true;
+                    }
+                    // Never let an external link replace the app itself:
+                    // hand it to the default browser instead.
+                    use tauri_plugin_opener::OpenerExt;
+                    let _ = handle.opener().open_url(url.as_str(), None::<&str>);
+                    false
+                }
+            })
             .build()?;
 
             // Inject before the first on_page_load fires (best-effort).

@@ -578,6 +578,7 @@
 </template>
 
 <script setup>
+import { openExternal } from '@/utils/externalLinks'
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import Sortable from 'sortablejs'
@@ -1070,13 +1071,7 @@ function onKeyDown(e) {
   }
 }
 
-async function openLink(url) {
-  if (window.__TAURI_INTERNALS__) {
-    await window.__TAURI_INTERNALS__.invoke('plugin:opener|open_url', { url, with: null })
-  } else {
-    window.open(url, '_blank', 'noopener,noreferrer')
-  }
-}
+const openLink = openExternal
 
 function initSortable() {
   if (!checklistListEl.value || sortableInstance) return
