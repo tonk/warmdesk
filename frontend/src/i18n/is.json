@@ -1290,6 +1290,8 @@
     "chart_back": "Til baka",
     "chart_drill_range": "Verkþættir {from}–{to} af {total}",
     "chart_show_other": "Sýna {n} verkþætti í „Annað“",
+    "chart_list_other": "Sýna lista yfir {n} verkþætti í „Annað“",
+    "chart_hide_other": "Fela verkþætti í „Annað“",
     "chart_other_click_hint": "Smelltu til að sýna {n} verkþætti í „Annað“",
     "chart_all_activities": "Allir verkþættir ({n})",
     "chart_in_chart": "Litur í riti",

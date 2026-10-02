@@ -1290,6 +1290,8 @@
     "chart_back": "Tilbake",
     "chart_drill_range": "Aktiviteter {from}–{to} av {total}",
     "chart_show_other": "Vis de {n} aktivitetene i «Annet»",
+    "chart_list_other": "List opp de {n} aktivitetene i «Annet»",
+    "chart_hide_other": "Skjul aktivitetene i «Annet»",
     "chart_other_click_hint": "Klikk for å vise de {n} aktivitetene i «Annet»",
     "chart_all_activities": "Alle aktiviteter ({n})",
     "chart_in_chart": "Farge i diagrammet",

@@ -1290,6 +1290,8 @@
     "chart_back": "Terug",
     "chart_drill_range": "Activiteiten {from}–{to} van {total}",
     "chart_show_other": "Toon de {n} activiteiten in “Overig”",
+    "chart_list_other": "Toon de {n} activiteiten in “Overig”",
+    "chart_hide_other": "Verberg de activiteiten in “Overig”",
     "chart_other_click_hint": "Klik om de {n} activiteiten in “Overig” te tonen",
     "chart_all_activities": "Alle activiteiten ({n})",
     "chart_in_chart": "Kleur in grafiek",

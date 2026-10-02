@@ -1290,6 +1290,8 @@
     "chart_back": "Tillbaka",
     "chart_drill_range": "Aktiviteter {from}–{to} av {total}",
     "chart_show_other": "Visa de {n} aktiviteterna i ”Övrigt”",
+    "chart_list_other": "Lista de {n} aktiviteterna i ”Övrigt”",
+    "chart_hide_other": "Dölj aktiviteterna i ”Övrigt”",
     "chart_other_click_hint": "Klicka för att visa de {n} aktiviteterna i ”Övrigt”",
     "chart_all_activities": "Alla aktiviteter ({n})",
     "chart_in_chart": "Färg i diagrammet",

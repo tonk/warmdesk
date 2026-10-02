@@ -1371,6 +1371,8 @@
     "chart_back": "Back",
     "chart_drill_range": "Activities {from}–{to} of {total}",
     "chart_show_other": "Show the {n} activities in “Other”",
+    "chart_list_other": "List the {n} activities in “Other”",
+    "chart_hide_other": "Hide the activities in “Other”",
     "chart_other_click_hint": "Click to show the {n} activities in “Other”",
     "chart_all_activities": "All activities ({n})",
     "chart_in_chart": "Colour in chart",

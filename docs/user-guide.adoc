@@ -1435,7 +1435,8 @@ To see what's in *Other*, click the *Other* slice or bar, or the *Show the N act
 The PDF export always shows the top level.
 
 Below the chart, a table lists every activity with its customers, time, and share of the total, most time first.
-The coloured square shows the activity's colour in the chart as it's shown now; activities marked *Other* are part of the *Other* slice or bar.
+The coloured square shows the activity's colour in the chart as it's shown now.
+The activities that make up the *Other* slice or bar are combined into a single *Other* row with their total time and share; click the arrow on the left of that row to list them individually, and again to collapse them.
 
 ==== Exporting
 

@@ -1290,6 +1290,8 @@
     "chart_back": "Zurück",
     "chart_drill_range": "Tätigkeiten {from}–{to} von {total}",
     "chart_show_other": "Die {n} Tätigkeiten in „Sonstige“ anzeigen",
+    "chart_list_other": "Die {n} Tätigkeiten in „Sonstige“ auflisten",
+    "chart_hide_other": "Tätigkeiten in „Sonstige“ ausblenden",
     "chart_other_click_hint": "Klicken, um die {n} Tätigkeiten in „Sonstige“ anzuzeigen",
     "chart_all_activities": "Alle Tätigkeiten ({n})",
     "chart_in_chart": "Farbe im Diagramm",

@@ -1290,6 +1290,8 @@
     "chart_back": "Volver",
     "chart_drill_range": "Actividades {from}–{to} de {total}",
     "chart_show_other": "Mostrar las {n} actividades de «Otro»",
+    "chart_list_other": "Listar las {n} actividades de «Otro»",
+    "chart_hide_other": "Ocultar las actividades de «Otro»",
     "chart_other_click_hint": "Haz clic para mostrar las {n} actividades de «Otro»",
     "chart_all_activities": "Todas las actividades ({n})",
     "chart_in_chart": "Color en el gráfico",

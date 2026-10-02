@@ -1110,14 +1110,41 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="a in reportActivityTable" :key="a.key" :class="`rpt-act-${a.state}`">
+                <tr v-for="a in reportActivityTableShown" :key="a.key" :class="`rpt-act-${a.state}`">
                   <td class="rpt-act-swatch-col">
                     <span v-if="a.color" class="rpt-act-swatch" :style="{ background: a.color }" aria-hidden="true"></span>
                   </td>
-                  <td>
-                    {{ a.label }}
-                    <span v-if="a.state === 'other'" class="rpt-act-other-tag">{{ $t('timeTracking.chart_other') }}</span>
+                  <td>{{ a.label }}</td>
+                  <td>{{ a.customer }}</td>
+                  <td class="rpt-th-time">{{ fmtTime(a.minutes) }}</td>
+                  <td class="rpt-th-time">{{ a.share }}</td>
+                </tr>
+                <tr v-if="reportActivityTableOther" class="rpt-act-other-sum">
+                  <td class="rpt-act-swatch-col">
+                    <button type="button" class="rpt-act-expand"
+                      :aria-expanded="String(reportOtherExpanded)"
+                      aria-controls="rpt-act-other-rows"
+                      :aria-label="reportOtherExpanded
+                        ? $t('timeTracking.chart_hide_other')
+                        : $t('timeTracking.chart_list_other', { n: reportActivityTableOther.count })"
+                      @click="reportOtherExpanded = !reportOtherExpanded">
+                      <span class="rpt-act-chevron" :class="{ open: reportOtherExpanded }" aria-hidden="true">▸</span>
+                    </button>
                   </td>
+                  <td>
+                    <span class="rpt-act-swatch" style="background: var(--chart-cat-other)" aria-hidden="true"></span>
+                    {{ $t('timeTracking.chart_other') }}
+                    <span class="rpt-act-other-count">({{ reportActivityTableOther.count }})</span>
+                  </td>
+                  <td></td>
+                  <td class="rpt-th-time">{{ fmtTime(reportActivityTableOther.minutes) }}</td>
+                  <td class="rpt-th-time">{{ reportActivityTableOther.share }}</td>
+                </tr>
+              </tbody>
+              <tbody v-if="reportActivityTableOther" v-show="reportOtherExpanded" id="rpt-act-other-rows">
+                <tr v-for="a in reportActivityTableOther.rows" :key="a.key" class="rpt-act-other">
+                  <td class="rpt-act-swatch-col"></td>
+                  <td class="rpt-act-other-indent">{{ a.label }}</td>
                   <td>{{ a.customer }}</td>
                   <td class="rpt-th-time">{{ fmtTime(a.minutes) }}</td>
                   <td class="rpt-th-time">{{ a.share }}</td>
@@ -4902,6 +4929,23 @@ const reportActivityTable = computed(() => {
   })
 })
 
+// The table folds every activity that sits in "Other" into one summary row
+// (with its total time and share) that expands to list them; collapsed again
+// whenever the chart's drill-down level or the report changes.
+const reportOtherExpanded = ref(false)
+watch(reportChartWindow, () => { reportOtherExpanded.value = false })
+
+const reportActivityTableShown = computed(() => reportActivityTable.value.filter(a => a.state !== 'other'))
+
+const reportActivityTableOther = computed(() => {
+  const rows = reportActivityTable.value.filter(a => a.state === 'other')
+  if (!rows.length) return null
+  const minutes = rows.reduce((sum, a) => sum + a.minutes, 0)
+  const total = reportActivityTotalMinutes.value
+  const pct = new Intl.NumberFormat(locale.value, { style: 'percent', maximumFractionDigits: 1 })
+  return { rows, count: rows.length, minutes, share: total ? pct.format(minutes / total) : '' }
+})
+
 const reportActivityTotalMinutes = computed(() => reportActivityTotals.value.reduce((sum, a) => sum + a.minutes, 0))
 
 async function drillIntoReportOther() {
@@ -6840,14 +6884,27 @@ td.c-day-holiday-cell.c-day-popup-open {
   vertical-align: middle;
 }
 .rpt-act-above td, .rpt-act-other td { color: var(--color-text-muted); }
-.rpt-act-other-tag {
-  margin-left: 6px;
-  padding: 0 6px;
+.rpt-act-other-sum td { font-weight: 600; }
+.rpt-act-other-sum .rpt-act-swatch { margin-right: 4px; }
+.rpt-act-other-count { font-weight: 400; color: var(--color-text-muted); }
+.rpt-act-other-indent { padding-left: 24px !important; }
+.rpt-act-expand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  font-size: 11px;
-  white-space: nowrap;
+  background: none;
+  color: var(--color-text);
+  cursor: pointer;
 }
+.rpt-act-expand:hover { background: var(--color-border); }
+.rpt-act-expand:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 1px; }
+.rpt-act-chevron { display: inline-block; transition: transform 0.15s; }
+.rpt-act-chevron.open { transform: rotate(90deg); }
 
 /* Report header: logo + company name + period */
 .rpt-header {

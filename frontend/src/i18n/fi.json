@@ -1290,6 +1290,8 @@
     "chart_back": "Takaisin",
     "chart_drill_range": "Tehtävät {from}–{to} / {total}",
     "chart_show_other": "Näytä ”Muu”-kohdan {n} tehtävää",
+    "chart_list_other": "Luettele ”Muu”-kohdan {n} tehtävää",
+    "chart_hide_other": "Piilota ”Muu”-kohdan tehtävät",
     "chart_other_click_hint": "Napsauta näyttääksesi ”Muu”-kohdan {n} tehtävää",
     "chart_all_activities": "Kaikki tehtävät ({n})",
     "chart_in_chart": "Väri kaaviossa",
