@@ -2,10 +2,21 @@
   <div class="cal-week">
     <div class="cal-week-header">
       <div class="cal-hour-gutter-spacer" aria-hidden="true" />
-      <div v-for="d in weekDays" :key="d.iso" class="cal-day-header" :class="{ 'cal-day-header-today': d.isToday }">
+      <button
+        v-for="d in weekDays"
+        :key="d.iso"
+        type="button"
+        class="cal-day-header"
+        :class="{ 'cal-day-header-today': d.isToday, 'cal-day-header-selected': daySelected(d.iso) }"
+        :disabled="readOnly"
+        :aria-pressed="readOnly ? undefined : daySelected(d.iso)"
+        :aria-label="$t('timeTracking.calendar_select_day_label', { day: `${d.abbr} ${d.mmdd}` })"
+        @click="$emit('day-select', { date: d.iso, additive: $event.ctrlKey || $event.metaKey || $event.shiftKey })"
+        @contextmenu.prevent="$emit('day-contextmenu', { x: $event.clientX, y: $event.clientY, date: d.iso })"
+      >
         <span class="cal-day-abbr">{{ d.abbr }}</span>
         <span class="cal-day-date">{{ d.mmdd }}</span>
-      </div>
+      </button>
     </div>
 
     <div v-if="hasUnscheduled" class="cal-unscheduled-row">
@@ -17,8 +28,10 @@
           :id="`tt-entry-${e.entry.id}`"
           type="button"
           class="cal-unscheduled-chip"
+          :class="{ 'cal-unscheduled-chip-selected': selectedIds.has(e.entry.id) }"
           :style="{ borderLeftColor: e.color }"
-          @click="$emit('block-open', e.entry)"
+          :aria-pressed="readOnly ? undefined : selectedIds.has(e.entry.id)"
+          @click="onChipClick($event, e.entry)"
           @contextmenu.prevent="$emit('block-contextmenu', { x: $event.clientX, y: $event.clientY, entry: e.entry })"
         >{{ e.customerName || e.entry.description || $t('timeTracking.no_customer') }}</button>
       </div>
@@ -43,6 +56,8 @@
           :week-days="weekDays"
           :get-column-rects="getColumnRects"
           :read-only="readOnly"
+          :selected-ids="selectedIds"
+          @block-toggle-select="$emit('block-toggle-select', $event)"
           @slot-click="$emit('slot-click', $event)"
           @slot-contextmenu="$emit('slot-contextmenu', $event)"
           @block-contextmenu="$emit('block-contextmenu', $event)"
@@ -72,8 +87,22 @@ const props = defineProps({
   projectName: { type: Function, required: true },  // (entry) => string
   entryColor: { type: Function, required: true }, // (entry) => hex color string (customer or project, per user setting)
   readOnly: { type: Boolean, default: false },
+  selectedIds: { type: Set, default: () => new Set() }, // ids of the multi-selected entries
 })
-defineEmits(['slot-click', 'slot-contextmenu', 'block-contextmenu', 'block-open', 'block-move', 'block-resize'])
+const emit = defineEmits([
+  'slot-click', 'slot-contextmenu', 'block-contextmenu', 'block-open', 'block-move', 'block-resize',
+  'block-toggle-select', 'day-select', 'day-contextmenu',
+])
+
+function onChipClick(e, entry) {
+  if (e.ctrlKey || e.metaKey || e.shiftKey) { if (!props.readOnly) emit('block-toggle-select', entry); return }
+  emit('block-open', entry)
+}
+
+function daySelected(iso) {
+  const list = entriesByDay.value[iso] || []
+  return list.length > 0 && list.every((e) => props.selectedIds.has(e.id))
+}
 
 const scrollEl = ref(null)
 const dayRefs = ref([])
@@ -209,8 +238,17 @@ onMounted(async () => {
   text-align: center;
   padding: 6px 4px;
   font-size: 12px;
+  font-family: inherit;
+  color: inherit;
+  background: none;
+  border: none;
   border-left: 1px solid var(--color-border);
+  cursor: pointer;
 }
+.cal-day-header:disabled { cursor: default; }
+.cal-day-header:not(:disabled):hover { background: var(--color-bg); }
+.cal-day-header:focus-visible { outline: 2px solid var(--color-primary); outline-offset: -2px; }
+.cal-day-header-selected { box-shadow: inset 0 -3px 0 var(--color-primary); }
 
 .cal-day-header-today { color: var(--color-primary); font-weight: 600; }
 .cal-day-abbr { display: block; text-transform: uppercase; }
@@ -235,6 +273,10 @@ onMounted(async () => {
   background: var(--color-bg);
   color: var(--color-text);
   cursor: pointer;
+}
+.cal-unscheduled-chip-selected {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
 }
 .cal-block-highlight {
   outline: 3px solid var(--color-primary);

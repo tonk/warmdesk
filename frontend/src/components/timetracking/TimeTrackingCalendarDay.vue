@@ -23,9 +23,11 @@
       :project-name="item.projectName"
       :color="item.color"
       :read-only="readOnly"
+      :selected="selectedIds.has(item.entry.id)"
       :dense="item.height < 40"
       @open="$emit('block-open', $event)"
       @contextmenu="$emit('block-contextmenu', $event)"
+      @toggle-select="$emit('block-toggle-select', $event)"
       @move="$emit('block-move', $event)"
       @resize="$emit('block-resize', $event)"
     />
@@ -49,8 +51,9 @@ const props = defineProps({
   weekDays: { type: Array, required: true },
   getColumnRects: { type: Function, required: true },
   readOnly: { type: Boolean, default: false },
+  selectedIds: { type: Set, default: () => new Set() },
 })
-const emit = defineEmits(['slot-click', 'slot-contextmenu', 'block-contextmenu', 'block-open', 'block-move', 'block-resize'])
+const emit = defineEmits(['slot-click', 'slot-contextmenu', 'block-contextmenu', 'block-open', 'block-move', 'block-resize', 'block-toggle-select'])
 
 const dayEl = ref(null)
 const dragSelect = ref(null) // { pointerId, startY, currentY } while click-dragging to select a range

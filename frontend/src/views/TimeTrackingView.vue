@@ -494,6 +494,8 @@
         :read-only="viewingOther"
         @save-entry="saveCalendarEntry"
         @delete-entry="deleteCalendarEntry"
+        @create-entries="createCalendarEntries"
+        @delete-entries="deleteCalendarEntries"
         @move-entry="applyCalendarEntryTimes"
         @resize-entry="applyCalendarEntryTimes"
       />
@@ -3623,6 +3625,47 @@ async function deleteCalendarEntry(entry) {
     rawEntries.value = rawEntries.value.filter(e => e.id !== entry.id)
   } catch {
     ui.error(t('timeTracking.delete_error'))
+  }
+}
+
+// Paste of several copied calendar entries — created one after another so a
+// failure is reported once and the entries already created stay in view.
+async function createCalendarEntries(payloads) {
+  for (const p of payloads) {
+    try {
+      const { data } = await timeEntriesApi.create({
+        customer_id: p.customer_id,
+        project_id: p.project_id,
+        contract_id: p.contract_id ?? null,
+        location_id: p.location_id ?? null,
+        date: p.date,
+        minutes: p.minutes,
+        description: p.description,
+        is_holiday: p.is_holiday || false,
+        start_time: p.start_time,
+        end_time: p.end_time,
+        distance: p.distance,
+      })
+      rawEntries.value.push(data)
+    } catch {
+      ui.error(t('timeTracking.save_error'))
+      return
+    }
+  }
+}
+
+async function deleteCalendarEntries(entries) {
+  if (!window.confirm(t('timeTracking.confirm_delete_n', { n: entries.length }))) return
+  const deleted = new Set()
+  try {
+    for (const entry of entries) {
+      await timeEntriesApi.remove(entry.id)
+      deleted.add(entry.id)
+    }
+  } catch {
+    ui.error(t('timeTracking.delete_error'))
+  } finally {
+    rawEntries.value = rawEntries.value.filter(e => !deleted.has(e.id))
   }
 }
 

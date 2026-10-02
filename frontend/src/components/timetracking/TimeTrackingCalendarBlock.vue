@@ -8,14 +8,16 @@
     :class="{
       'cal-block-dragging': !!drag,
       'cal-block-readonly': readOnly,
+      'cal-block-selected': selected,
       'cal-block-overnight-start': segment === 'start',
       'cal-block-overnight-continuation': segment === 'continuation',
     }"
     :style="blockStyle"
     :aria-label="accessibleLabel"
+    :aria-pressed="readOnly ? undefined : selected"
     @pointerdown="onMovePointerDown"
-    @keydown.enter="onOpen"
-    @keydown.space.prevent="onOpen"
+    @keydown.enter="onKeyActivate"
+    @keydown.space.prevent="onKeyActivate"
     @click="onClick"
     @contextmenu.prevent="onContextMenu"
   >
@@ -59,13 +61,14 @@ const props = defineProps({
   projectName: { type: String, default: '' },
   color: { type: String, default: NO_CUSTOMER_COLOR }, // resolved by the parent (own customer color, or the assigned fallback)
   readOnly: { type: Boolean, default: false },
+  selected: { type: Boolean, default: false }, // part of the calendar's multi-selection
   dense: { type: Boolean, default: false },
   // 'full': a same-day entry. 'start'/'continuation': the two visual halves of an
   // overnight entry split across midnight — each has one edge (bottom/top respectively)
   // that is the midnight boundary, not a real entry edge, so it can't be dragged/resized.
   segment: { type: String, default: 'full' },
 })
-const emit = defineEmits(['open', 'contextmenu', 'move', 'resize'])
+const emit = defineEmits(['open', 'contextmenu', 'move', 'resize', 'toggle-select'])
 
 const { t } = useI18n()
 const { formatTime } = useDateFormat()
@@ -106,7 +109,14 @@ const accessibleLabel = computed(() => {
   return label
 })
 
-function onOpen() {
+function hasSelectModifier(e) {
+  return e.ctrlKey || e.metaKey || e.shiftKey
+}
+
+// Enter/Space opens the entry; with Ctrl/Cmd/Shift held they toggle it in the
+// multi-selection instead, mirroring Ctrl/Cmd/Shift+click.
+function onKeyActivate(e) {
+  if (hasSelectModifier(e)) { if (!props.readOnly) emit('toggle-select', props.entry); return }
   emit('open', props.entry)
 }
 
@@ -114,8 +124,9 @@ function onContextMenu(e) {
   emit('contextmenu', { x: e.clientX, y: e.clientY, entry: props.entry })
 }
 
-function onClick() {
+function onClick(e) {
   if (suppressNextClick) { suppressNextClick = false; return }
+  if (hasSelectModifier(e)) { if (!props.readOnly) emit('toggle-select', props.entry); return }
   emit('open', props.entry)
 }
 
@@ -247,6 +258,13 @@ function onResizePointerUp(e) {
   outline: 2px solid var(--color-text);
   outline-offset: 2px;
 }
+
+.cal-block-selected {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 1px var(--color-surface) inset, var(--shadow);
+}
+.cal-block-selected:focus-visible { outline-color: var(--color-text); }
 
 .cal-block-dragging { cursor: grabbing; opacity: 0.9; }
 .cal-block-readonly { cursor: default; }
