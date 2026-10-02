@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.36.1 — 2026-10-02
+
+### Fixed
+- **Links took over the desktop app** — in the desktop app, clicking a link to another site, such as a card's Git issue link, replaced WarmDesk in the window with that site (often its login page), with no way back. Links to other sites, including those in comments, chat messages, and attachments, now open in your default browser and the app stays where it was.
+
 ## v0.36.0 — 2026-10-02
 
 ### Added

@@ -1,5 +1,5 @@
 = WarmDesk — User Guide
-:revnumber: v0.36.0
+:revnumber: v0.36.1
 :revdate: 2026-10-02
 Ton Kersten <tonk@smartowl.nl>
 ifdef::backend-pdf[]
@@ -50,6 +50,8 @@ The administrator can change this timeout or disable it entirely.
 
 WarmDesk is available as a native desktop app (Linux AppImage, macOS DMG, Windows installer).
 Download the release for your platform and launch it — the app opens a server URL prompt on first run.
+
+Links to other sites — a card's Git issue, a link in a comment or chat message, an attachment — open in your default browser, so the app window always stays on WarmDesk.
 
 ==== Profiles
 

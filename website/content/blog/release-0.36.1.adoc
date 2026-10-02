@@ -1,0 +1,21 @@
+---
+title: "v0.36.1: Links open in your browser"
+date: "2026-10-02"
+author: "Ton Kersten"
+description: "In the desktop app, links to other sites now open in your default browser instead of replacing WarmDesk in the app window."
+draft: false
+---
+:doctype: article
+:icons!:
+
+A card can link to an issue on your Git server. In the browser, clicking that link opens a new tab. In the desktop app it did something much less useful: the app window itself went to the Git server, usually to its login page, and there was no way back to WarmDesk short of restarting the app. `v0.36.1` fixes that.
+
+== What changed
+
+In the desktop app, every link to another site now opens in your default browser: the Git issue link on a card, links in comments, chat messages, and discussions, link previews, and attachments. The app window stays on WarmDesk, exactly where you were.
+
+Links inside WarmDesk itself, such as a reference to another card, still open in the app as before. The web version isn't affected.
+
+== Upgrade
+
+Download `v0.36.1` from the link:../../download[download page] or pull the latest release tag; the fix comes with the updated desktop app. No database migration is needed.
