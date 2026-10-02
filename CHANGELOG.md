@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.35.0 — 2026-10-02
+
+### Added
+- **Select, copy, and paste several calendar entries at once** — in the calendar view, *Ctrl+click* (or *Ctrl+Space* on a focused block) selects several blocks, and clicking a day header selects the whole day. Copy, delete, or clear the selection from the bar above the calendar, the right-click menu, or with *Ctrl+C* / *Esc*. Right-click an empty slot and choose *Paste* to place the copied entries so the earliest one starts at that time, with the others keeping their distance to it, or *Paste at original times* (also on a day header's right-click menu) to copy a day onto another day with the same times. The copied entries stay available when you switch weeks.
+
+### Fixed
+- **Right-click menu off-screen when zoomed** — with the app zoomed in or out, the calendar's *Edit / Copy / Delete* menu opened further and further away from the mouse the lower you clicked, and could end up out of view. It now opens where you click and always stays inside the window.
+- **Esc didn't always close the right-click menu** — it only worked when the keyboard focus was in the menu; it now closes it in every case.
+- **Unsorted dropdowns in the calendar entry form** — the *Customer*, *Project*, and *Location* lists are now in alphabetical order.
+
 ## v0.34.1 — 2026-09-25
 
 ### Added

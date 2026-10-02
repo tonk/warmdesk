@@ -917,3 +917,6 @@ Create an application that has all these features and requirements
 - Ship an annotated timer.yaml.example in the server tarballs, the release assets, and the Linux desktop packages, and document the timer's config file in the user guide
 - Fix the Bruno/Postman time-entry and time-report examples to use the parameters the API actually reads
 - Add the time-tracking timer to the desktop tray menu (status, stop and book, switch, one-click start of the last pick, start timer…), kept in sync with the timer from every client
+- Sort the customer, project, and location dropdowns in the calendar entry form
+- Keep the right-click menu inside the window under the app zoom, and close it with Esc wherever the focus is
+- Add multi-select to the time-tracking calendar (Ctrl/Cmd/Shift+click or +Enter/Space on a block, click a day header for the whole day) with copy, delete, Ctrl+C, and Esc, plus paste at the clicked time (keeping relative offsets) or at the original times

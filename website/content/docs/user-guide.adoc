@@ -357,7 +357,9 @@ Blocks are coloured by customer by default, or by project via the *Calendar bloc
 
 * *Click* an empty slot to create a one-hour entry, or *click and drag* to create one for the exact range.
 * *Drag* a block to move it to another time or day; drag its top or bottom edge to *resize* it.
-* *Right-click* a block to *Edit*, *Copy*, or *Delete* it; right-click an empty slot to create an entry or *Paste* the copied one (same customer, project, activity, distance, and location, and the same duration).
+* *Right-click* a block to *Edit*, *Copy*, or *Delete* it; right-click an empty slot to create an entry or *Paste* the copied ones (same customer, project, activity, distance, and location, and the same duration).
+* *Ctrl+click* blocks (or *Ctrl+Space* on a focused block) to select several, or click a *day header* to select the whole day. Copy, delete, or clear the selection from the bar above the calendar or the right-click menu, or with `Ctrl+C` / `Esc`.
+* *Paste* puts the earliest copied entry at the clicked time and keeps the others at the same distance; *Paste at original times* (empty slot or day header) only moves the date. The copied entries survive switching weeks.
 * Use *−* / *+* in the top-right corner to *zoom*; the zoom level is remembered in your browser.
 * Tab to a block and press `Enter` to edit its date and times with the keyboard.
 

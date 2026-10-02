@@ -1,0 +1,39 @@
+---
+title: "v0.35.0: Copy a whole day in the calendar"
+date: "2026-10-02"
+author: "Ton Kersten"
+description: "The time-tracking calendar can now select several entries, or a whole day, and copy, paste, or delete them at once."
+draft: false
+---
+:doctype: article
+:icons!:
+
+Until now the calendar view could copy one entry at a time. If this Thursday looks just like last Monday, that meant copying and pasting each block separately. `v0.35.0` lets you take the whole day along at once.
+
+== Selecting
+
+* *Ctrl+click* a block (*⌘* on macOS, *Shift* works too) to add it to the selection, or remove it. From the keyboard, tab to a block and press *Ctrl+Space*.
+* Click a *day header* to select all entries of that day; *Ctrl+click* a header to add a day to what's already selected.
+
+A bar above the calendar shows how many entries are selected, with *Copy*, *Delete*, and *Clear selection*. *Ctrl+C* copies the selection and *Esc* clears it. Right-clicking a selected block gives the same choices for the whole selection, and deleting asks for confirmation just once.
+
+== Pasting
+
+Right-click an empty slot and there are two choices:
+
+* *Paste* — the earliest copied entry starts at the time you clicked, and the rest keep their distance to it. Copy Monday 09:00–12:00 and 13:00–17:00, paste at 10:00 on Thursday, and you get 10:00–13:00 and 14:00–18:00.
+* *Paste at original times* — only the date changes, so the day lands on its new date with the same times. This one is also on the right-click menu of a day header.
+
+The copied entries stay available when you switch weeks, so copying a day into next week is: select the day, *Ctrl+C*, go to next week, right-click the day header, *Paste at original times*.
+
+== Fixed
+
+* With the app zoomed in or out, the calendar's right-click menu opened further away from the mouse the lower you clicked, and could end up out of view. It now opens where you click and stays inside the window.
+* *Esc* closes the right-click menu wherever the keyboard focus is.
+* The *Customer*, *Project*, and *Location* dropdowns in the calendar entry form are sorted alphabetically.
+
+See the Calendar view section of the link:../../docs/user-guide/[User Guide] for more.
+
+== Upgrade
+
+Download `v0.35.0` from the link:../../download[download page] or pull the latest release tag. No database migration is needed.

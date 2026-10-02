@@ -1,6 +1,6 @@
 = WarmDesk — User Guide
-:revnumber: v0.34.1
-:revdate: 2026-09-25
+:revnumber: v0.35.0
+:revdate: 2026-10-02
 Ton Kersten <tonk@smartowl.nl>
 ifdef::backend-pdf[]
 :title-page:
@@ -1170,19 +1170,41 @@ Blocks are coloured by customer by default, or by project if you switch the *Cal
 |Resizes the entry, changing its start or end time independently.
 
 |Right-click a block
-|Opens a menu to *Edit*, *Copy*, or *Delete* that entry.
+|Opens a menu to *Edit*, *Copy*, *Select day*, or *Delete* that entry. On a block that is part of a selection of several, the menu copies or deletes the whole selection instead.
+
+|kbd:[Ctrl]+click a block (kbd:[⌘] on macOS; kbd:[Shift] works too)
+|Adds the block to the selection, or removes it. From the keyboard: tab to the block and press kbd:[Ctrl+Space].
+
+|Click a day header
+|Selects all entries of that day. kbd:[Ctrl]+click a header to add the day to the selection, or remove it. Right-click a header for *Select day*, *Copy day*, and *Paste at original times*.
 
 |Right-click an empty slot
-|Opens a menu to create a new entry at that time, or *Paste* the entry last copied (same customer, project, activity, distance, and location; duration preserved).
+|Opens a menu to create a new entry at that time, *Paste* the copied entries there, or *Paste at original times*. Pasted entries keep their customer, project, activity, distance, location, and duration.
 
 |*−* / *+* (top-right of the calendar)
 |Zooms the grid out or in (changes how many pixels represent an hour); your zoom level is remembered on this browser.
 |===
 
+[[calendar-selection]]
+==== Selecting, copying, and pasting several entries
+
+While entries are selected, a bar above the calendar shows how many, with *Copy*, *Delete*, and *Clear selection*.
+kbd:[Ctrl+C] also copies the selection, and kbd:[Esc] clears it; switching to another week clears it too.
+Deleting a selection asks for confirmation once.
+
+There are two ways to paste:
+
+* *Paste* (right-click an empty slot) — the earliest copied entry starts at the time you clicked, and the others keep their distance to it, in days and in time. Copy Monday 09:00–12:00 and 13:00–17:00, paste at 10:00 on Thursday, and you get Thursday 10:00–13:00 and 14:00–18:00.
+* *Paste at original times* (right-click an empty slot or a day header) — only the date moves, so a copied day lands on the target day with exactly the same times.
+
+An entry that would run past midnight stops at 23:59; an overnight entry stays overnight.
+Entries without times, and whole-day entries, keep their times and only move to the new day.
+The copied entries stay available when you switch weeks, so you can copy a day into another week.
+
 The bottom bar below the calendar is the same one used by the weekly grid: *⚡ Run macro*, *⇐ Copy Previous Week*, *↶ Undo*, and the export controls (*Export XLSX* / *Export PDF* / *Grid PDF*) all work here too — see *Icons and indicators* above and <<time-macros,Time macros>>.
 The *+ Add row* button only appears in the weekly grid, since the calendar has no row concept.
 
-Every drag/resize action can also be done by keyboard: tab to a block and press kbd:[Enter] to open its edit form, which lets you change the date, start time, end time, customer, project, activity, and distance directly.
+Every drag/resize action can also be done by keyboard: tab to a block and press kbd:[Enter] to open its edit form (kbd:[Ctrl+Enter] selects it instead), which lets you change the date, start time, end time, customer, project, activity, and distance directly.
 If the selected customer has a location with a standard travel distance, a *Location* dropdown appears to auto-fill the distance field — see <<travel-distance-auto-fill,Travel distance auto-fill>>.
 
 [[time-macros]]
