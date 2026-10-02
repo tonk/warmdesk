@@ -1068,17 +1068,22 @@
             <div class="rpt-chart-wrap" :class="{ 'rpt-chart-wrap-pie': reportChartType === 'pie' }">
               <canvas ref="reportChartCanvas"></canvas>
             </div>
-            <table v-if="reportChartType !== 'stacked'" class="sr-only">
-              <caption>{{ $t('timeTracking.chart_by_activity') }}</caption>
-              <thead><tr><th>{{ $t('timeTracking.activity') }}</th><th>{{ $t('timeTracking.time') }}</th></tr></thead>
-              <tbody>
-                <tr v-for="a in reportActivityBreakdown" :key="a.label">
-                  <td>{{ a.label }}</td>
-                  <td>{{ fmtTime(a.minutes) }}</td>
-                </tr>
-              </tbody>
-            </table>
-            <table v-else class="sr-only">
+            <div v-if="reportChartDrill > 0 || reportChartWindow.other > 0" class="rpt-chart-drill">
+              <button v-if="reportChartDrill > 0" type="button" class="btn btn-ghost btn-sm" @click="drillOutReportOther">
+                <span aria-hidden="true">←</span> {{ $t('timeTracking.chart_back') }}
+              </button>
+              <span v-if="reportChartDrill > 0" class="rpt-chart-drill-range" aria-live="polite">
+                {{ $t('timeTracking.chart_drill_range', {
+                  from: reportChartWindow.offset + 1,
+                  to: reportChartWindow.offset + reportChartWindow.charted,
+                  total: reportActivityTotals.length,
+                }) }}
+              </span>
+              <button v-if="reportChartWindow.other > 0" type="button" class="btn btn-secondary btn-sm" @click="drillIntoReportOther">
+                {{ $t('timeTracking.chart_show_other', { n: reportChartWindow.other }) }} <span aria-hidden="true">→</span>
+              </button>
+            </div>
+            <table v-if="reportChartType === 'stacked'" class="sr-only">
               <caption>{{ $t('timeTracking.chart_by_activity') }}</caption>
               <thead>
                 <tr>
@@ -1092,6 +1097,40 @@
                   <td v-for="s in reportStackedBreakdown.series" :key="s.label">{{ fmtTime(Math.round(s.data[i] * 60)) }}</td>
                 </tr>
               </tbody>
+            </table>
+            <table class="rpt-activity-table">
+              <caption class="rpt-activity-caption">{{ $t('timeTracking.chart_all_activities', { n: reportActivityTotals.length }) }}</caption>
+              <thead>
+                <tr>
+                  <th scope="col" class="rpt-act-swatch-col"><span class="sr-only">{{ $t('timeTracking.chart_in_chart') }}</span></th>
+                  <th scope="col">{{ $t('timeTracking.activity') }}</th>
+                  <th scope="col">{{ $t('timeTracking.customer') }}</th>
+                  <th scope="col" class="rpt-th-time">{{ $t('timeTracking.time') }}</th>
+                  <th scope="col" class="rpt-th-time">{{ $t('timeTracking.chart_share') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="a in reportActivityTable" :key="a.key" :class="`rpt-act-${a.state}`">
+                  <td class="rpt-act-swatch-col">
+                    <span v-if="a.color" class="rpt-act-swatch" :style="{ background: a.color }" aria-hidden="true"></span>
+                  </td>
+                  <td>
+                    {{ a.label }}
+                    <span v-if="a.state === 'other'" class="rpt-act-other-tag">{{ $t('timeTracking.chart_other') }}</span>
+                  </td>
+                  <td>{{ a.customer }}</td>
+                  <td class="rpt-th-time">{{ fmtTime(a.minutes) }}</td>
+                  <td class="rpt-th-time">{{ a.share }}</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr class="rpt-grp-totals-row">
+                  <td></td>
+                  <td colspan="2">{{ $t('timeTracking.totals') }}</td>
+                  <td class="rpt-th-time">{{ fmtTime(reportActivityTotalMinutes) }}</td>
+                  <td></td>
+                </tr>
+              </tfoot>
             </table>
           </template>
         </div>
@@ -4689,6 +4728,7 @@ async function loadReport() {
   } finally {
     loadingReport.value = false
   }
+  reportChartDrill.value = 0
   if (reportViewMode.value === 'chart') {
     if (reportChartType.value === 'stacked') await ensureReportChartPeriodData()
     await nextTick(); renderReportChart()
@@ -4767,7 +4807,10 @@ function bestLabelVariant(variants) {
 // Aggregates every entry across all report groups by activity (description),
 // independent of the report's own group_by (period/customer/project), since
 // the chart's job is a single breakdown "by activity" regardless of grouping.
-const reportActivityBreakdown = computed(() => {
+// Returns every activity, most time first (ties by key so the stacked chart,
+// which ranks its own copy, puts them in the same order) — the chart folds the
+// tail into "Other", the activity table below it lists them all.
+const reportActivityTotals = computed(() => {
   if (!report.value) return []
   const totals = new Map()
   const customers = new Map()
@@ -4787,26 +4830,98 @@ const reportActivityBreakdown = computed(() => {
       variants.set(rawLabel, (variants.get(rawLabel) || 0) + minutes)
     }
   }
-  const sorted = Array.from(totals, ([key, minutes]) => ({
+  return Array.from(totals, ([key, minutes]) => ({
+    key,
     label: bestLabelVariant(labelVariants.get(key)),
     minutes,
     customer: Array.from(customers.get(key) || []).join(', '),
   }))
     .filter(a => a.minutes > 0)
-    .sort((a, b) => b.minutes - a.minutes)
-  if (sorted.length <= REPORT_CHART_MAX_SLICES + 1) return sorted
-  const top = sorted.slice(0, REPORT_CHART_MAX_SLICES)
-  const otherMinutes = sorted.slice(REPORT_CHART_MAX_SLICES).reduce((s, a) => s + a.minutes, 0)
-  top.push({ label: t('timeTracking.chart_other'), minutes: otherMinutes, customer: '' })
+    .sort(compareActivityRank)
+})
+
+function compareActivityRank(a, b) {
+  return b.minutes - a.minutes || (a.key < b.key ? -1 : a.key > b.key ? 1 : 0)
+}
+
+// Drill-down into "Other": level 0 charts the top REPORT_CHART_MAX_SLICES
+// activities, each level deeper charts the next REPORT_CHART_MAX_SLICES of what
+// was folded into "Other" one level up (clicking the "Other" slice/bar, or the
+// button below the chart). Reset whenever the report, chart type, or basis changes.
+const reportChartDrill = ref(0)
+const reportChartOffset = computed(() => reportChartDrill.value * REPORT_CHART_MAX_SLICES)
+
+const reportActivityBreakdown = computed(() => {
+  const rest = reportActivityTotals.value.slice(reportChartOffset.value)
+  if (rest.length <= REPORT_CHART_MAX_SLICES + 1) return rest
+  const top = rest.slice(0, REPORT_CHART_MAX_SLICES)
+  const folded = rest.slice(REPORT_CHART_MAX_SLICES)
+  top.push({
+    key: '__other__',
+    label: t('timeTracking.chart_other'),
+    minutes: folded.reduce((sum, a) => sum + a.minutes, 0),
+    customer: '',
+    isOther: true,
+    count: folded.length,
+  })
   return top
 })
+
+// How the chart currently displayed splits the ranked activity list: `charted`
+// activities from `offset` get their own color, `other` more are folded into
+// "Other" (0 when there's no "Other").
+const reportChartWindow = computed(() => {
+  if (reportChartType.value === 'stacked') {
+    const s = reportStackedBreakdown.value
+    if (!s) return { offset: reportChartOffset.value, charted: 0, other: 0 }
+    return { offset: reportChartOffset.value, charted: s.series.filter(x => !x.isOther).length, other: s.otherCount }
+  }
+  const b = reportActivityBreakdown.value
+  const other = b.find(a => a.isOther)
+  return { offset: reportChartOffset.value, charted: b.length - (other ? 1 : 0), other: other ? other.count : 0 }
+})
+
+// Every activity for the table under the chart, with its share and where it sits
+// in the chart shown right now: its own color, folded into "Other", or already
+// charted on a level above the current drill-down.
+const reportActivityTable = computed(() => {
+  const all = reportActivityTotals.value
+  const total = all.reduce((sum, a) => sum + a.minutes, 0)
+  const { offset, charted } = reportChartWindow.value
+  const pct = new Intl.NumberFormat(locale.value, { style: 'percent', maximumFractionDigits: 1 })
+  return all.map((a, i) => {
+    const pos = i - offset
+    const state = pos < 0 ? 'above' : pos < charted ? 'charted' : 'other'
+    return {
+      ...a,
+      share: total ? pct.format(a.minutes / total) : '',
+      state,
+      color: state === 'charted' ? `var(--chart-cat-${(pos % REPORT_CHART_MAX_SLICES) + 1})`
+        : state === 'other' ? 'var(--chart-cat-other)' : '',
+    }
+  })
+})
+
+const reportActivityTotalMinutes = computed(() => reportActivityTotals.value.reduce((sum, a) => sum + a.minutes, 0))
+
+async function drillIntoReportOther() {
+  if (!reportChartWindow.value.other) return
+  reportChartDrill.value++
+  await nextTick(); renderReportChart()
+}
+
+async function drillOutReportOther() {
+  if (reportChartDrill.value === 0) return
+  reportChartDrill.value--
+  await nextTick(); renderReportChart()
+}
 
 function reportChartColorAt(index, isOther) {
   return isOther ? cssVar('--chart-cat-other') : cssVar(`--chart-cat-${(index % REPORT_CHART_MAX_SLICES) + 1}`)
 }
 
 function reportChartColors(data) {
-  return data.map((a, i) => reportChartColorAt(i, a.label === t('timeTracking.chart_other')))
+  return data.map((a, i) => reportChartColorAt(i, !!a.isOther))
 }
 
 // Same "top N + Other" breakdown as reportActivityBreakdown, but one series
@@ -4842,10 +4957,15 @@ const reportStackedBreakdown = computed(() => {
     return totals
   })
   const ranked = Array.from(grandTotals, ([key, minutes]) => ({ key, minutes }))
-    .sort((a, b) => b.minutes - a.minutes)
-  const topKeys = new Set(ranked.slice(0, REPORT_CHART_MAX_SLICES).map(a => a.key))
+    .sort(compareActivityRank)
+  // Activities charted on a level above the current drill-down are left out
+  // entirely; the next REPORT_CHART_MAX_SLICES get a series each, the rest "Other".
+  const offset = reportChartOffset.value
+  const shownKeys = new Set(ranked.slice(0, offset).map(a => a.key))
+  const topKeys = new Set(ranked.slice(offset, offset + REPORT_CHART_MAX_SLICES).map(a => a.key))
+  const otherCount = Math.max(0, ranked.length - offset - REPORT_CHART_MAX_SLICES)
   const otherLabel = t('timeTracking.chart_other')
-  const seriesKeys = ranked.length > REPORT_CHART_MAX_SLICES
+  const seriesKeys = otherCount > 0
     ? [...topKeys, '__other__']
     : [...topKeys]
   const series = seriesKeys.map(key => {
@@ -4858,7 +4978,7 @@ const reportStackedBreakdown = computed(() => {
         if (isOther) {
           let sum = 0
           for (const [actKey, minutes] of totals) {
-            if (!topKeys.has(actKey)) sum += minutes
+            if (!topKeys.has(actKey) && !shownKeys.has(actKey)) sum += minutes
           }
           return sum / 60
         }
@@ -4866,7 +4986,7 @@ const reportStackedBreakdown = computed(() => {
       }),
     }
   })
-  return { periods, series }
+  return { periods, series, otherCount }
 })
 
 const reportChartHasData = computed(() => {
@@ -4876,6 +4996,11 @@ const reportChartHasData = computed(() => {
   }
   return reportActivityBreakdown.value.length > 0
 })
+
+function setChartCursor(evt, pointer) {
+  const canvas = evt?.native?.target
+  if (canvas) canvas.style.cursor = pointer ? 'pointer' : 'default'
+}
 
 function renderReportChart() {
   if (!reportChartCanvas.value) return
@@ -4902,10 +5027,13 @@ function renderReportChart() {
       options: {
         responsive: true,
         color: textColor,
+        onClick: (_evt, els) => { if (els.some(el => stacked.series[el.datasetIndex]?.isOther)) drillIntoReportOther() },
+        onHover: (evt, els) => setChartCursor(evt, els.some(el => stacked.series[el.datasetIndex]?.isOther)),
         plugins: {
           legend: { display: true, position: 'top', labels: { color: textColor } },
           tooltip: { callbacks: {
             title: ctx => stacked.series[ctx[0]?.datasetIndex]?.customer || '',
+            footer: ctx => stacked.series[ctx[0]?.datasetIndex]?.isOther ? t('timeTracking.chart_other_click_hint', { n: stacked.otherCount }) : '',
             label: ctx => `${ctx.dataset.label}: ${fmtTime(Math.round(ctx.parsed.y * 60))}`,
           } },
         },
@@ -4937,10 +5065,16 @@ function renderReportChart() {
       responsive: true,
       color: textColor,
       aspectRatio: isPie ? 1.6 : undefined,
+      onClick: (_evt, els) => { if (els.some(el => data[el.index]?.isOther)) drillIntoReportOther() },
+      onHover: (evt, els) => setChartCursor(evt, els.some(el => data[el.index]?.isOther)),
       plugins: {
         legend: { display: isPie, position: 'right', labels: { color: textColor } },
         tooltip: { callbacks: {
           title: ctx => data[ctx[0]?.dataIndex]?.customer || '',
+          footer: ctx => {
+            const a = data[ctx[0]?.dataIndex]
+            return a?.isOther ? t('timeTracking.chart_other_click_hint', { n: a.count }) : ''
+          },
           label: ctx => {
             const hours = isPie ? ctx.parsed : ctx.parsed.y
             return `${ctx.label}: ${fmtTime(Math.round(hours * 60))}`
@@ -4956,11 +5090,13 @@ function renderReportChart() {
 }
 
 watch(reportChartType, async (type) => {
+  reportChartDrill.value = 0
   if (type === 'stacked') await ensureReportChartPeriodData()
   await nextTick(); renderReportChart()
 })
 
 watch(reportChartBasis, async () => {
+  reportChartDrill.value = 0
   await nextTick(); renderReportChart()
 })
 
@@ -6662,6 +6798,56 @@ td.c-day-holiday-cell.c-day-popup-open {
    environment it already handles correctly. */
 .rpt-chart-wrap { max-width: 900px; margin: 0 auto; zoom: calc(1 / var(--app-zoom, 1)); }
 .rpt-chart-wrap-pie { max-width: 640px; }
+
+.rpt-chart-drill {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+.rpt-chart-drill-range { font-size: 13px; color: var(--color-text-muted); }
+
+.rpt-activity-table {
+  width: 100%;
+  max-width: 900px;
+  margin: 20px auto 0;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.rpt-activity-caption {
+  caption-side: top;
+  text-align: left;
+  font-weight: 600;
+  padding-bottom: 6px;
+  color: var(--color-text);
+}
+.rpt-activity-table th,
+.rpt-activity-table td {
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+}
+.rpt-activity-table th { color: var(--color-text-muted); font-weight: 600; }
+.rpt-activity-table .rpt-th-time { text-align: right; white-space: nowrap; }
+.rpt-act-swatch-col { width: 20px; }
+.rpt-act-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  vertical-align: middle;
+}
+.rpt-act-above td, .rpt-act-other td { color: var(--color-text-muted); }
+.rpt-act-other-tag {
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  font-size: 11px;
+  white-space: nowrap;
+}
 
 /* Report header: logo + company name + period */
 .rpt-header {

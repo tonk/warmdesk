@@ -1427,6 +1427,14 @@ Use the *Table* / *Chart* toggle above the report to switch views.
 
 Stacked bar charts always break the data down by period, regardless of the *Group by* filter. Click *Export PDF* to download the currently displayed chart as a PDF.
 
+The chart shows the ten activities with the most time; the rest are added together as *Other*.
+To see what's in *Other*, click the *Other* slice or bar, or the *Show the N activities in "Other"* button below the chart: the chart then shows the next ten activities, again with an *Other* for whatever remains, until everything has been shown.
+*Back* returns to the previous level; changing the report, chart type, or time basis starts at the top again.
+The PDF export always shows the top level.
+
+Below the chart, a table lists every activity with its customers, time, and share of the total, most time first.
+The coloured square shows the activity's colour in the chart as it's shown now; activities marked *Other* are part of the *Other* slice or bar.
+
 ==== Exporting
 
 Click *Export options* to expand the export settings before downloading:
