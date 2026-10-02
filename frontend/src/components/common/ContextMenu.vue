@@ -47,6 +47,9 @@ const activeIndex = ref(props.items.findIndex(i => !i.disabled))
 // clamp against window.innerHeight checks the wrong space. Measure instead: where the
 // menu lands for two known left/top values gives the live scale and origin, and a
 // full-viewport fixed probe gives the viewport bounds in that same measured space.
+// Engines also disagree on whether getBoundingClientRect() itself is zoomed (Chromium
+// 128+ yes, WebKitGTK no) while clientX/Y and window.innerHeight never are, so the
+// probe's height vs innerHeight converts the click point into the measured space too.
 function clampPosition() {
   const el = menuEl.value
   if (!el) return
@@ -60,9 +63,10 @@ function clampPosition() {
   const sy = (r1.top - r0.top) / 100 || 1
   const vp = probeEl.value?.getBoundingClientRect()
     || { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight }
+  const k = window.innerHeight ? (vp.bottom - vp.top) / window.innerHeight || 1 : 1
   const margin = 8
-  let left = props.x
-  let top = props.y
+  let left = props.x * k
+  let top = props.y * k
   if (left + r0.width > vp.right - margin) left = vp.right - r0.width - margin
   if (top + r0.height > vp.bottom - margin) top = vp.bottom - r0.height - margin
   left = Math.max(vp.left + margin, left)
