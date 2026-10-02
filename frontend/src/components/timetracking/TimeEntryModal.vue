@@ -8,7 +8,7 @@
       <label class="form-label" for="te-customer">{{ $t('timeTracking.customer') }}</label>
       <select id="te-customer" class="form-input" v-model="form.customer_id" @change="form.project_id = null">
         <option :value="null">{{ $t('timeTracking.no_customer') }}</option>
-        <option v-for="c in allCustomers" :key="c.id" :value="c.id">{{ c.name }}</option>
+        <option v-for="c in customerOptions" :key="c.id" :value="c.id">{{ c.name }}</option>
       </select>
     </div>
     <div class="form-group">
@@ -106,9 +106,15 @@ const form = reactive({
   location_id: source.location_id ?? null,
 })
 
-const projectOptions = computed(() => filterProjectsForCustomer(form.customer_id, {
+function byLabel(label) {
+  return (a, b) => (label(a) || '').localeCompare(label(b) || '', undefined, { sensitivity: 'base' })
+}
+
+const customerOptions = computed(() => [...props.allCustomers].sort(byLabel(c => c.name)))
+
+const projectOptions = computed(() => [...filterProjectsForCustomer(form.customer_id, {
   allProjects: props.allProjects, ttCustomers: props.ttCustomers, ttProjects: props.ttProjects, projects: props.projects,
-}))
+})].sort(byLabel(p => p.name)))
 
 // Locations (with a standard travel distance) for the selected customer — picking one
 // fills the distance field and is remembered on the entry via form.location_id; the
@@ -132,7 +138,9 @@ watch(() => form.customer_id, (id) => {
 })
 
 const locationOptions = computed(() =>
-  (locationsByCustomer.value[form.customer_id] || []).filter(l => l.travel_distance != null),
+  (locationsByCustomer.value[form.customer_id] || [])
+    .filter(l => l.travel_distance != null)
+    .sort(byLabel(formatLocationLabel)),
 )
 
 function formatLocationLabel(loc) {
