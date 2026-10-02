@@ -1,0 +1,27 @@
+---
+title: "v0.36.0: What's in Other?"
+date: "2026-10-02"
+author: "Ton Kersten"
+description: "The time-report chart lets you click Other to see the activities inside it, and lists every activity in a table below the chart."
+draft: false
+---
+:doctype: article
+:icons!:
+
+The chart on the time-tracking *Report* tab shows the ten activities you spent the most time on, and adds everything else together as *Other*. Ten colours is about as many as you can still tell apart, so that limit stays. But with a lot of different activities, *Other* easily becomes the biggest slice of all, and until now there was no way to see what was in it. `v0.36.0` fixes that in two ways.
+
+== Click Other
+
+Click the *Other* slice or bar, or the *Show the N activities in "Other"* button below the chart, and the chart shows the next ten activities, again with an *Other* for whatever remains. Keep clicking until everything has been shown; a line below the chart tells you where you are, like _Activities 11–20 of 35_, and *Back* takes you up a level again.
+
+This works for the bar, pie, and stacked bar charts. Changing the report, chart type, or time basis starts at the top again. The PDF export shows the top level, as before.
+
+== Every activity in a table
+
+Below the chart there's now a table with every activity, most time first: its customers, its time, and its share of the total. A coloured square shows the activity's colour in the chart as it's shown now, and activities that are part of *Other* are marked as such. So even without clicking, you can see at a glance what *Other* is made of.
+
+See the Reports section of the link:../../docs/user-guide/[User Guide] for more.
+
+== Upgrade
+
+Download `v0.36.0` from the link:../../download[download page] or pull the latest release tag. No database migration is needed.

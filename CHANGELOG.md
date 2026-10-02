@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.36.0 — 2026-10-02
+
+### Added
+- **See what's in "Other" in the time-report chart** — the chart shows the ten activities with the most time and adds the rest together as *Other*. Click the *Other* slice or bar, or the new *Show the N activities in "Other"* button below the chart, and it shows the next ten, again with an *Other* for whatever remains, until you've seen everything; *Back* returns to the previous level. Works for bar, pie, and stacked bar charts. The PDF export still shows the top level.
+- **All activities listed below the chart** — a table under the chart lists every activity with its customers, time, and share of the total, most time first. A coloured square shows each activity's colour in the chart, and activities that are part of *Other* are marked as such.
+
 ## v0.35.0 — 2026-10-02
 
 ### Added

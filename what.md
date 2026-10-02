@@ -920,3 +920,5 @@ Create an application that has all these features and requirements
 - Sort the customer, project, and location dropdowns in the calendar entry form
 - Keep the right-click menu inside the window under the app zoom, and close it with Esc wherever the focus is
 - Add multi-select to the time-tracking calendar (Ctrl/Cmd/Shift+click or +Enter/Space on a block, click a day header for the whole day) with copy, delete, Ctrl+C, and Esc, plus paste at the clicked time (keeping relative offsets) or at the original times
+- Let the time-report chart drill into "Other" (click the slice/bar or the button below the chart, ten activities per level, with Back), for bar, pie, and stacked charts
+- List every activity below the time-report chart with its customers, time, share, and colour in the current chart

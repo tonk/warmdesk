@@ -8,10 +8,10 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.35.0)
+## Latest release (v0.36.0)
 
-- **Added** — Select several entries (or a whole day) in the time-tracking calendar and copy, paste, or delete them at once.
-- **Fixed** — The calendar's right-click menu stays on screen when the app is zoomed, and *Esc* always closes it; the entry form's dropdowns are sorted.
+- **Added** — Click *Other* in the time-report chart to see the activities inside it, ten at a time.
+- **Added** — A table below the chart lists every activity with its time and share of the total.
 
 ## Experiment
 
@@ -383,7 +383,7 @@ See [INSTALL.md](INSTALL.md) for full instructions including:
 - **Watchers** — subscribe to card activity
 - **Favourite people** — mark users for quick access
 - **Time reports** — generate a time overview filtered by period (all / year / month / week / custom date range), project, and one or more assignees; export to server-generated PDF (selectable font and output language, company logo, per-project subtotal badges) or Excel (XLSX); time displayed as H:MM
-- **Time report chart view** — toggle the Report tab between Table and Chart; chart types are bar, pie, and stacked bar, with a declarable/total/undeclarable time basis switch; export the chart as a server-generated PDF
+- **Time report chart view** — toggle the Report tab between Table and Chart; chart types are bar, pie, and stacked bar, with a declarable/total/undeclarable time basis switch; click *Other* to drill into the activities folded into it, and a table below the chart lists every activity with its time and share; export the chart as a server-generated PDF
 - **Time tracking PDF options** — the weekly timesheet export and the time-tracking report tab both offer the same PDF Font and PDF Language selects as the main report view; selections are persisted in localStorage; when the report is grouped by Customer a *New page per customer* checkbox appears — each customer is exported to its own page with the full document header repeated and no cross-customer grand total; optional per-row distance and undeclarable-time columns show billable vs. unbillable time and mileage on every entry, not just totals, and the undeclarable/billable breakdown is available for every grouping
 - **Company branding** — set a company name and separate light/dark logos (JPG, PNG, GIF, WebP, or SVG); light logo shown on the login screen's light theme, dark logo on dark theme; logos also appear on reports
 - **Configurable initial columns** — admin can define which columns are created when a new project is made (defaults to "Backlog")
