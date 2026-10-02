@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.37.0 — 2026-10-02
+
+### Changed
+- **"Other" folded into one row in the activity table** — the table under the time-report chart no longer lists every activity that's part of *Other* one by one. They're combined into a single *Other* row with their total time and share of the total; click the arrow on the left of that row to list them, and again to fold them back. Drilling into *Other* on the chart updates the row to match what's still left in it.
+
 ## v0.36.1 — 2026-10-02
 
 ### Fixed

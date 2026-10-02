@@ -1,0 +1,23 @@
+---
+title: "v0.37.0: Other, in one row"
+date: "2026-10-02"
+author: "Ton Kersten"
+description: "The activity table under the time-report chart folds everything in Other into one expandable row with its total time and share."
+draft: false
+---
+:doctype: article
+:icons!:
+
+`v0.36.0` added a table under the time-report chart listing every activity. Handy, but with a lot of small activities the ones in *Other* made it a long list, and you had to add them up yourself to see how much *Other* actually was.
+
+== One row for Other
+
+The activities that make up the *Other* slice or bar are now combined into a single *Other* row, with their total time and their share of the total. Click the arrow on the left of that row to list them one by one, indented underneath; click it again to fold them back.
+
+When you drill into *Other* on the chart, the row follows along: it only covers what's still left in *Other* at that level, and it folds back up whenever you change the report, chart type, time basis, or level.
+
+See the Reports section of the link:../../docs/user-guide/[User Guide] for more.
+
+== Upgrade
+
+Download `v0.37.0` from the link:../../download[download page] or pull the latest release tag. No database migration is needed.

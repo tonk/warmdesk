@@ -923,3 +923,4 @@ Create an application that has all these features and requirements
 - Let the time-report chart drill into "Other" (click the slice/bar or the button below the chart, ten activities per level, with Back), for bar, pie, and stacked charts
 - List every activity below the time-report chart with its customers, time, share, and colour in the current chart
 - Open external links in the desktop app in the default browser instead of navigating the app window away
+- Fold the activities in "Other" into one expandable row with total time and share in the table under the time-report chart

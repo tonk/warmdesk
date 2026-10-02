@@ -8,9 +8,9 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.36.1)
+## Latest release (v0.37.0)
 
-- **Fixed** — In the desktop app, links to other sites (such as a card's Git issue) open in your default browser instead of replacing the app window.
+- **Time report** — The activities in *Other* are combined into one expandable row with their total time and share in the table under the chart.
 
 ## Experiment
 
