@@ -15,6 +15,9 @@
           <button v-if="!systemStore.isTimetrackingMode" :class="['tab', { active: tab === 'macros' }]" @click="tab = 'macros'" role="tab" :aria-selected="tab === 'macros'" aria-controls="tab-panel-macros" id="tab-btn-macros">{{ $t('macro.title') }}</button>
           <button v-if="!systemStore.isTimetrackingMode" :class="['tab', { active: tab === 'helpdesk' }]" @click="tab = 'helpdesk'" role="tab" :aria-selected="tab === 'helpdesk'" aria-controls="tab-panel-helpdesk" id="tab-btn-helpdesk">{{ $t('helpdeskAdmin.title') }}</button>
           <button v-if="!systemStore.isTimetrackingMode" :class="['tab', { active: tab === 'business-calendars' }]" @click="tab = 'business-calendars'" role="tab" :aria-selected="tab === 'business-calendars'" aria-controls="tab-panel-business-calendars" id="tab-btn-business-calendars">{{ $t('helpdeskAdmin.business_hours') }}</button>
+          <button v-if="!systemStore.isTimetrackingMode" :class="['tab', { active: tab === 'service-catalog' }]" @click="tab = 'service-catalog'" role="tab" :aria-selected="tab === 'service-catalog'" aria-controls="tab-panel-service-catalog" id="tab-btn-service-catalog">{{ $t('catalogAdmin.title') }}</button>
+          <button v-if="!systemStore.isTimetrackingMode" :class="['tab', { active: tab === 'change-management' }]" @click="tab = 'change-management'" role="tab" :aria-selected="tab === 'change-management'" aria-controls="tab-panel-change-management" id="tab-btn-change-management">{{ $t('changeAdmin.title') }}</button>
+          <button v-if="!systemStore.isTimetrackingMode" :class="['tab', { active: tab === 'cmdb-types' }]" @click="tab = 'cmdb-types'" role="tab" :aria-selected="tab === 'cmdb-types'" aria-controls="tab-panel-cmdb-types" id="tab-btn-cmdb-types">{{ $t('cmdbAdmin.title') }}</button>
           <button v-if="!systemStore.isTimetrackingMode" :class="['tab', { active: tab === 'ticket-checklists' }]" @click="tab = 'ticket-checklists'" role="tab" :aria-selected="tab === 'ticket-checklists'" aria-controls="tab-panel-ticket-checklists" id="tab-btn-ticket-checklists">{{ $t('ticketChecklist.title') }}</button>
           <button :class="['tab', { active: tab === 'invoice-templates' }]" @click="tab = 'invoice-templates'" role="tab" :aria-selected="tab === 'invoice-templates'" aria-controls="tab-panel-invoice-templates" id="tab-btn-invoice-templates">{{ $t('admin.invoice_templates') }}</button>
           <button :class="['tab', { active: tab === 'backup' }]" @click="tab = 'backup'; loadBackups(); loadSettings()" role="tab" :aria-selected="tab === 'backup'" aria-controls="tab-panel-backup" id="tab-btn-backup">{{ $t('admin.backup_tab') }}</button>
@@ -1067,6 +1070,21 @@
           <BusinessCalendarsTab />
         </div>
 
+        <!-- Service catalogue tab -->
+        <div v-if="!systemStore.isTimetrackingMode" v-show="tab === 'service-catalog'" role="tabpanel" id="tab-panel-service-catalog" aria-labelledby="tab-btn-service-catalog">
+          <ServiceCatalogTab />
+        </div>
+
+        <!-- Change management tab -->
+        <div v-if="!systemStore.isTimetrackingMode" v-show="tab === 'change-management'" role="tabpanel" id="tab-panel-change-management" aria-labelledby="tab-btn-change-management">
+          <ChangeManagementTab />
+        </div>
+
+        <!-- CMDB types tab -->
+        <div v-if="!systemStore.isTimetrackingMode" v-show="tab === 'cmdb-types'" role="tabpanel" id="tab-panel-cmdb-types" aria-labelledby="tab-btn-cmdb-types">
+          <CmdbTypesTab />
+        </div>
+
         <!-- Ticket checklist templates tab -->
         <div v-show="tab === 'ticket-checklists'" role="tabpanel" id="tab-panel-ticket-checklists" aria-labelledby="tab-btn-ticket-checklists">
           <TicketChecklistTemplatesTab />
@@ -1968,6 +1986,9 @@ import SlaPoliciesTab from '@/components/admin/SlaPoliciesTab.vue'
 import MacrosTab from '@/components/admin/MacrosTab.vue'
 import HelpdeskSettingsTab from '@/components/admin/HelpdeskSettingsTab.vue'
 import BusinessCalendarsTab from '@/components/admin/BusinessCalendarsTab.vue'
+import ServiceCatalogTab from '@/components/admin/ServiceCatalogTab.vue'
+import ChangeManagementTab from '@/components/admin/ChangeManagementTab.vue'
+import CmdbTypesTab from '@/components/admin/CmdbTypesTab.vue'
 import TicketChecklistTemplatesTab from '@/components/admin/TicketChecklistTemplatesTab.vue'
 import InvoiceTemplatesTab from '@/components/admin/InvoiceTemplatesTab.vue'
 import HelpIcon from '@/components/common/HelpIcon.vue'

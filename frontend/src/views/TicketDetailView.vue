@@ -190,6 +190,12 @@
         </div>
       </section>
 
+      <TicketRequestPanel :ticket="ticket" :customer-id="customerId" :is-inbox="isInbox" @updated="onPanelUpdated" />
+      <TicketApprovalPanel :ticket="ticket" :customer-id="customerId" :is-inbox="isInbox" @updated="onPanelUpdated" />
+      <TicketChangePanel :ticket="ticket" :customer-id="customerId" :is-inbox="isInbox" @updated="onPanelUpdated" />
+      <TicketCiPanel :ticket="ticket" :customer-id="customerId" :is-inbox="isInbox" @updated="onPanelUpdated" />
+      <TicketKnowledgePanel :ticket="ticket" :customer-id="customerId" :is-inbox="isInbox" @updated="onPanelUpdated" />
+
       <div v-if="ticket.description" class="detail-description">
         <div class="detail-desc-header">
           <span class="detail-desc-label">{{ $t('ticket.original_email') }}</span>
@@ -531,6 +537,11 @@ import FileUploadButton from '@/components/common/FileUploadButton.vue'
 import DatePicker from '@/components/common/DatePicker.vue'
 import BaseModal from '@/components/common/BaseModal.vue'
 import HelpIcon from '@/components/common/HelpIcon.vue'
+import TicketRequestPanel from '@/components/tickets/TicketRequestPanel.vue'
+import TicketApprovalPanel from '@/components/tickets/TicketApprovalPanel.vue'
+import TicketChangePanel from '@/components/tickets/TicketChangePanel.vue'
+import TicketCiPanel from '@/components/tickets/TicketCiPanel.vue'
+import TicketKnowledgePanel from '@/components/tickets/TicketKnowledgePanel.vue'
 import { avatarUrl } from '@/composables/useAvatar'
 
 const { formatDateTime, formatDate } = useDateFormat()
@@ -794,6 +805,14 @@ async function useWorkaround(lt) {
   msgEditorTab.value = 'edit'
   await nextTick()
   document.getElementById('ticket-msg-panel-edit')?.focus()
+}
+
+// The ITSM panels (request, approval, change, CIs, knowledge) save their own
+// fields and hand back the updated ticket.
+function onPanelUpdated(data) {
+  if (!data) return
+  ticket.value = data
+  syncChecklistFromTicket(data)
 }
 
 function apiUpdate(data) {

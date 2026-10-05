@@ -46,27 +46,50 @@ type Ticket struct {
 	SlaWarnedAt      *time.Time `json:"sla_warned_at,omitempty"`
 	SlaEscalatedAt   *time.Time `json:"sla_escalated_at,omitempty"`
 	// Problem-management fields — only meaningful when Type == "problem".
-	ProblemStatus  string                `gorm:"size:30" json:"problem_status"`
-	RootCause      string                `gorm:"type:text" json:"root_cause"`
-	Workaround     string                `gorm:"type:text" json:"workaround"`
-	IsKnownError   bool                  `gorm:"default:false" json:"is_known_error"`
-	EmailMessageID *string               `gorm:"uniqueIndex;size:998" json:"email_message_id,omitempty"`
-	FromEmail      *string               `gorm:"size:254" json:"from_email,omitempty"`
-	FromName       *string               `gorm:"size:150" json:"from_name,omitempty"`
-	RawEmail       *string               `gorm:"type:text" json:"raw_email,omitempty"`
-	CreatedAt      time.Time             `json:"created_at"`
-	UpdatedAt      time.Time             `json:"updated_at"`
-	Messages       []TicketMessage       `gorm:"foreignKey:TicketID" json:"messages,omitempty"`
-	Tags           []TicketTag           `gorm:"foreignKey:TicketID" json:"tags,omitempty"`
-	CreatedBy      User                  `json:"created_by,omitempty"`
-	AssignedTo     *User                 `json:"assigned_to,omitempty"`
-	Owner          *User                 `json:"owner,omitempty"`
-	Group          *UserGroup            `json:"group,omitempty"`
-	SlaPolicy      *SlaPolicy            `json:"sla_policy,omitempty"`
-	Category       *TicketCategory       `json:"category,omitempty"`
-	ResolutionCode *TicketResolutionCode `json:"resolution_code,omitempty"`
-	Attachments    []Attachment          `gorm:"-" json:"attachments,omitempty"`
-	ChecklistItems []TicketChecklistItem `gorm:"foreignKey:TicketID" json:"checklist_items,omitempty"`
+	ProblemStatus string `gorm:"size:30" json:"problem_status"`
+	RootCause     string `gorm:"type:text" json:"root_cause"`
+	Workaround    string `gorm:"type:text" json:"workaround"`
+	IsKnownError  bool   `gorm:"default:false" json:"is_known_error"`
+	// Service request fields — set when the ticket was ordered from the
+	// service catalogue.
+	CatalogItemID *uint       `gorm:"index" json:"catalog_item_id,omitempty"`
+	RequestData   RequestData `gorm:"type:text" json:"request_data,omitempty"`
+	// Approval round (service requests and changes). ApprovalStatus is ""
+	// (no approval needed), pending, approved or rejected; ApprovalRound
+	// increments each time approval is (re)requested so earlier decisions
+	// don't count towards a new round.
+	ApprovalStatus    string `gorm:"size:20" json:"approval_status"`
+	ApprovalGroupID   *uint  `gorm:"index" json:"approval_group_id,omitempty"`
+	ApprovalsRequired int    `gorm:"not null;default:0" json:"approvals_required"`
+	ApprovalRound     int    `gorm:"not null;default:0" json:"approval_round"`
+	// Change-enablement fields — only meaningful when Type == "change_request".
+	ChangeType         string                `gorm:"size:20" json:"change_type"`   // standard | normal | emergency
+	ChangeStatus       string                `gorm:"size:30" json:"change_status"` // see services.ValidChangeStatuses
+	Risk               string                `gorm:"size:10" json:"risk"`          // low | medium | high
+	PlannedStart       *time.Time            `json:"planned_start,omitempty"`
+	PlannedEnd         *time.Time            `json:"planned_end,omitempty"`
+	ImplementationPlan string                `gorm:"type:text" json:"implementation_plan"`
+	BackoutPlan        string                `gorm:"type:text" json:"backout_plan"`
+	TestPlan           string                `gorm:"type:text" json:"test_plan"`
+	ReviewNotes        string                `gorm:"type:text" json:"review_notes"`
+	ChangeOutcome      string                `gorm:"size:20" json:"change_outcome"` // successful | partially_successful | failed
+	EmailMessageID     *string               `gorm:"uniqueIndex;size:998" json:"email_message_id,omitempty"`
+	FromEmail          *string               `gorm:"size:254" json:"from_email,omitempty"`
+	FromName           *string               `gorm:"size:150" json:"from_name,omitempty"`
+	RawEmail           *string               `gorm:"type:text" json:"raw_email,omitempty"`
+	CreatedAt          time.Time             `json:"created_at"`
+	UpdatedAt          time.Time             `json:"updated_at"`
+	Messages           []TicketMessage       `gorm:"foreignKey:TicketID" json:"messages,omitempty"`
+	Tags               []TicketTag           `gorm:"foreignKey:TicketID" json:"tags,omitempty"`
+	CreatedBy          User                  `json:"created_by,omitempty"`
+	AssignedTo         *User                 `json:"assigned_to,omitempty"`
+	Owner              *User                 `json:"owner,omitempty"`
+	Group              *UserGroup            `json:"group,omitempty"`
+	SlaPolicy          *SlaPolicy            `json:"sla_policy,omitempty"`
+	Category           *TicketCategory       `json:"category,omitempty"`
+	ResolutionCode     *TicketResolutionCode `json:"resolution_code,omitempty"`
+	Attachments        []Attachment          `gorm:"-" json:"attachments,omitempty"`
+	ChecklistItems     []TicketChecklistItem `gorm:"foreignKey:TicketID" json:"checklist_items,omitempty"`
 }
 
 type TicketMessage struct {

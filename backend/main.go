@@ -199,6 +199,7 @@ func main() {
 	handlers.StartBackupScheduler()
 	if cfg.AppMode != "timetracking" {
 		services.SeedResolutionCodes()
+		handlers.SeedCITypes()
 		services.StartTicketSlaScheduler()
 	}
 

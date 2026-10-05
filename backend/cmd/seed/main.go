@@ -4917,6 +4917,9 @@ Happy shipping! 🚀`,
 	}
 	fmt.Printf("   Created %d project webhooks\n", totalWebhooks)
 
+	// ── 18b. ITIL: categories, knowledge base, CMDB, problems, catalogue, approvals, changes
+	seedITSM(db, users, demoCustomerIDs, createdTickets)
+
 	// ── 19. Summary ──────────────────────────────────────────────────────────────
 	fmt.Println()
 	fmt.Println("✅ Demo data seeded successfully!")
@@ -5086,6 +5089,7 @@ func seedTimeMacroLibrary(db *gorm.DB, userID uint, lib map[string]any) error {
 // removeDemoData deletes all records created by the seed (identified by the
 // demo users and projects), then the users themselves,
 func removeDemoData(db *gorm.DB) {
+	removeITSMDemoData(db)
 	demoUsernames := []string{"demo.admin", "demo.sarah", "demo.marc", "demo.lisa", "demo.viewer", "demo.priya", "demo.james", "demo.elena", "demo.raj", "demo.metrics", "demo.cust1", "demo.cust2"}
 	demoSlugs := []string{"website-redesign", "mobile-app-v2", "devops-infra", "product-platform", "api-platform", "marketing", "travel-tt", "holidays-tt", "study-tt", "internal-tt"}
 	demoCustomerNames := []string{"Acme Corporation", "Globex Systems", "Initech Ltd", "Smart Owl Consulting", "Personal"}
@@ -5180,6 +5184,7 @@ func removeDemoData(db *gorm.DB) {
 		var ticketIDs []uint
 		db.Model(&models.Ticket{}).Where("customer_id IN ?", custIDs).Pluck("id", &ticketIDs)
 		if len(ticketIDs) > 0 {
+			removeITSMTicketRows(db, ticketIDs)
 			db.Unscoped().Where("ticket_id IN ?", ticketIDs).Delete(&models.TicketMessage{})
 			db.Unscoped().Where("ticket_id IN ?", ticketIDs).Delete(&models.TicketTag{})
 			db.Unscoped().Where("ticket_id IN ?", ticketIDs).Delete(&models.TicketChecklistItem{})
@@ -5203,6 +5208,7 @@ func removeDemoData(db *gorm.DB) {
 	var inboxIDs []uint
 	db.Model(&models.Ticket{}).Where("customer_id IS NULL AND title IN ?", demoInboxTitles).Pluck("id", &inboxIDs)
 	if len(inboxIDs) > 0 {
+		removeITSMTicketRows(db, inboxIDs)
 		db.Unscoped().Where("ticket_id IN ?", inboxIDs).Delete(&models.TicketMessage{})
 		db.Unscoped().Where("ticket_id IN ?", inboxIDs).Delete(&models.TicketTag{})
 		db.Unscoped().Where("ticket_id IN ?", inboxIDs).Delete(&models.TicketChecklistItem{})

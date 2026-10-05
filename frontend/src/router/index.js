@@ -36,6 +36,15 @@ const routes = [
   { path: '/tickets/inbox/:ticketId', name: 'inbox-ticket-detail', component: lazyWithReload(() => import('@/views/TicketDetailView.vue')), meta: { helpdeskOnly: true } },
   { path: '/helpdesk/problems', name: 'problems', component: lazyWithReload(() => import('@/views/ProblemsView.vue')), meta: { helpdeskOnly: true, noCustomerRole: true } },
   { path: '/helpdesk/reports', name: 'ticket-report', component: lazyWithReload(() => import('@/views/TicketReportView.vue')), meta: { helpdeskOnly: true, noCustomerRole: true } },
+  { path: '/helpdesk/catalog', name: 'service-catalog', component: lazyWithReload(() => import('@/views/ServiceCatalogView.vue')), meta: { helpdeskOnly: true } },
+  { path: '/helpdesk/approvals', name: 'approvals', component: lazyWithReload(() => import('@/views/ApprovalsView.vue')), meta: { helpdeskOnly: true, noCustomerRole: true } },
+  { path: '/helpdesk/changes', name: 'change-calendar', component: lazyWithReload(() => import('@/views/ChangeCalendarView.vue')), meta: { helpdeskOnly: true, noCustomerRole: true } },
+  { path: '/kb', name: 'kb', component: lazyWithReload(() => import('@/views/KnowledgeBaseView.vue')), meta: { helpdeskOnly: true } },
+  { path: '/kb/new', name: 'kb-new', component: lazyWithReload(() => import('@/views/KnowledgeArticleEditView.vue')), meta: { helpdeskOnly: true, noCustomerRole: true } },
+  { path: '/kb/:id', name: 'kb-article', component: lazyWithReload(() => import('@/views/KnowledgeArticleView.vue')), meta: { helpdeskOnly: true } },
+  { path: '/kb/:id/edit', name: 'kb-edit', component: lazyWithReload(() => import('@/views/KnowledgeArticleEditView.vue')), meta: { helpdeskOnly: true, noCustomerRole: true } },
+  { path: '/cmdb', name: 'cmdb', component: lazyWithReload(() => import('@/views/CmdbView.vue')), meta: { helpdeskOnly: true, noCustomerRole: true } },
+  { path: '/cmdb/:id', name: 'cmdb-ci', component: lazyWithReload(() => import('@/views/CiDetailView.vue')), meta: { helpdeskOnly: true, noCustomerRole: true } },
   { path: '/:pathMatch(.*)*', redirect: '/' }
 ]
 

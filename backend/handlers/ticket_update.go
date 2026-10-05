@@ -19,26 +19,37 @@ const errResolutionCodeRequired = "a resolution code is required to resolve this
 // PUT /tickets/inbox/:id. Every field is optional; for the optional foreign
 // keys (assignee, owner, group, category, resolution code) 0 clears.
 type ticketUpdateRequest struct {
-	Title           *string         `json:"title"`
-	Description     *string         `json:"description"`
-	Type            *string         `json:"type"`
-	Status          *string         `json:"status"`
-	Priority        *string         `json:"priority"`
-	Impact          *string         `json:"impact"`
-	Urgency         *string         `json:"urgency"`
-	CategoryID      *uint           `json:"category_id"`
-	ResolutionCode  *uint           `json:"resolution_code_id"`
-	ResolutionNotes *string         `json:"resolution_notes"`
-	IsMajorIncident *bool           `json:"is_major_incident"`
-	ProblemStatus   *string         `json:"problem_status"`
-	RootCause       *string         `json:"root_cause"`
-	Workaround      *string         `json:"workaround"`
-	IsKnownError    *bool           `json:"is_known_error"`
-	AssignedTo      *uint           `json:"assigned_to_id"`
-	OwnerID         *uint           `json:"owner_id"`
-	GroupID         *uint           `json:"group_id"`
-	ReminderAt      json.RawMessage `json:"reminder_at"`
-	CloseAt         json.RawMessage `json:"close_at"`
+	Title           *string `json:"title"`
+	Description     *string `json:"description"`
+	Type            *string `json:"type"`
+	Status          *string `json:"status"`
+	Priority        *string `json:"priority"`
+	Impact          *string `json:"impact"`
+	Urgency         *string `json:"urgency"`
+	CategoryID      *uint   `json:"category_id"`
+	ResolutionCode  *uint   `json:"resolution_code_id"`
+	ResolutionNotes *string `json:"resolution_notes"`
+	IsMajorIncident *bool   `json:"is_major_incident"`
+	ProblemStatus   *string `json:"problem_status"`
+	RootCause       *string `json:"root_cause"`
+	Workaround      *string `json:"workaround"`
+	IsKnownError    *bool   `json:"is_known_error"`
+	// Change-enablement fields (type change_request).
+	ChangeType         *string         `json:"change_type"`
+	ChangeStatus       *string         `json:"change_status"`
+	Risk               *string         `json:"risk"`
+	PlannedStart       json.RawMessage `json:"planned_start"`
+	PlannedEnd         json.RawMessage `json:"planned_end"`
+	ImplementationPlan *string         `json:"implementation_plan"`
+	BackoutPlan        *string         `json:"backout_plan"`
+	TestPlan           *string         `json:"test_plan"`
+	ReviewNotes        *string         `json:"review_notes"`
+	ChangeOutcome      *string         `json:"change_outcome"`
+	AssignedTo         *uint           `json:"assigned_to_id"`
+	OwnerID            *uint           `json:"owner_id"`
+	GroupID            *uint           `json:"group_id"`
+	ReminderAt         json.RawMessage `json:"reminder_at"`
+	CloseAt            json.RawMessage `json:"close_at"`
 	// CustomerID assigns an inbox ticket to a customer (inbox endpoint only).
 	CustomerID *uint `json:"customer_id"`
 }
@@ -106,6 +117,10 @@ func applyTicketUpdate(ticket *models.Ticket, req *ticketUpdateRequest, userID u
 		if ticket.Type == "problem" && ticket.ProblemStatus == "" {
 			ticket.ProblemStatus = "investigating"
 			updates["problem_status"] = ticket.ProblemStatus
+		}
+		if ticket.Type == "change_request" && ticket.ChangeStatus == "" {
+			ticket.ChangeStatus, ticket.ChangeType = "draft", "normal"
+			updates["change_status"], updates["change_type"] = "draft", "normal"
 		}
 	}
 	if req.CustomerID != nil && allowCustomerAssign && *req.CustomerID > 0 {
@@ -220,6 +235,73 @@ func applyTicketUpdate(ticket *models.Ticket, req *ticketUpdateRequest, userID u
 		logEvent("known_error_changed", strconv.FormatBool(*req.IsKnownError))
 	}
 
+	// Change fields.
+	if req.ChangeType != nil && *req.ChangeType != ticket.ChangeType {
+		if !services.ValidChangeTypes[*req.ChangeType] {
+			return badUpdate("invalid change_type")
+		}
+		if ticket.ChangeStatus != "" && ticket.ChangeStatus != "draft" {
+			return &ticketUpdateError{http.StatusBadRequest, gin.H{"error": "the change type can only be changed while the change is a draft", "code": "change_not_draft"}}
+		}
+		ticket.ChangeType = *req.ChangeType
+		updates["change_type"] = *req.ChangeType
+		logEvent("change_type_changed", *req.ChangeType)
+	}
+	if req.Risk != nil && *req.Risk != ticket.Risk {
+		if *req.Risk != "" && !services.ValidRiskLevels[*req.Risk] {
+			return badUpdate("invalid risk")
+		}
+		ticket.Risk = *req.Risk
+		updates["risk"] = *req.Risk
+		logEvent("risk_changed", *req.Risk)
+	}
+	windowChanged := false
+	if t, ok := parseNullableTimestamp(req.PlannedStart); ok {
+		ticket.PlannedStart = t
+		updates["planned_start"] = t
+		windowChanged = true
+	}
+	if t, ok := parseNullableTimestamp(req.PlannedEnd); ok {
+		ticket.PlannedEnd = t
+		updates["planned_end"] = t
+		windowChanged = true
+	}
+	if windowChanged {
+		if ticket.PlannedStart != nil && ticket.PlannedEnd != nil && !ticket.PlannedEnd.After(*ticket.PlannedStart) {
+			return badUpdate("planned end must be after planned start")
+		}
+		// Moving a scheduled change's window means re-checking it.
+		if ticket.ChangeStatus == "scheduled" && req.ChangeStatus == nil {
+			ticket.ChangeStatus = "approved"
+			updates["change_status"] = "approved"
+		}
+		logEvent("change_window_changed", "")
+	}
+	for _, f := range []struct {
+		val   *string
+		field *string
+		col   string
+	}{
+		{req.ImplementationPlan, &ticket.ImplementationPlan, "implementation_plan"},
+		{req.BackoutPlan, &ticket.BackoutPlan, "backout_plan"},
+		{req.TestPlan, &ticket.TestPlan, "test_plan"},
+		{req.ReviewNotes, &ticket.ReviewNotes, "review_notes"},
+	} {
+		if f.val != nil && *f.val != *f.field {
+			*f.field = *f.val
+			updates[f.col] = *f.val
+			logEvent(f.col+"_changed", "")
+		}
+	}
+	if req.ChangeOutcome != nil && *req.ChangeOutcome != ticket.ChangeOutcome {
+		if *req.ChangeOutcome != "" && !services.ValidChangeOutcomes[*req.ChangeOutcome] {
+			return badUpdate("invalid change_outcome")
+		}
+		ticket.ChangeOutcome = *req.ChangeOutcome
+		updates["change_outcome"] = *req.ChangeOutcome
+		logEvent("change_outcome_changed", *req.ChangeOutcome)
+	}
+
 	// Assignment.
 	if req.AssignedTo != nil && !ptrEq(ticket.AssignedToID, *req.AssignedTo) {
 		ticket.AssignedToID = idOrNil(*req.AssignedTo)
@@ -267,8 +349,31 @@ func applyTicketUpdate(ticket *models.Ticket, req *ticketUpdateRequest, userID u
 		}
 	}
 
+	approvalRequested := false
+	if req.ChangeStatus != nil && *req.ChangeStatus != ticket.ChangeStatus {
+		round := ticket.ApprovalRound
+		changeUpdates, err := services.TransitionChange(ticket, *req.ChangeStatus, now)
+		if err != nil {
+			if ce, ok := services.IsChangeError(err); ok {
+				return &ticketUpdateError{http.StatusBadRequest, gin.H{"error": ce.Msg, "code": ce.Code}}
+			}
+			return badUpdate(err.Error())
+		}
+		for k, v := range changeUpdates {
+			updates[k] = v
+		}
+		approvalRequested = ticket.ApprovalRound != round
+		logEvent("change_status_changed", ticket.ChangeStatus)
+		if _, ok := changeUpdates["status"]; ok {
+			logEvent("status_changed", ticket.Status)
+		}
+	}
+
 	if req.Status != nil && services.ValidTicketStatuses[*req.Status] && *req.Status != ticket.Status {
 		newStatus := *req.Status
+		if services.ApprovalBlocksStatus(ticket, newStatus) {
+			return &ticketUpdateError{http.StatusBadRequest, gin.H{"error": "this ticket needs approval first", "code": "approval_required"}}
+		}
 		if services.StatusRequiresChecklistComplete(newStatus) && services.TicketChecklistBlocksClose(ticket.ID) {
 			return badUpdate(errChecklistIncomplete)
 		}
@@ -292,8 +397,10 @@ func applyTicketUpdate(ticket *models.Ticket, req *ticketUpdateRequest, userID u
 	}
 	services.RefreshSlaBreaches(ticket, now)
 	if majorIncidentRaised {
-		t := *ticket
-		go services.NotifyMajorIncident(&t)
+		services.NotifyMajorIncident(ticket)
+	}
+	if approvalRequested {
+		services.NotifyApprovers(ticket)
 	}
 	return nil
 }
@@ -349,6 +456,9 @@ func initNewTicket(t *models.Ticket, ticketType, defaultType, priority, impact, 
 	t.Type = ticketType
 	if t.Type == "problem" {
 		t.ProblemStatus = "investigating"
+	}
+	if t.Type == "change_request" {
+		t.ChangeStatus, t.ChangeType = "draft", "normal"
 	}
 	for _, v := range []string{impact, urgency} {
 		if v != "" && !services.ValidImpactUrgency[v] {

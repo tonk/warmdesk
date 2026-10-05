@@ -273,7 +273,7 @@ func CreateTicket(c *gin.Context) {
 
 	database.DB.Create(&models.TicketHistory{TicketID: ticket.ID, UserID: userID, EventType: "created"})
 	if ticket.IsMajorIncident {
-		go services.NotifyMajorIncident(&ticket)
+		services.NotifyMajorIncident(&ticket)
 	}
 	ticket, _ = preloadTicket(ticket.ID)
 	c.JSON(http.StatusCreated, ticket)
@@ -420,6 +420,9 @@ func DeleteTicket(c *gin.Context) {
 	database.DB.Where("ticket_id = ?", ticket.ID).Delete(&models.TicketTag{})
 	database.DB.Where("ticket_id = ?", ticket.ID).Delete(&models.TicketChecklistItem{})
 	database.DB.Where("source_ticket_id = ? OR target_ticket_id = ?", ticket.ID, ticket.ID).Delete(&models.TicketLink{})
+	database.DB.Where("ticket_id = ?", ticket.ID).Delete(&models.TicketCI{})
+	database.DB.Where("ticket_id = ?", ticket.ID).Delete(&models.TicketArticleLink{})
+	database.DB.Where("ticket_id = ?", ticket.ID).Delete(&models.TicketApproval{})
 	database.DB.Delete(&ticket)
 	c.JSON(http.StatusOK, gin.H{"message": "deleted"})
 }
@@ -944,6 +947,9 @@ func DeleteInboxTicket(c *gin.Context) {
 	database.DB.Where("ticket_id = ?", ticket.ID).Delete(&models.TicketTag{})
 	database.DB.Where("ticket_id = ?", ticket.ID).Delete(&models.TicketChecklistItem{})
 	database.DB.Where("source_ticket_id = ? OR target_ticket_id = ?", ticket.ID, ticket.ID).Delete(&models.TicketLink{})
+	database.DB.Where("ticket_id = ?", ticket.ID).Delete(&models.TicketCI{})
+	database.DB.Where("ticket_id = ?", ticket.ID).Delete(&models.TicketArticleLink{})
+	database.DB.Where("ticket_id = ?", ticket.ID).Delete(&models.TicketApproval{})
 	database.DB.Delete(&ticket)
 	c.JSON(http.StatusOK, gin.H{"message": "deleted"})
 }

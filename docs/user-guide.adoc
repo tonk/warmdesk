@@ -1703,6 +1703,86 @@ The *Ticket report* page in the helpdesk section shows the key figures of the he
 Filter by customer, group, type, priority or category, and export the report as PDF or Excel.
 The report only covers customers you have access to.
 
+=== Knowledge base
+
+The *Knowledge base* in the sidebar's helpdesk section holds how-to articles and solutions.
+Agents see every article, including drafts; users with the Customer role only see *published public* articles — for all customers, or only for their own customer when an article is limited to one.
+
+* Search by title, keywords, summary and text; filter by category.
+* Agents create and edit articles (title, summary, keywords, category, body in Markdown) and choose the *visibility* (internal or public) and *status* (draft, published, archived).
+* Readers can mark an article as helpful or not helpful.
+* Only the author or an administrator can delete an article; archive it otherwise.
+
+On a ticket, the *Knowledge* panel suggests published articles that match the ticket title and lists the articles linked to the ticket.
+Agents can link an article, or click *Create article from this ticket* to start a new article pre-filled with the resolution notes (or, for a problem, its root cause and workaround) and linked to the ticket.
+
+=== Service catalogue
+
+The *Service catalogue* lists the services that can be requested, such as a new laptop or an account.
+Choose a service, fill in its request form and submit it: WarmDesk creates a service request ticket with your answers, routed to the right group, with the fulfilment tasks as a checklist.
+Users with the Customer role can order from the catalogue as well.
+The answers are shown in the *Request* panel of the ticket.
+
+=== Approvals
+
+Some service requests, and every normal or emergency change, need approval before work can start.
+While approval is pending (or after a rejection) the ticket can't be set to *In progress*, *Resolved* or *Pending close*; it can still be closed.
+
+Approvers are the members of the approver group; a set number of approvals is needed, and a single rejection rejects the request.
+Pending approvals for you appear on the *Approvals* page, with the request details, the plan of a change and earlier decisions.
+Approve, or reject with a reason; the people working the ticket are notified of the outcome.
+Agents can also ask for approval on any other ticket from the *Approval* panel.
+
+=== Changes
+
+A ticket of type *Change request* gets a *Change* panel and follows the change lifecycle:
+
+[cols="1,3", options="header"]
+|===
+|Change status |Meaning
+
+|Draft
+|Being prepared. Fill in the change type, risk, implementation plan and backout plan.
+
+|Awaiting approval
+|Submitted to the change advisory board (CAB). A *standard* change is pre-approved and skips this step.
+
+|Approved
+|Approved; set the planned window and schedule it.
+
+|Scheduled
+|Planned for its window. A normal or standard change can't be scheduled inside a change freeze; an emergency change can.
+
+|Implementing
+|Being carried out (the ticket is *In progress*).
+
+|Review
+|Post-implementation review: record the outcome and review notes.
+
+|Completed / Failed
+|Finished; the ticket is resolved.
+
+|Cancelled
+|Abandoned; the ticket is closed.
+|===
+
+When the planned window is set, the panel warns about change freezes and about other changes in the same window that touch the same configuration items.
+The *Change calendar* in the helpdesk section shows all changes in a month view, a week view or a list, together with the freeze windows and the changes that haven't been scheduled yet.
+The week view is a time grid: each change is drawn over its planned window, overlapping changes sit side by side, and a change that runs past midnight continues on the next day (marked ↤ / ↦).
+
+=== Configuration items (CMDB)
+
+The *CMDB* holds the configuration items (CIs) you support: services, applications, servers, databases, network devices and so on.
+A CI belongs to a customer or is internal; you see the CIs of the customers you have access to and all internal ones.
+Users with the Customer role don't see the CMDB.
+
+* Each CI has a type, status (planned, active, maintenance, retired), environment, criticality, owner, support group, description and free attributes.
+* Relations describe how CIs depend on each other: _depends on_, _runs on_, _part of_ and _connected to_.
+* *Impact analysis* on a CI shows every CI that would be affected if it fails or changes — everything that (indirectly) depends on, runs on or is part of it — with their open tickets.
+
+Link the affected CIs to a ticket in its *Configuration items* panel.
+For a change, the panel also summarises the impact of the linked CIs.
+
 === Threaded replies
 
 Click the *Reply* button beneath any message to open an inline reply form directly below it.

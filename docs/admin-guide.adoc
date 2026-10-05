@@ -1410,6 +1410,27 @@ Deleting a calendar makes the policies that used it fall back to around-the-cloc
 
 When upgrading, tickets that were already resolved or closed get their resolution and closing times filled in from their status history on the first start, so the ticket report covers older tickets too.
 
+=== Service catalogue
+
+*Admin → Service catalogue* defines the services users can request.
+Each item has a name, description, optional icon and category, an optional customer (empty = offered to all customers), a default priority, the *fulfilment group* new requests are routed to, an optional *checklist template* with the fulfilment tasks, and a *request form* built from fields (text, text area, select, checkbox, date, number; each optionally required).
+
+Set *Approvals required* above 0 and choose an *approver group* to make requests need approval: that many members of the group must approve, and a single rejection rejects the request.
+Approvers are notified in WarmDesk (and by email when they're offline); global admins can always decide as an override.
+Deleting an item keeps the answers on tickets that were already requested.
+
+=== Change management
+
+*Admin → Change management* holds:
+
+* The *CAB group* — the change advisory board whose members approve changes — and the number of approvals needed for *normal* and for *emergency* changes (default 1 each). Standard changes are pre-approved. Without a CAB group, normal and emergency changes can't be submitted.
+* *Freeze windows* — periods in which normal and standard changes can't be scheduled, for all customers or one customer. Emergency changes can still be scheduled, with a warning.
+
+=== CMDB types
+
+*Admin → CMDB types* manages the types of configuration items (Service, Application, Server, Database, Network device, Workstation and Storage are created on first start).
+A type that is still in use can't be deleted.
+
 === Macros
 
 Macros are one-click action sequences that agents apply to tickets.

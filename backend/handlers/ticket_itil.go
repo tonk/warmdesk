@@ -457,7 +457,20 @@ func AdminImportCalendarHolidays(c *gin.Context) {
 // helpdesk user so the UI can preview derived priorities and know whether a
 // resolution code is required.
 func GetHelpdeskSettings(c *gin.Context) {
-	c.JSON(http.StatusOK, services.LoadHelpdeskSettings())
+	c.JSON(http.StatusOK, helpdeskSettingsResponse())
+}
+
+// helpdeskSettingsResponse is the helpdesk settings plus the change settings
+// under "change".
+func helpdeskSettingsResponse() gin.H {
+	s := services.LoadHelpdeskSettings()
+	return gin.H{
+		"priority_matrix":         s.PriorityMatrix,
+		"resolved_autoclose_days": s.ResolvedAutoCloseDays,
+		"require_resolution_code": s.RequireResolutionCode,
+		"major_incident_group_id": s.MajorIncidentGroupID,
+		"change":                  services.LoadChangeSettings(),
+	}
 }
 
 // AdminUpdateHelpdeskSettings PUT /api/v1/admin/helpdesk/settings
@@ -467,6 +480,11 @@ func AdminUpdateHelpdeskSettings(c *gin.Context) {
 		ResolvedAutoCloseDays *int              `json:"resolved_autoclose_days"`
 		RequireResolutionCode *bool             `json:"require_resolution_code"`
 		MajorIncidentGroupID  *uint             `json:"major_incident_group_id"`
+		Change                *struct {
+			CABGroupID                 *uint `json:"cab_group_id"`
+			ApprovalsRequired          *int  `json:"approvals_required"`
+			EmergencyApprovalsRequired *int  `json:"emergency_approvals_required"`
+		} `json:"change"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
@@ -505,7 +523,13 @@ func AdminUpdateHelpdeskSettings(c *gin.Context) {
 		}
 		saveSetting(services.SettingHelpdeskMajorIncidentGroup, val)
 	}
-	c.JSON(http.StatusOK, services.LoadHelpdeskSettings())
+	if ch := req.Change; ch != nil {
+		if msg := saveChangeSettings(ch.CABGroupID, ch.ApprovalsRequired, ch.EmergencyApprovalsRequired); msg != "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": msg})
+			return
+		}
+	}
+	c.JSON(http.StatusOK, helpdeskSettingsResponse())
 }
 
 // ── Problem management ─────────────────────────────────────────────────────

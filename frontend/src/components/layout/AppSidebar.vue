@@ -236,6 +236,26 @@
             <span class="link-icon" aria-hidden="true">📈</span>
             <span class="link-text">{{ $t('ticketReport.title') }}</span>
           </RouterLink>
+          <RouterLink to="/kb" class="sidebar-link">
+            <span class="link-icon" aria-hidden="true">📚</span>
+            <span class="link-text">{{ $t('itsmNav.knowledge_base') }}</span>
+          </RouterLink>
+          <RouterLink to="/helpdesk/catalog" class="sidebar-link">
+            <span class="link-icon" aria-hidden="true">🛒</span>
+            <span class="link-text">{{ $t('itsmNav.service_catalog') }}</span>
+          </RouterLink>
+          <RouterLink v-if="auth.user?.global_role !== 'customer'" to="/helpdesk/approvals" class="sidebar-link">
+            <span class="link-icon" aria-hidden="true">✅</span>
+            <span class="link-text">{{ $t('itsmNav.approvals') }}</span>
+          </RouterLink>
+          <RouterLink v-if="auth.user?.global_role !== 'customer'" to="/helpdesk/changes" class="sidebar-link">
+            <span class="link-icon" aria-hidden="true">🗓</span>
+            <span class="link-text">{{ $t('itsmNav.change_calendar') }}</span>
+          </RouterLink>
+          <RouterLink v-if="auth.user?.global_role !== 'customer'" to="/cmdb" class="sidebar-link">
+            <span class="link-icon" aria-hidden="true">🗄</span>
+            <span class="link-text">{{ $t('itsmNav.cmdb') }}</span>
+          </RouterLink>
           <RouterLink
             v-for="c in customersStore.customers"
             :key="c.id"

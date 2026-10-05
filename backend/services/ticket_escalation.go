@@ -220,9 +220,12 @@ func NotifyTicketAlert(t *models.Ticket, recipients []uint, kind string) {
 		"kind":        kind,
 	}
 	subjects := map[string]string{
-		TicketAlertSlaWarning:    "SLA warning",
-		TicketAlertSlaBreach:     "SLA breached — ticket escalated",
-		TicketAlertMajorIncident: "Major incident",
+		TicketAlertSlaWarning:        "SLA warning",
+		TicketAlertSlaBreach:         "SLA breached — ticket escalated",
+		TicketAlertMajorIncident:     "Major incident",
+		TicketAlertApprovalRequested: "Approval requested",
+		TicketAlertApprovalApproved:  "Approved",
+		TicketAlertApprovalRejected:  "Rejected",
 	}
 	heading := subjects[kind]
 	subject := fmt.Sprintf("%s: [#%d] %s", heading, t.ID, t.Title)

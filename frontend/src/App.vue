@@ -164,6 +164,18 @@ const nameLabels = {
   'time-tracking': 'Time Tracking',
 }
 
+// Breadcrumb labels for the ITSM pages, keyed by path prefix.
+const itsmCrumbs = {
+  kb: 'itsmNav.knowledge_base',
+  cmdb: 'itsmNav.cmdb',
+  helpdesk: 'ticket.tickets',
+  'helpdesk/catalog': 'itsmNav.service_catalog',
+  'helpdesk/approvals': 'itsmNav.approvals',
+  'helpdesk/changes': 'itsmNav.change_calendar',
+  'helpdesk/problems': 'problems.title',
+  'helpdesk/reports': 'ticketReport.title',
+}
+
 const routeCrumbs = computed(() => {
   if (route.path === '/') return []
   const parts = route.path.split('/').filter(Boolean)
@@ -182,10 +194,13 @@ const routeCrumbs = computed(() => {
       label = 'Inbox'
     } else if (part === 'chats') {
       label = 'Chats'
+    } else if (itsmCrumbs[parts.slice(0, idx + 1).join('/')]) {
+      label = t(itsmCrumbs[parts.slice(0, idx + 1).join('/')])
     } else {
       label = decodeURIComponent(part)
     }
-    return { to, label }
+    // /helpdesk has no page of its own; its crumb is a label only.
+    return { to: to === '/helpdesk' ? null : to, label }
   })
 })
 
@@ -410,10 +425,14 @@ function showTicketAlert({ ticket_id, title, kind }) {
     sla_warning: 'ticketAlert.sla_warning',
     sla_breach: 'ticketAlert.sla_breach',
     major_incident: 'ticketAlert.major_incident',
+    approval_requested: 'ticketAlert.approval_requested',
+    approval_approved: 'ticketAlert.approval_approved',
+    approval_rejected: 'ticketAlert.approval_rejected',
   }[kind]
   if (!key) return
   const message = t(key, { id: ticket_id ?? '', title: title || '' })
-  ui.toast(message, kind === 'sla_warning' ? 'info' : 'error', kind === 'sla_warning' ? 6000 : 10000)
+  const severe = kind === 'sla_breach' || kind === 'major_incident' || kind === 'approval_rejected'
+  ui.toast(message, severe ? 'error' : kind === 'approval_approved' ? 'success' : 'info', severe ? 10000 : 6000)
   desktopNotify(t('ticketAlert.notification_title'), message)
 }
 
