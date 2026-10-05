@@ -197,6 +197,10 @@ func main() {
 	}
 	handlers.MigrateWebhookTokenHashes()
 	handlers.StartBackupScheduler()
+	if cfg.AppMode != "timetracking" {
+		services.SeedResolutionCodes()
+		services.StartTicketSlaScheduler()
+	}
 
 	// IMAP incoming mail polling
 	imapSvc := services.NewIMAPService()

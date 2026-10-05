@@ -28,15 +28,11 @@ func attachTicketChecklist(ticket *models.Ticket) {
 
 // ticketChecklistBlocksClose returns true when the ticket has incomplete checklist items.
 func ticketChecklistBlocksClose(ticketID uint) bool {
-	var count int64
-	database.DB.Model(&models.TicketChecklistItem{}).
-		Where("ticket_id = ? AND is_completed = ?", ticketID, false).
-		Count(&count)
-	return count > 0
+	return services.TicketChecklistBlocksClose(ticketID)
 }
 
 func statusRequiresChecklistComplete(status string) bool {
-	return status == "closed" || status == "pending_close"
+	return services.StatusRequiresChecklistComplete(status)
 }
 
 // AdminListTicketChecklistTemplates GET /api/v1/admin/ticket-checklist-templates

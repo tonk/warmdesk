@@ -10,6 +10,7 @@ import (
 	"github.com/tonk/warmdesk/database"
 	"github.com/tonk/warmdesk/middleware"
 	"github.com/tonk/warmdesk/models"
+	"github.com/tonk/warmdesk/services"
 	"gorm.io/gorm"
 )
 
@@ -193,34 +194,49 @@ func ApplyInboxMacro(c *gin.Context) {
 	applyMacroActions(c, &ticket, &macro, userID)
 }
 
-var validMacroStatuses = map[string]bool{
-	"new": true, "open": true, "pending": true, "pending_close": true, "closed": true,
-}
-var validMacroPriorities = map[string]bool{
-	"low": true, "medium": true, "high": true, "critical": true,
-}
-var validMacroTypes = map[string]bool{
-	"incident": true, "problem": true, "service_request": true, "change_request": true,
-}
-
 func applyMacroActions(c *gin.Context, ticket *models.Ticket, macro *models.Macro, userID uint) {
-	updates := map[string]any{}
+	// Field-changing actions are folded into one ticket update so macros get
+	// the same validation, status lifecycle (SLA pause, resolved_at, …) and
+	// history as a manual edit. Later actions of the same type win.
+	var req ticketUpdateRequest
 	var pendingMessages []string
+	var tags []string
+	str := func(v string) *string { return &v }
+	id := func(v string) *uint {
+		n, err := strconv.ParseUint(v, 10, 64)
+		if err != nil {
+			return nil
+		}
+		u := uint(n)
+		return &u
+	}
 
 	for _, action := range macro.Actions {
 		switch action.Type {
 		case "set_status":
-			if validMacroStatuses[action.Value] {
-				updates["status"] = action.Value
+			if services.ValidTicketStatuses[action.Value] {
+				req.Status = str(action.Value)
 			}
 		case "set_priority":
-			if validMacroPriorities[action.Value] {
-				updates["priority"] = action.Value
+			if services.ValidTicketPriorities[action.Value] {
+				req.Priority = str(action.Value)
 			}
 		case "set_type":
-			if validMacroTypes[action.Value] {
-				updates["type"] = action.Value
+			if services.ValidTicketTypes[action.Value] {
+				req.Type = str(action.Value)
 			}
+		case "set_impact":
+			if services.ValidImpactUrgency[action.Value] {
+				req.Impact = str(action.Value)
+			}
+		case "set_urgency":
+			if services.ValidImpactUrgency[action.Value] {
+				req.Urgency = str(action.Value)
+			}
+		case "set_category":
+			req.CategoryID = id(action.Value)
+		case "set_resolution":
+			req.ResolutionCode = id(action.Value)
 		case "add_message":
 			if action.Value != "" {
 				body := expandPlaceholders(action.Value, ticket, userID)
@@ -228,19 +244,18 @@ func applyMacroActions(c *gin.Context, ticket *models.Ticket, macro *models.Macr
 			}
 		case "add_tag":
 			if action.Value != "" {
-				tag := models.TicketTag{TicketID: ticket.ID, Name: action.Value}
-				database.DB.FirstOrCreate(&tag, models.TicketTag{TicketID: ticket.ID, Name: action.Value})
+				tags = append(tags, action.Value)
 			}
 		}
 	}
 
-	if newStatus, ok := updates["status"].(string); ok && statusRequiresChecklistComplete(newStatus) && ticketChecklistBlocksClose(ticket.ID) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": errChecklistIncomplete})
+	if e := applyTicketUpdate(ticket, &req, userID, false); e != nil {
+		c.JSON(e.Status, e.Body)
 		return
 	}
-
-	if len(updates) > 0 {
-		database.DB.Model(ticket).Updates(updates)
+	for _, name := range tags {
+		tag := models.TicketTag{TicketID: ticket.ID, Name: name}
+		database.DB.FirstOrCreate(&tag, models.TicketTag{TicketID: ticket.ID, Name: name})
 	}
 
 	var updated models.Ticket
@@ -251,6 +266,8 @@ func applyMacroActions(c *gin.Context, ticket *models.Ticket, macro *models.Macr
 		Preload("Group").
 		Preload("Tags").
 		Preload("SlaPolicy").
+		Preload("Category").
+		Preload("ResolutionCode").
 		Preload("Messages", func(db *gorm.DB) *gorm.DB {
 			return db.Order("created_at asc")
 		}).

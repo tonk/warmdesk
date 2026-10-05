@@ -279,9 +279,21 @@ Users with the `customer` global role bypass the `helpdesk_enabled` flag and go 
 
 ### SLA policies
 
-`MatchSlaPolicy(priority)` in `handlers/sla.go` finds an active policy for the given priority (exact match or catch-all). `ComputeSlaDeadlines` computes the response and resolution deadlines from `time.Now()`. Both are called in `CreateTicket`. `refreshSlaBreachStatus` updates `SlaResponseBreached` and `SlaResolutionBreached` on every `GetTicket` / `ListTickets` call so the UI always reflects real-time breach state without a separate cron job.
+All SLA and lifecycle logic lives in `services/` (not `handlers/`) so the IMAP poller and the scheduler can use it too:
+
+- **`services/ticket_sla.go`** — `MatchSlaPolicy(ticket)` (every non-empty filter — priority, type, customer, category incl. subcategories — must match; most filters wins, ties → lowest ID), `ComputeSlaDeadlines(policy, cal, createdAt, pausedMinutes)`, `ApplySla(ticket)` (re-matches and recomputes, **always from `created_at`** — a priority change must never hand out a fresh deadline), and `EvaluateSlaBreaches`/`RefreshSlaBreaches`, which derive breach flags purely from timestamps (`first_response_at`, `resolved_at`, `sla_paused_at`) so a ticket closed late is breached even if nobody viewed it in between. Business calendars (`models.BusinessCalendar` + holidays, `WorkCalendar`, `AddBusinessMinutes`/`BusinessMinutesBetween`); `nil` calendar = 24×7.
+- **`services/ticket_lifecycle.go`** — `TransitionTicketStatus(ticket, status, now, opts)` returns the column updates for a status change: stamps `resolved_at`/`closed_at`, pauses the resolution clock in `pending` (`sla_paused_at`) and banks the paused business minutes in `sla_paused_minutes` on resume (pushing the resolution deadline back), clears the stamps and bumps `reopen_count` on reopen (`CountReopen` — off for spam/unspam). **Every status write must go through it** (or `SaveTicketStatus`): `applyTicketUpdate`, macros, spam, auto-close, IMAP replies, resolve-linked. Also `LoadHelpdeskSettings` (priority matrix, resolved auto-close days, require resolution code, major-incident group — keys in `system_settings`), `DerivePriority`, `AutoCloseTickets`, `BackfillTicketTimestamps` (one-off fill of `resolved_at`/`closed_at` from history), `SeedResolutionCodes`.
+- **`services/ticket_escalation.go`** — `StartTicketSlaScheduler()` (started from `main.go` unless `app_mode=timetracking`) runs every minute: auto-close, breach refresh, warning at `WarningPercent`, escalation on first breach (notify + optionally reassign to `EscalationGroupID`/`EscalationUserID`). `claimTicketAlert` sets `sla_warned_at`/`sla_escalated_at` with a conditional `UPDATE … WHERE col IS NULL` so only one instance alerts when several share a DB. Alerts go out as a `ticket.alert` WS message (`kind`: `sla_warning` | `sla_breach` | `major_incident`) or email to offline users.
+
+Statuses: `new`, `open`, `in_progress`, `pending`, `resolved`, `pending_close`, `closed`; `services.IsResolvedStatus` = resolved | pending_close | closed. A `customer`-role reply (portal or IMAP) reopens resolved tickets / resumes pending ones. `first_response_at` is set on the first public non-customer reply regardless of SLA.
 
 SLA policies are managed by admins via `GET/POST/PUT/DELETE /api/v1/admin/sla-policies` (no feature flag — always visible to admins).
+
+### ITIL incident and problem management
+
+Ticket updates from both `PUT /customers/:cid/tickets/:id` and `PUT /tickets/inbox/:id` (and macros, resolve-linked) share `applyTicketUpdate` in `handlers/ticket_update.go`, which returns a `*ticketUpdateError` instead of writing the response. Fields: `impact`/`urgency` (derive `priority` via the matrix unless `priority` is sent explicitly), `category_id` (two-level `TicketCategory`), `resolution_code_id` (`TicketResolutionCode`, required for resolving when `helpdesk_require_resolution_code` is on — error code `resolution_code_required`), `resolution_notes`, `is_major_incident` (notifies the major-incident group), and for `type = problem`: `problem_status`, `root_cause`, `workaround`, `is_known_error`. For the optional FKs, `0` clears.
+
+`TicketLink.LinkType` is directional (`source <type> target`): `related`, `duplicate_of`, `caused_by` (incident → problem), `parent_of`; `ListTicketLinks` returns `direction` (`outgoing`/`incoming`). Link targets must be accessible to the caller (`canSeeTicket`), which also hides problem tickets from `customer`-role users everywhere (lists, detail, links). `GET /problems` is the cross-customer problem list / known error database; `POST /customers/:cid/tickets/:id/resolve-linked` resolves all `caused_by` incidents of a problem. `GET /helpdesk/reports/tickets` (+ `/pdf`, `/xlsx`) is the KPI report (`handlers/ticket_report*.go`, own 12-language label table `ticketReportTranslations`); FCR counts agent replies as public, non-`inbound` messages without `from_name` by non-customer users — IMAP replies set `TicketMessage.Inbound`. Admin config: `/admin/ticket-categories`, `/admin/ticket-resolution-codes`, `/admin/business-calendars` (+ `/:id/import-holidays` reusing `holidaysByLocale`), `PUT /admin/helpdesk/settings`; readable by agents: `GET /helpdesk/settings`, `/ticket-categories`, `/ticket-resolution-codes`.
 
 ### Pending reminder
 
@@ -289,7 +301,7 @@ A ticket in `"pending"` status may have a `ReminderAt` timestamp. `ListTickets` 
 
 ### Pending close
 
-A ticket in `"pending_close"` status has a `CloseAt` timestamp. `autoClosePendingTickets()` (called inline from `ListTickets`/`GetTicket`) closes any ticket whose `close_at` has passed.
+A ticket in `"pending_close"` status has a `CloseAt` timestamp. `services.AutoCloseTickets()` (run by the SLA scheduler every minute and inline from `ListTickets`/`GetTicket`) closes any ticket whose `close_at` has passed, and `resolved` tickets older than `helpdesk_resolved_autoclose_days` (default 5, 0 = never).
 
 ### Date title prefix
 
@@ -305,9 +317,11 @@ Macros are reusable action sequences that agents can apply to tickets in one cli
 
 | Type | Effect |
 |---|---|
-| `set_status` | Sets ticket status (`new`, `open`, `pending`, `pending_close`, `closed`) |
+| `set_status` | Sets ticket status (`new`, `open`, `in_progress`, `pending`, `resolved`, `pending_close`, `closed`) |
 | `set_priority` | Sets priority (`low`, `medium`, `high`, `critical`) |
 | `set_type` | Sets type (`incident`, `problem`, `service_request`, `change_request`) |
+| `set_impact` / `set_urgency` | Sets impact / urgency (`low`, `medium`, `high`) |
+| `set_category` / `set_resolution` | Sets category / resolution code (value = ID) |
 | `add_tag` | Adds a tag (idempotent via `FirstOrCreate`) |
 | `add_message` | Appends a message body; supports placeholders `{email}`, `{fname}`, `{name}`, `{subject}`, `{ticket_id}`, `{agent}`, `{agent_fname}` |
 

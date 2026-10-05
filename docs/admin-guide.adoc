@@ -769,7 +769,7 @@ Metrics exposed:
 
 |`warmdesk_tickets_total`
 |`status`
-|Ticket count by status (`new`, `open`, `pending`, `pending_close`, `closed`)
+|Ticket count by status (`new`, `open`, `in_progress`, `pending`, `resolved`, `pending_close`, `closed`)
 
 |`warmdesk_tickets_by_priority_total`
 |`priority`
@@ -782,6 +782,18 @@ Metrics exposed:
 |`warmdesk_ticket_messages_total`
 |`visibility`
 |Ticket message count; `visibility` is `public` or `private`
+
+|`warmdesk_major_incidents_open`
+|—
+|Open tickets flagged as a major incident
+
+|`warmdesk_ticket_mttr_seconds`
+|—
+|Mean time to resolve of tickets resolved in the last 30 days
+
+|`warmdesk_ticket_resolution_sla_ratio`
+|—
+|Share (0–1) of tickets resolved in the last 30 days that met their resolution SLA
 
 |`warmdesk_backup_last_run_timestamp_seconds`
 |—
@@ -1311,9 +1323,9 @@ Global admins always have helpdesk access regardless of this flag.
 
 === SLA policies
 
-SLA policies define response and resolution deadlines based on ticket priority.
+SLA policies define response and resolution deadlines for tickets.
 
-Go to *Admin → Settings → SLA Policies*:
+Go to *Admin → SLA Policies*:
 
 [cols="1,3", options="header"]
 |===
@@ -1323,21 +1335,80 @@ Go to *Admin → Settings → SLA Policies*:
 |Descriptive label, e.g. "Standard"
 
 |*Response time (minutes)*
-|Time from ticket creation to first agent response
+|Working time from ticket creation to the first public agent reply
 
 |*Resolution time (minutes)*
-|Time from ticket creation to closure
+|Working time from ticket creation to resolution (*Resolved*, *Pending close* or *Closed*)
 
-|*Priority filter*
-|Comma-separated priorities this policy applies to (e.g. `high,critical`). Leave empty for a catch-all that applies to all unmatched priorities.
+|*Priority filter* / *Type filter*
+|Priorities and ticket types this policy applies to. Leave empty to match any.
+
+|*Customer* / *Category*
+|Restrict the policy to one customer (for a contract-specific SLA) or one category (a parent category also covers its subcategories). Leave empty to match any.
+
+|*Business hours*
+|The business calendar deadlines are counted in. Without one, deadlines run around the clock.
+
+|*Warning threshold (%)*
+|Share of the SLA time after which the assignee, owner and group are warned (default 75; 0 disables the warning)
+
+|*Escalation group* / *Escalation user*
+|Notified when the SLA is breached
+
+|*Reassign on breach*
+|When on (default), a breached ticket is reassigned to the escalation group and/or user
 
 |*Active*
 |Inactive policies are ignored; a policy can be disabled without deleting it
 |===
 
-When a ticket is created, WarmDesk applies the *first* active policy that matches the ticket's priority (a policy with an empty priority filter matches every priority), and computes the response / resolution deadlines immediately.
-Matching is *not* priority-specific-first: policies are evaluated in database order, not in order of specificity, so if a catch-all policy exists it can shadow a more specific one that would otherwise also match. To avoid ambiguity, keep at most one catch-all policy and give it the lowest priority in your workflow, or avoid combining a catch-all with overlapping specific policies altogether.
-Breach status is recalculated on every list and detail load.
+A policy matches a ticket when *every* filter it sets matches; of all matching active policies the most specific one (the one with the most filters set) wins, and ties go to the oldest policy.
+A policy without any filters is a catch-all for tickets no other policy matches.
+The policy is re-evaluated whenever a ticket's priority, type, category or customer changes; deadlines are always counted from the ticket's creation time.
+Tickets created from incoming email get an SLA in the same way.
+
+The resolution clock pauses while a ticket is *Pending* (waiting for the requester); the paused working time is added to the resolution deadline when the ticket leaves *Pending*.
+The response clock never pauses.
+
+A background job on the server re-evaluates every open ticket once a minute: it updates the breach flags, sends the warning once per ticket and escalates once on the first breach.
+Warnings and escalations reach online users as an in-app notification and offline users with email notifications enabled by email; each one is recorded in the ticket history.
+When several WarmDesk instances share one database, only one of them sends a given alert.
+
+=== Business hours
+
+Go to *Admin → Business hours* to define the working calendars SLA policies count in.
+A calendar has a time zone, working days and a daily start and end time (for example Monday–Friday 09:00–17:00 Europe/Amsterdam), plus a list of holidays.
+*Import public holidays* adds the public holidays of a country for a given year (the same tables as the time-tracking holiday import); dates already on the list are skipped.
+Deleting a calendar makes the policies that used it fall back to around-the-clock deadlines.
+
+=== Helpdesk settings
+
+*Admin → Helpdesk* holds the ITIL-related options:
+
+[cols="1,3", options="header"]
+|===
+|Setting |Notes
+
+|*Priority matrix*
+|Maps impact × urgency to a priority. When an agent sets both impact and urgency, the priority follows from this matrix (agents can still override it). The default is the usual ITIL 3 × 3 table.
+
+|*Auto-close resolved tickets after (days)*
+|*Resolved* tickets are closed automatically after this many days unless the requester replies (default 5; 0 = never)
+
+|*Require a resolution code*
+|When on, a ticket can only be resolved or closed with a resolution code (default off). Marking a ticket as spam is not affected.
+
+|*Major incident group*
+|Group whose members are notified when a ticket is flagged as a major incident
+
+|*Categories*
+|Two-level ticket categories (category › subcategory). Deactivated categories stay on existing tickets but can't be picked any more. Deleting a category also deletes its subcategories and removes them from tickets and SLA policies.
+
+|*Resolution codes*
+|The codes agents choose from when resolving a ticket. A default set (_Fixed_, _Workaround provided_, _Duplicate_, _User error_, _No fault found_, _Cancelled_) is created on first start. Codes in use can only be deactivated, not deleted.
+|===
+
+When upgrading, tickets that were already resolved or closed get their resolution and closing times filled in from their status history on the first start, so the ticket report covers older tickets too.
 
 === Macros
 
@@ -1354,13 +1425,22 @@ Each macro has:
 |Action type |Effect
 
 |`set_status`
-|Set ticket status (`new`, `open`, `pending`, `pending_close`, `closed`)
+|Set ticket status (`new`, `open`, `in_progress`, `pending`, `resolved`, `pending_close`, `closed`)
 
 |`set_priority`
 |Set priority (`low`, `medium`, `high`, `critical`)
 
 |`set_type`
 |Set type (`incident`, `problem`, `service_request`, `change_request`)
+
+|`set_impact` / `set_urgency`
+|Set impact or urgency (`low`, `medium`, `high`); the priority follows from the priority matrix unless the macro also sets one
+
+|`set_category`
+|Set the category
+
+|`set_resolution`
+|Set the resolution code
 
 |`add_tag`
 |Add a tag (idempotent)
@@ -1373,6 +1453,7 @@ Drag actions to reorder.
 Use the *Insert placeholder* chips below an `add_message` action to click-insert placeholders.
 
 Agents apply macros from the *Apply Macro* dropdown in the ticket detail view.
+Macro changes go through the same validation, status lifecycle and history as manual edits — for example, a macro that resolves a ticket fails when a resolution code is required and neither the ticket nor the macro sets one.
 `add_message` actions pre-fill the reply box rather than posting immediately, so the agent can review and edit before sending.
 
 === Checklist templates
@@ -1386,7 +1467,7 @@ Go to *Admin → Settings → Checklists*:
 . Save.
 
 When an agent opens a ticket and clicks *Apply Template* in the checklist section, all items from the template are added to the ticket's checklist.
-Tickets are blocked from moving to `pending_close` or `closed` status until every checklist item is checked off.
+Tickets are blocked from moving to `resolved`, `pending_close` or `closed` status until every checklist item is checked off.
 
 === Customer access for helpdesk users
 

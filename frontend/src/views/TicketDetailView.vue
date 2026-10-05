@@ -13,10 +13,12 @@
             <input v-else ref="titleInput" v-model="editTitleVal" class="form-input title-input" :aria-label="$t('ticket.title')" @blur="saveTitle" @keydown.enter="saveTitle" @keydown.escape="cancelTitleEdit" />
           </div>
           <div class="detail-actions">
-            <select class="form-input form-input-sm" :value="ticket.status" :aria-label="$t('ticket.status')" @change="updateStatus($event.target.value)">
+            <select class="form-input form-input-sm" :value="ticket.status" :aria-label="$t('ticket.status')" @change="onStatusSelect($event)">
               <option value="new">{{ $t('ticket.status_new') }}</option>
               <option value="open">{{ $t('ticket.status_open') }}</option>
+              <option value="in_progress">{{ $t('ticket.status_in_progress') }}</option>
               <option value="pending">{{ $t('ticket.status_pending') }}</option>
+              <option value="resolved" :disabled="checklistBlocksClose">{{ $t('ticket.status_resolved') }}</option>
               <option value="pending_close" :disabled="checklistBlocksClose">{{ $t('ticket.status_pending_close') }}</option>
               <option value="closed" :disabled="checklistBlocksClose">{{ $t('ticket.status_closed') }}</option>
             </select>
@@ -46,6 +48,10 @@
         <div class="detail-meta">
           <span class="ticket-type" :class="'type-' + ticket.type">{{ $t('ticket.type_' + ticket.type) }}</span>
           <span class="ticket-status" :class="'status-' + ticket.status">{{ $t('ticket.status_' + ticket.status) }}</span>
+          <span v-if="ticket.is_major_incident" class="major-incident-badge">{{ $t('ticket.major_incident') }}</span>
+          <span v-if="ticket.type === 'problem' && ticket.is_known_error" class="known-error-badge">{{ $t('ticket.known_error') }}</span>
+          <span v-if="ticket.reopen_count > 0" class="reopen-badge" :title="$t('ticket.reopen_count_hint')">{{ $t('ticket.reopened_n', { n: ticket.reopen_count }) }}</span>
+          <span v-if="ticket.category" class="category-chip">{{ categoryLabel(ticket.category_id) }}</span>
           <span v-if="ticket.sla_policy_id" :class="['sla-badge', ticket.sla_response_breached || ticket.sla_resolution_breached ? 'sla-breach' : slaWarning(ticket) ? 'sla-warning' : 'sla-ok']">
             {{ ticket.sla_policy?.name || $t('sla.sla') }}
             <template v-if="ticket.sla_response_breached">· {{ $t('sla.response_breached') }}</template>
@@ -95,6 +101,95 @@
         </div>
       </div>
 
+      <section class="itil-panel" aria-labelledby="itil-classification-heading">
+        <h4 id="itil-classification-heading">{{ $t('ticket.classification') }}</h4>
+        <div class="itil-grid">
+          <div class="itil-field">
+            <label for="itil-type">{{ $t('ticket.type') }}</label>
+            <select id="itil-type" class="form-input form-input-sm" :value="ticket.type" @change="saveFields({ type: $event.target.value })">
+              <option v-for="tp in TICKET_TYPES" :key="tp" :value="tp">{{ $t('ticket.type_' + tp) }}</option>
+            </select>
+          </div>
+          <div class="itil-field">
+            <label for="itil-impact">{{ $t('ticket.impact') }}</label>
+            <select id="itil-impact" class="form-input form-input-sm" :value="ticket.impact || ''" @change="saveFields({ impact: $event.target.value })">
+              <option value="">—</option>
+              <option v-for="lv in LEVELS" :key="lv" :value="lv">{{ $t('ticket.impact_' + lv) }}</option>
+            </select>
+          </div>
+          <div class="itil-field">
+            <label for="itil-urgency">{{ $t('ticket.urgency') }}</label>
+            <select id="itil-urgency" class="form-input form-input-sm" :value="ticket.urgency || ''" @change="saveFields({ urgency: $event.target.value })">
+              <option value="">—</option>
+              <option v-for="lv in LEVELS" :key="lv" :value="lv">{{ $t('ticket.urgency_' + lv) }}</option>
+            </select>
+          </div>
+          <div class="itil-field">
+            <label for="itil-category">{{ $t('ticket.category') }}</label>
+            <select id="itil-category" class="form-input form-input-sm" :value="ticket.category_id || 0" @change="saveFields({ category_id: Number($event.target.value) })">
+              <option :value="0">—</option>
+              <option v-for="c in categoryOptions" :key="c.id" :value="c.id">{{ c.label }}</option>
+            </select>
+          </div>
+          <div class="itil-field itil-field-check">
+            <label class="checkbox-label">
+              <input type="checkbox" :checked="ticket.is_major_incident" @change="saveFields({ is_major_incident: $event.target.checked })" />
+              {{ $t('ticket.major_incident') }}
+            </label>
+          </div>
+        </div>
+        <p v-if="derivedPriorityHint" class="itil-hint" role="status">{{ derivedPriorityHint }}</p>
+
+        <div v-if="isResolvedStatus(ticket.status) || ticket.resolution_code_id || ticket.resolution_notes" class="itil-resolution">
+          <h5>{{ $t('ticket.resolution') }}</h5>
+          <div class="itil-grid">
+            <div class="itil-field">
+              <label for="itil-resolution-code">{{ $t('ticket.resolution_code') }}</label>
+              <select id="itil-resolution-code" class="form-input form-input-sm" :value="ticket.resolution_code_id || 0" @change="saveFields({ resolution_code_id: Number($event.target.value) })">
+                <option :value="0">—</option>
+                <option v-for="rc in resolutionCodeOptions" :key="rc.id" :value="rc.id">{{ rc.name }}</option>
+              </select>
+            </div>
+            <div class="itil-field itil-field-wide">
+              <label for="itil-resolution-notes">{{ $t('ticket.resolution_notes') }}</label>
+              <textarea id="itil-resolution-notes" v-model="resolutionNotesDraft" class="form-input" rows="2" @blur="saveResolutionNotes"></textarea>
+            </div>
+          </div>
+          <p v-if="ticket.resolved_at" class="itil-hint">{{ $t('ticket.resolved_at') }} {{ formatDateTime(ticket.resolved_at) }}</p>
+        </div>
+      </section>
+
+      <section v-if="ticket.type === 'problem'" class="itil-panel problem-panel" aria-labelledby="problem-heading">
+        <h4 id="problem-heading">{{ $t('ticket.problem_management') }}</h4>
+        <div class="itil-grid">
+          <div class="itil-field">
+            <label for="problem-status">{{ $t('ticket.problem_status') }}</label>
+            <select id="problem-status" class="form-input form-input-sm" :value="ticket.problem_status || 'investigating'" @change="saveFields({ problem_status: $event.target.value })">
+              <option v-for="ps in PROBLEM_STATUSES" :key="ps" :value="ps">{{ $t('ticket.problem_status_' + ps) }}</option>
+            </select>
+          </div>
+          <div class="itil-field itil-field-check">
+            <label class="checkbox-label">
+              <input type="checkbox" :checked="ticket.is_known_error" @change="saveFields({ is_known_error: $event.target.checked })" />
+              {{ $t('ticket.known_error') }}
+            </label>
+            <HelpIcon i18n-key="ticket.known_error_hint" :label="$t('ticket.known_error')" />
+          </div>
+          <div class="itil-field itil-field-wide">
+            <label for="problem-root-cause">{{ $t('ticket.root_cause') }}</label>
+            <textarea id="problem-root-cause" v-model="problemDraft.root_cause" class="form-input" rows="3" @blur="saveProblemText('root_cause')"></textarea>
+          </div>
+          <div class="itil-field itil-field-wide">
+            <label for="problem-workaround">{{ $t('ticket.workaround') }}</label>
+            <textarea id="problem-workaround" v-model="problemDraft.workaround" class="form-input" rows="3" @blur="saveProblemText('workaround')"></textarea>
+          </div>
+        </div>
+        <div v-if="!isInbox" class="problem-actions">
+          <span class="itil-hint">{{ $t('ticket.linked_incidents_n', { n: linkedIncidents.length }) }}</span>
+          <button class="btn btn-secondary btn-sm" :disabled="!openLinkedIncidents.length" @click="openResolveLinked">{{ $t('ticket.resolve_linked') }}</button>
+        </div>
+      </section>
+
       <div v-if="ticket.description" class="detail-description">
         <div class="detail-desc-header">
           <span class="detail-desc-label">{{ $t('ticket.original_email') }}</span>
@@ -138,6 +233,7 @@
 
       <div v-if="ticket.sla_policy_id && !isInbox" class="sla-card">
         <h4>{{ ticket.sla_policy?.name || $t('sla.sla') }}</h4>
+        <p v-if="ticket.sla_paused_at" class="sla-paused" role="status">⏸ {{ $t('sla.paused_since', { date: formatDateTime(ticket.sla_paused_at) }) }}</p>
         <div class="sla-card-body">
           <div class="sla-card-row" v-if="ticket.sla_response_deadline">
             <span class="sla-card-label">{{ $t('sla.response_by') }}</span>
@@ -150,7 +246,7 @@
           <div class="sla-card-row" v-if="ticket.sla_resolution_deadline">
             <span class="sla-card-label">{{ $t('sla.resolution_by') }}</span>
             <span :class="['sla-card-value', ticket.sla_resolution_breached ? 'sla-card-breach' : '']">{{ formatDateTime(ticket.sla_resolution_deadline) }}</span>
-            <span v-if="ticket.status === 'pending_close'" class="sla-card-check met"><span class="feat-check" style="color:var(--color-success)">✓</span> {{ $t('ticket.status_' + ticket.status) }}</span>
+            <span v-if="ticket.resolved_at && !ticket.sla_resolution_breached" class="sla-card-check met"><span class="feat-check" style="color:var(--color-success)">✓</span> {{ $t('ticket.status_resolved') }} {{ formatDateTime(ticket.resolved_at) }}</span>
             <span v-else-if="ticket.sla_resolution_breached" class="sla-card-status breach">{{ $t('sla.resolution_breached') }}</span>
             <span v-else-if="slaWarning(ticket)" class="sla-card-status warn">{{ $t('sla.warning') }}</span>
             <span v-else class="sla-card-status ok">{{ $t('sla.on_track') }}</span>
@@ -162,13 +258,20 @@
         <h4>{{ $t('ticket.linked_tickets') }} <span v-if="linkedTickets.length" class="count">({{ linkedTickets.length }})</span></h4>
         <div v-if="linkedTickets.length" class="linked-list">
           <div v-for="lt in linkedTickets" :key="lt.link_id" class="linked-row" @click="openTicket(lt)">
+            <span class="linked-type">{{ linkTypeLabel(lt) }}</span>
             <span class="linked-status" :class="'status-' + lt.status">{{ $t('ticket.status_' + lt.status) }}</span>
             <span class="linked-priority" :class="'pri-' + lt.priority">{{ lt.priority }}</span>
             <span class="linked-title">#{{ lt.id }} {{ lt.title }}</span>
-            <button class="btn-icon-xs" @click.stop="removeLinkedTicket(lt)" :title="$t('ticket.remove_link')" aria-label="Remove link">✕</button>
+            <span v-if="lt.type === 'problem' && lt.is_known_error" class="known-error-badge">{{ $t('ticket.known_error') }}</span>
+            <button v-if="lt.workaround" class="btn btn-ghost btn-xs" @click.stop="useWorkaround(lt)">{{ $t('ticket.use_workaround') }}</button>
+            <button class="btn-icon-xs" @click.stop="removeLinkedTicket(lt)" :title="$t('ticket.remove_link')" :aria-label="$t('ticket.remove_link')">✕</button>
           </div>
         </div>
         <div class="linked-add-row">
+          <label class="sr-only" for="new-link-type">{{ $t('ticket.link_type') }}</label>
+          <select id="new-link-type" class="form-input form-input-sm" v-model="newLinkType">
+            <option v-for="lt in LINK_TYPES" :key="lt" :value="lt">{{ $t('ticket.link_out_' + lt) }}</option>
+          </select>
           <input class="form-input form-input-sm" v-model="newLinkId" :placeholder="$t('ticket.add_link_placeholder')" :aria-label="$t('ticket.linked_tickets')" @keydown.enter.prevent="addLinkedTicket" />
           <button class="btn btn-secondary btn-sm" @click="addLinkedTicket" :disabled="!newLinkId.trim()">{{ $t('common.add') }}</button>
         </div>
@@ -363,6 +466,40 @@
       {{ $t('ticket.not_found') }}
     </div>
 
+    <BaseModal v-if="resolveDialog" :title="$t('ticket.resolve_title')" @close="resolveDialog = null">
+      <form id="resolve-form" class="resolve-form" @submit.prevent="confirmResolve">
+        <p class="itil-hint">{{ $t('ticket.resolve_intro', { status: $t('ticket.status_' + resolveDialog.status) }) }}</p>
+        <label for="resolve-code">{{ $t('ticket.resolution_code') }}<span v-if="helpdeskSettings.require_resolution_code" aria-hidden="true"> *</span></label>
+        <select id="resolve-code" v-model.number="resolveDialog.code" class="form-input" :required="helpdeskSettings.require_resolution_code">
+          <option :value="0">—</option>
+          <option v-for="rc in resolutionCodeOptions" :key="rc.id" :value="rc.id">{{ rc.name }}</option>
+        </select>
+        <label for="resolve-notes">{{ $t('ticket.resolution_notes') }}</label>
+        <textarea id="resolve-notes" v-model="resolveDialog.notes" class="form-input" rows="3"></textarea>
+      </form>
+      <template #footer>
+        <button class="btn btn-secondary" @click="resolveDialog = null">{{ $t('common.cancel') }}</button>
+        <button class="btn btn-primary" type="submit" form="resolve-form" :disabled="resolving || (helpdeskSettings.require_resolution_code && !resolveDialog.code)">{{ $t('ticket.status_' + resolveDialog.status) }}</button>
+      </template>
+    </BaseModal>
+
+    <BaseModal v-if="resolveLinkedDialog" :title="$t('ticket.resolve_linked')" @close="resolveLinkedDialog = null">
+      <form id="resolve-linked-form" class="resolve-form" @submit.prevent="confirmResolveLinked">
+        <p class="itil-hint">{{ $t('ticket.resolve_linked_intro', { n: openLinkedIncidents.length }) }}</p>
+        <label for="resolve-linked-code">{{ $t('ticket.resolution_code') }}<span v-if="helpdeskSettings.require_resolution_code" aria-hidden="true"> *</span></label>
+        <select id="resolve-linked-code" v-model.number="resolveLinkedDialog.code" class="form-input" :required="helpdeskSettings.require_resolution_code">
+          <option :value="0">—</option>
+          <option v-for="rc in resolutionCodeOptions" :key="rc.id" :value="rc.id">{{ rc.name }}</option>
+        </select>
+        <label for="resolve-linked-msg">{{ $t('ticket.resolve_linked_message') }}</label>
+        <textarea id="resolve-linked-msg" v-model="resolveLinkedDialog.message" class="form-input" rows="4"></textarea>
+      </form>
+      <template #footer>
+        <button class="btn btn-secondary" @click="resolveLinkedDialog = null">{{ $t('common.cancel') }}</button>
+        <button class="btn btn-primary" type="submit" form="resolve-linked-form" :disabled="resolving || (helpdeskSettings.require_resolution_code && !resolveLinkedDialog.code)">{{ $t('ticket.resolve_linked') }}</button>
+      </template>
+    </BaseModal>
+
     <BaseModal v-if="showRawEmail" title="Original email" @close="showRawEmail = false" :resizable="true" style="--modal-width: 800px">
       <pre class="raw-email-pre">{{ rawEmailContent }}</pre>
     </BaseModal>
@@ -375,6 +512,7 @@ import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import Sortable from 'sortablejs'
 import { ticketsApi } from '@/api/tickets'
+import { helpdeskApi } from '@/api/helpdesk'
 import { macrosApi } from '@/api/macros'
 import { ticketChecklistsApi } from '@/api/ticketChecklists'
 import client from '@/api/client'
@@ -454,6 +592,7 @@ const sending = ref(false)
 const newTagName = ref('')
 const linkedTickets = ref(null)
 const newLinkId = ref('')
+const newLinkType = ref('related')
 const linkedCards = ref(null)
 const newCardLink = ref('')
 const customerUsers = ref([])
@@ -504,6 +643,157 @@ function checklistApi() {
     deleteItem: (itemId) => ticketChecklistsApi.deleteItem(customerId.value, ticketId.value, itemId),
     reorder: (items) => ticketChecklistsApi.reorder(customerId.value, ticketId.value, items),
   }
+}
+
+// ── ITIL: classification, resolution, problem management ────────────────────
+const TICKET_TYPES = ['incident', 'problem', 'service_request', 'change_request']
+const LEVELS = ['low', 'medium', 'high']
+const PROBLEM_STATUSES = ['investigating', 'root_cause_identified', 'known_error', 'resolved']
+const LINK_TYPES = ['related', 'duplicate_of', 'caused_by', 'parent_of']
+const RESOLVED_STATUSES = ['resolved', 'pending_close', 'closed']
+const isResolvedStatus = (s) => RESOLVED_STATUSES.includes(s)
+
+const helpdeskSettings = ref({ priority_matrix: {}, require_resolution_code: false })
+const categories = ref([])
+const resolutionCodes = ref([])
+const resolveDialog = ref(null)
+const resolveLinkedDialog = ref(null)
+const resolving = ref(false)
+const resolutionNotesDraft = ref('')
+const problemDraft = ref({ root_cause: '', workaround: '' })
+
+async function loadHelpdeskConfig() {
+  const [s, c, r] = await Promise.allSettled([
+    helpdeskApi.getSettings(), helpdeskApi.listCategories(), helpdeskApi.listResolutionCodes(),
+  ])
+  if (s.status === 'fulfilled') helpdeskSettings.value = s.value.data
+  if (c.status === 'fulfilled') categories.value = c.value.data || []
+  if (r.status === 'fulfilled') resolutionCodes.value = r.value.data || []
+}
+
+// Categories as "Parent › Child", parents first. The ticket's own category
+// stays selectable even when it has since been deactivated.
+const categoryOptions = computed(() => {
+  const byId = Object.fromEntries(categories.value.map(c => [c.id, c]))
+  const opts = categories.value.map(c => ({
+    id: c.id,
+    label: c.parent_id && byId[c.parent_id] ? `${byId[c.parent_id].name} › ${c.name}` : c.name,
+  }))
+  const own = ticket.value?.category
+  if (own && !byId[own.id]) opts.push({ id: own.id, label: own.name })
+  return opts.sort((a, b) => a.label.localeCompare(b.label))
+})
+
+function categoryLabel(id) {
+  return categoryOptions.value.find(c => c.id === id)?.label || ticket.value?.category?.name || ''
+}
+
+const resolutionCodeOptions = computed(() => {
+  const opts = [...resolutionCodes.value]
+  const own = ticket.value?.resolution_code
+  if (own && !opts.some(rc => rc.id === own.id)) opts.push(own)
+  return opts
+})
+
+const derivedPriorityHint = computed(() => {
+  const tk = ticket.value
+  if (!tk?.impact || !tk?.urgency) return ''
+  const p = helpdeskSettings.value.priority_matrix?.[`${tk.impact}:${tk.urgency}`]
+  if (!p) return ''
+  return p === tk.priority
+    ? t('ticket.priority_derived', { priority: t('ticket.priority_' + p) })
+    : t('ticket.priority_overridden', { priority: t('ticket.priority_' + p) })
+})
+
+watch(ticket, (tk) => {
+  resolutionNotesDraft.value = tk?.resolution_notes || ''
+  problemDraft.value = { root_cause: tk?.root_cause || '', workaround: tk?.workaround || '' }
+})
+
+async function saveFields(fields, successMsg = t('ticket.updated')) {
+  try {
+    const { data } = await apiUpdate(fields)
+    ticket.value = data
+    syncChecklistFromTicket(data)
+    ui.success(successMsg)
+    return true
+  } catch (e) {
+    ui.error(e.response?.data?.error || t('ticket.update_failed'))
+    return false
+  }
+}
+
+function saveResolutionNotes() {
+  if (resolutionNotesDraft.value === (ticket.value?.resolution_notes || '')) return
+  saveFields({ resolution_notes: resolutionNotesDraft.value })
+}
+
+function saveProblemText(field) {
+  if (problemDraft.value[field] === (ticket.value?.[field] || '')) return
+  saveFields({ [field]: problemDraft.value[field] })
+}
+
+// Resolving goes through a dialog that collects the resolution code and
+// notes; closing directly only asks when a code is required and missing.
+function onStatusSelect(event) {
+  const status = event.target.value
+  const tk = ticket.value
+  const entersResolved = isResolvedStatus(status) && !isResolvedStatus(tk.status)
+  const needsCode = helpdeskSettings.value.require_resolution_code && !tk.resolution_code_id
+  if (entersResolved && (status === 'resolved' || needsCode)) {
+    event.target.value = tk.status
+    resolveDialog.value = { status, code: tk.resolution_code_id || 0, notes: tk.resolution_notes || '' }
+    return
+  }
+  updateStatus(status)
+}
+
+async function confirmResolve() {
+  const d = resolveDialog.value
+  resolving.value = true
+  const ok = await saveFields({ status: d.status, resolution_code_id: d.code || 0, resolution_notes: d.notes }, t('ticket.status_updated'))
+  resolving.value = false
+  if (ok) resolveDialog.value = null
+}
+
+const linkedIncidents = computed(() =>
+  (linkedTickets.value || []).filter(l => l.link_type === 'caused_by' && l.direction === 'incoming')
+)
+const openLinkedIncidents = computed(() => linkedIncidents.value.filter(l => !isResolvedStatus(l.status)))
+
+function openResolveLinked() {
+  resolveLinkedDialog.value = { code: ticket.value?.resolution_code_id || 0, message: problemDraft.value.workaround || '' }
+}
+
+async function confirmResolveLinked() {
+  const d = resolveLinkedDialog.value
+  resolving.value = true
+  try {
+    const { data } = await helpdeskApi.resolveLinked(customerId.value, ticketId.value, {
+      resolution_code_id: d.code || undefined, message: d.message,
+    })
+    ui.success(t('ticket.resolve_linked_done', { n: data.resolved, skipped: data.skipped }))
+    resolveLinkedDialog.value = null
+    const { data: links } = await ticketsApi.listLinks(customerId.value, ticketId.value)
+    linkedTickets.value = links || []
+  } catch (e) {
+    ui.error(e.response?.data?.error || t('ticket.update_failed'))
+  } finally {
+    resolving.value = false
+  }
+}
+
+function linkTypeLabel(lt) {
+  const type = lt.link_type || 'related'
+  return t((lt.direction === 'incoming' ? 'ticket.link_in_' : 'ticket.link_out_') + type)
+}
+
+async function useWorkaround(lt) {
+  const text = lt.workaround.trim()
+  newMessage.value = newMessage.value.trim() ? `${newMessage.value.trim()}\n\n${text}` : text
+  msgEditorTab.value = 'edit'
+  await nextTick()
+  document.getElementById('ticket-msg-panel-edit')?.focus()
 }
 
 function apiUpdate(data) {
@@ -787,7 +1077,7 @@ watch([() => route.params.ticketId, () => route.name], () => {
   fetchTicket()
 })
 
-onMounted(() => { fetchTicket(); loadMacros(); loadChecklistTemplates() })
+onMounted(() => { fetchTicket(); loadMacros(); loadChecklistTemplates(); loadHelpdeskConfig() })
 
 // Refresh messages when IMAP delivers a reply to this ticket
 async function refreshMessages() {
@@ -1076,10 +1366,11 @@ async function addLinkedTicket() {
   const targetId = parseInt(newLinkId.value.trim(), 10)
   if (!targetId) return
   try {
-    const { data } = await ticketsApi.addLink(customerId.value, ticketId.value, targetId)
+    const { data } = await ticketsApi.addLink(customerId.value, ticketId.value, targetId, newLinkType.value)
     if (!linkedTickets.value) linkedTickets.value = []
     linkedTickets.value.push(data)
     newLinkId.value = ''
+    newLinkType.value = 'related'
     ui.success('Ticket linked')
   } catch (e) {
     const msg = e.response?.data?.error || 'Failed to link ticket'
@@ -1172,7 +1463,7 @@ async function doCreateCard() {
 
 function slaWarning(t) {
   if (!t.sla_response_deadline && !t.sla_resolution_deadline) return false
-  if (t.status === 'pending_close') return false
+  if (isResolvedStatus(t.status) || t.sla_paused_at) return false
   const now = Date.now()
   if (t.sla_response_deadline && !t.first_response_at) {
     const deadline = new Date(t.sla_response_deadline).getTime()
@@ -1204,6 +1495,18 @@ function activityIcon(type) {
     tag_removed: '−',
     dates_changed: '📅',
     customer_moved: '→',
+    impact_changed: '⚑',
+    urgency_changed: '⚑',
+    category_changed: '▤',
+    resolution_changed: '✓',
+    major_incident_changed: '⚠',
+    problem_status_changed: '⟳',
+    root_cause_changed: '✎',
+    workaround_changed: '✎',
+    known_error_changed: '★',
+    sla_warning: '⏰',
+    sla_escalated: '⚠',
+    linked_incidents_resolved: '✓',
   }
   return icons[type] || '•'
 }
@@ -1228,6 +1531,18 @@ function activityLabel(h) {
     case 'tag_removed': return `removed tag #${h.detail}`
     case 'dates_changed': return 'updated reminder / close dates'
     case 'customer_moved': return `moved to customer: ${h.detail}`
+    case 'impact_changed': return `changed impact to ${h.detail || '—'}`
+    case 'urgency_changed': return `changed urgency to ${h.detail || '—'}`
+    case 'category_changed': return `changed category to ${h.detail || '—'}`
+    case 'resolution_changed': return `set resolution code to ${h.detail || '—'}`
+    case 'major_incident_changed': return h.detail === 'true' ? 'flagged as major incident' : 'removed major incident flag'
+    case 'problem_status_changed': return `changed problem status to ${h.detail}`
+    case 'root_cause_changed': return 'updated the root cause'
+    case 'workaround_changed': return 'updated the workaround'
+    case 'known_error_changed': return h.detail === 'true' ? 'marked as known error' : 'unmarked as known error'
+    case 'sla_warning': return 'SLA warning threshold reached'
+    case 'sla_escalated': return `SLA breached — escalated (${h.detail})`
+    case 'linked_incidents_resolved': return `resolved ${h.detail} linked incident(s)`
     default: return h.detail || h.event_type
   }
 }
@@ -1377,6 +1692,38 @@ async function assignToCustomer() {
 .status-pending { background: #f0e6ff; color: #6b21a8; }
 .status-pending_close { background: #d1fae5; color: #065f46; }
 .status-closed { background: #e5e7eb; color: #374151; }
+.status-in_progress { background: color-mix(in srgb, var(--color-primary) 18%, transparent); color: var(--color-text); }
+.status-resolved { background: color-mix(in srgb, var(--color-success) 22%, transparent); color: var(--color-text); }
+.major-incident-badge,
+.known-error-badge,
+.reopen-badge,
+.category-chip { font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 4px; border: 1px solid var(--color-border); color: var(--color-text); }
+.major-incident-badge { background: color-mix(in srgb, var(--color-danger) 18%, transparent); border-color: var(--color-danger); }
+.known-error-badge { background: color-mix(in srgb, var(--color-warning) 22%, transparent); border-color: var(--color-warning); }
+.reopen-badge { background: color-mix(in srgb, var(--color-warning) 12%, transparent); }
+.category-chip { background: var(--color-surface); }
+.itil-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+.itil-panel h4 { margin: 0 0 10px; font-size: 14px; }
+.itil-panel h5 { margin: 14px 0 8px; font-size: 13px; }
+.itil-grid { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: flex-end; }
+.itil-field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; min-width: 150px; }
+.itil-field > label { color: var(--color-text-muted); font-weight: 600; }
+.itil-field-wide { flex: 1 1 100%; }
+.itil-field-check { flex-direction: row; align-items: center; min-width: 0; }
+.itil-hint { font-size: 12px; color: var(--color-text-muted); margin: 8px 0 0; }
+.problem-panel { border-left: 3px solid var(--color-warning); }
+.problem-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
+.problem-actions .itil-hint { margin: 0; }
+.linked-type { font-size: 11px; color: var(--color-text-muted); white-space: nowrap; }
+.sla-paused { font-size: 12px; color: var(--color-text-muted); margin: 0 0 8px; }
+.resolve-form { display: flex; flex-direction: column; gap: 6px; }
+.resolve-form label { font-size: 13px; font-weight: 600; margin-top: 6px; }
 .detail-desc-header {
   display: flex;
   align-items: center;

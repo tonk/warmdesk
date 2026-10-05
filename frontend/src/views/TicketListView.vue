@@ -80,6 +80,7 @@
               <h3 class="ticket-card-title"><span v-if="t.is_spam" class="spam-tag">{{ $t('ticket.spam') }}</span>{{ t.title }}</h3>
               <div class="ticket-card-meta">
                 <span class="ticket-status" :class="'status-' + t.status">{{ $t('ticket.status_' + t.status) }}</span>
+                <span v-if="t.is_major_incident" class="major-badge">{{ $t('ticket.major_incident') }}</span>
                 <span v-if="t.sla_response_breached" class="sla-badge sla-breach" :title="slaTitle(t)">{{ $t('sla.breached') }}</span>
                 <span v-else-if="slaWarning(t)" class="sla-badge sla-warning" :title="slaTitle(t)">{{ $t('sla.warning') }}</span>
                 <span v-else-if="t.sla_policy_id" class="sla-badge sla-ok" :title="slaTitle(t)">{{ $t('sla.on_track') }}</span>
@@ -120,6 +121,7 @@
               <h3 class="ticket-card-title"><span v-if="t.is_spam" class="spam-tag">{{ $t('ticket.spam') }}</span>{{ t.title }}</h3>
               <div class="ticket-card-meta">
                 <span class="ticket-status" :class="'status-' + t.status">{{ $t('ticket.status_' + t.status) }}</span>
+                <span v-if="t.is_major_incident" class="major-badge">{{ $t('ticket.major_incident') }}</span>
                 <span v-if="t.reminder_at" class="reminder-badge">
                   {{ $t('ticket.reminder') }}: {{ formatDate(t.reminder_at) }}
                 </span>
@@ -163,6 +165,7 @@
               <h3 class="ticket-card-title"><span v-if="t.is_spam" class="spam-tag">{{ $t('ticket.spam') }}</span>{{ t.title }}</h3>
               <div class="ticket-card-meta">
                 <span class="ticket-status" :class="'status-' + t.status">{{ $t('ticket.status_' + t.status) }}</span>
+                <span v-if="t.is_major_incident" class="major-badge">{{ $t('ticket.major_incident') }}</span>
                 <span v-if="t.sla_response_breached" class="sla-badge sla-breach" :title="slaTitle(t)">{{ $t('sla.breached') }}</span>
                 <span v-else-if="slaWarning(t)" class="sla-badge sla-warning" :title="slaTitle(t)">{{ $t('sla.warning') }}</span>
                 <span v-else-if="t.sla_policy_id" class="sla-badge sla-ok" :title="slaTitle(t)">{{ $t('sla.on_track') }}</span>
@@ -203,6 +206,7 @@
               <h3 class="ticket-card-title"><span v-if="t.is_spam" class="spam-tag">{{ $t('ticket.spam') }}</span>{{ t.title }}</h3>
               <div class="ticket-card-meta">
                 <span class="ticket-status" :class="'status-' + t.status">{{ $t('ticket.status_' + t.status) }}</span>
+                <span v-if="t.is_major_incident" class="major-badge">{{ $t('ticket.major_incident') }}</span>
                 <span v-if="t.sla_response_breached" class="sla-badge sla-breach" :title="slaTitle(t)">{{ $t('sla.breached') }}</span>
                 <span v-else-if="slaWarning(t)" class="sla-badge sla-warning" :title="slaTitle(t)">{{ $t('sla.warning') }}</span>
                 <span v-else-if="t.sla_policy_id" class="sla-badge sla-ok" :title="slaTitle(t)">{{ $t('sla.on_track') }}</span>
@@ -227,7 +231,7 @@
           </div>
           <div v-for="g in groupedTickets" :key="g.status" class="group-section">
             <div class="group-header">
-              <h2 class="group-title">{{ g.label }}</h2>
+              <h2 class="group-title">{{ $t(g.labelKey) }}</h2>
               <span class="group-count">{{ g.tickets.length }}</span>
             </div>
             <div v-if="g.tickets.length && groupSubMode === 'cards'" class="ticket-grid">
@@ -384,6 +388,20 @@
             </select>
           </div>
           <div class="form-group">
+            <label for="new-ticket-impact">{{ $t('ticket.impact') }}</label>
+            <select id="new-ticket-impact" v-model="newTicket.impact" class="form-input">
+              <option value="">—</option>
+              <option v-for="lv in ['low', 'medium', 'high']" :key="lv" :value="lv">{{ $t('ticket.impact_' + lv) }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="new-ticket-urgency">{{ $t('ticket.urgency') }}</label>
+            <select id="new-ticket-urgency" v-model="newTicket.urgency" class="form-input">
+              <option value="">—</option>
+              <option v-for="lv in ['low', 'medium', 'high']" :key="lv" :value="lv">{{ $t('ticket.urgency_' + lv) }}</option>
+            </select>
+          </div>
+          <div class="form-group">
             <label for="new-ticket-priority">{{ $t('ticket.priority') }}</label>
             <select id="new-ticket-priority" v-model="newTicket.priority" class="form-input">
               <option value="low">{{ $t('ticket.priority_low') }}</option>
@@ -391,6 +409,21 @@
               <option value="high">{{ $t('ticket.priority_high') }}</option>
               <option value="critical">{{ $t('ticket.priority_critical') }}</option>
             </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="new-ticket-category">{{ $t('ticket.category') }}</label>
+            <select id="new-ticket-category" v-model="newTicket.category_id" class="form-input">
+              <option :value="null">—</option>
+              <option v-for="c in categoryOptions" :key="c.id" :value="c.id">{{ c.label }}</option>
+            </select>
+          </div>
+          <div class="form-group form-group-check">
+            <label class="checkbox-label">
+              <input type="checkbox" v-model="newTicket.is_major_incident" />
+              {{ $t('ticket.major_incident') }}
+            </label>
           </div>
         </div>
         <div class="form-row">
@@ -437,6 +470,7 @@ import { useRoute, useRouter, RouterLink } from 'vue-router'
 import client from '@/api/client'
 import { customersApi } from '@/api/customers'
 import { ticketsApi } from '@/api/tickets'
+import { helpdeskApi } from '@/api/helpdesk'
 import { attachmentsApi } from '@/api/attachments'
 import { useUIStore } from '@/stores/ui'
 import BaseModal from '@/components/common/BaseModal.vue'
@@ -464,7 +498,8 @@ const tickets = ref([])
 const loading = ref(true)
 const showCreate = ref(false)
 const descTab = ref('edit')
-const newTicket = ref({ title: '', description: '', type: 'incident', priority: 'medium', group_id: null, owner_id: null })
+const blankTicket = () => ({ title: '', description: '', type: 'incident', priority: 'medium', impact: '', urgency: '', category_id: null, is_major_incident: false, group_id: null, owner_id: null })
+const newTicket = ref(blankTicket())
 const newTicketTags = ref([])
 const newTagName = ref('')
 const pendingFiles = ref([])
@@ -506,8 +541,28 @@ function isPendingReminder(t) {
 }
 
 function isResolvedOrClosed(t) {
-  return t.status === 'pending_close' || t.status === 'closed'
+  return t.status === 'resolved' || t.status === 'pending_close' || t.status === 'closed'
 }
+
+// Impact × urgency preset the priority from the admin matrix; the priority
+// select stays editable as an override.
+const priorityMatrix = ref({})
+const categoryOptions = ref([])
+async function loadHelpdeskConfig() {
+  const [s, c] = await Promise.allSettled([helpdeskApi.getSettings(), helpdeskApi.listCategories()])
+  if (s.status === 'fulfilled') priorityMatrix.value = s.value.data?.priority_matrix || {}
+  if (c.status === 'fulfilled') {
+    const cats = c.value.data || []
+    const byId = Object.fromEntries(cats.map(x => [x.id, x]))
+    categoryOptions.value = cats
+      .map(x => ({ id: x.id, label: x.parent_id && byId[x.parent_id] ? `${byId[x.parent_id].name} › ${x.name}` : x.name }))
+      .sort((a, b) => a.label.localeCompare(b.label))
+  }
+}
+watch(() => [newTicket.value.impact, newTicket.value.urgency], ([impact, urgency]) => {
+  const p = impact && urgency && priorityMatrix.value[`${impact}:${urgency}`]
+  if (p) newTicket.value.priority = p
+})
 
 const regularTickets = computed(() => {
   return visibleTickets.value.filter(t => !isPendingReminder(t) && !isResolvedOrClosed(t))
@@ -520,7 +575,7 @@ const pendingReminderTickets = computed(() => {
 })
 
 const pendingCloseTickets = computed(() => {
-  return visibleTickets.value.filter(t => t.status === 'pending_close')
+  return visibleTickets.value.filter(t => t.status === 'resolved' || t.status === 'pending_close')
 })
 
 const closedTickets = computed(() => {
@@ -528,11 +583,13 @@ const closedTickets = computed(() => {
 })
 
 const statusGroups = [
-  { status: 'new', label: 'New' },
-  { status: 'open', label: 'Open' },
-  { status: 'pending', label: 'Pending reminder' },
-  { status: 'pending_close', label: 'Pending close' },
-  { status: 'closed', label: 'Closed' },
+  { status: 'new', labelKey: 'ticket.status_new' },
+  { status: 'open', labelKey: 'ticket.status_open' },
+  { status: 'in_progress', labelKey: 'ticket.status_in_progress' },
+  { status: 'pending', labelKey: 'ticket.pending_reminders' },
+  { status: 'resolved', labelKey: 'ticket.status_resolved' },
+  { status: 'pending_close', labelKey: 'ticket.status_pending_close' },
+  { status: 'closed', labelKey: 'ticket.status_closed' },
 ]
 
 const groupedTickets = computed(() => {
@@ -586,9 +643,10 @@ function sortByField(arr, f, d) {
 const listSections = computed(() => [
   { key: 'new',            label: t('ticket.status_new'),        tickets: visibleTickets.value.filter(tk => tk.status === 'new') },
   { key: 'open',           label: t('ticket.status_open'),       tickets: visibleTickets.value.filter(tk => tk.status === 'open') },
+  { key: 'in_progress',    label: t('ticket.status_in_progress'), tickets: visibleTickets.value.filter(tk => tk.status === 'in_progress') },
   { key: 'pending',        label: t('ticket.status_pending'),    tickets: visibleTickets.value.filter(tk => tk.status === 'pending' && !tk.reminder_at) },
   { key: 'pending-remind', label: t('ticket.pending_reminders'), tickets: visibleTickets.value.filter(tk => tk.status === 'pending' && tk.reminder_at).sort((a, b) => new Date(a.reminder_at) - new Date(b.reminder_at)) },
-  { key: 'pending-close',  label: t('ticket.resolved_closed'),   tickets: visibleTickets.value.filter(tk => tk.status === 'pending_close') },
+  { key: 'pending-close',  label: t('ticket.resolved_closed'),   tickets: visibleTickets.value.filter(tk => tk.status === 'resolved' || tk.status === 'pending_close') },
   { key: 'closed',         label: t('ticket.status_closed'),     tickets: visibleTickets.value.filter(tk => tk.status === 'closed') },
 ].filter(s => s.tickets.length > 0).map(s => ({ ...s, tickets: sortByField(s.tickets, sortField.value, sortDir.value) }))
 )
@@ -659,7 +717,7 @@ watch(() => route.params.id, () => {
   fetchData()
 })
 
-onMounted(fetchData)
+onMounted(() => { fetchData(); loadHelpdeskConfig() })
 
 function openTicket(t) {
   router.push(`/customers/${customerId.value}/tickets/${t.id}`)
@@ -667,7 +725,7 @@ function openTicket(t) {
 
 function slaWarning(t) {
   if (!t.sla_response_deadline && !t.sla_resolution_deadline) return false
-  if (t.status === 'pending_close') return false
+  if (['resolved', 'pending_close', 'closed'].includes(t.status) || t.sla_paused_at) return false
   const now = Date.now()
   if (t.sla_response_deadline && !t.first_response_at) {
     const deadline = new Date(t.sla_response_deadline).getTime()
@@ -723,7 +781,7 @@ async function submitCreate() {
     tickets.value.unshift(ticket)
     showCreate.value = false
     descTab.value = 'edit'
-    newTicket.value = { title: '', description: '', type: 'incident', priority: 'medium', group_id: null, owner_id: null }
+    newTicket.value = blankTicket()
     newTicketTags.value = []
     newTagName.value = ''
     ui.success('Ticket created')
@@ -884,6 +942,10 @@ async function onDescPaste(e) {
 .status-pending { background: #f0e6ff; color: #6b21a8; }
 .status-pending_close { background: #d1fae5; color: #065f46; }
 .status-closed { background: #e5e7eb; color: #374151; }
+.status-in_progress { background: color-mix(in srgb, var(--color-primary) 18%, transparent); color: var(--color-text); }
+.status-resolved { background: color-mix(in srgb, var(--color-success) 22%, transparent); color: var(--color-text); }
+.major-badge { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; text-transform: uppercase; border: 1px solid var(--color-danger); color: var(--color-text); background: color-mix(in srgb, var(--color-danger) 18%, transparent); }
+.form-group-check { display: flex; align-items: flex-end; }
 .ticket-assignee { display: flex; align-items: center; gap: 4px; }
 .sla-badge { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
 .sla-ok { background: #d1fae5; color: #065f46; }

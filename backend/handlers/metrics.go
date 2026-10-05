@@ -78,7 +78,7 @@ func GetMetrics(c *gin.Context) {
 	// warmdesk_tickets_total — by status and by priority
 	fmt.Fprintf(&buf, "\n# HELP warmdesk_tickets_total Number of tickets by status\n")
 	fmt.Fprintf(&buf, "# TYPE warmdesk_tickets_total gauge\n")
-	for _, status := range []string{"new", "open", "pending", "pending_close", "closed"} {
+	for _, status := range []string{"new", "open", "in_progress", "pending", "resolved", "pending_close", "closed"} {
 		var count int64
 		database.DB.Model(&models.Ticket{}).Where("status = ?", status).Count(&count)
 		fmt.Fprintf(&buf, "warmdesk_tickets_total{status=%q} %d\n", status, count)
@@ -89,7 +89,7 @@ func GetMetrics(c *gin.Context) {
 	for _, pri := range []string{"low", "medium", "high", "critical"} {
 		var count int64
 		database.DB.Model(&models.Ticket{}).
-			Where("priority = ? AND status NOT IN ('closed','pending_close')", pri).
+			Where("priority = ? AND status NOT IN ('closed','pending_close','resolved')", pri).
 			Count(&count)
 		fmt.Fprintf(&buf, "warmdesk_tickets_by_priority_total{priority=%q} %d\n", pri, count)
 	}
@@ -97,15 +97,55 @@ func GetMetrics(c *gin.Context) {
 	// warmdesk_sla_breaches_total — response and resolution breaches on open tickets
 	var respBreaches, resolBreaches int64
 	database.DB.Model(&models.Ticket{}).
-		Where("sla_response_breached = true AND status NOT IN ('closed','pending_close')").
+		Where("sla_response_breached = true AND status NOT IN ('closed','pending_close','resolved')").
 		Count(&respBreaches)
 	database.DB.Model(&models.Ticket{}).
-		Where("sla_resolution_breached = true AND status NOT IN ('closed','pending_close')").
+		Where("sla_resolution_breached = true AND status NOT IN ('closed','pending_close','resolved')").
 		Count(&resolBreaches)
 	fmt.Fprintf(&buf, "\n# HELP warmdesk_sla_breaches_total Number of open tickets currently breaching SLA\n")
 	fmt.Fprintf(&buf, "# TYPE warmdesk_sla_breaches_total gauge\n")
 	fmt.Fprintf(&buf, "warmdesk_sla_breaches_total{type=\"response\"} %d\n", respBreaches)
 	fmt.Fprintf(&buf, "warmdesk_sla_breaches_total{type=\"resolution\"} %d\n", resolBreaches)
+
+	// warmdesk_major_incidents_open / warmdesk_ticket_mttr_seconds — tickets
+	// resolved in the last 30 days.
+	var majorOpen int64
+	database.DB.Model(&models.Ticket{}).
+		Where("is_major_incident = ? AND status NOT IN ('closed','pending_close','resolved')", true).
+		Count(&majorOpen)
+	fmt.Fprintf(&buf, "\n# HELP warmdesk_major_incidents_open Number of open major incidents\n")
+	fmt.Fprintf(&buf, "# TYPE warmdesk_major_incidents_open gauge\n")
+	fmt.Fprintf(&buf, "warmdesk_major_incidents_open %d\n", majorOpen)
+
+	var recent []models.Ticket
+	database.DB.Select("created_at", "resolved_at", "sla_resolution_deadline", "sla_resolution_breached").
+		Where("resolved_at IS NOT NULL AND resolved_at >= ? AND (is_spam = ? OR is_spam IS NULL)", time.Now().AddDate(0, 0, -30), false).
+		Find(&recent)
+	var mttrSum float64
+	var slaN, slaMet int
+	for _, t := range recent {
+		mttrSum += t.ResolvedAt.Sub(t.CreatedAt).Seconds()
+		if t.SlaResolutionDeadline != nil {
+			slaN++
+			if !t.SlaResolutionBreached {
+				slaMet++
+			}
+		}
+	}
+	fmt.Fprintf(&buf, "\n# HELP warmdesk_ticket_mttr_seconds Mean time to resolve, tickets resolved in the last 30 days\n")
+	fmt.Fprintf(&buf, "# TYPE warmdesk_ticket_mttr_seconds gauge\n")
+	if len(recent) > 0 {
+		fmt.Fprintf(&buf, "warmdesk_ticket_mttr_seconds %.0f\n", mttrSum/float64(len(recent)))
+	} else {
+		fmt.Fprintf(&buf, "warmdesk_ticket_mttr_seconds 0\n")
+	}
+	fmt.Fprintf(&buf, "\n# HELP warmdesk_ticket_resolution_sla_ratio Share of tickets resolved within SLA, last 30 days\n")
+	fmt.Fprintf(&buf, "# TYPE warmdesk_ticket_resolution_sla_ratio gauge\n")
+	if slaN > 0 {
+		fmt.Fprintf(&buf, "warmdesk_ticket_resolution_sla_ratio %.4f\n", float64(slaMet)/float64(slaN))
+	} else {
+		fmt.Fprintf(&buf, "warmdesk_ticket_resolution_sla_ratio 1\n")
+	}
 
 	// warmdesk_ticket_messages_total — public vs private
 	var publicMsgs, privateMsgs int64

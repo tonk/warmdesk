@@ -36,9 +36,83 @@
             <span class="sla-unit">min</span>
           </div>
         </div>
-        <div class="sla-form-field" style="flex:1;min-width:160px">
-          <label class="sla-label" for="sla-filter">{{ $t('sla.priority_filter') }}</label>
-          <input id="sla-filter" class="form-input" v-model="form.priority_filter" :placeholder="$t('sla.priority_filter_placeholder')" />
+        <div class="sla-form-field">
+          <label class="sla-label" for="sla-warn">{{ $t('sla.warning_percent') }}</label>
+          <div class="sla-input-unit">
+            <input id="sla-warn" class="form-input" type="number" min="0" max="100" v-model.number="form.warning_percent" aria-describedby="sla-warn-hint" />
+            <span class="sla-unit">%</span>
+          </div>
+          <small id="sla-warn-hint" class="sla-hint">{{ $t('sla.warning_percent_hint') }}</small>
+        </div>
+        <div class="sla-form-field" style="flex:1;min-width:180px">
+          <label class="sla-label" for="sla-calendar">{{ $t('sla.calendar') }}</label>
+          <select id="sla-calendar" class="form-input" v-model="form.calendar_id">
+            <option :value="0">{{ $t('sla.calendar_24_7') }}</option>
+            <option v-for="c in calendars" :key="c.id" :value="c.id">{{ c.name }} ({{ c.timezone }})</option>
+          </select>
+        </div>
+      </div>
+
+      <h4 class="sla-section-title">{{ $t('sla.matching') }}</h4>
+      <p class="sla-hint sla-hint-block">{{ $t('sla.matching_hint') }}</p>
+
+      <div class="sla-form-row">
+        <fieldset class="sla-fieldset">
+          <legend class="sla-label">{{ $t('sla.priority_filter') }}</legend>
+          <label v-for="p in PRIORITIES" :key="p" class="sla-check">
+            <input type="checkbox" :value="p" v-model="form.priorities" />
+            {{ $t('ticket.priority_' + p) }}
+          </label>
+        </fieldset>
+        <fieldset class="sla-fieldset">
+          <legend class="sla-label">{{ $t('sla.type_filter') }}</legend>
+          <label v-for="ty in TYPES" :key="ty" class="sla-check">
+            <input type="checkbox" :value="ty" v-model="form.types" />
+            {{ $t('ticket.type_' + ty) }}
+          </label>
+        </fieldset>
+      </div>
+
+      <div class="sla-form-row">
+        <div class="sla-form-field" style="flex:1;min-width:180px">
+          <label class="sla-label" for="sla-customer">{{ $t('sla.customer') }}</label>
+          <select id="sla-customer" class="form-input" v-model="form.customer_id">
+            <option :value="0">{{ $t('sla.any_customer') }}</option>
+            <option v-for="c in customers" :key="c.id" :value="c.id">{{ c.name }}</option>
+          </select>
+        </div>
+        <div class="sla-form-field" style="flex:1;min-width:180px">
+          <label class="sla-label" for="sla-category">{{ $t('sla.category') }}</label>
+          <select id="sla-category" class="form-input" v-model="form.category_id">
+            <option :value="0">{{ $t('sla.any_category') }}</option>
+            <option v-for="c in categoryOptions" :key="c.id" :value="c.id">{{ c.label }}</option>
+          </select>
+        </div>
+      </div>
+
+      <h4 class="sla-section-title">{{ $t('sla.escalation') }}</h4>
+      <p class="sla-hint sla-hint-block">{{ $t('sla.escalation_hint') }}</p>
+
+      <div class="sla-form-row">
+        <div class="sla-form-field" style="flex:1;min-width:180px">
+          <label class="sla-label" for="sla-esc-group">{{ $t('sla.escalation_group') }}</label>
+          <select id="sla-esc-group" class="form-input" v-model="form.escalation_group_id">
+            <option :value="0">{{ $t('sla.none') }}</option>
+            <option v-for="g in groups" :key="g.id" :value="g.id">{{ g.name }}</option>
+          </select>
+        </div>
+        <div class="sla-form-field" style="flex:1;min-width:180px">
+          <label class="sla-label" for="sla-esc-user">{{ $t('sla.escalation_user') }}</label>
+          <select id="sla-esc-user" class="form-input" v-model="form.escalation_user_id">
+            <option :value="0">{{ $t('sla.none') }}</option>
+            <option v-for="u in users" :key="u.id" :value="u.id">{{ userLabel(u) }}</option>
+          </select>
+        </div>
+        <div class="sla-form-field" style="align-self:flex-end">
+          <label class="toggle-label">
+            <input type="checkbox" v-model="form.escalation_reassign" />
+            {{ $t('sla.escalation_reassign') }}
+          </label>
         </div>
       </div>
 
@@ -58,7 +132,9 @@
           <th>{{ $t('sla.name') }}</th>
           <th>{{ $t('sla.response_time') }}</th>
           <th>{{ $t('sla.resolution_time') }}</th>
-          <th>{{ $t('sla.priority_filter') }}</th>
+          <th>{{ $t('sla.matching') }}</th>
+          <th>{{ $t('sla.calendar') }}</th>
+          <th>{{ $t('sla.escalation') }}</th>
           <th>{{ $t('sla.active') }}</th>
           <th>{{ $t('common.actions') }}</th>
         </tr>
@@ -68,7 +144,24 @@
           <td><button type="button" class="name-link" @click="startEdit(p)">{{ p.name }}</button></td>
           <td>{{ fmtMinutes(p.response_time_minutes) }}</td>
           <td>{{ fmtMinutes(p.resolution_time_minutes) }}</td>
-          <td><code>{{ p.priority_filter || $t('sla.all') }}</code></td>
+          <td>
+            <div class="sla-match-list">
+              <span>{{ fmtFilter(p.priority_filter, 'priority') || $t('sla.all') }}</span>
+              <small v-if="p.type_filter">{{ fmtFilter(p.type_filter, 'type') }}</small>
+              <small v-if="p.customer_id">{{ $t('sla.customer') }}: {{ nameOf(customers, p.customer_id) }}</small>
+              <small v-if="p.category_id">{{ $t('sla.category') }}: {{ categoryLabel(p.category_id) }}</small>
+            </div>
+          </td>
+          <td>{{ p.calendar_id ? nameOf(calendars, p.calendar_id) : $t('sla.calendar_24_7') }}</td>
+          <td>
+            <div class="sla-match-list">
+              <span v-if="!p.escalation_group_id && !p.escalation_user_id">—</span>
+              <span v-if="p.escalation_group_id">{{ nameOf(groups, p.escalation_group_id) }}</span>
+              <span v-if="p.escalation_user_id">{{ userLabel(users.find(u => u.id === p.escalation_user_id)) }}</span>
+              <small v-if="(p.escalation_group_id || p.escalation_user_id) && p.escalation_reassign">{{ $t('sla.reassigns') }}</small>
+              <small v-if="p.warning_percent > 0">{{ $t('sla.warns_at', { percent: p.warning_percent }) }}</small>
+            </div>
+          </td>
           <td>
             <span :class="['badge', p.is_active ? 'badge-active' : 'badge-inactive']">
               {{ p.is_active ? $t('sla.yes') : $t('sla.no') }}
@@ -82,7 +175,7 @@
           </td>
         </tr>
         <tr v-if="!policies.length && !editing">
-          <td colspan="6" style="text-align:center;color:var(--color-text-muted)">{{ $t('sla.no_policies') }}</td>
+          <td colspan="8" style="text-align:center;color:var(--color-text-muted)">{{ $t('sla.no_policies') }}</td>
         </tr>
       </tbody>
     </table>
@@ -90,20 +183,47 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { slaApi } from '@/api/sla'
+import { helpdeskApi } from '@/api/helpdesk'
+import { customersApi } from '@/api/customers'
+import { groupsApi } from '@/api/groups'
+import { adminApi } from '@/api/admin'
 import { useUIStore } from '@/stores/ui'
 
+const PRIORITIES = ['low', 'medium', 'high', 'critical']
+const TYPES = ['incident', 'problem', 'service_request', 'change_request']
+
+const { t } = useI18n()
 const ui = useUIStore()
 const loading = ref(true)
 const policies = ref([])
 const editing = ref(null)
 const form = ref(emptyForm())
 
-onMounted(load)
+// Lookup data for the selects and the table.
+const customers = ref([])
+const groups = ref([])
+const users = ref([])
+const categories = ref([])
+const calendars = ref([])
+
+onMounted(() => { load(); loadLookups() })
 
 function emptyForm() {
-  return { name: '', response_time_minutes: 0, resolution_time_minutes: 0, priority_filter: '', is_active: true }
+  return {
+    name: '', response_time_minutes: 0, resolution_time_minutes: 0,
+    priorities: [], types: [],
+    customer_id: 0, category_id: 0, calendar_id: 0,
+    warning_percent: 75,
+    escalation_group_id: 0, escalation_user_id: 0, escalation_reassign: true,
+    is_active: true,
+  }
+}
+
+function splitCsv(v) {
+  return (v || '').split(',').map(x => x.trim()).filter(Boolean)
 }
 
 async function load() {
@@ -115,18 +235,108 @@ async function load() {
   loading.value = false
 }
 
+// Each lookup is loaded independently so one failing endpoint doesn't
+// leave the other selects empty. Reloaded when the form opens, so
+// calendars/categories created in other tabs show up without a page reload.
+async function loadLookups() {
+  const settle = async (fn, target) => {
+    try { const { data } = await fn(); target.value = data || [] } catch { /* keep previous */ }
+  }
+  await Promise.all([
+    settle(() => customersApi.list(), customers),
+    settle(() => groupsApi.list(), groups),
+    settle(() => adminApi.listUsers(), users),
+    settle(() => helpdeskApi.adminListCategories(), categories),
+    settle(() => helpdeskApi.listCalendars(), calendars),
+  ])
+}
+
+const categoryOptions = computed(() => {
+  const byId = Object.fromEntries(categories.value.map(c => [c.id, c]))
+  return categories.value
+    .map(c => ({ id: c.id, label: categoryLabel(c.id, byId), sortKey: categorySortKey(c, byId) }))
+    .sort((a, b) => a.sortKey.localeCompare(b.sortKey))
+})
+
+function categorySortKey(c, byId) {
+  const parent = c.parent_id ? byId[c.parent_id] : null
+  const pad = (n) => String(n ?? 0).padStart(6, '0')
+  return parent
+    ? `${pad(parent.sort_order)}${parent.name}\u0001${pad(c.sort_order)}${c.name}`
+    : `${pad(c.sort_order)}${c.name}`
+}
+
+function categoryLabel(id, byId) {
+  const map = byId || Object.fromEntries(categories.value.map(c => [c.id, c]))
+  const c = map[id]
+  if (!c) return '#' + id
+  const parent = c.parent_id ? map[c.parent_id] : null
+  return parent ? `${parent.name} › ${c.name}` : c.name
+}
+
+function nameOf(list, id) {
+  return list.find(x => x.id === id)?.name || '#' + id
+}
+
+function userLabel(u) {
+  if (!u) return '—'
+  const full = u.display_name || [u.first_name, u.last_name].filter(Boolean).join(' ')
+  return full ? `${full} (${u.username})` : u.username
+}
+
+function fmtFilter(csv, kind) {
+  return splitCsv(csv).map(v => t(`ticket.${kind}_${v}`)).join(', ')
+}
+
 function startCreate() {
   form.value = emptyForm()
   editing.value = { id: 0 }
+  loadLookups()
 }
 
 function startEdit(p) {
-  form.value = { ...p }
+  form.value = {
+    name: p.name,
+    response_time_minutes: p.response_time_minutes,
+    resolution_time_minutes: p.resolution_time_minutes,
+    priorities: splitCsv(p.priority_filter),
+    types: splitCsv(p.type_filter),
+    customer_id: p.customer_id || 0,
+    category_id: p.category_id || 0,
+    calendar_id: p.calendar_id || 0,
+    warning_percent: p.warning_percent ?? 75,
+    escalation_group_id: p.escalation_group_id || 0,
+    escalation_user_id: p.escalation_user_id || 0,
+    escalation_reassign: p.escalation_reassign ?? true,
+    is_active: p.is_active,
+  }
   editing.value = p
+  loadLookups()
 }
 
 function cancelEdit() {
   editing.value = null
+}
+
+function buildPayload() {
+  const f = form.value
+  const warn = Number.isFinite(f.warning_percent) ? Math.min(100, Math.max(0, Math.round(f.warning_percent))) : 75
+  return {
+    name: f.name.trim(),
+    response_time_minutes: f.response_time_minutes || 0,
+    resolution_time_minutes: f.resolution_time_minutes || 0,
+    // Keep the canonical order so the stored CSV is stable.
+    priority_filter: PRIORITIES.filter(p => f.priorities.includes(p)).join(','),
+    type_filter: TYPES.filter(ty => f.types.includes(ty)).join(','),
+    customer_id: Number(f.customer_id) || 0,
+    category_id: Number(f.category_id) || 0,
+    calendar_id: Number(f.calendar_id) || 0,
+    warning_percent: warn,
+    escalation_group_id: Number(f.escalation_group_id) || 0,
+    escalation_user_id: Number(f.escalation_user_id) || 0,
+    escalation_reassign: !!f.escalation_reassign,
+    is_active: !!f.is_active,
+  }
 }
 
 async function confirmSave() {
@@ -135,11 +345,12 @@ async function confirmSave() {
     return
   }
   try {
+    const payload = buildPayload()
     if (editing.value.id === 0) {
-      await slaApi.create(form.value)
+      await slaApi.create(payload)
       ui.success('SLA policy created')
     } else {
-      await slaApi.update(editing.value.id, form.value)
+      await slaApi.update(editing.value.id, payload)
       ui.success('SLA policy updated')
     }
     editing.value = null
@@ -184,6 +395,13 @@ function fmtMinutes(m) {
 .sla-input-unit { display: flex; align-items: center; gap: 6px; }
 .sla-input-unit .form-input { width: 110px; }
 .sla-unit { font-size: 12px; color: var(--color-text-muted); white-space: nowrap; }
+.sla-hint { font-size: 11px; color: var(--color-text-muted); }
+.sla-hint-block { display: block; margin: 0 0 12px; font-size: 12px; max-width: 72ch; }
+.sla-section-title { font-size: 13px; font-weight: 600; margin: 16px 0 4px; }
+.sla-fieldset { border: 1px solid var(--color-border); border-radius: 6px; padding: 8px 12px; margin: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; min-width: 220px; }
+.sla-fieldset legend { padding: 0 4px; }
+.sla-check { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+.sla-match-list { display: flex; flex-direction: column; gap: 2px; }
 .sla-form-footer { display: flex; gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--color-border); }
 .loading-state { display: flex; justify-content: center; padding: 48px; }
 

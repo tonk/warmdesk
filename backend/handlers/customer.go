@@ -127,9 +127,9 @@ func ListCustomers(c *gin.Context) {
 		var pCount, cCount, tNew, tPending, tPendingClose, tClosed int64
 		database.DB.Model(&models.Project{}).Where("customer_id = ? AND deleted_at IS NULL", cust.ID).Count(&pCount)
 		database.DB.Model(&models.Contract{}).Where("customer_id = ?", cust.ID).Count(&cCount)
-		database.DB.Model(&models.Ticket{}).Where("customer_id = ? AND status IN ('new', 'open')", cust.ID).Count(&tNew)
+		database.DB.Model(&models.Ticket{}).Where("customer_id = ? AND status IN ('new', 'open', 'in_progress')", cust.ID).Count(&tNew)
 		database.DB.Model(&models.Ticket{}).Where("customer_id = ? AND status = 'pending'", cust.ID).Count(&tPending)
-		database.DB.Model(&models.Ticket{}).Where("customer_id = ? AND status = 'pending_close'", cust.ID).Count(&tPendingClose)
+		database.DB.Model(&models.Ticket{}).Where("customer_id = ? AND status IN ('pending_close', 'resolved')", cust.ID).Count(&tPendingClose)
 		database.DB.Model(&models.Ticket{}).Where("customer_id = ? AND status = 'closed'", cust.ID).Count(&tClosed)
 		myRole := myRoles[cust.ID]
 		if isAdmin {

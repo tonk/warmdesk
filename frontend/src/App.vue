@@ -62,6 +62,7 @@ import { useTimerStore } from '@/stores/timer'
 import { useProjectChatUnread } from '@/composables/useProjectChatUnread'
 import { useTrayUnread } from '@/composables/useTrayUnread'
 import { useTrayTimer } from '@/composables/useTrayTimer'
+import { useChatNotify } from '@/composables/useChatNotify'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import ToastContainer from '@/components/common/ToastContainer.vue'
@@ -86,6 +87,7 @@ const { t } = useI18n()
 const auth = useAuthStore()
 const systemStore = useSystemStore()
 const ui = useUIStore()
+const { desktopNotify } = useChatNotify()
 const notificationsStore = useNotificationsStore()
 const ticketsStore = useTicketsStore()
 const timerStore = useTimerStore()
@@ -365,6 +367,8 @@ async function connectUserWs() {
       if (msg.type === 'mention.notification') {
         const { sender_name, body, context } = msg.payload || {}
         ui.mention(sender_name || 'Someone', body || '', context || '')
+      } else if (msg.type === 'ticket.alert') {
+        showTicketAlert(msg.payload || {})
       } else if (msg.type === 'call.group_invite') {
         lkGroupCall.handleGroupInvite(msg.payload)
       } else if (msg.type && msg.type.startsWith('call.')) {
@@ -395,6 +399,22 @@ async function connectUserWs() {
     userWs?.close()
     userWs = null
   }
+}
+
+// ITIL alerts (SLA warning/breach, major incident) for tickets the user is
+// responsible for. Breaches and major incidents use the error style and stay
+// visible longer; warnings use the info style. Also raised as a desktop
+// notification when the app is in the background, like chat messages.
+function showTicketAlert({ ticket_id, title, kind }) {
+  const key = {
+    sla_warning: 'ticketAlert.sla_warning',
+    sla_breach: 'ticketAlert.sla_breach',
+    major_incident: 'ticketAlert.major_incident',
+  }[kind]
+  if (!key) return
+  const message = t(key, { id: ticket_id ?? '', title: title || '' })
+  ui.toast(message, kind === 'sla_warning' ? 'info' : 'error', kind === 'sla_warning' ? 6000 : 10000)
+  desktopNotify(t('ticketAlert.notification_title'), message)
 }
 
 function disconnectUserWs() {

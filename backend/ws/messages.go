@@ -93,6 +93,8 @@ const (
 	TypeTicketUpdated  = "ticket.updated"
 	TypeTicketDeleted  = "ticket.deleted"
 	TypeTicketMsgAdded = "ticket.message.added"
+	// TypeTicketAlert notifies a user of an SLA warning/breach or a major incident.
+	TypeTicketAlert = "ticket.alert"
 
 	// System
 	TypePong  = "pong"

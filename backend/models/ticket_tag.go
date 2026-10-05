@@ -10,8 +10,11 @@ type TicketTag struct {
 }
 
 type TicketLink struct {
-	ID              uint      `gorm:"primaryKey" json:"id"`
-	SourceTicketID  uint      `gorm:"not null;index;uniqueIndex:idx_ticket_link_pair" json:"source_ticket_id"`
-	TargetTicketID  uint      `gorm:"not null;index;uniqueIndex:idx_ticket_link_pair" json:"target_ticket_id"`
-	CreatedAt       time.Time `json:"created_at"`
+	ID             uint `gorm:"primaryKey" json:"id"`
+	SourceTicketID uint `gorm:"not null;index;uniqueIndex:idx_ticket_link_pair" json:"source_ticket_id"`
+	TargetTicketID uint `gorm:"not null;index;uniqueIndex:idx_ticket_link_pair" json:"target_ticket_id"`
+	// LinkType is directional, read as "source <type> target":
+	// related | duplicate_of | caused_by | parent_of.
+	LinkType  string    `gorm:"size:20;not null;default:'related'" json:"link_type"`
+	CreatedAt time.Time `json:"created_at"`
 }

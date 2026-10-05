@@ -1532,17 +1532,27 @@ Use the filter bar to narrow by status, priority, type, assignee, or tag.
 |Just created, not yet acknowledged
 
 |Open
-|Being worked on
+|Acknowledged, waiting to be picked up
+
+|In progress
+|An agent is actively working on it
 
 |Pending
-|Waiting for customer response; optional reminder date
+|Waiting for the requester; optional reminder date. The SLA resolution clock is paused while a ticket is pending.
+
+|Resolved
+|The fix has been delivered. Closes automatically after the number of days an administrator configured (default 5) unless the requester replies.
 
 |Pending close
-|Resolved, pending automatic closure; a close date is shown
+|Resolved, closes automatically on the close date shown
 
 |Closed
 |Resolved and closed
 |===
+
+*Resolved*, *Pending close* and *Closed* all stop the SLA resolution clock.
+A reply from the requester (by email or through the customer portal) to a resolved or closed ticket reopens it and is counted as a reopen; a reply to a pending ticket moves it back to *Open* and resumes the SLA clock.
+Tickets flagged as a major incident show a red *Major incident* badge in every view.
 
 === Ticket detail
 
@@ -1556,8 +1566,11 @@ From here you can:
 |Edit the title
 |Click the title text
 
-|Change status, priority, type
-|Dropdowns in the right panel
+|Change status, priority
+|Dropdowns in the header
+
+|Set type, impact, urgency, category, major incident
+|*Classification* panel
 
 |Assign to an agent
 |*Assigned to* dropdown
@@ -1577,8 +1590,11 @@ From here you can:
 |View SLA deadlines
 |*SLA* card in the right panel
 
-|Link to another ticket
+|Link to another ticket (related, duplicate, cause, parent/child)
 |*Linked tickets* section
+
+|Record root cause, workaround and known error (problem tickets)
+|*Problem management* panel
 
 |Link to a board card
 |*Linked cards* section
@@ -1603,6 +1619,89 @@ Clicking the ticket number (`#123`) in the header copies `Ticket#123` to the cli
 
 The original email body (for email-created tickets) is shown as plain text.
 Messages that triggered an outbound email reply show a ✉ badge.
+
+=== Classification and priority
+
+The *Classification* panel holds the ITIL classification of a ticket:
+
+* *Type* — incident, problem, service request or change request.
+* *Impact* and *Urgency* (low / medium / high). When both are set, the priority follows from the priority matrix an administrator configured (for example high impact × high urgency = critical). You can still pick a different priority in the header; the panel then notes that the priority was set manually.
+* *Category* — an administrator-managed category, optionally with a subcategory (shown as `Network › VPN`).
+* *Major incident* — flags a ticket with large business impact. Setting the flag notifies the ticket's assignee, owner and group, plus the major-incident group if an administrator configured one.
+
+Type, priority, customer and category determine which SLA policy applies.
+Changing any of them re-evaluates the SLA, but deadlines are always counted from the moment the ticket was created — raising the priority later shortens the deadline instead of handing out a fresh one.
+
+=== Resolving a ticket
+
+Choosing *Resolved* in the status dropdown opens a dialog in which you record a *resolution code* (such as _Fixed_ or _Workaround provided_) and optional *resolution notes*.
+When an administrator made the resolution code mandatory, the dialog also appears when you close a ticket directly and the ticket can't be resolved without one.
+The resolution code, notes and resolution time are shown in the *Resolution* part of the classification panel and can be corrected there afterwards.
+
+=== SLA deadlines
+
+The *SLA* card shows the response and resolution deadlines of the policy that applies.
+Deadlines are counted in the business hours of the policy's calendar (for example Monday–Friday 09:00–17:00, excluding public holidays) or around the clock when the policy has no calendar.
+While a ticket is *Pending* the card shows that the clock is paused; the time spent waiting is added to the resolution deadline when work resumes.
+
+Breaches are evaluated continuously on the server, not only when someone opens the ticket.
+When a configured share of the SLA time has been used (75% by default) the assignee and group receive a warning; on a breach the ticket is escalated — the escalation group or user configured on the policy is notified and, depending on the policy, the ticket is reassigned to them.
+Online users see these alerts as a notification in WarmDesk; offline users with email notifications enabled receive an email.
+
+=== Linked tickets
+
+Choose a link type before adding a linked ticket:
+
+[cols="1,3", options="header"]
+|===
+|Link type |Meaning (read as "this ticket …")
+
+|Related to
+|The tickets are related
+
+|Duplicate of
+|This ticket reports the same issue as the other one
+
+|Caused by
+|This incident is caused by the linked problem
+
+|Parent of
+|The linked ticket is a sub-ticket of this one
+|===
+
+The other ticket shows the reverse wording (_Duplicated by_, _Causes_, _Child of_).
+You can link to tickets of another customer as long as you have access to that customer.
+When the linked ticket is a problem with a workaround, a *Use workaround* button copies the workaround into the reply box.
+
+=== Problem management
+
+Set a ticket's type to *Problem* to manage the underlying cause of one or more incidents.
+Problem tickets are only visible to agents — customer-portal users never see them, not even as a linked ticket.
+The *Problem management* panel holds:
+
+* *Problem status* — investigating, root cause identified, known error, resolved.
+* *Root cause* and *Workaround* (saved when you leave the field).
+* *Known error* — marks the problem as a known error, which makes it appear in the known error database.
+
+Link each affected incident to the problem with the link type *Caused by*.
+Once the problem is fixed, *Resolve linked incidents* resolves every open incident linked that way in one go, with a resolution code and an optional message that is sent to each requester as a public reply.
+Incidents of customers you have no access to are skipped.
+
+The *Problems* page in the sidebar's helpdesk section lists all problem records you can access; switch on *Known errors only* to search the known error database by title, root cause or workaround.
+
+=== Ticket report
+
+The *Ticket report* page in the helpdesk section shows the key figures of the helpdesk for a period (default: the last 30 days):
+
+* Tickets created and resolved, the open backlog and its age, and the number of major incidents.
+* Mean time to resolve and mean time to first response.
+* The share of tickets that met their response and resolution SLA.
+* First-contact resolution: resolved tickets with at most one agent reply that were never reopened.
+* Reopen rate.
+* Breakdowns by priority, type, category and customer.
+
+Filter by customer, group, type, priority or category, and export the report as PDF or Excel.
+The report only covers customers you have access to.
 
 === Threaded replies
 
@@ -1637,13 +1736,13 @@ Once items are added you can:
 * Delete individual items with the *×* button.
 * Drag items to reorder them.
 
-Changing the ticket status to `Pending close` or `Closed` is blocked while any checklist item remains unchecked.
+Changing the ticket status to `Resolved`, `Pending close` or `Closed` is blocked while any checklist item remains unchecked.
 
 === Macros
 
 Macros are one-click action sequences defined by administrators.
 Click the *Apply Macro* dropdown in the ticket detail header and select a macro.
-The macro applies its configured actions immediately (status, priority, tags) and pre-fills the reply box with any message template so you can review and edit before sending.
+The macro applies its configured actions immediately (status, priority, type, impact, urgency, category, resolution code, tags) and pre-fills the reply box with any message template so you can review and edit before sending.
 
 === Pending and auto-close
 
@@ -1651,7 +1750,9 @@ A ticket in *Pending* status can have a *Reminder* date.
 Pending tickets with a due reminder float to the top of the ticket list.
 
 A ticket in *Pending close* status has a *Close at* date.
-When that date passes the ticket is automatically closed by the server on the next list or detail load.
+When that date passes the server closes the ticket automatically (it checks every minute).
+
+A ticket in *Resolved* status is closed automatically once it has been resolved for the number of days an administrator configured (default 5; 0 disables this), unless the requester replies first.
 
 '''
 

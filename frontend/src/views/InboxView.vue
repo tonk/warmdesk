@@ -77,7 +77,7 @@
           </div>
           <div v-for="g in groupedTickets" :key="g.status" class="group-section">
             <div class="group-header">
-              <h2 class="group-title">{{ g.label }}</h2>
+              <h2 class="group-title">{{ $t(g.labelKey) }}</h2>
               <span class="group-count">{{ g.tickets.length }}</span>
             </div>
             <div v-if="g.tickets.length && groupSubMode === 'cards'" class="ticket-grid">
@@ -279,13 +279,13 @@ const groupSortDir = ref(-1)
 const priorityRank = { low: 1, medium: 2, high: 3, critical: 4 }
 
 const newTickets = computed(() => visibleTickets.value.filter(t => t.status === 'new'))
-const openTickets = computed(() => visibleTickets.value.filter(t => t.status === 'open'))
+const openTickets = computed(() => visibleTickets.value.filter(t => t.status === 'open' || t.status === 'in_progress'))
 const pendingActiveTickets = computed(() => visibleTickets.value.filter(t => t.status === 'pending' && !t.reminder_at))
 const pendingReminderTickets = computed(() =>
   visibleTickets.value.filter(t => t.status === 'pending' && t.reminder_at)
     .sort((a, b) => new Date(a.reminder_at) - new Date(b.reminder_at))
 )
-const pendingCloseTickets = computed(() => visibleTickets.value.filter(t => t.status === 'pending_close'))
+const pendingCloseTickets = computed(() => visibleTickets.value.filter(t => t.status === 'resolved' || t.status === 'pending_close'))
 const closedTickets = computed(() => visibleTickets.value.filter(t => t.status === 'closed'))
 
 const listSections = computed(() =>
@@ -304,11 +304,13 @@ const cardSections = computed(() => [
 ])
 
 const statusGroups = [
-  { status: 'new', label: 'New' },
-  { status: 'open', label: 'Open' },
-  { status: 'pending', label: 'Pending reminder' },
-  { status: 'pending_close', label: 'Pending close' },
-  { status: 'closed', label: 'Closed' },
+  { status: 'new', labelKey: 'ticket.status_new' },
+  { status: 'open', labelKey: 'ticket.status_open' },
+  { status: 'in_progress', labelKey: 'ticket.status_in_progress' },
+  { status: 'pending', labelKey: 'ticket.pending_reminders' },
+  { status: 'resolved', labelKey: 'ticket.status_resolved' },
+  { status: 'pending_close', labelKey: 'ticket.status_pending_close' },
+  { status: 'closed', labelKey: 'ticket.status_closed' },
 ]
 
 function sortTickets(arr, field, dir) {
@@ -349,7 +351,7 @@ function groupSortArrow(field) { return groupSortField.value !== field ? '▽' :
 
 function slaWarning(t) {
   if (!t.sla_response_deadline && !t.sla_resolution_deadline) return false
-  if (t.status === 'pending_close') return false
+  if (['resolved', 'pending_close', 'closed'].includes(t.status) || t.sla_paused_at) return false
   const now = Date.now()
   if (t.sla_response_deadline && !t.first_response_at) {
     const dl = new Date(t.sla_response_deadline).getTime()
@@ -459,6 +461,8 @@ watch(() => ticketsStore.inboxRefreshKey, loadInbox)
 .status-pending { background: #f0e6ff; color: #6b21a8; }
 .status-pending_close { background: #d1fae5; color: #065f46; }
 .status-closed { background: #e5e7eb; color: #374151; }
+.status-in_progress { background: color-mix(in srgb, var(--color-primary) 18%, transparent); color: var(--color-text); }
+.status-resolved { background: color-mix(in srgb, var(--color-success) 22%, transparent); color: var(--color-text); }
 .ticket-assignee { display: flex; align-items: center; gap: 4px; }
 .ticket-tags { display: flex; gap: 3px; align-items: center; }
 .mini-tag { font-size: 10px; background: var(--color-bg-alt); padding: 1px 5px; border-radius: 3px; color: var(--color-text-muted); }

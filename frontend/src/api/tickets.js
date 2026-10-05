@@ -10,7 +10,7 @@ export const ticketsApi = {
   addTag:       (cid, id, name)          => client.post(`/customers/${cid}/tickets/${id}/tags`, { name }),
   removeTag:    (cid, id, tagId)         => client.delete(`/customers/${cid}/tickets/${id}/tags/${tagId}`),
   listLinks:    (cid, id)                => client.get(`/customers/${cid}/tickets/${id}/links`),
-  addLink:      (cid, id, targetId)      => client.post(`/customers/${cid}/tickets/${id}/links`, { target_ticket_id: targetId }),
+  addLink:      (cid, id, targetId, linkType = 'related') => client.post(`/customers/${cid}/tickets/${id}/links`, { target_ticket_id: targetId, link_type: linkType }),
   removeLink:   (cid, id, linkId)        => client.delete(`/customers/${cid}/tickets/${id}/links/${linkId}`),
   listCards:    (cid, id)                => client.get(`/customers/${cid}/tickets/${id}/cards`),
   addCardLink:  (cid, id, body)          => client.post(`/customers/${cid}/tickets/${id}/cards`, body),

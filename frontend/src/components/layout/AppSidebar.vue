@@ -228,6 +228,14 @@
               <span>{{ ticketsStore.inboxCount }}</span>
             </span>
           </RouterLink>
+          <RouterLink v-if="auth.user?.global_role !== 'customer'" to="/helpdesk/problems" class="sidebar-link">
+            <span class="link-icon" aria-hidden="true">🧩</span>
+            <span class="link-text">{{ $t('problems.title') }}</span>
+          </RouterLink>
+          <RouterLink v-if="auth.user?.global_role !== 'customer'" to="/helpdesk/reports" class="sidebar-link">
+            <span class="link-icon" aria-hidden="true">📈</span>
+            <span class="link-text">{{ $t('ticketReport.title') }}</span>
+          </RouterLink>
           <RouterLink
             v-for="c in customersStore.customers"
             :key="c.id"

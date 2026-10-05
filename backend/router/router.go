@@ -167,6 +167,20 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 				admin.POST("/sla-policies", handlers.AdminCreateSlaPolicy)
 				admin.PUT("/sla-policies/:id", handlers.AdminUpdateSlaPolicy)
 				admin.DELETE("/sla-policies/:id", handlers.AdminDeleteSlaPolicy)
+				admin.GET("/ticket-categories", handlers.AdminListTicketCategories)
+				admin.POST("/ticket-categories", handlers.AdminCreateTicketCategory)
+				admin.PUT("/ticket-categories/:id", handlers.AdminUpdateTicketCategory)
+				admin.DELETE("/ticket-categories/:id", handlers.AdminDeleteTicketCategory)
+				admin.GET("/ticket-resolution-codes", handlers.AdminListTicketResolutionCodes)
+				admin.POST("/ticket-resolution-codes", handlers.AdminCreateTicketResolutionCode)
+				admin.PUT("/ticket-resolution-codes/:id", handlers.AdminUpdateTicketResolutionCode)
+				admin.DELETE("/ticket-resolution-codes/:id", handlers.AdminDeleteTicketResolutionCode)
+				admin.GET("/business-calendars", handlers.AdminListBusinessCalendars)
+				admin.POST("/business-calendars", handlers.AdminCreateBusinessCalendar)
+				admin.PUT("/business-calendars/:id", handlers.AdminUpdateBusinessCalendar)
+				admin.DELETE("/business-calendars/:id", handlers.AdminDeleteBusinessCalendar)
+				admin.POST("/business-calendars/:id/import-holidays", handlers.AdminImportCalendarHolidays)
+				admin.PUT("/helpdesk/settings", handlers.AdminUpdateHelpdeskSettings)
 
 				// Macros (helpdesk)
 				admin.GET("/macros", handlers.AdminListMacros)
@@ -265,6 +279,18 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 			customers.DELETE("/:customerId/groups/:groupId/members/:userId", handlers.CustomerRemoveGroupMember)
 
 			if !ttMode {
+				helpdesk := protected.Group("")
+				helpdesk.Use(middleware.RequireFeature("helpdesk_enabled"))
+				{
+					helpdesk.GET("/helpdesk/settings", handlers.GetHelpdeskSettings)
+					helpdesk.GET("/ticket-categories", handlers.ListTicketCategories)
+					helpdesk.GET("/ticket-resolution-codes", handlers.ListTicketResolutionCodes)
+					helpdesk.GET("/problems", handlers.ListProblems)
+					helpdesk.GET("/helpdesk/reports/tickets", handlers.GetTicketReport)
+					helpdesk.GET("/helpdesk/reports/tickets/pdf", handlers.GetTicketReportPDF)
+					helpdesk.GET("/helpdesk/reports/tickets/xlsx", handlers.GetTicketReportXLSX)
+				}
+
 				inbox := protected.Group("/tickets")
 				inbox.Use(middleware.RequireFeature("helpdesk_enabled"))
 				{
@@ -302,6 +328,7 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 					tickets.GET("/:ticketId/links", handlers.ListTicketLinks)
 					tickets.POST("/:ticketId/links", handlers.CreateTicketLink)
 					tickets.DELETE("/:ticketId/links/:linkId", handlers.DeleteTicketLink)
+					tickets.POST("/:ticketId/resolve-linked", handlers.ResolveLinkedIncidents)
 					tickets.GET("/:ticketId/cards", handlers.ListTicketCardLinks)
 					tickets.POST("/:ticketId/cards", handlers.CreateTicketCardLink)
 					tickets.POST("/:ticketId/create-card", handlers.CreateCardFromTicket)

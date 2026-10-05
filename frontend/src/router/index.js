@@ -34,6 +34,8 @@ const routes = [
   { path: '/customers/:id/tickets/:ticketId', name: 'ticket-detail', component: lazyWithReload(() => import('@/views/TicketDetailView.vue')), meta: { helpdeskOnly: true } },
   { path: '/tickets/inbox', name: 'inbox', component: lazyWithReload(() => import('@/views/InboxView.vue')), meta: { helpdeskOnly: true } },
   { path: '/tickets/inbox/:ticketId', name: 'inbox-ticket-detail', component: lazyWithReload(() => import('@/views/TicketDetailView.vue')), meta: { helpdeskOnly: true } },
+  { path: '/helpdesk/problems', name: 'problems', component: lazyWithReload(() => import('@/views/ProblemsView.vue')), meta: { helpdeskOnly: true, noCustomerRole: true } },
+  { path: '/helpdesk/reports', name: 'ticket-report', component: lazyWithReload(() => import('@/views/TicketReportView.vue')), meta: { helpdeskOnly: true, noCustomerRole: true } },
   { path: '/:pathMatch(.*)*', redirect: '/' }
 ]
 
@@ -57,6 +59,7 @@ router.beforeEach((to) => {
   if (to.meta.reportsOnly && !auth.canViewReports) return '/'
   if (to.meta.timeTrackingOnly && !auth.timeTrackingEnabled && !auth.canViewReports) return '/'
   if (to.meta.helpdeskOnly && !auth.helpdeskEnabled) return '/'
+  if (to.meta.noCustomerRole && auth.user?.global_role === 'customer') return '/'
   if (to.meta.boardOnly && !auth.boardEnabled) return '/'
   if (to.meta.chatOnly && !auth.chatEnabled) return '/'
   if (to.meta.public && auth.isLoggedIn && (to.name === 'login' || to.name === 'register')) return '/'

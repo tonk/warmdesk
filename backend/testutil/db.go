@@ -92,6 +92,13 @@ func allModels() []interface{} {
 		&models.TicketHistory{},
 		&models.TicketView{},
 		&models.SlaPolicy{},
+		&models.Macro{},
+		&models.TicketChecklistTemplate{},
+		&models.TicketChecklistItem{},
+		&models.TicketCategory{},
+		&models.TicketResolutionCode{},
+		&models.BusinessCalendar{},
+		&models.BusinessCalendarHoliday{},
 		&models.Invoice{},
 		&models.InvoiceTemplate{},
 	}

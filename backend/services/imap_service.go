@@ -276,11 +276,13 @@ func (s *IMAPService) processMessage(msg *imap.Message, section *imap.BodySectio
 					body = "(no body)"
 				}
 				body = stripQuotedReplies(body)
+				reopenOnRequesterReply(&parent)
 				database.DB.Create(&models.TicketMessage{
 					TicketID: parent.ID,
 					UserID:   systemUserID(),
 					Body:     body,
 					FromName: fromName,
+					Inbound:  true,
 				})
 				broadcastTicketEvent(appws.TypeTicketMsgAdded, parent.ID)
 				log.Printf("imap: reply added to ticket #%d via X-WarmDesk-Ticket-Id header", parent.ID)
@@ -318,12 +320,7 @@ func (s *IMAPService) processMessage(msg *imap.Message, section *imap.BodySectio
 		if err := database.DB.Where("email_message_id = ?", msgIDVal).First(&parent).Error; err != nil {
 			return nil
 		}
-		closedStatuses := map[string]bool{"resolved": true, "closed": true, "done": true, "cancelled": true}
-		if closedStatuses[parent.Status] {
-			log.Printf("imap: reopening ticket #%d (was %s) on customer reply", parent.ID, parent.Status)
-			database.DB.Model(&parent).Update("status", "open")
-			parent.Status = "open"
-		}
+		reopenOnRequesterReply(&parent)
 		return &parent
 	}
 
@@ -347,12 +344,7 @@ func (s *IMAPService) processMessage(msg *imap.Message, section *imap.BodySectio
 		if err := database.DB.First(&parent, id).Error; err != nil {
 			return nil
 		}
-		closedStatuses := map[string]bool{"resolved": true, "closed": true, "done": true, "cancelled": true}
-		if closedStatuses[parent.Status] {
-			log.Printf("imap: reopening ticket #%d (was %s) on customer reply", parent.ID, parent.Status)
-			database.DB.Model(&parent).Update("status", "open")
-			parent.Status = "open"
-		}
+		reopenOnRequesterReply(&parent)
 		return &parent
 	}
 
@@ -379,6 +371,7 @@ func (s *IMAPService) processMessage(msg *imap.Message, section *imap.BodySectio
 			UserID:   systemUserID,
 			Body:     body,
 			FromName: fromName,
+			Inbound:  true,
 		})
 		broadcastTicketEvent(appws.TypeTicketMsgAdded, parent.ID)
 		log.Printf("imap: reply added to ticket #%d", parent.ID)
@@ -394,6 +387,7 @@ func (s *IMAPService) processMessage(msg *imap.Message, section *imap.BodySectio
 				UserID:   systemUserID,
 				Body:     body,
 				FromName: fromName,
+				Inbound:  true,
 			})
 			broadcastTicketEvent(appws.TypeTicketMsgAdded, parent.ID)
 			log.Printf("imap: reply added to ticket #%d via subject [%s]", parent.ID, subject)
@@ -431,6 +425,7 @@ func (s *IMAPService) processMessage(msg *imap.Message, section *imap.BodySectio
 		FromName:       fromNamePtr,
 		RawEmail:       rawEmailPtr,
 	}
+	ApplySla(&ticket)
 	if err := database.DB.Create(&ticket).Error; err != nil {
 		return fmt.Errorf("create ticket: %w", err)
 	}
@@ -484,12 +479,17 @@ func (s *IMAPService) TestConnection(cfg config.IMAPConfig) error {
 }
 
 // systemUserID returns the ID of the first admin user, or 1 as fallback.
-func systemUserID() uint {
-	var u models.User
-	if err := database.DB.Where("global_role = ?", "admin").Order("id asc").First(&u).Error; err == nil {
-		return u.ID
+func systemUserID() uint { return SystemUserID() }
+
+// reopenOnRequesterReply moves a ticket back to "open" when the requester
+// replies by email: a resolved/closed ticket is reopened (and counted as a
+// reopen), a pending one resumes its SLA clock.
+func reopenOnRequesterReply(t *models.Ticket) {
+	if t.Status != "pending" && !IsResolvedStatus(t.Status) {
+		return
 	}
-	return 1
+	log.Printf("imap: reopening ticket #%d (was %s) on customer reply", t.ID, t.Status)
+	SaveTicketStatus(t, "open", SystemUserID(), TransitionOptions{CountReopen: true})
 }
 
 // decodeRFC2047 decodes an RFC 2047 encoded header value (e.g. =?UTF-8?B?...?=).

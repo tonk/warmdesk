@@ -46,6 +46,10 @@
             <option value="set_status">{{ $t('macro.action_set_status') }}</option>
             <option value="set_priority">{{ $t('macro.action_set_priority') }}</option>
             <option value="set_type">{{ $t('macro.action_set_type') }}</option>
+            <option value="set_impact">{{ $t('macro.action_set_impact') }}</option>
+            <option value="set_urgency">{{ $t('macro.action_set_urgency') }}</option>
+            <option value="set_category">{{ $t('macro.action_set_category') }}</option>
+            <option value="set_resolution">{{ $t('macro.action_set_resolution') }}</option>
             <option value="add_tag">{{ $t('macro.action_add_tag') }}</option>
             <option value="add_message">{{ $t('macro.action_add_message') }}</option>
           </select>
@@ -56,7 +60,9 @@
             <select :id="'act-val-' + idx" class="form-input form-input-sm" v-model="action.value">
               <option value="new">{{ $t('ticket.status_new') }}</option>
               <option value="open">{{ $t('ticket.status_open') }}</option>
+              <option value="in_progress">{{ $t('ticket.status_in_progress') }}</option>
               <option value="pending">{{ $t('ticket.status_pending') }}</option>
+              <option value="resolved">{{ $t('ticket.status_resolved') }}</option>
               <option value="pending_close">{{ $t('ticket.status_pending_close') }}</option>
               <option value="closed">{{ $t('ticket.status_closed') }}</option>
             </select>
@@ -81,6 +87,34 @@
               <option value="problem">{{ $t('ticket.type_problem') }}</option>
               <option value="service_request">{{ $t('ticket.type_service_request') }}</option>
               <option value="change_request">{{ $t('ticket.type_change_request') }}</option>
+            </select>
+          </template>
+
+          <!-- Impact / urgency select -->
+          <template v-else-if="action.type === 'set_impact' || action.type === 'set_urgency'">
+            <label class="sr-only" :for="'act-val-' + idx">{{ $t('macro.action_value') }}</label>
+            <select :id="'act-val-' + idx" class="form-input form-input-sm" v-model="action.value">
+              <option v-for="lvl in LEVELS" :key="lvl" :value="lvl">{{ $t((action.type === 'set_impact' ? 'ticket.impact_' : 'ticket.urgency_') + lvl) }}</option>
+            </select>
+          </template>
+
+          <!-- Category select -->
+          <template v-else-if="action.type === 'set_category'">
+            <label class="sr-only" :for="'act-val-' + idx">{{ $t('macro.action_value') }}</label>
+            <select :id="'act-val-' + idx" class="form-input form-input-sm" v-model="action.value">
+              <option value="" disabled>{{ $t('common.select') }}</option>
+              <option v-if="action.value && !categoryOptions.some(c => c.value === action.value)" :value="action.value">{{ $t('macro.unknown_option', { id: action.value }) }}</option>
+              <option v-for="c in categoryOptions" :key="c.value" :value="c.value">{{ c.label }}</option>
+            </select>
+          </template>
+
+          <!-- Resolution code select -->
+          <template v-else-if="action.type === 'set_resolution'">
+            <label class="sr-only" :for="'act-val-' + idx">{{ $t('macro.action_value') }}</label>
+            <select :id="'act-val-' + idx" class="form-input form-input-sm" v-model="action.value">
+              <option value="" disabled>{{ $t('common.select') }}</option>
+              <option v-if="action.value && !resolutionOptions.some(r => r.value === action.value)" :value="action.value">{{ $t('macro.unknown_option', { id: action.value }) }}</option>
+              <option v-for="r in resolutionOptions" :key="r.value" :value="r.value">{{ r.label }}</option>
             </select>
           </template>
 
@@ -155,11 +189,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import Sortable from 'sortablejs'
 import { macrosApi } from '@/api/macros'
+import { helpdeskApi } from '@/api/helpdesk'
 import { useUIStore } from '@/stores/ui'
 
+const { t } = useI18n()
 const ui = useUIStore()
 const loading = ref(true)
 const saving = ref(false)
@@ -200,6 +237,34 @@ watch(() => form.value.actions.length, async (len) => {
   if (len) { await nextTick(); initActionsSortable() }
 })
 
+const LEVELS = ['low', 'medium', 'high']
+
+// Active categories / resolution codes for the set_category / set_resolution
+// actions. Macro values are strings, so the ids are stringified here.
+const categories = ref([])
+const resolutionCodes = ref([])
+
+async function loadLookups() {
+  try { categories.value = (await helpdeskApi.listCategories()).data || [] } catch { /* keep previous */ }
+  try { resolutionCodes.value = (await helpdeskApi.listResolutionCodes()).data || [] } catch { /* keep previous */ }
+}
+
+const categoryOptions = computed(() => {
+  const byId = Object.fromEntries(categories.value.map(c => [c.id, c]))
+  const tops = categories.value.filter(c => !c.parent_id || !byId[c.parent_id])
+  const out = []
+  for (const top of tops) {
+    out.push({ value: String(top.id), label: top.name })
+    for (const child of categories.value.filter(c => c.parent_id === top.id)) {
+      out.push({ value: String(child.id), label: `${top.name} › ${child.name}` })
+    }
+  }
+  return out
+})
+
+const resolutionOptions = computed(() =>
+  resolutionCodes.value.map(r => ({ value: String(r.id), label: r.name })))
+
 const PLACEHOLDERS = ['{email}', '{fname}', '{name}', '{subject}', '{ticket_id}', '{agent}', '{agent_fname}']
 
 function insertPlaceholder(action, ph, idx) {
@@ -218,7 +283,7 @@ function insertPlaceholder(action, ph, idx) {
   }
 }
 
-onMounted(load)
+onMounted(() => { load(); loadLookups() })
 
 function emptyForm() {
   return { name: '', description: '', is_active: true, sort_order: 0, actions: [] }
@@ -264,6 +329,7 @@ function startCreate() {
   form.value = emptyForm()
   editing.value = { id: 0 }
   formSnapshot.value = snapshotForm(form.value)
+  loadLookups()
 }
 
 function startEdit(m) {
@@ -272,10 +338,11 @@ function startEdit(m) {
     description: m.description,
     is_active: m.is_active,
     sort_order: m.sort_order,
-    actions: (m.actions || []).map(a => ({ ...a })),
+    actions: (m.actions || []).map(a => ({ ...a, value: a.value == null ? '' : String(a.value) })),
   }
   editing.value = m
   formSnapshot.value = snapshotForm(form.value)
+  loadLookups()
 }
 
 function cancelEdit() {
@@ -295,6 +362,10 @@ function onActionTypeChange(action) {
     set_status: 'open',
     set_priority: 'medium',
     set_type: 'incident',
+    set_impact: 'medium',
+    set_urgency: 'medium',
+    set_category: categoryOptions.value[0]?.value ?? '',
+    set_resolution: resolutionOptions.value[0]?.value ?? '',
     add_tag: '',
     add_message: '',
   }
@@ -304,6 +375,10 @@ function onActionTypeChange(action) {
 async function confirmSave() {
   if (!form.value.name.trim()) {
     ui.error('Name is required')
+    return
+  }
+  if (form.value.actions.some(a => ['set_category', 'set_resolution'].includes(a.type) && !a.value)) {
+    ui.error(t('macro.value_required'))
     return
   }
   saving.value = true
