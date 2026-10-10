@@ -128,6 +128,7 @@ import { useProjectStore } from '@/stores/project'
 import { useUIStore } from '@/stores/ui'
 import { useSidebarStore } from '@/stores/sidebar'
 import { useAuthStore } from '@/stores/auth'
+import { useSystemStore } from '@/stores/system'
 import { resolveAssetUrl } from '@/api/serverConfig'
 import { customersApi } from '@/api/customers'
 
@@ -136,6 +137,7 @@ const projectStore = useProjectStore()
 const ui = useUIStore()
 const sidebarStore = useSidebarStore()
 const auth = useAuthStore()
+const systemStore = useSystemStore()
 const showCreate = ref(false)
 const gridEl = ref(null)
 let sortable = null
@@ -183,7 +185,7 @@ watch(() => newProject.value.name, (name) => {
 })
 
 onMounted(async () => {
-  if (auth.user?.dashboard_default === 'tickets' && auth.helpdeskEnabled) {
+  if ((auth.user?.dashboard_default === 'tickets' || systemStore.isTicketsystemMode) && auth.helpdeskEnabled) {
     try {
       const { data } = await customersApi.list()
       const list = data || []

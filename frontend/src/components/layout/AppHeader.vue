@@ -6,18 +6,18 @@
       </RouterLink>
       <slot name="breadcrumb" />
     </div>
-    <div v-if="!systemStore.isTimetrackingMode" class="header-center">
+    <div v-if="!systemStore.isRestrictedMode" class="header-center">
       <GlobalSearch />
     </div>
     <nav class="header-nav" aria-label="Main navigation">
       <RouterLink v-if="!systemStore.isTimetrackingMode" to="/" class="header-nav-link" :class="{ active: route.path === '/' }">{{ $t('nav.dashboard') }}</RouterLink>
       <RouterLink to="/news" class="header-nav-link" :class="{ active: route.path === '/news' }">{{ $t('nav.news') }}</RouterLink>
-      <RouterLink v-if="!systemStore.isTimetrackingMode" to="/chats" class="header-nav-link" :class="{ active: route.path === '/chats' }">
+      <RouterLink v-if="!systemStore.isRestrictedMode" to="/chats" class="header-nav-link" :class="{ active: route.path === '/chats' }">
         {{ $t('nav.messages') }}
         <span v-if="notificationsStore.hasUnread" class="nav-unread-dot" aria-hidden="true"></span>
         <span v-if="notificationsStore.hasUnread" class="sr-only">({{ $t('sidebar.unread_messages') }})</span>
       </RouterLink>
-      <RouterLink v-if="!systemStore.isTimetrackingMode && (auth.timeTrackingEnabled || auth.canViewReports)" to="/time-tracking" class="header-nav-link" :class="{ active: route.path.startsWith('/time-tracking') }">{{ $t('timeTracking.nav') }}</RouterLink>
+      <RouterLink v-if="!systemStore.isRestrictedMode && (auth.timeTrackingEnabled || auth.canViewReports)" to="/time-tracking" class="header-nav-link" :class="{ active: route.path.startsWith('/time-tracking') }">{{ $t('timeTracking.nav') }}</RouterLink>
     </nav>
     <div class="header-right">
       <span class="presence-count" v-if="presenceCount > 0" :title="`${presenceCount} ${$t('presence.online')}`">
@@ -138,12 +138,12 @@
           <div class="dropdown-item" role="menuitem" @click="navigate('/settings')">{{ $t('nav.settings') }}</div>
           <div class="dropdown-item" role="menuitem" v-if="auth.isAdmin" @click="navigate('/admin')">{{ $t('nav.admin') }}</div>
           <div class="dropdown-divider" role="separator"></div>
-          <div v-if="!systemStore.isTimetrackingMode" class="dropdown-item" role="menuitem" @click="navigate('/chats')">
+          <div v-if="!systemStore.isRestrictedMode" class="dropdown-item" role="menuitem" @click="navigate('/chats')">
             {{ $t('nav.messages') }}
             <span v-if="notificationsStore.hasUnread" class="msg-unread-dot" aria-hidden="true"></span>
             <span v-if="notificationsStore.hasUnread" class="sr-only">({{ $t('sidebar.unread_messages') }})</span>
           </div>
-          <div class="dropdown-item" role="menuitem" v-if="auth.timeTrackingEnabled || auth.canViewReports" @click="navigate('/time-tracking')">{{ $t('timeTracking.nav') }}</div>
+          <div class="dropdown-item" role="menuitem" v-if="!systemStore.isTicketsystemMode && (auth.timeTrackingEnabled || auth.canViewReports)" @click="navigate('/time-tracking')">{{ $t('timeTracking.nav') }}</div>
           <div class="dropdown-divider" role="separator"></div>
           <div class="dropdown-item" role="menuitem" @click="openShortcuts">{{ $t('nav.keyboard_shortcuts') }}</div>
           <div
@@ -208,7 +208,7 @@ const emit = defineEmits(['open-shortcuts'])
 
 const auth = useAuthStore()
 // The timer endpoints need the time_tracking_enabled feature (admins always have it).
-const showTimer = computed(() => !!auth.user && (auth.isAdmin || !!auth.user.time_tracking_enabled))
+const showTimer = computed(() => !systemStore.isTicketsystemMode && !!auth.user && (auth.isAdmin || !!auth.user.time_tracking_enabled))
 const systemStore = useSystemStore()
 const router = useRouter()
 const route = useRoute()

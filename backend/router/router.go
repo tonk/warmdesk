@@ -16,6 +16,9 @@ import (
 
 func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, apiLog bool, uploadDir string, trustedProxies []string, appMode string, instanceMode string) *gin.Engine {
 	ttMode := appMode == "timetracking"
+	tsMode := appMode == "ticketsystem"
+	// noBoards: modes that expose neither boards/projects nor chat.
+	noBoards := ttMode || tsMode
 	testMode := instanceMode == "test"
 	r := gin.New()
 	r.SetTrustedProxies(trustedProxies) //nolint
@@ -112,7 +115,7 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 			admin.POST("/users/:id/mfa/disable", handlers.AdminDisableUserMFA)
 			admin.GET("/users/:id/passkeys", handlers.AdminListUserPasskeys)
 			admin.DELETE("/users/:id/passkeys", handlers.AdminRevokeUserPasskeys)
-			if !ttMode {
+			if !noBoards {
 				admin.GET("/users/:id/projects", handlers.AdminGetUserProjects)
 				admin.PUT("/users/:id/projects", handlers.AdminSetUserProjects)
 			}
@@ -124,7 +127,7 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 			admin.GET("/users/:id/api-keys", handlers.AdminListUserAPIKeys)
 			admin.POST("/users/:id/api-keys", handlers.AdminCreateUserAPIKey)
 			admin.DELETE("/users/:id/api-keys/:keyId", handlers.AdminDeleteUserAPIKey)
-			if !ttMode {
+			if !noBoards {
 				admin.GET("/projects", handlers.AdminListProjects)
 				admin.POST("/projects", handlers.AdminCreateProject)
 				admin.PUT("/projects/:id", handlers.AdminUpdateProject)
@@ -238,7 +241,7 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 		// Users (for direct messages / user lookup)
 		protected.GET("/users", handlers.ListAllUsers)
 
-		if !ttMode {
+		if !noBoards {
 			// Online presence (global)
 			protected.GET("/online-users", handlers.GetOnlineUsers)
 
@@ -394,7 +397,7 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 			}
 		}
 
-		if !ttMode {
+		if !noBoards {
 			// Direct messages (legacy 1-on-1)
 			dm := protected.Group("/direct-messages")
 			dm.Use(middleware.BlockCustomerRole(), middleware.RequireFeature("chat_enabled"))
@@ -426,52 +429,54 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 			protected.GET("/link-preview", handlers.LinkPreview)
 		}
 
-		// Reports
-		protected.GET("/reports/time", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimeReport)
-		protected.GET("/reports/time/pdf", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimeReportPDF)
-		protected.GET("/reports/time/xlsx", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimeReportXLSX)
+		if !tsMode {
+			// Reports
+			protected.GET("/reports/time", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimeReport)
+			protected.GET("/reports/time/pdf", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimeReportPDF)
+			protected.GET("/reports/time/xlsx", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimeReportXLSX)
 
-		// Time-tracking-only customers and projects (no board/CRM created)
-		protected.GET("/time-tracking-customers", middleware.RequireFeature("time_tracking_enabled"), handlers.ListTimeTrackingCustomers)
-		protected.POST("/time-tracking-customers", middleware.RequireFeature("time_tracking_enabled"), handlers.CreateTimeTrackingCustomer)
-		protected.PUT("/time-tracking-customers/:id", middleware.RequireFeature("time_tracking_enabled"), handlers.UpdateTimeTrackingCustomer)
-		protected.DELETE("/time-tracking-customers/:id", middleware.RequireFeature("time_tracking_enabled"), handlers.DeleteTimeTrackingCustomer)
+			// Time-tracking-only customers and projects (no board/CRM created)
+			protected.GET("/time-tracking-customers", middleware.RequireFeature("time_tracking_enabled"), handlers.ListTimeTrackingCustomers)
+			protected.POST("/time-tracking-customers", middleware.RequireFeature("time_tracking_enabled"), handlers.CreateTimeTrackingCustomer)
+			protected.PUT("/time-tracking-customers/:id", middleware.RequireFeature("time_tracking_enabled"), handlers.UpdateTimeTrackingCustomer)
+			protected.DELETE("/time-tracking-customers/:id", middleware.RequireFeature("time_tracking_enabled"), handlers.DeleteTimeTrackingCustomer)
 
-		// Time-tracking-only projects (no board created)
-		protected.GET("/time-tracking-projects", middleware.RequireFeature("time_tracking_enabled"), handlers.ListTimeTrackingProjects)
-		protected.POST("/time-tracking-projects", middleware.RequireFeature("time_tracking_enabled"), handlers.CreateTimeTrackingProject)
-		protected.PUT("/time-tracking-projects/:id", middleware.RequireFeature("time_tracking_enabled"), handlers.UpdateTimeTrackingProject)
-		protected.DELETE("/time-tracking-projects/:id", middleware.RequireFeature("time_tracking_enabled"), handlers.DeleteTimeTrackingProject)
+			// Time-tracking-only projects (no board created)
+			protected.GET("/time-tracking-projects", middleware.RequireFeature("time_tracking_enabled"), handlers.ListTimeTrackingProjects)
+			protected.POST("/time-tracking-projects", middleware.RequireFeature("time_tracking_enabled"), handlers.CreateTimeTrackingProject)
+			protected.PUT("/time-tracking-projects/:id", middleware.RequireFeature("time_tracking_enabled"), handlers.UpdateTimeTrackingProject)
+			protected.DELETE("/time-tracking-projects/:id", middleware.RequireFeature("time_tracking_enabled"), handlers.DeleteTimeTrackingProject)
 
-		// Global invoice list (across all accessible customers)
-		protected.GET("/invoices", handlers.ListAllInvoices)
+			// Global invoice list (across all accessible customers)
+			protected.GET("/invoices", handlers.ListAllInvoices)
 
-		// Invoice templates (readable by all, writeable by admin only — see admin group above)
-		protected.GET("/invoice-templates", handlers.ListInvoiceTemplates)
+			// Invoice templates (readable by all, writeable by admin only — see admin group above)
+			protected.GET("/invoice-templates", handlers.ListInvoiceTemplates)
 
-		// Time entries (personal time registration)
-		// Time-tracking timer (one running timer per user; stop books time entries)
-		protected.GET("/timer", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimer)
-		protected.GET("/timer/targets", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimerTargets)
-		protected.POST("/timer/start", middleware.RequireFeature("time_tracking_enabled"), handlers.StartTimer)
-		protected.POST("/timer/stop", middleware.RequireFeature("time_tracking_enabled"), handlers.StopTimer)
-		protected.DELETE("/timer", middleware.RequireFeature("time_tracking_enabled"), handlers.CancelTimer)
+			// Time entries (personal time registration)
+			// Time-tracking timer (one running timer per user; stop books time entries)
+			protected.GET("/timer", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimer)
+			protected.GET("/timer/targets", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimerTargets)
+			protected.POST("/timer/start", middleware.RequireFeature("time_tracking_enabled"), handlers.StartTimer)
+			protected.POST("/timer/stop", middleware.RequireFeature("time_tracking_enabled"), handlers.StopTimer)
+			protected.DELETE("/timer", middleware.RequireFeature("time_tracking_enabled"), handlers.CancelTimer)
 
-		protected.GET("/time-entries", middleware.RequireFeature("time_tracking_enabled"), handlers.ListTimeEntries)
-		protected.POST("/time-entries", middleware.RequireFeature("time_tracking_enabled"), handlers.CreateTimeEntry)
-		protected.PUT("/time-entries/:id", middleware.RequireFeature("time_tracking_enabled"), handlers.UpdateTimeEntry)
-		protected.DELETE("/time-entries/:id", middleware.RequireFeature("time_tracking_enabled"), handlers.DeleteTimeEntry)
-		protected.GET("/time-entries/report", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimeEntryReport)
-		protected.GET("/time-entries/report/pdf", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimeEntryReportPDF)
-		protected.GET("/time-entries/report/chart-pdf", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimeEntryReportChartPDF)
-		protected.GET("/time-entries/report/xlsx", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimeEntryReportXLSX)
-		protected.GET("/time-entries/sheet/xlsx", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimeEntrySheetXLSX)
-		protected.GET("/time-entries/grid/pdf", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimeSheetGridPDF)
-		protected.POST("/time-entries/holidays", middleware.RequireFeature("time_tracking_enabled"), handlers.AddHolidays)
-		protected.GET("/time-entries/row-order", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimeEntryRowOrder)
-		protected.PUT("/time-entries/row-order", middleware.RequireFeature("time_tracking_enabled"), handlers.UpdateTimeEntryRowOrder)
-		protected.GET("/time-entries/macro-library", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimeMacroLibrary)
-		protected.PUT("/time-entries/macro-library", middleware.RequireFeature("time_tracking_enabled"), handlers.UpdateTimeMacroLibrary)
+			protected.GET("/time-entries", middleware.RequireFeature("time_tracking_enabled"), handlers.ListTimeEntries)
+			protected.POST("/time-entries", middleware.RequireFeature("time_tracking_enabled"), handlers.CreateTimeEntry)
+			protected.PUT("/time-entries/:id", middleware.RequireFeature("time_tracking_enabled"), handlers.UpdateTimeEntry)
+			protected.DELETE("/time-entries/:id", middleware.RequireFeature("time_tracking_enabled"), handlers.DeleteTimeEntry)
+			protected.GET("/time-entries/report", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimeEntryReport)
+			protected.GET("/time-entries/report/pdf", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimeEntryReportPDF)
+			protected.GET("/time-entries/report/chart-pdf", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimeEntryReportChartPDF)
+			protected.GET("/time-entries/report/xlsx", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimeEntryReportXLSX)
+			protected.GET("/time-entries/sheet/xlsx", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimeEntrySheetXLSX)
+			protected.GET("/time-entries/grid/pdf", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimeSheetGridPDF)
+			protected.POST("/time-entries/holidays", middleware.RequireFeature("time_tracking_enabled"), handlers.AddHolidays)
+			protected.GET("/time-entries/row-order", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimeEntryRowOrder)
+			protected.PUT("/time-entries/row-order", middleware.RequireFeature("time_tracking_enabled"), handlers.UpdateTimeEntryRowOrder)
+			protected.GET("/time-entries/macro-library", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimeMacroLibrary)
+			protected.PUT("/time-entries/macro-library", middleware.RequireFeature("time_tracking_enabled"), handlers.UpdateTimeMacroLibrary)
+		} // end if !tsMode (time tracking, reports, invoices)
 
 		// Prometheus metrics (admin or metrics role)
 		protected.GET("/metrics", middleware.MetricsAuth(), handlers.GetMetrics)
@@ -479,7 +484,7 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 		// Automated backup trigger (admin or backup role)
 		protected.POST("/backup", middleware.BackupAuth(), handlers.AdminBackupDatabase)
 
-		if !ttMode {
+		if !noBoards {
 			// Conversations (1-on-1 and group)
 			convs := protected.Group("/conversations")
 			convs.Use(middleware.BlockCustomerRole(), middleware.RequireFeature("chat_enabled"))
@@ -662,10 +667,10 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 				projects.GET("/:projectSlug/charts/sprint-report/:sprintId", handlers.GetSprintReport)
 				projects.GET("/:projectSlug/epics/:epicId/burndown", handlers.GetEpicBurndown)
 			}
-		} // end if !ttMode (conversations + projects)
+		} // end if !noBoards (conversations + projects)
 	}
 
-	if !ttMode {
+	if !noBoards {
 		// Public incoming webhook receivers
 		v1.POST("/webhooks/:token", handlers.IncomingWebhook)
 		v1.POST("/gitea-webhook/:token", handlers.IncomingGiteaWebhook)
@@ -678,7 +683,7 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 
 	// WebSocket — self-auth (cookie, Bearer, or WS ticket); outside protected group
 	v1.GET("/ws/user", wsHandler.HandleUserWS)
-	if !ttMode {
+	if !noBoards {
 		v1.GET("/ws/:projectSlug", wsHandler.HandleWS)
 
 		// Ticket API — authenticated via X-API-Key header
@@ -723,6 +728,14 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 					path = "timetracking-full.svg"
 				}
 			}
+			if tsMode {
+				switch path {
+				case "logo.svg":
+					path = "ticketsystem.svg"
+				case "logo-full.svg":
+					path = "ticketsystem-full.svg"
+				}
+			}
 			// In test instance mode, serve the orange "TEST"-ribboned logo variants
 			// so a test instance is never visually mistaken for production.
 			if testMode {
@@ -735,6 +748,10 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 					path = "timetracking-test.svg"
 				case "timetracking-full.svg":
 					path = "timetracking-full-test.svg"
+				case "ticketsystem.svg":
+					path = "ticketsystem-test.svg"
+				case "ticketsystem-full.svg":
+					path = "ticketsystem-full-test.svg"
 				}
 			}
 			if path != "" {

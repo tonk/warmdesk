@@ -161,12 +161,12 @@
                 <tr>
                   <th style="width:42px;"></th>
                   <th>{{ $t('admin.user') }}</th>
-                  <th v-if="!systemStore.isTimetrackingMode" style="text-align:center;width:70px;">{{ $t('feature.board') }}</th>
-                  <th v-if="!systemStore.isTimetrackingMode" style="text-align:center;width:70px;">{{ $t('feature.chat') }}</th>
-                  <th style="text-align:center;width:90px;">{{ $t('feature.time_tracking') }}</th>
-                  <th style="text-align:center;width:100px;">{{ $t('admin.timetracking_viewer') }}</th>
+                  <th v-if="!systemStore.isRestrictedMode" style="text-align:center;width:70px;">{{ $t('feature.board') }}</th>
+                  <th v-if="!systemStore.isRestrictedMode" style="text-align:center;width:70px;">{{ $t('feature.chat') }}</th>
+                  <th v-if="!systemStore.isTicketsystemMode" style="text-align:center;width:90px;">{{ $t('feature.time_tracking') }}</th>
+                  <th v-if="!systemStore.isTicketsystemMode" style="text-align:center;width:100px;">{{ $t('admin.timetracking_viewer') }}</th>
                   <th v-if="!systemStore.isTimetrackingMode" style="text-align:center;width:90px;">{{ $t('feature.helpdesk') }}</th>
-                  <th v-if="!systemStore.isTimetrackingMode" style="text-align:center;width:110px;">{{ $t('feature.create_projects') }}</th>
+                  <th v-if="!systemStore.isRestrictedMode" style="text-align:center;width:110px;">{{ $t('feature.create_projects') }}</th>
                   <th style="text-align:center;width:60px;">{{ $t('admin.mfa_enabled') }}</th>
                 </tr>
               </thead>
@@ -179,24 +179,24 @@
                     </div>
                   </td>
                   <td>{{ user.display_name || user.username }}</td>
-                  <td v-if="!systemStore.isTimetrackingMode" style="text-align:center;">
+                  <td v-if="!systemStore.isRestrictedMode" style="text-align:center;">
                     <template v-if="user.global_role === 'admin'"><span class="feat-check feat-always">✓</span></template>
                     <template v-else-if="user.global_role === 'customer'"><span class="feat-check feat-off">—</span></template>
                     <span v-else-if="user.global_role === 'metrics' || user.global_role === 'backup'" class="feat-check feat-off">—</span>
                     <input v-else type="checkbox" class="feat-toggle" :checked="user.board_enabled !== false" @change="toggleFeature(user, 'board_enabled', $event.target.checked)" />
                   </td>
-                  <td v-if="!systemStore.isTimetrackingMode" style="text-align:center;">
+                  <td v-if="!systemStore.isRestrictedMode" style="text-align:center;">
                     <template v-if="user.global_role === 'admin'"><span class="feat-check feat-always">✓</span></template>
                     <template v-else-if="user.global_role === 'customer'"><span class="feat-check feat-off">—</span></template>
                     <span v-else-if="user.global_role === 'metrics' || user.global_role === 'backup'" class="feat-check feat-off">—</span>
                     <input v-else type="checkbox" class="feat-toggle" :checked="user.chat_enabled !== false" @change="toggleFeature(user, 'chat_enabled', $event.target.checked)" />
                   </td>
-                  <td style="text-align:center;">
+                  <td v-if="!systemStore.isTicketsystemMode" style="text-align:center;">
                     <template v-if="user.global_role === 'customer'"><span class="feat-check feat-off">—</span></template>
                     <span v-else-if="user.global_role === 'metrics' || user.global_role === 'backup'" class="feat-check feat-off">—</span>
                     <input v-else type="checkbox" class="feat-toggle" :checked="!!user.time_tracking_enabled" @change="toggleFeature(user, 'time_tracking_enabled', $event.target.checked)" />
                   </td>
-                  <td style="text-align:center;">
+                  <td v-if="!systemStore.isTicketsystemMode" style="text-align:center;">
                     <template v-if="user.global_role === 'customer'"><span class="feat-check feat-off">—</span></template>
                     <span v-else-if="user.global_role === 'metrics' || user.global_role === 'backup'" class="feat-check feat-off">—</span>
                     <input v-else type="checkbox" class="feat-toggle" :checked="!!user.time_tracking_viewer" @change="toggleFeature(user, 'time_tracking_viewer', $event.target.checked)" />
@@ -207,7 +207,7 @@
                     <span v-else-if="user.global_role === 'metrics' || user.global_role === 'backup'" class="feat-check feat-off">—</span>
                     <input v-else type="checkbox" class="feat-toggle" :checked="!!user.helpdesk_enabled" @change="toggleFeature(user, 'helpdesk_enabled', $event.target.checked)" />
                   </td>
-                  <td v-if="!systemStore.isTimetrackingMode" style="text-align:center;">
+                  <td v-if="!systemStore.isRestrictedMode" style="text-align:center;">
                     <template v-if="user.global_role === 'admin'"><span class="feat-check feat-always">✓</span></template>
                     <template v-else-if="user.global_role === 'customer' || user.global_role === 'viewer'"><span class="feat-check feat-off">—</span></template>
                     <span v-else-if="user.global_role === 'metrics' || user.global_role === 'backup'" class="feat-check feat-off">—</span>
@@ -460,7 +460,7 @@
                   @change="saveSecuritySettings" />
               </div>
 
-              <div v-if="!systemStore.isTimetrackingMode" class="form-group" style="max-width:400px">
+              <div v-if="!systemStore.isRestrictedMode" class="form-group" style="max-width:400px">
                 <label class="toggle-row">
                   <span>{{ $t('admin.scrum_storypoints_enabled') }}<HelpIcon i18n-key="admin.scrum_storypoints_hint" :label="$t('admin.scrum_storypoints_enabled')" /></span>
                   <input type="checkbox" v-model="systemSettings.scrum_storypoints_enabled" @change="saveGeneralSettings" />
@@ -569,7 +569,7 @@
               </div>
             </div>
 
-            <div class="card settings-card" v-if="!systemStore.isTimetrackingMode">
+            <div class="card settings-card" v-if="!systemStore.isRestrictedMode">
               <h3 class="settings-subsection">
                 {{ $t('admin.project_defaults_title') }}
                 <HelpIcon i18n-key="admin.default_columns_hint" :label="$t('admin.project_defaults_title')" />
@@ -2053,7 +2053,7 @@ const SECTION_LOADERS = {
   backup: () => { loadBackups(); loadSettings() },
 }
 
-const adminMenu = computed(() => visibleAdminMenu(systemStore.isTimetrackingMode))
+const adminMenu = computed(() => visibleAdminMenu(systemStore.appMode))
 
 function findSection(predicate) {
   for (const group of adminMenu.value) {

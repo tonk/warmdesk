@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="462"
+   height="172.845"
+   viewBox="0 0 462 172.845"
+   version="1.1"
+   xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .desk-top   { fill: #FFE0A3; }
+      .desk-body  { fill: #F5A93F; }
+      .desk-leg   { fill: #C97A1D; }
+      .ticket-rim  { fill: #8A5010; }
+      .ticket-face { fill: #C97A1D; }
+      .ticket-line { stroke: #FFE0A3; fill: none; }
+      .ticket-mark { fill: #FFE0A3; }
+      .ticket-check { stroke: #FFE0A3; }
+      .wordmark-ticket { fill: #FFE0A3; }
+      .wordmark-system { fill: #ffd18a; }
+      .tagline         { fill: #B4B2A9; }
+      .ribbon { fill: #8A5010; }
+      .ribbon-text { fill: #FFFFFF; font-family: FreeSans, 'Liberation Sans', Arial, Helvetica, sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 2px; }
+    </style>
+  </defs>
+
+  <!-- Desk legs -->
+  <rect class="desk-leg" x="26"  y="108.5" width="13" height="62" rx="3"/>
+  <rect class="desk-leg" x="145" y="108.5" width="13" height="62" rx="3"/>
+
+  <!-- Desk apron -->
+  <rect class="desk-body" x="10" y="90.5" width="162" height="24" rx="5"/>
+
+  <!-- Desk top surface -->
+  <rect class="desk-top" x="0" y="78.5" width="182" height="16" rx="4"/>
+
+  <!-- Ticket (drawn after desk so it rests on the surface) -->
+  <g transform="translate(91 50) rotate(-8) scale(1.1) translate(-80 -50)">
+    <path class="ticket-rim" d="M52,28 H108 a4,4 0 0 1 4,4 V44 a6,6 0 0 0 0,12 V68 a4,4 0 0 1 -4,4 H52 a4,4 0 0 1 -4,-4 V56 a6,6 0 0 0 0,-12 V32 a4,4 0 0 1 4,-4 Z"/>
+    <path class="ticket-face" d="M54,31 H106 a2,2 0 0 1 2,2 V45.5 a8,8 0 0 0 0,9 V67 a2,2 0 0 1 -2,2 H54 a2,2 0 0 1 -2,-2 V54.5 a8,8 0 0 0 0,-9 V33 a2,2 0 0 1 2,-2 Z"/>
+    <line class="ticket-line" x1="92" y1="33" x2="92" y2="67" stroke-width="2" stroke-dasharray="3 3"/>
+    <rect class="ticket-mark" x="58" y="37" width="26" height="4" rx="2"/>
+    <rect class="ticket-mark" x="58" y="46" width="20" height="4" rx="2"/>
+    <rect class="ticket-mark" x="58" y="55" width="23" height="4" rx="2"/>
+    <path class="ticket-check" d="M96,50 l4,4 l7,-8" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="202" y="91.5" font-family="FreeSans, 'Liberation Sans', Arial, Helvetica, sans-serif" font-size="64px" font-weight="500" class="wordmark-ticket" letter-spacing="-1">Ticket</text>
+  <text x="202" y="146.5" font-family="FreeSans, 'Liberation Sans', Arial, Helvetica, sans-serif" font-size="56px" font-weight="500" class="wordmark-system" letter-spacing="-1">System</text>
+
+  <!-- Tagline -->
+  <text x="204" y="169" font-family="FreeSans, 'Liberation Sans', Arial, Helvetica, sans-serif" font-size="15px" font-weight="400" class="tagline" letter-spacing="2">helpdesk &amp; service desk</text>
+
+  <!-- TEST corner ribbon -->
+  <g transform="translate(150,28) rotate(40)">
+    <rect class="ribbon" x="-70" y="-13" width="140" height="26" rx="3"/>
+    <text class="ribbon-text" x="0" y="5" text-anchor="middle">TEST</text>
+  </g>
+</svg>

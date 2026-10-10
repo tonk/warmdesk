@@ -181,7 +181,7 @@ const routeCrumbs = computed(() => {
   if (route.path === '/') return []
   if (route.name === 'admin') {
     // Admin › <group> › <section>; the group has no page of its own.
-    const sec = findAdminSection(visibleAdminMenu(systemStore.isTimetrackingMode), route.params.group, route.params.item)
+    const sec = findAdminSection(visibleAdminMenu(systemStore.appMode), route.params.group, route.params.item)
     const crumbs = [{ to: '/admin', label: nameLabels.admin }]
     if (sec) crumbs.push({ to: null, label: t(sec.group.labelKey) }, { to: null, label: t(sec.item.labelKey) })
     return crumbs
@@ -218,7 +218,9 @@ let titleBlinkTimer = null
 let titleBlinkOn = false
 
 function baseTitle() {
-  return systemStore.isTimetrackingMode ? 'WarmDesk - Time Tracking' : 'WarmDesk'
+  if (systemStore.isTimetrackingMode) return 'WarmDesk - Time Tracking'
+  if (systemStore.isTicketsystemMode) return 'WarmDesk - Ticket System'
+  return 'WarmDesk'
 }
 
 function hasNewMessage() {
@@ -278,7 +280,7 @@ function updateTitleState() {
   }
 }
 
-watch([() => notificationsStore.hasUnread, projectChatUnread, () => systemStore.isTimetrackingMode], updateTitleState, { immediate: true })
+watch([() => notificationsStore.hasUnread, projectChatUnread, () => systemStore.isTimetrackingMode, () => systemStore.isTicketsystemMode], updateTitleState, { immediate: true })
 
 function onTitleVisibilityChange() { updateTitleState() }
 

@@ -58,7 +58,8 @@
     "password_expired_title": "Adgangskode udløbet",
     "must_change_password": "En administrator kræver, at du angiver en ny adgangskode, før du fortsætter.",
     "remember_me": "Husk mig",
-    "timetracking_mode": "Kun tidsregistrering"
+    "timetracking_mode": "Kun tidsregistrering",
+    "ticketsystem_mode": "Kun ticketsystem"
   },
   "project": {
     "projects": "Projekter",

@@ -58,7 +58,8 @@
     "password_expired_title": "Lykilorð útrunnið",
     "must_change_password": "Stjórnandi krefst þess að þú stillir nýtt lykilorð áður en þú heldur áfram.",
     "remember_me": "Muna mig",
-    "timetracking_mode": "Einungis timaskraning"
+    "timetracking_mode": "Einungis timaskraning",
+    "ticketsystem_mode": "Einungis miðakerfi"
   },
   "project": {
     "projects": "Verkefni",

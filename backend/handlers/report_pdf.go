@@ -74,6 +74,14 @@ func resolveLogoBytes(logoURL string) ([]byte, string, bool) {
 			rel, ext = "timetracking-full.svg", ".svg"
 		}
 	}
+	if serverAppMode == "ticketsystem" {
+		switch rel {
+		case "logo.svg":
+			rel, ext = "ticketsystem.svg", ".svg"
+		case "logo-full.svg":
+			rel, ext = "ticketsystem-full.svg", ".svg"
+		}
+	}
 	// In test instance mode, substitute the orange "TEST"-ribboned logo variants
 	// so exported PDFs from a test instance are visibly distinguishable from production.
 	if serverInstanceMode == "test" {
@@ -86,6 +94,10 @@ func resolveLogoBytes(logoURL string) ([]byte, string, bool) {
 			rel, ext = "timetracking-test.svg", ".svg"
 		case "timetracking-full.svg":
 			rel, ext = "timetracking-full-test.svg", ".svg"
+		case "ticketsystem.svg":
+			rel, ext = "ticketsystem-test.svg", ".svg"
+		case "ticketsystem-full.svg":
+			rel, ext = "ticketsystem-full-test.svg", ".svg"
 		}
 	}
 	// Try WebDir on disk first

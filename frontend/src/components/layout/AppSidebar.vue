@@ -27,7 +27,7 @@
 
     <div class="sidebar-scroll">
     <!-- Starred Projects -->
-    <section v-if="auth.boardEnabled && !systemStore.isTimetrackingMode && shownSections.starred"
+    <section v-if="auth.boardEnabled && !systemStore.isRestrictedMode && shownSections.starred"
       class="sidebar-section"
       :style="sectionStyle('starred')"
       :class="{ 'section-drag-over': sectionDragOver === 'starred' }"
@@ -65,7 +65,7 @@
     </section>
 
     <!-- All Projects -->
-    <section v-if="auth.boardEnabled && !systemStore.isTimetrackingMode && shownSections.projects"
+    <section v-if="auth.boardEnabled && !systemStore.isRestrictedMode && shownSections.projects"
       class="sidebar-section"
       :style="sectionStyle('projects')"
       :class="{ 'section-drag-over': sectionDragOver === 'projects' }"
@@ -152,7 +152,7 @@
           {{ $t('sidebar.no_customers') }}
         </div>
         <nav class="sidebar-nav">
-          <RouterLink v-if="auth.isAdmin && !systemStore.isTimetrackingMode" to="/invoices" class="sidebar-link">
+          <RouterLink v-if="auth.isAdmin && !systemStore.isRestrictedMode" to="/invoices" class="sidebar-link">
             <span class="link-icon" aria-hidden="true">🧾</span>
             <span class="link-text">{{ $t('sidebar.all_invoices') }}</span>
           </RouterLink>
@@ -173,7 +173,7 @@
     </section>
 
     <!-- Favorite People -->
-    <section v-if="auth.chatEnabled && !systemStore.isTimetrackingMode && shownSections.favorites"
+    <section v-if="auth.chatEnabled && !systemStore.isRestrictedMode && shownSections.favorites"
       class="sidebar-section"
       :style="sectionStyle('favorites')"
       :class="{ 'section-drag-over': sectionDragOver === 'favorites' }"
@@ -276,7 +276,7 @@
     </section>
 
     <!-- All People -->
-    <section v-if="auth.chatEnabled && !systemStore.isTimetrackingMode && shownSections.people"
+    <section v-if="auth.chatEnabled && !systemStore.isRestrictedMode && shownSections.people"
       class="sidebar-section"
       :style="sectionStyle('people')"
       :class="{ 'section-drag-over': sectionDragOver === 'people' }"
@@ -316,7 +316,7 @@
     </section>
 
     <!-- Chats -->
-    <section v-if="auth.chatEnabled && !systemStore.isTimetrackingMode && shownSections.chats"
+    <section v-if="auth.chatEnabled && !systemStore.isRestrictedMode && shownSections.chats"
       class="sidebar-section"
       :style="sectionStyle('chats')"
       :class="{ 'section-drag-over': sectionDragOver === 'chats' }"
@@ -452,14 +452,14 @@ const sectionsMenuOpen = ref(false)
 const sectionsMenuEl = ref(null)
 
 const sectionsMenuConfig = computed(() => [
-  { key: 'starred', label: t('sidebar.starred'), enabled: auth.boardEnabled && !systemStore.isTimetrackingMode },
-  { key: 'projects', label: t('sidebar.all_projects'), enabled: auth.boardEnabled && !systemStore.isTimetrackingMode },
+  { key: 'starred', label: t('sidebar.starred'), enabled: auth.boardEnabled && !systemStore.isRestrictedMode },
+  { key: 'projects', label: t('sidebar.all_projects'), enabled: auth.boardEnabled && !systemStore.isRestrictedMode },
   { key: 'customers', label: t('sidebar.customers'), enabled: true },
   { key: 'allCustomers', label: t('customer.all_customers'), enabled: true },
-  { key: 'favorites', label: t('sidebar.favorites'), enabled: auth.chatEnabled && !systemStore.isTimetrackingMode },
+  { key: 'favorites', label: t('sidebar.favorites'), enabled: auth.chatEnabled && !systemStore.isRestrictedMode },
   { key: 'helpdesk', label: t('ticket.tickets'), enabled: auth.helpdeskEnabled && !systemStore.isTimetrackingMode },
-  { key: 'people', label: t('sidebar.users'), enabled: auth.chatEnabled && !systemStore.isTimetrackingMode },
-  { key: 'chats', label: t('nav.messages'), enabled: auth.chatEnabled && !systemStore.isTimetrackingMode },
+  { key: 'people', label: t('sidebar.users'), enabled: auth.chatEnabled && !systemStore.isRestrictedMode },
+  { key: 'chats', label: t('nav.messages'), enabled: auth.chatEnabled && !systemStore.isRestrictedMode },
 ].filter(s => s.enabled))
 
 function onSectionsMenuDocClick(e) {
@@ -730,7 +730,12 @@ let inboxInterval = null
 
 onMounted(() => {
   customersStore.fetchCustomers()
-  if (!systemStore.isTimetrackingMode) {
+  if (systemStore.isTicketsystemMode) {
+    if (auth.helpdeskEnabled) {
+      ticketsStore.fetchInboxCount()
+      inboxInterval = setInterval(() => ticketsStore.fetchInboxCount(), INBOX_POLL_INTERVAL_MS)
+    }
+  } else if (!systemStore.isTimetrackingMode) {
     sidebarStore.fetchStarred()
     sidebarStore.fetchAllProjects()
     sidebarStore.fetchAllUsers()

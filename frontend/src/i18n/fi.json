@@ -58,7 +58,8 @@
     "password_expired_title": "Salasana vanhentunut",
     "must_change_password": "Järjestelmänvalvoja edellyttää, että asetat uuden salasanan ennen jatkamista.",
     "remember_me": "Muista minut",
-    "timetracking_mode": "Vain ajanseuranta"
+    "timetracking_mode": "Vain ajanseuranta",
+    "ticketsystem_mode": "Vain tiketöintijärjestelmä"
   },
   "project": {
     "projects": "Projektit",

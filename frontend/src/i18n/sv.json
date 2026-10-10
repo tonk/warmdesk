@@ -58,7 +58,8 @@
     "password_expired_title": "Lösenord utgånget",
     "must_change_password": "En administratör kräver att du anger ett nytt lösenord innan du fortsätter.",
     "remember_me": "Kom ihåg mig",
-    "timetracking_mode": "Endast tidrapportering"
+    "timetracking_mode": "Endast tidrapportering",
+    "ticketsystem_mode": "Endast ärendesystem"
   },
   "project": {
     "projects": "Projekt",

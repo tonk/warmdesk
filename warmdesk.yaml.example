@@ -198,7 +198,12 @@ oauth2:
 #   - Boards, chat, and helpdesk API routes are disabled.
 #   - The time-tracking logos (clock-on-desk) replace the default WarmDesk logos
 #     in the web UI and in exported PDFs (when no custom company logo is set).
-# Can also be passed as the --mode=timetracking CLI flag (takes precedence over this setting).
+# Set to "ticketsystem" to run as a ticket-system-only server:
+#   - Boards/projects, chat, and time-tracking API routes are disabled; only the
+#     helpdesk (customers, tickets, knowledge base, CMDB, changes) remains.
+#   - The ticket logos (ticket-on-desk) replace the default WarmDesk logos in the
+#     web UI and in exported PDFs, and the login page shows "Ticket system only".
+# Can also be passed as the --mode=timetracking / --mode=ticketsystem CLI flag (takes precedence over this setting).
 # Can also be set via the APP_MODE environment variable.
 # app_mode: "timetracking"
 
@@ -206,7 +211,8 @@ oauth2:
 # Set to "test" to mark this server as a test/staging instance:
 #   - The logo variants swap to an orange palette with a "TEST" corner ribbon
 #     (logo-test.svg / logo-full-test.svg, or timetracking-test.svg /
-#     timetracking-full-test.svg when app_mode is "timetracking") in the web UI
+#     timetracking-full-test.svg when app_mode is "timetracking", or ticketsystem-test.svg /
+#     ticketsystem-full-test.svg when it is "ticketsystem") in the web UI
 #     and in exported PDFs (when no custom company logo is set).
 #   - Combines independently with app_mode — e.g. app_mode: "timetracking" +
 #     instance_mode: "test" serves the orange time-tracking logos.

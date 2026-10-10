@@ -58,7 +58,8 @@
     "password_expired_title": "Passwort abgelaufen",
     "must_change_password": "Ein Administrator verlangt, dass Sie vor dem Fortfahren ein neues Passwort festlegen.",
     "remember_me": "Benutzername merken",
-    "timetracking_mode": "Nur Zeiterfassung"
+    "timetracking_mode": "Nur Zeiterfassung",
+    "ticketsystem_mode": "Nur Ticketsystem"
   },
   "project": {
     "projects": "Projekte",

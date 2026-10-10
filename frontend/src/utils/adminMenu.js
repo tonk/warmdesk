@@ -12,8 +12,8 @@ export const ADMIN_MENU = [
     { key: 'invoice-templates', path: 'invoice-templates', labelKey: 'admin.invoice_templates' },
   ] },
   { key: 'work', path: 'work', labelKey: 'adminNav.group_work', items: [
-    { key: 'projects', path: 'projects', labelKey: 'admin.projects', hideInTimetracking: true },
-    { key: 'time-tracking', path: 'time-tracking', labelKey: 'admin.time_tracking' },
+    { key: 'projects', path: 'projects', labelKey: 'admin.projects', hideInTimetracking: true, hideInTicketsystem: true },
+    { key: 'time-tracking', path: 'time-tracking', labelKey: 'admin.time_tracking', hideInTicketsystem: true },
   ] },
   { key: 'helpdesk', path: 'helpdesk', labelKey: 'adminNav.group_helpdesk', hideInTimetracking: true, items: [
     { key: 'helpdesk', path: 'ticket-settings', labelKey: 'adminNav.ticket_settings' },
@@ -34,11 +34,13 @@ export const ADMIN_MENU = [
   ] },
 ]
 
-// visibleAdminMenu drops the groups and items hidden in time-tracking mode.
-export function visibleAdminMenu(timetrackingMode) {
+// visibleAdminMenu drops the groups and items hidden in the given app mode
+// ('' | 'timetracking' | 'ticketsystem').
+export function visibleAdminMenu(appMode) {
+  const hidden = x => (appMode === 'timetracking' && x.hideInTimetracking) || (appMode === 'ticketsystem' && x.hideInTicketsystem)
   return ADMIN_MENU
-    .filter(g => !(g.hideInTimetracking && timetrackingMode))
-    .map(g => ({ ...g, items: g.items.filter(it => !(it.hideInTimetracking && timetrackingMode)) }))
+    .filter(g => !hidden(g))
+    .map(g => ({ ...g, items: g.items.filter(it => !hidden(it)) }))
     .filter(g => g.items.length)
 }
 

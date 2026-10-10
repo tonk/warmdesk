@@ -58,7 +58,8 @@
     "password_expired_title": "Contraseña caducada",
     "must_change_password": "Un administrador requiere que establezca una nueva contraseña antes de continuar.",
     "remember_me": "Recuérdame",
-    "timetracking_mode": "Solo registro de tiempo"
+    "timetracking_mode": "Solo registro de tiempo",
+    "ticketsystem_mode": "Solo sistema de tickets"
   },
   "project": {
     "projects": "Proyectos",

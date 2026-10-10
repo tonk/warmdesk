@@ -12,13 +12,16 @@ export const useSystemStore = defineStore('system', () => {
   const appMode = ref('')
   const instanceMode = ref('')
   const isTimetrackingMode = computed(() => appMode.value === 'timetracking')
+  const isTicketsystemMode = computed(() => appMode.value === 'ticketsystem')
+  // Modes that expose neither boards/projects nor chat
+  const isRestrictedMode = computed(() => isTimetrackingMode.value || isTicketsystemMode.value)
   const isTestInstance = computed(() => instanceMode.value === 'test')
   const logoSrc = computed(() => {
-    const base = isTimetrackingMode.value ? '/timetracking' : '/logo'
+    const base = isTimetrackingMode.value ? '/timetracking' : isTicketsystemMode.value ? '/ticketsystem' : '/logo'
     return isTestInstance.value ? `${base}-test.svg` : `${base}.svg`
   })
   const logoFullSrc = computed(() => {
-    const base = isTimetrackingMode.value ? '/timetracking-full' : '/logo-full'
+    const base = isTimetrackingMode.value ? '/timetracking-full' : isTicketsystemMode.value ? '/ticketsystem-full' : '/logo-full'
     return isTestInstance.value ? `${base}-test.svg` : `${base}.svg`
   })
   const defaults = ref({
@@ -59,5 +62,5 @@ export const useSystemStore = defineStore('system', () => {
     } catch {}
   }
 
-  return { registrationEnabled, scrumStorypointsEnabled, externalImageProxyEnabled, sessionTimeoutMinutes, appMode, isTimetrackingMode, instanceMode, isTestInstance, logoSrc, logoFullSrc, defaults, fetchAppMode, fetchSettings }
+  return { registrationEnabled, scrumStorypointsEnabled, externalImageProxyEnabled, sessionTimeoutMinutes, appMode, isTimetrackingMode, isTicketsystemMode, isRestrictedMode, instanceMode, isTestInstance, logoSrc, logoFullSrc, defaults, fetchAppMode, fetchSettings }
 })
