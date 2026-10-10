@@ -2579,7 +2579,12 @@
     "import_failed": "Det gick inte att importera helgdagar",
     "calendar_saved": "Kalender sparad",
     "calendar_deleted": "Kalender borttagen",
-    "delete_calendar_confirm": "Ta bort kalendern \"{name}\"? SLA-policyer som använder den faller tillbaka på 24/7."
+    "delete_calendar_confirm": "Ta bort kalendern \"{name}\"? SLA-policyer som använder den faller tillbaka på 24/7.",
+    "public_holidays": "Helgdagar",
+    "add_holidays_for_year": "Lägg till ett lands helgdagar för {year}",
+    "add_holidays_hint": "Lägger till landets helgdagar för det året i listan nedan; klicka på Spara för att behålla dem.",
+    "holidays_all_listed": "Alla helgdagar för {year} finns redan i listan",
+    "holidays_added_unsaved": "{added} helgdagar tillagda ({skipped} fanns redan) — klicka på Spara för att behålla dem"
   },
   "itsmNav": {
     "knowledge_base": "Kunskapsbas",
@@ -3131,5 +3136,17 @@
     "ticket_type": "Typ",
     "priority": "Prioritet",
     "delete_confirm": "Ta bort \"{name}\"? Dess relationer och ärendelänkar tas också bort."
+  },
+  "adminNav": {
+    "menu": "Adminmeny",
+    "choose_section": "Välj en del",
+    "group_people": "Personer & åtkomst",
+    "group_customers": "Kunder & fakturering",
+    "group_work": "Arbete",
+    "group_helpdesk": "Helpdesk",
+    "group_change": "Ändringar & konfiguration",
+    "group_system": "System",
+    "ticket_settings": "Ärendeinställningar",
+    "resize_menu": "Ändra adminmenyns bredd"
   }
 }

@@ -49,21 +49,22 @@
           <button class="btn btn-secondary btn-sm" @click="addHoliday">+ {{ $t('helpdeskAdmin.add_holiday') }}</button>
         </div>
 
-        <div class="bc-import" role="group" :aria-label="$t('helpdeskAdmin.import_holidays')">
-          <template v-if="editing.id">
-            <div class="bc-form-field" style="min-width:90px">
-              <label class="bc-label" for="bc-import-year">{{ $t('helpdeskAdmin.year') }}</label>
-              <input id="bc-import-year" class="form-input bc-year" type="number" min="2000" max="2100" v-model.number="importYear" />
-            </div>
-            <div class="bc-form-field" style="min-width:200px">
-              <label class="bc-label" for="bc-import-locale">{{ $t('helpdeskAdmin.holiday_country') }}</label>
-              <select id="bc-import-locale" class="form-input" v-model="importLocale">
-                <option v-for="l in HOLIDAY_LOCALES" :key="l" :value="l">{{ localeLabel(l) }}</option>
-              </select>
-            </div>
-            <button class="btn btn-secondary btn-sm bc-import-btn" @click="importHolidays" :disabled="importing">{{ $t('helpdeskAdmin.import_holidays') }}</button>
-          </template>
-          <small v-else class="bc-hint">{{ $t('helpdeskAdmin.import_save_first') }}</small>
+        <div class="bc-import" role="group" aria-labelledby="bc-import-title">
+          <span id="bc-import-title" class="bc-import-title">{{ $t('helpdeskAdmin.public_holidays') }}</span>
+          <div class="bc-form-field bc-import-year">
+            <label class="bc-label" for="bc-import-year">{{ $t('helpdeskAdmin.year') }}</label>
+            <input id="bc-import-year" class="form-input bc-year" type="number" min="2000" max="2100" v-model.number="importYear" />
+          </div>
+          <HolidayCountryMenu
+            class="bc-import-menu"
+            button-class="btn btn-secondary btn-sm"
+            align="left"
+            :label="$t('timeTracking.add_holidays')"
+            :aria-label="$t('helpdeskAdmin.add_holidays_for_year', { year: importYear })"
+            :disabled="importing"
+            @select="addPublicHolidays"
+          />
+          <small class="bc-hint">{{ $t('helpdeskAdmin.add_holidays_hint') }}</small>
         </div>
 
         <div v-if="!form.holidays.length" class="bc-empty-inline">{{ $t('helpdeskAdmin.no_holidays') }}</div>
@@ -126,14 +127,13 @@ import { useI18n } from 'vue-i18n'
 import { helpdeskApi } from '@/api/helpdesk'
 import { useUIStore } from '@/stores/ui'
 import DatePicker from '@/components/common/DatePicker.vue'
+import HolidayCountryMenu from '@/components/common/HolidayCountryMenu.vue'
 
 // Go weekday numbers (0 = Sunday), displayed Monday first.
 const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0]
 
 // Locales the backend can generate public holidays for, with the country
 // whose holidays each one produces (en = United Kingdom).
-const HOLIDAY_LOCALES = ['en', 'nl', 'de', 'fr', 'es', 'da', 'sv', 'nb', 'fi', 'is', 'pt', 'it']
-const LOCALE_REGION = { en: 'GB', nl: 'NL', de: 'DE', fr: 'FR', es: 'ES', da: 'DK', sv: 'SE', nb: 'NO', fi: 'FI', is: 'IS', pt: 'PT', it: 'IT' }
 
 // Same short list the admin settings tab offers; the full IANA list from the
 // browser is preferred where available.
@@ -166,7 +166,6 @@ const form = ref(emptyForm())
 const formSnapshot = ref('')
 const nameEl = ref(null)
 const importYear = ref(new Date().getFullYear())
-const importLocale = ref(HOLIDAY_LOCALES.includes(locale.value) ? locale.value : 'en')
 let holidayKey = 0
 
 onMounted(load)
@@ -209,14 +208,6 @@ function fmtWorkDays(csv) {
   return WEEKDAY_ORDER.filter(d => days.includes(d)).map(d => weekdayName(d, 'short')).join(', ') || '—'
 }
 
-function localeLabel(l) {
-  try {
-    const name = new Intl.DisplayNames([locale.value], { type: 'region' }).of(LOCALE_REGION[l])
-    return `${name} (${l})`
-  } catch {
-    return `${LOCALE_REGION[l]} (${l})`
-  }
-}
 
 function snapshotForm(f) {
   return JSON.stringify({ ...f, holidays: f.holidays.map(h => ({ date: h.date, name: h.name })) })
@@ -333,8 +324,10 @@ function saveError(e) {
   return data?.error || t('helpdeskAdmin.save_failed')
 }
 
-async function importHolidays() {
-  if (!editing.value?.id) return
+// Add a country's public holidays for the chosen year to the form. They're
+// saved together with the rest of the calendar, so this also works for a
+// calendar that hasn't been saved yet.
+async function addPublicHolidays(country) {
   const year = importYear.value
   if (!Number.isInteger(year) || year < 2000 || year > 2100) {
     ui.error(t('helpdeskAdmin.invalid_year'))
@@ -342,16 +335,14 @@ async function importHolidays() {
   }
   importing.value = true
   try {
-    const { data } = await helpdeskApi.importHolidays(editing.value.id, year, importLocale.value)
-    // The import is stored server-side right away. Merge the stored list into
-    // the form so unsaved edits to other fields and holidays are kept.
+    const { data } = await helpdeskApi.publicHolidays(year, country)
     const existing = new Set(form.value.holidays.map(h => h.date))
-    const imported = withKeys((data?.calendar?.holidays || []).filter(h => !existing.has(h.date)))
-    form.value.holidays = [...form.value.holidays, ...imported]
+    const fresh = withKeys((data || []).filter(h => !existing.has(h.date)))
+    form.value.holidays = [...form.value.holidays, ...fresh]
       .sort((a, b) => (a.date || '9999').localeCompare(b.date || '9999'))
-    const idx = calendars.value.findIndex(c => c.id === editing.value.id)
-    if (idx >= 0 && data?.calendar) calendars.value[idx] = data.calendar
-    ui.success(t('helpdeskAdmin.holidays_imported', { count: data?.added ?? 0 }))
+    const skipped = (data || []).length - fresh.length
+    if (!fresh.length) ui.info(t('helpdeskAdmin.holidays_all_listed', { year }))
+    else ui.success(t('helpdeskAdmin.holidays_added_unsaved', { added: fresh.length, skipped }))
   } catch (e) {
     ui.error(e.response?.data?.error || t('helpdeskAdmin.import_failed'))
   } finally {
@@ -395,7 +386,10 @@ async function deleteCalendar(c) {
 .bc-holidays { margin-top: 16px; }
 .bc-holidays-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
 .bc-import { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; padding: 10px 12px; border: 1px dashed var(--color-border); border-radius: 6px; margin-bottom: 12px; }
-.bc-import-btn { margin-bottom: 2px; }
+.bc-import-title { flex: 1 0 100%; font-size: 13px; font-weight: 600; }
+.bc-import-year { min-width: 90px; }
+.bc-import-menu { margin-bottom: 2px; }
+.bc-import .bc-hint { flex: 1 1 220px; align-self: center; }
 .bc-empty-inline { font-size: 13px; color: var(--color-text-muted); padding: 8px 0; }
 .bc-holiday-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .bc-holiday-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }

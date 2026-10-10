@@ -2579,7 +2579,12 @@
     "import_failed": "Feestdagen importeren mislukt",
     "calendar_saved": "Kalender opgeslagen",
     "calendar_deleted": "Kalender verwijderd",
-    "delete_calendar_confirm": "Kalender \"{name}\" verwijderen? SLA-beleid dat deze gebruikt valt terug op 24/7."
+    "delete_calendar_confirm": "Kalender \"{name}\" verwijderen? SLA-beleid dat deze gebruikt valt terug op 24/7.",
+    "public_holidays": "Feestdagen",
+    "add_holidays_for_year": "Feestdagen van een land voor {year} toevoegen",
+    "add_holidays_hint": "Voegt de feestdagen van het land voor dat jaar toe aan de lijst hieronder; klik op Opslaan om ze te bewaren.",
+    "holidays_all_listed": "Alle feestdagen van {year} staan al in de lijst",
+    "holidays_added_unsaved": "{added} feestdagen toegevoegd ({skipped} stonden er al) — klik op Opslaan om ze te bewaren"
   },
   "itsmNav": {
     "knowledge_base": "Kennisbank",
@@ -3131,5 +3136,17 @@
     "ticket_type": "Type",
     "priority": "Prioriteit",
     "delete_confirm": "\"{name}\" verwijderen? De relaties en ticketkoppelingen worden ook verwijderd."
+  },
+  "adminNav": {
+    "menu": "Beheermenu",
+    "choose_section": "Kies een onderdeel",
+    "group_people": "Mensen & toegang",
+    "group_customers": "Klanten & facturatie",
+    "group_work": "Werk",
+    "group_helpdesk": "Helpdesk",
+    "group_change": "Wijzigingen & configuratie",
+    "group_system": "Systeem",
+    "ticket_settings": "Ticketinstellingen",
+    "resize_menu": "Breedte van het beheermenu aanpassen"
   }
 }

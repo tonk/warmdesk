@@ -2579,7 +2579,12 @@
     "import_failed": "Ekki tókst að flytja inn frídaga",
     "calendar_saved": "Dagatal vistað",
     "calendar_deleted": "Dagatali eytt",
-    "delete_calendar_confirm": "Eyða dagatalinu „{name}“? SLA-reglur sem nota það falla aftur á 24/7."
+    "delete_calendar_confirm": "Eyða dagatalinu „{name}“? SLA-reglur sem nota það falla aftur á 24/7.",
+    "public_holidays": "Almennir frídagar",
+    "add_holidays_for_year": "Bæta við almennum frídögum lands fyrir {year}",
+    "add_holidays_hint": "Bætir almennum frídögum landsins fyrir það ár við listann hér fyrir neðan; smelltu á Vista til að halda þeim.",
+    "holidays_all_listed": "Allir almennir frídagar ársins {year} eru þegar á listanum",
+    "holidays_added_unsaved": "{added} frídögum bætt við ({skipped} voru þegar á listanum) — smelltu á Vista til að halda þeim"
   },
   "itsmNav": {
     "knowledge_base": "Þekkingargrunnur",
@@ -3131,5 +3136,17 @@
     "ticket_type": "Tegund",
     "priority": "Forgangur",
     "delete_confirm": "Eyða \"{name}\"? Tengsl hennar og tengingar við mál eru einnig fjarlægð."
+  },
+  "adminNav": {
+    "menu": "Stjórnunarvalmynd",
+    "choose_section": "Veldu hluta",
+    "group_people": "Fólk og aðgangur",
+    "group_customers": "Viðskiptavinir og reikningar",
+    "group_work": "Vinna",
+    "group_helpdesk": "Þjónustuborð",
+    "group_change": "Breytingar og grunnstillingar",
+    "group_system": "Kerfi",
+    "ticket_settings": "Beiðnastillingar",
+    "resize_menu": "Breyta breidd stjórnunarvalmyndar"
   }
 }

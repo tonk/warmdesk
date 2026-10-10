@@ -377,3 +377,26 @@ func TestCMDBAccessImpactAndChangeConflicts(t *testing.T) {
 	require.NoError(t, json.Unmarshal(body, &cal))
 	assert.Len(t, cal.Changes, 2)
 }
+
+func TestAdminPublicHolidays(t *testing.T) {
+	f := newITILFixture(t)
+	code, body := call(t, AdminPublicHolidays, f.admin, http.MethodGet, "", nil, "year=2027&locale=nl")
+	require.Equal(t, http.StatusOK, code, string(body))
+	var out []struct{ Date, Name string }
+	require.NoError(t, json.Unmarshal(body, &out))
+	require.NotEmpty(t, out)
+	assert.Equal(t, "2027-01-01", out[0].Date, "sorted by date")
+	var kingsDay bool
+	for _, h := range out {
+		kingsDay = kingsDay || h.Date == "2027-04-27"
+	}
+	assert.True(t, kingsDay, "Koningsdag")
+	var n int64
+	database.DB.Model(&models.BusinessCalendarHoliday{}).Count(&n)
+	assert.Zero(t, n, "nothing is stored")
+
+	code, _ = call(t, AdminPublicHolidays, f.admin, http.MethodGet, "", nil, "year=2027&locale=xx")
+	assert.Equal(t, http.StatusBadRequest, code)
+	code, _ = call(t, AdminPublicHolidays, f.admin, http.MethodGet, "", nil, "year=1999&locale=nl")
+	assert.Equal(t, http.StatusBadRequest, code)
+}

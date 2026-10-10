@@ -461,6 +461,37 @@ WHERE username='yourname';"
 
 Access the admin panel via the *Admin* link in the navigation (visible to admin users only).
 
+The menu on the left groups the admin sections:
+
+[cols="1,3", options="header"]
+|===
+|Group |Sections
+
+|People & access
+|Users, Groups
+
+|Customers & billing
+|Customers, Invoice templates
+
+|Work
+|Projects, Time tracking
+
+|Helpdesk
+|Ticket settings, SLA policies, Business hours, Macros, Checklists, Service catalogue
+
+|Change & configuration
+|Change management, CMDB types
+
+|System
+|Settings, News, Backup / restore
+|===
+
+Click a group heading to fold it away; the group of the open section always stays open.
+Drag the divider between the menu and the page to make the menu wider or narrower (or focus it and use the arrow keys; double-click resets it); the width is remembered in your browser.
+Every section has its own address (for example `/admin/helpdesk/sla-policies`), so you can bookmark it or share the link.
+On a narrow screen the menu becomes a single dropdown.
+In time-tracking mode the Helpdesk and Change & configuration groups, and Projects, are hidden.
+
 === Users
 
 [cols="1,3", options="header"]
@@ -1318,14 +1349,14 @@ Once enabled, a user can access the *Customers → Tickets* views and the *Inbox
 
 === Enabling helpdesk access
 
-In *Admin → Users → Edit User*, toggle *Helpdesk (tickets)* on.
+In *Admin → People & access → Users → Edit User*, toggle *Helpdesk (tickets)* on.
 Global admins always have helpdesk access regardless of this flag.
 
 === SLA policies
 
 SLA policies define response and resolution deadlines for tickets.
 
-Go to *Admin → SLA Policies*:
+Go to *Admin → Helpdesk → SLA Policies*:
 
 [cols="1,3", options="header"]
 |===
@@ -1376,14 +1407,14 @@ When several WarmDesk instances share one database, only one of them sends a giv
 
 === Business hours
 
-Go to *Admin → Business hours* to define the working calendars SLA policies count in.
+Go to *Admin → Helpdesk → Business hours* to define the working calendars SLA policies count in.
 A calendar has a time zone, working days and a daily start and end time (for example Monday–Friday 09:00–17:00 Europe/Amsterdam), plus a list of holidays.
-*Import public holidays* adds the public holidays of a country for a given year (the same tables as the time-tracking holiday import); dates already on the list are skipped.
+Under *Public holidays*, pick a year and click *Add holidays* to choose a country, just like the button in time tracking: its public holidays for that year are added to the list (dates already on it are skipped) and stored when you click *Save*, so this works for a new calendar too.
 Deleting a calendar makes the policies that used it fall back to around-the-clock deadlines.
 
 === Helpdesk settings
 
-*Admin → Helpdesk* holds the ITIL-related options:
+*Admin → Helpdesk → Ticket settings* holds the ITIL-related options:
 
 [cols="1,3", options="header"]
 |===
@@ -1412,7 +1443,7 @@ When upgrading, tickets that were already resolved or closed get their resolutio
 
 === Service catalogue
 
-*Admin → Service catalogue* defines the services users can request.
+*Admin → Helpdesk → Service catalogue* defines the services users can request.
 Each item has a name, description, optional icon and category, an optional customer (empty = offered to all customers), a default priority, the *fulfilment group* new requests are routed to, an optional *checklist template* with the fulfilment tasks, and a *request form* built from fields (text, text area, select, checkbox, date, number; each optionally required).
 
 Set *Approvals required* above 0 and choose an *approver group* to make requests need approval: that many members of the group must approve, and a single rejection rejects the request.
@@ -1421,21 +1452,21 @@ Deleting an item keeps the answers on tickets that were already requested.
 
 === Change management
 
-*Admin → Change management* holds:
+*Admin → Change & configuration → Change management* holds:
 
 * The *CAB group* — the change advisory board whose members approve changes — and the number of approvals needed for *normal* and for *emergency* changes (default 1 each). Standard changes are pre-approved. Without a CAB group, normal and emergency changes can't be submitted.
 * *Freeze windows* — periods in which normal and standard changes can't be scheduled, for all customers or one customer. Emergency changes can still be scheduled, with a warning.
 
 === CMDB types
 
-*Admin → CMDB types* manages the types of configuration items (Service, Application, Server, Database, Network device, Workstation and Storage are created on first start).
+*Admin → Change & configuration → CMDB types* manages the types of configuration items (Service, Application, Server, Database, Network device, Workstation and Storage are created on first start).
 A type that is still in use can't be deleted.
 
 === Macros
 
 Macros are one-click action sequences that agents apply to tickets.
 
-Go to *Admin → Settings → Macros* to create and manage macros.
+Go to *Admin → Helpdesk → Macros* to create and manage macros.
 Each macro has:
 
 * A *Name* and optional *Description*
@@ -1481,7 +1512,7 @@ Macro changes go through the same validation, status lifecycle and history as ma
 
 Checklist templates let admins define reusable ordered item lists that agents apply to tickets in one click.
 
-Go to *Admin → Settings → Checklists*:
+Go to *Admin → Helpdesk → Checklists*:
 
 . Click *+ New Template*, enter a name, and add items.
 . Drag items to reorder. Click × to delete.

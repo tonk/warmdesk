@@ -117,7 +117,8 @@ A seed tool is included in the distribution to populate the database with
 realistic demo content (users, projects, cards, comments, time entries, topics,
 conversations, customer locations, helpdesk tickets, problems, knowledge base
 articles, a service catalogue with approvals, changes, CMDB configuration items,
-and system settings including company branding):
+business-hours calendars with public holidays, and system settings including
+company branding):
 
 ```bash
 cd dist

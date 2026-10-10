@@ -2579,7 +2579,12 @@
     "import_failed": "Import der Feiertage fehlgeschlagen",
     "calendar_saved": "Kalender gespeichert",
     "calendar_deleted": "Kalender gelöscht",
-    "delete_calendar_confirm": "Kalender \"{name}\" löschen? SLA-Richtlinien, die ihn verwenden, fallen auf 24/7 zurück."
+    "delete_calendar_confirm": "Kalender \"{name}\" löschen? SLA-Richtlinien, die ihn verwenden, fallen auf 24/7 zurück.",
+    "public_holidays": "Feiertage",
+    "add_holidays_for_year": "Feiertage eines Landes für {year} hinzufügen",
+    "add_holidays_hint": "Fügt die Feiertage des Landes für dieses Jahr der Liste unten hinzu; klicke auf Speichern, um sie zu behalten.",
+    "holidays_all_listed": "Alle Feiertage von {year} stehen bereits in der Liste",
+    "holidays_added_unsaved": "{added} Feiertage hinzugefügt ({skipped} bereits vorhanden) — klicke auf Speichern, um sie zu behalten"
   },
   "itsmNav": {
     "knowledge_base": "Wissensdatenbank",
@@ -3131,5 +3136,17 @@
     "ticket_type": "Typ",
     "priority": "Priorität",
     "delete_confirm": "\"{name}\" löschen? Die Beziehungen und Ticketverknüpfungen werden ebenfalls entfernt."
+  },
+  "adminNav": {
+    "menu": "Admin-Menü",
+    "choose_section": "Bereich wählen",
+    "group_people": "Personen & Zugriff",
+    "group_customers": "Kunden & Abrechnung",
+    "group_work": "Arbeit",
+    "group_helpdesk": "Helpdesk",
+    "group_change": "Änderungen & Konfiguration",
+    "group_system": "System",
+    "ticket_settings": "Ticket-Einstellungen",
+    "resize_menu": "Breite des Admin-Menüs ändern"
   }
 }

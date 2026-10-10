@@ -2579,7 +2579,12 @@
     "import_failed": "Kunne ikke importere helligdager",
     "calendar_saved": "Kalender lagret",
     "calendar_deleted": "Kalender slettet",
-    "delete_calendar_confirm": "Slette kalenderen «{name}»? SLA-retningslinjer som bruker den, faller tilbake til 24/7."
+    "delete_calendar_confirm": "Slette kalenderen «{name}»? SLA-retningslinjer som bruker den, faller tilbake til 24/7.",
+    "public_holidays": "Helligdager",
+    "add_holidays_for_year": "Legg til et lands helligdager for {year}",
+    "add_holidays_hint": "Legger til landets helligdager for det året i listen nedenfor; klikk på Lagre for å beholde dem.",
+    "holidays_all_listed": "Alle helligdager i {year} står allerede i listen",
+    "holidays_added_unsaved": "{added} helligdager lagt til ({skipped} fantes allerede) — klikk på Lagre for å beholde dem"
   },
   "itsmNav": {
     "knowledge_base": "Kunnskapsbase",
@@ -3131,5 +3136,17 @@
     "ticket_type": "Type",
     "priority": "Prioritet",
     "delete_confirm": "Slette \"{name}\"? Relasjonene og sakskoblingene fjernes også."
+  },
+  "adminNav": {
+    "menu": "Adminmeny",
+    "choose_section": "Velg en del",
+    "group_people": "Personer & tilgang",
+    "group_customers": "Kunder & fakturering",
+    "group_work": "Arbeid",
+    "group_helpdesk": "Helpdesk",
+    "group_change": "Endringer & konfigurasjon",
+    "group_system": "System",
+    "ticket_settings": "Saksinnstillinger",
+    "resize_menu": "Endre bredden på adminmenyen"
   }
 }

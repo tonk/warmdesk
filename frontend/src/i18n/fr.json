@@ -2579,7 +2579,12 @@
     "import_failed": "Échec de l'importation des jours fériés",
     "calendar_saved": "Calendrier enregistré",
     "calendar_deleted": "Calendrier supprimé",
-    "delete_calendar_confirm": "Supprimer le calendrier « {name} » ? Les politiques SLA qui l'utilisent reviennent à 24/7."
+    "delete_calendar_confirm": "Supprimer le calendrier « {name} » ? Les politiques SLA qui l'utilisent reviennent à 24/7.",
+    "public_holidays": "Jours fériés",
+    "add_holidays_for_year": "Ajouter les jours fériés d’un pays pour {year}",
+    "add_holidays_hint": "Ajoute les jours fériés du pays pour cette année à la liste ci-dessous ; cliquez sur Enregistrer pour les conserver.",
+    "holidays_all_listed": "Tous les jours fériés de {year} sont déjà dans la liste",
+    "holidays_added_unsaved": "{added} jours fériés ajoutés ({skipped} déjà présents) — cliquez sur Enregistrer pour les conserver"
   },
   "itsmNav": {
     "knowledge_base": "Base de connaissances",
@@ -3131,5 +3136,17 @@
     "ticket_type": "Type",
     "priority": "Priorité",
     "delete_confirm": "Supprimer « {name} » ? Ses relations et liens avec des tickets seront également supprimés."
+  },
+  "adminNav": {
+    "menu": "Menu d’administration",
+    "choose_section": "Choisir une section",
+    "group_people": "Personnes et accès",
+    "group_customers": "Clients et facturation",
+    "group_work": "Travail",
+    "group_helpdesk": "Support",
+    "group_change": "Changements et configuration",
+    "group_system": "Système",
+    "ticket_settings": "Paramètres des tickets",
+    "resize_menu": "Redimensionner le menu d’administration"
   }
 }

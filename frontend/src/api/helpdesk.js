@@ -28,6 +28,8 @@ export const helpdeskApi = {
   updateCalendar:       (id, data) => client.put(`/admin/business-calendars/${id}`, data),
   deleteCalendar:       (id)       => client.delete(`/admin/business-calendars/${id}`),
   importHolidays:       (id, year, locale) => client.post(`/admin/business-calendars/${id}/import-holidays`, { year, locale }),
+  // A country's public holidays for a year, not stored: [{date, name}]
+  publicHolidays:       (year, locale) => client.get('/admin/public-holidays', { params: { year, locale } }),
 
   // Problem records across accessible customers; params: { known_error, q, include_resolved }
   listProblems:         (params) => client.get('/problems', { params }),

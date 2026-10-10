@@ -48,6 +48,7 @@
 <script setup>
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { visibleAdminMenu, findAdminSection } from '@/utils/adminMenu'
 import client from '@/api/client'
 
 const appVersion = __APP_VERSION__
@@ -178,6 +179,13 @@ const itsmCrumbs = {
 
 const routeCrumbs = computed(() => {
   if (route.path === '/') return []
+  if (route.name === 'admin') {
+    // Admin › <group> › <section>; the group has no page of its own.
+    const sec = findAdminSection(visibleAdminMenu(systemStore.isTimetrackingMode), route.params.group, route.params.item)
+    const crumbs = [{ to: '/admin', label: nameLabels.admin }]
+    if (sec) crumbs.push({ to: null, label: t(sec.group.labelKey) }, { to: null, label: t(sec.item.labelKey) })
+    return crumbs
+  }
   const parts = route.path.split('/').filter(Boolean)
   return parts.map((part, idx) => {
     const to = '/' + parts.slice(0, idx + 1).join('/')

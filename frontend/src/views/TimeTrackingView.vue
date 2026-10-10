@@ -45,21 +45,13 @@
         </div>
         <button class="nav-btn" @click="shiftWeek(1)" :title="$t('timeTracking.next_week')" :aria-label="$t('timeTracking.next_week')">&#9654;</button>
         <button class="nav-btn nav-today" @click="goToToday" :title="$t('timeTracking.today')" :aria-label="$t('timeTracking.today')" :disabled="isCurrentWeek">{{ $t('timeTracking.today') }}</button>
-        <div class="nav-holidays-wrap" ref="holidaysDropRef">
-          <button class="nav-btn nav-holidays" @click="holidaysDropOpen = !holidaysDropOpen"
-            :aria-expanded="String(holidaysDropOpen)" aria-haspopup="true"
-            :aria-label="$t('timeTracking.add_holidays_title', { year: weekInfo.year })">
-            {{ $t('timeTracking.add_holidays') }}<span class="nav-hol-chevron" :class="{ open: holidaysDropOpen }" aria-hidden="true">›</span>
-          </button>
-          <div v-if="holidaysDropOpen" class="holidays-drop" role="menu">
-            <button v-for="c in holidayLocales" :key="c.locale"
-              class="hol-country-btn" role="menuitem"
-              @click="addHolidays(c.locale)">
-              <span v-if="isTauri" class="hol-flag" :data-country="c.flag" aria-hidden="true"></span>
-              <span v-else class="hol-flag-emoji" aria-hidden="true">{{ c.emoji }}</span>{{ c.label }}
-            </button>
-          </div>
-        </div>
+        <HolidayCountryMenu
+          class="nav-holidays-wrap"
+          button-class="nav-btn nav-holidays"
+          :label="$t('timeTracking.add_holidays')"
+          :aria-label="$t('timeTracking.add_holidays_title', { year: weekInfo.year })"
+          @select="addHolidays"
+        />
       </div>
 
       <div class="tt-mode-tabs" role="tablist" aria-label="Time tracking mode">
@@ -1478,6 +1470,7 @@ import Sortable from 'sortablejs'
 import { Chart, registerables } from 'chart.js'
 import { useAuthStore } from '@/stores/auth'
 import { useUIStore } from '@/stores/ui'
+import HolidayCountryMenu from '@/components/common/HolidayCountryMenu.vue'
 import { useSystemStore } from '@/stores/system'
 import { useTimerStore } from '@/stores/timer'
 import { timeEntriesApi } from '@/api/timeEntries'
@@ -1841,42 +1834,14 @@ function onWkPickerDocClick(e) {
   if (wkPickerRef.value && !wkPickerRef.value.contains(e.target)) wkPickerOpen.value = false
 }
 
-const holidaysDropOpen = ref(false)
-const holidaysDropRef  = ref(null)
-
-const isTauri = !!window.__TAURI_INTERNALS__
-
-const holidayLocales = [
-  { locale: 'en', flag: 'GB', emoji: '🇬🇧', label: 'United Kingdom' },
-  { locale: 'nl', flag: 'NL', emoji: '🇳🇱', label: 'Nederland' },
-  { locale: 'de', flag: 'DE', emoji: '🇩🇪', label: 'Deutschland' },
-  { locale: 'fr', flag: 'FR', emoji: '🇫🇷', label: 'France' },
-  { locale: 'es', flag: 'ES', emoji: '🇪🇸', label: 'España' },
-  { locale: 'da', flag: 'DK', emoji: '🇩🇰', label: 'Danmark' },
-  { locale: 'sv', flag: 'SE', emoji: '🇸🇪', label: 'Sverige' },
-  { locale: 'nb', flag: 'NO', emoji: '🇳🇴', label: 'Norge' },
-  { locale: 'fi', flag: 'FI', emoji: '🇫🇮', label: 'Suomi' },
-  { locale: 'is', flag: 'IS', emoji: '🇮🇸', label: 'Ísland' },
-  { locale: 'pt', flag: 'PT', emoji: '🇵🇹', label: 'Portugal' },
-  { locale: 'it', flag: 'IT', emoji: '🇮🇹', label: 'Italia' },
-]
-
-function onHolidaysDocClick(e) {
-  if (holidaysDropRef.value && !holidaysDropRef.value.contains(e.target)) {
-    holidaysDropOpen.value = false
-  }
-}
-
 function onNavEscapeKey(e) {
   if (e.key !== 'Escape') return
   if (wkPickerOpen.value) { wkPickerOpen.value = false; e.stopPropagation(); return }
-  if (holidaysDropOpen.value) { holidaysDropOpen.value = false; e.stopPropagation(); return }
   if (macroRunOpen.value) { macroRunOpen.value = false; e.stopPropagation(); return }
   if (gridPdfOpen.value) { gridPdfOpen.value = false; e.stopPropagation() }
 }
 
 async function addHolidays(loc) {
-  holidaysDropOpen.value = false
   const year = weekInfo.value.year
   try {
     const { data } = await timeEntriesApi.addHolidays({ year, locale: loc })
@@ -5551,7 +5516,6 @@ onMounted(() => {
   window.addEventListener('beforeinput', onWindowBeforeInputCapture, true)
   document.addEventListener('keydown', onNavEscapeKey)
   document.addEventListener('mousedown', onDocClick)
-  document.addEventListener('mousedown', onHolidaysDocClick)
   document.addEventListener('mousedown', onMacroRunDocClick)
   document.addEventListener('mousedown', onWkPickerDocClick)
   document.addEventListener('mousedown', onTimePopupDocClick)
@@ -5596,7 +5560,6 @@ onUnmounted(() => {
   window.removeEventListener('beforeinput', onWindowBeforeInputCapture, true)
   document.removeEventListener('keydown', onNavEscapeKey)
   document.removeEventListener('mousedown', onDocClick)
-  document.removeEventListener('mousedown', onHolidaysDocClick)
   document.removeEventListener('mousedown', onMacroRunDocClick)
   document.removeEventListener('mousedown', onWkPickerDocClick)
   document.removeEventListener('mousedown', onTimePopupDocClick)
@@ -5921,7 +5884,7 @@ async function saveInvoiceFromGroup() {
 .wk-cal-day.wk-cal-sel { background: var(--color-primary); color: #fff; font-weight: 600; }
 .wk-cal-day.wk-cal-sel:hover { background: var(--color-primary); }
 .wk-cal-day.wk-cal-today:not(.wk-cal-sel) { font-weight: 700; color: var(--color-primary); }
-.nav-btn {
+.nav-btn, .nav-holidays-wrap :deep(.nav-btn) {
   background: rgba(255,255,255,.2);
   border: none;
   color: #fff;
@@ -5935,46 +5898,12 @@ async function saveInvoiceFromGroup() {
   justify-content: center;
   line-height: 1;
 }
-.nav-btn:hover { background: rgba(255,255,255,.35); }
+.nav-btn:hover, .nav-holidays-wrap :deep(.nav-btn:hover) { background: rgba(255,255,255,.35); }
 .nav-today { width: auto; padding: 0 8px; font-size: 11px; font-weight: 600; letter-spacing: .03em; }
 .nav-today:disabled { opacity: .4; cursor: default; }
 .nav-today:disabled:hover { background: rgba(255,255,255,.2); }
-.nav-holidays-wrap { position: relative; margin-left: 4px; }
-.nav-holidays { width: auto; padding: 0 10px; font-size: 11px; font-weight: 600; letter-spacing: .03em; display: inline-flex; align-items: center; gap: 4px; }
-.nav-hol-chevron { display: inline-block; font-style: normal; font-size: 11px; transform: rotate(90deg); transition: transform .15s; line-height: 1; }
-.nav-hol-chevron.open { transform: rotate(-90deg); }
-.holidays-drop {
-  position: absolute; top: calc(100% + 4px); right: 0;
-  min-width: 180px; padding: 4px 0;
-  background: var(--color-surface); border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm); box-shadow: 0 4px 12px rgba(0,0,0,.15); z-index: 200;
-}
-.hol-country-btn {
-  display: flex; align-items: center; gap: 8px; width: 100%;
-  padding: 7px 14px; border: none; background: none;
-  font-size: 13px; color: var(--color-text); cursor: pointer; text-align: left;
-}
-.hol-country-btn:hover { background: var(--color-surface-2); }
-.hol-flag {
-  display: inline-block; width: 26px; height: 17px; border-radius: 2px; flex-shrink: 0;
-  box-shadow: 0 0 0 1px rgba(0,0,0,.18);
-}
-.hol-flag-emoji { font-size: 18px; line-height: 1; flex-shrink: 0; }
-/* Horizontal tricolors */
-.hol-flag[data-country="NL"] { background: linear-gradient(to bottom, #AE1C28 0% 33.4%, #fff 33.4% 66.6%, #21468B 66.6% 100%); }
-.hol-flag[data-country="DE"] { background: linear-gradient(to bottom, #222 0% 33.4%, #DD0000 33.4% 66.6%, #FFCE00 66.6% 100%); }
-.hol-flag[data-country="ES"] { background: linear-gradient(to bottom, #AA151B 0% 25%, #F1BF00 25% 75%, #AA151B 75% 100%); }
-/* Vertical tricolors */
-.hol-flag[data-country="FR"] { background: linear-gradient(to right, #002395 0% 33.4%, #fff 33.4% 66.6%, #ED2939 66.6% 100%); }
-.hol-flag[data-country="IT"] { background: linear-gradient(to right, #009246 0% 33.4%, #fff 33.4% 66.6%, #CE2B37 66.6% 100%); }
-.hol-flag[data-country="PT"] { background: linear-gradient(to right, #006600 0% 38%, #CC0000 38% 100%); }
-/* Nordic cross / other — approximated as bicolour split */
-.hol-flag[data-country="GB"] { background: linear-gradient(135deg, #012169 0% 50%, #CF101A 50% 100%); }
-.hol-flag[data-country="DK"] { background: linear-gradient(to right, #C60C30 0% 35%, #fff 35% 45%, #C60C30 45% 100%); }
-.hol-flag[data-country="SE"] { background: linear-gradient(to right, #006AA7 0% 35%, #FECC00 35% 45%, #006AA7 45% 100%); }
-.hol-flag[data-country="NO"] { background: linear-gradient(to right, #EF2B2D 0% 30%, #fff 30% 40%, #002868 40% 48%, #fff 48% 58%, #EF2B2D 58% 100%); }
-.hol-flag[data-country="FI"] { background: linear-gradient(to right, #fff 0% 35%, #003580 35% 45%, #fff 45% 100%); }
-.hol-flag[data-country="IS"] { background: linear-gradient(to right, #003897 0% 30%, #fff 30% 40%, #DC143C 40% 48%, #fff 48% 58%, #003897 58% 100%); }
+.nav-holidays-wrap { margin-left: 4px; }
+.nav-holidays-wrap :deep(.nav-holidays) { width: auto; padding: 0 10px; font-size: 11px; font-weight: 600; letter-spacing: .03em; }
 
 
 /* Holiday highlights */

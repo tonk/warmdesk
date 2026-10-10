@@ -2579,7 +2579,12 @@
     "import_failed": "Importazione delle festività non riuscita",
     "calendar_saved": "Calendario salvato",
     "calendar_deleted": "Calendario eliminato",
-    "delete_calendar_confirm": "Eliminare il calendario \"{name}\"? Le policy SLA che lo usano tornano a 24/7."
+    "delete_calendar_confirm": "Eliminare il calendario \"{name}\"? Le policy SLA che lo usano tornano a 24/7.",
+    "public_holidays": "Festività",
+    "add_holidays_for_year": "Aggiungi le festività di un paese per il {year}",
+    "add_holidays_hint": "Aggiunge le festività del paese per quell’anno all’elenco qui sotto; fai clic su Salva per conservarle.",
+    "holidays_all_listed": "Tutte le festività del {year} sono già nell’elenco",
+    "holidays_added_unsaved": "{added} festività aggiunte ({skipped} già presenti) — fai clic su Salva per conservarle"
   },
   "itsmNav": {
     "knowledge_base": "Knowledge base",
@@ -3131,5 +3136,17 @@
     "ticket_type": "Tipo",
     "priority": "Priorità",
     "delete_confirm": "Eliminare \"{name}\"? Vengono rimossi anche le relazioni e i collegamenti ai ticket."
+  },
+  "adminNav": {
+    "menu": "Menu di amministrazione",
+    "choose_section": "Scegli una sezione",
+    "group_people": "Persone e accesso",
+    "group_customers": "Clienti e fatturazione",
+    "group_work": "Lavoro",
+    "group_helpdesk": "Helpdesk",
+    "group_change": "Modifiche e configurazione",
+    "group_system": "Sistema",
+    "ticket_settings": "Impostazioni ticket",
+    "resize_menu": "Ridimensiona il menu di amministrazione"
   }
 }

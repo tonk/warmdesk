@@ -31,6 +31,7 @@ var (
 	seedCatalogNames  = []string{"New laptop", "Software licence", "Access to a project"}
 	seedITSMGroups    = []string{"Change Advisory Board", "Service Approvers"}
 	seedFreezeNames   = []string{"Year-end change freeze"}
+	seedCalendarNames = []string{"Netherlands office", "UK support desk", "Extended hours NL"}
 	seedCITypeDefault = []struct{ name, icon string }{
 		{"Service", "🧩"}, {"Application", "📦"}, {"Server", "🖥"}, {"Database", "🗄"},
 		{"Network device", "🌐"}, {"Workstation", "💻"}, {"Storage", "💾"},
@@ -140,6 +141,51 @@ func seedITSM(db *gorm.DB, users map[string]*models.User, customerIDs []uint, ti
 		articles[as.title] = a
 	}
 	fmt.Printf("   Created %d knowledge base articles\n", len(articleSeeds))
+
+	// ── Business hours ────────────────────────────────────────────────────────
+	fmt.Println("→ Creating business-hours calendars…")
+	type calendarSeed struct {
+		name, tz, days, start, end string
+		holidayLocale              string
+	}
+	calendars := map[string]*models.BusinessCalendar{}
+	totalHolidays := 0
+	for _, cs := range []calendarSeed{
+		{"Netherlands office", "Europe/Amsterdam", "1,2,3,4,5", "09:00", "17:30", "nl"},
+		{"UK support desk", "Europe/London", "1,2,3,4,5", "08:00", "18:00", "en"},
+		{"Extended hours NL", "Europe/Amsterdam", "1,2,3,4,5,6", "07:00", "22:00", "nl"},
+	} {
+		cal := &models.BusinessCalendar{Name: cs.name, Timezone: cs.tz, WorkDays: cs.days, StartTime: cs.start, EndTime: cs.end}
+		must(db.Create(cal).Error)
+		// This year's and next year's public holidays, so SLA deadlines near
+		// the turn of the year still skip them.
+		for _, year := range []int{now.Year(), now.Year() + 1} {
+			hols, _ := services.PublicHolidays(cs.holidayLocale, year)
+			for _, h := range hols {
+				must(db.Create(&models.BusinessCalendarHoliday{CalendarID: cal.ID, Date: h.Date.Format("2006-01-02"), Name: h.Name}).Error)
+				totalHolidays++
+			}
+		}
+		calendars[cs.name] = cal
+	}
+	// The standard SLA policy counts in Dutch office hours; recompute the
+	// deadlines of its tickets so they match the calendar.
+	var standard models.SlaPolicy
+	if db.Where("name = ?", "Standard — 4h response / 24h resolution").First(&standard).Error == nil {
+		must(db.Model(&standard).Update("calendar_id", calendars["Netherlands office"].ID).Error)
+		standard.CalendarID = &calendars["Netherlands office"].ID
+		wc := services.LoadWorkCalendar(standard.CalendarID)
+		var onStandard []models.Ticket
+		db.Where("sla_policy_id = ?", standard.ID).Find(&onStandard)
+		for i := range onStandard {
+			t := &onStandard[i]
+			resp, res := services.ComputeSlaDeadlines(&standard, wc, t.CreatedAt, t.SlaPausedMinutes)
+			t.SlaResponseDeadline, t.SlaResolutionDeadline = resp, res
+			must(db.Model(t).Updates(map[string]any{"sla_response_deadline": resp, "sla_resolution_deadline": res}).Error)
+			services.RefreshSlaBreaches(t, now)
+		}
+	}
+	fmt.Printf("   Created %d calendars with %d public holidays\n", len(calendars), totalHolidays)
 
 	// ── CMDB ──────────────────────────────────────────────────────────────────
 	fmt.Println("→ Creating CMDB configuration items…")
@@ -505,6 +551,13 @@ func removeITSMDemoData(db *gorm.DB) {
 	}
 	db.Where("name IN ?", seedCatalogNames).Delete(&models.ServiceCatalogItem{})
 	db.Where("name IN ?", seedFreezeNames).Delete(&models.ChangeFreezeWindow{})
+	var calIDs []uint
+	db.Model(&models.BusinessCalendar{}).Where("name IN ?", seedCalendarNames).Pluck("id", &calIDs)
+	if len(calIDs) > 0 {
+		db.Model(&models.SlaPolicy{}).Where("calendar_id IN ?", calIDs).Update("calendar_id", nil)
+		db.Where("calendar_id IN ?", calIDs).Delete(&models.BusinessCalendarHoliday{})
+		db.Where("id IN ?", calIDs).Delete(&models.BusinessCalendar{})
+	}
 	var catIDs []uint
 	db.Model(&models.TicketCategory{}).Where("name IN ?", seedCategoryNames).Pluck("id", &catIDs)
 	if len(catIDs) > 0 {

@@ -2576,7 +2576,12 @@
     "import_failed": "Failed to import holidays",
     "calendar_saved": "Calendar saved",
     "calendar_deleted": "Calendar deleted",
-    "delete_calendar_confirm": "Delete calendar \"{name}\"? SLA policies that use it fall back to 24/7."
+    "delete_calendar_confirm": "Delete calendar \"{name}\"? SLA policies that use it fall back to 24/7.",
+    "public_holidays": "Public holidays",
+    "add_holidays_for_year": "Add a country's public holidays for {year}",
+    "add_holidays_hint": "Adds the country's public holidays for that year to the list below; click Save to keep them.",
+    "holidays_all_listed": "All public holidays of {year} are already on the list",
+    "holidays_added_unsaved": "{added} holidays added ({skipped} already listed) — click Save to keep them"
   },
   "itsmNav": {
     "knowledge_base": "Knowledge base",
@@ -3128,5 +3133,17 @@
     "ticket_type": "Type",
     "priority": "Priority",
     "delete_confirm": "Delete \"{name}\"? Its relations and ticket links are removed as well."
+  },
+  "adminNav": {
+    "menu": "Admin menu",
+    "choose_section": "Choose a section",
+    "group_people": "People & access",
+    "group_customers": "Customers & billing",
+    "group_work": "Work",
+    "group_helpdesk": "Helpdesk",
+    "group_change": "Change & configuration",
+    "group_system": "System",
+    "ticket_settings": "Ticket settings",
+    "resize_menu": "Resize the admin menu"
   }
 }

@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -410,7 +411,7 @@ func AdminDeleteBusinessCalendar(c *gin.Context) {
 
 // AdminImportCalendarHolidays POST /api/v1/admin/business-calendars/:id/import-holidays
 // Body: {"year": 2027, "locale": "nl"} — adds that country's public holidays
-// (the same tables as the time-tracking holiday import), skipping dates
+// (services.PublicHolidays, also used by the time-tracking holiday import), skipping dates
 // already present.
 func AdminImportCalendarHolidays(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
@@ -431,13 +432,13 @@ func AdminImportCalendarHolidays(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "year and locale are required"})
 		return
 	}
-	fn, ok := holidaysByLocale[req.Locale]
+	holidays, ok := services.PublicHolidays(req.Locale, req.Year)
 	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "unsupported locale"})
 		return
 	}
 	added := 0
-	for _, h := range fn(req.Year, easterSunday(req.Year)) {
+	for _, h := range holidays {
 		date := h.Date.Format("2006-01-02")
 		var count int64
 		database.DB.Model(&models.BusinessCalendarHoliday{}).Where("calendar_id = ? AND date = ?", cal.ID, date).Count(&count)
@@ -449,6 +450,33 @@ func AdminImportCalendarHolidays(c *gin.Context) {
 	}
 	database.DB.Preload("Holidays", func(db *gorm.DB) *gorm.DB { return db.Order("date asc") }).First(&cal, cal.ID)
 	c.JSON(http.StatusOK, gin.H{"added": added, "calendar": cal})
+}
+
+// AdminPublicHolidays GET /api/v1/admin/public-holidays?year=2027&locale=nl
+// Returns a country's public holidays for a year — the same tables as the
+// time-tracking holiday import — without storing them, so the business-hours
+// editor can add them to a calendar that is saved later (or not yet at all).
+func AdminPublicHolidays(c *gin.Context) {
+	year, err := strconv.Atoi(c.Query("year"))
+	if err != nil || year < 2000 || year > 2100 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "year must be between 2000 and 2100"})
+		return
+	}
+	holidays, ok := services.PublicHolidays(c.Query("locale"), year)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "unsupported locale"})
+		return
+	}
+	type holiday struct {
+		Date string `json:"date"`
+		Name string `json:"name"`
+	}
+	out := []holiday{}
+	for _, h := range holidays {
+		out = append(out, holiday{Date: h.Date.Format("2006-01-02"), Name: h.Name})
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Date < out[j].Date })
+	c.JSON(http.StatusOK, out)
 }
 
 // ── Helpdesk settings ──────────────────────────────────────────────────────

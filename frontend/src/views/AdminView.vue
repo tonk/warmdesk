@@ -3,28 +3,63 @@
       <div class="admin-container">
         <h1>{{ $t('admin.panel') }}</h1>
 
-        <div class="tabs" role="tablist" :aria-label="$t('admin.panel')">
-          <button :class="['tab', { active: tab === 'users' }]" @click="tab = 'users'" role="tab" :aria-selected="tab === 'users'" aria-controls="tab-panel-users" id="tab-btn-users">{{ $t('admin.users') }}</button>
-          <button :class="['tab', { active: tab === 'groups' }]" @click="tab = 'groups'; loadGroups()" role="tab" :aria-selected="tab === 'groups'" aria-controls="tab-panel-groups" id="tab-btn-groups">{{ $t('groups.title') }}</button>
-          <button :class="['tab', { active: tab === 'customers' }]" @click="tab = 'customers'; loadAdminCustomers()" role="tab" :aria-selected="tab === 'customers'" aria-controls="tab-panel-customers" id="tab-btn-customers">{{ $t('customer.customers') }}</button>
-          <button v-if="!systemStore.isTimetrackingMode" :class="['tab', { active: tab === 'projects' }]" @click="tab = 'projects'; loadProjects()" role="tab" :aria-selected="tab === 'projects'" aria-controls="tab-panel-projects" id="tab-btn-projects">{{ $t('admin.projects') }}</button>
-          <button :class="['tab', { active: tab === 'settings' }]" @click="tab = 'settings'; loadSettings()" role="tab" :aria-selected="tab === 'settings'" aria-controls="tab-panel-settings" id="tab-btn-settings">{{ $t('admin.settings') }}</button>
-          <button :class="['tab', { active: tab === 'news' }]" @click="tab = 'news'; loadNews()" role="tab" :aria-selected="tab === 'news'" aria-controls="tab-panel-news" id="tab-btn-news">{{ $t('admin.news_tab') }}</button>
-          <button :class="['tab', { active: tab === 'time-tracking' }]" @click="tab = 'time-tracking'; loadAdminTTProjects(); loadAdminTTCustomers()" role="tab" :aria-selected="tab === 'time-tracking'" aria-controls="tab-panel-time-tracking" id="tab-btn-time-tracking">{{ $t('admin.time_tracking') }}</button>
-          <button v-if="!systemStore.isTimetrackingMode" :class="['tab', { active: tab === 'sla' }]" @click="tab = 'sla'" role="tab" :aria-selected="tab === 'sla'" aria-controls="tab-panel-sla" id="tab-btn-sla">{{ $t('sla.title') }}</button>
-          <button v-if="!systemStore.isTimetrackingMode" :class="['tab', { active: tab === 'macros' }]" @click="tab = 'macros'" role="tab" :aria-selected="tab === 'macros'" aria-controls="tab-panel-macros" id="tab-btn-macros">{{ $t('macro.title') }}</button>
-          <button v-if="!systemStore.isTimetrackingMode" :class="['tab', { active: tab === 'helpdesk' }]" @click="tab = 'helpdesk'" role="tab" :aria-selected="tab === 'helpdesk'" aria-controls="tab-panel-helpdesk" id="tab-btn-helpdesk">{{ $t('helpdeskAdmin.title') }}</button>
-          <button v-if="!systemStore.isTimetrackingMode" :class="['tab', { active: tab === 'business-calendars' }]" @click="tab = 'business-calendars'" role="tab" :aria-selected="tab === 'business-calendars'" aria-controls="tab-panel-business-calendars" id="tab-btn-business-calendars">{{ $t('helpdeskAdmin.business_hours') }}</button>
-          <button v-if="!systemStore.isTimetrackingMode" :class="['tab', { active: tab === 'service-catalog' }]" @click="tab = 'service-catalog'" role="tab" :aria-selected="tab === 'service-catalog'" aria-controls="tab-panel-service-catalog" id="tab-btn-service-catalog">{{ $t('catalogAdmin.title') }}</button>
-          <button v-if="!systemStore.isTimetrackingMode" :class="['tab', { active: tab === 'change-management' }]" @click="tab = 'change-management'" role="tab" :aria-selected="tab === 'change-management'" aria-controls="tab-panel-change-management" id="tab-btn-change-management">{{ $t('changeAdmin.title') }}</button>
-          <button v-if="!systemStore.isTimetrackingMode" :class="['tab', { active: tab === 'cmdb-types' }]" @click="tab = 'cmdb-types'" role="tab" :aria-selected="tab === 'cmdb-types'" aria-controls="tab-panel-cmdb-types" id="tab-btn-cmdb-types">{{ $t('cmdbAdmin.title') }}</button>
-          <button v-if="!systemStore.isTimetrackingMode" :class="['tab', { active: tab === 'ticket-checklists' }]" @click="tab = 'ticket-checklists'" role="tab" :aria-selected="tab === 'ticket-checklists'" aria-controls="tab-panel-ticket-checklists" id="tab-btn-ticket-checklists">{{ $t('ticketChecklist.title') }}</button>
-          <button :class="['tab', { active: tab === 'invoice-templates' }]" @click="tab = 'invoice-templates'" role="tab" :aria-selected="tab === 'invoice-templates'" aria-controls="tab-panel-invoice-templates" id="tab-btn-invoice-templates">{{ $t('admin.invoice_templates') }}</button>
-          <button :class="['tab', { active: tab === 'backup' }]" @click="tab = 'backup'; loadBackups(); loadSettings()" role="tab" :aria-selected="tab === 'backup'" aria-controls="tab-panel-backup" id="tab-btn-backup">{{ $t('admin.backup_tab') }}</button>
+        <!-- Narrow screens: the menu becomes one dropdown with the groups as headings -->
+        <div class="admin-nav-select">
+          <label for="admin-nav-select" class="sr-only">{{ $t('adminNav.choose_section') }}</label>
+          <select id="admin-nav-select" class="form-input" :value="tab" @change="selectSection($event.target.value)">
+            <optgroup v-for="g in adminMenu" :key="g.key" :label="$t(g.labelKey)">
+              <option v-for="it in g.items" :key="it.key" :value="it.key">{{ $t(it.labelKey) }}</option>
+            </optgroup>
+          </select>
         </div>
 
+        <div class="admin-layout">
+          <nav id="admin-nav" class="admin-nav" :style="{ flexBasis: `${navWidth}px` }" :aria-label="$t('adminNav.menu')">
+            <div v-for="g in adminMenu" :key="g.key" class="admin-nav-group">
+              <button
+                type="button"
+                class="admin-nav-heading"
+                :aria-expanded="isGroupOpen(g) ? 'true' : 'false'"
+                :aria-controls="`admin-nav-${g.key}`"
+                @click="toggleGroup(g)"
+              >
+                <span class="admin-nav-chevron" :class="{ open: isGroupOpen(g) }" aria-hidden="true">›</span>
+                {{ $t(g.labelKey) }}
+              </button>
+              <ul v-show="isGroupOpen(g)" :id="`admin-nav-${g.key}`" class="admin-nav-list">
+                <li v-for="it in g.items" :key="it.key">
+                  <RouterLink
+                    :to="`/admin/${g.path}/${it.path}`"
+                    class="admin-nav-link"
+                    :class="{ active: tab === it.key }"
+                    :aria-current="tab === it.key ? 'page' : undefined"
+                  >{{ $t(it.labelKey) }}</RouterLink>
+                </li>
+              </ul>
+            </div>
+          </nav>
+          <!-- Drag (or focus and use the arrow keys) to resize the menu; double-click resets it. -->
+          <div
+            class="admin-nav-resizer"
+            :class="{ dragging: resizingNav }"
+            role="separator"
+            tabindex="0"
+            aria-orientation="vertical"
+            aria-controls="admin-nav"
+            :aria-valuenow="navWidth"
+            :aria-valuemin="NAV_MIN_WIDTH"
+            :aria-valuemax="NAV_MAX_WIDTH"
+            :aria-label="$t('adminNav.resize_menu')"
+            @pointerdown="startNavResize"
+            @keydown="onNavResizeKey"
+            @dblclick="setNavWidth(NAV_DEFAULT_WIDTH)"
+          ></div>
+
+          <div class="admin-content">
+            <h2 class="admin-section-title">{{ currentSection ? $t(currentSection.item.labelKey) : '' }}</h2>
+
         <!-- Users tab -->
-        <div v-show="tab === 'users'" role="tabpanel" id="tab-panel-users" aria-labelledby="tab-btn-users">
+        <div v-show="tab === 'users'" id="tab-panel-users">
           <div class="tab-toolbar">
             <button class="btn btn-primary btn-sm" @click="openCreateUser">+ {{ $t('admin.new_user') }}</button>
             <label class="toggle-label" style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
@@ -191,7 +226,7 @@
         </div>
 
         <!-- Projects tab -->
-        <div v-show="tab === 'projects'" role="tabpanel" id="tab-panel-projects" aria-labelledby="tab-btn-projects">
+        <div v-show="tab === 'projects'" id="tab-panel-projects">
           <div class="tab-toolbar">
             <button class="btn btn-primary btn-sm" @click="showCreateProject = true">+ {{ $t('project.new_project') }}</button>
             <label class="toggle-label" style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
@@ -271,7 +306,7 @@
         </div>
 
         <!-- Groups tab -->
-        <div v-show="tab === 'groups'" role="tabpanel" id="tab-panel-groups" aria-labelledby="tab-btn-groups">
+        <div v-show="tab === 'groups'" id="tab-panel-groups">
           <div class="tab-toolbar">
             <button class="btn btn-primary btn-sm" @click="openCreateGroup">+ {{ $t('groups.create') }}</button>
             <input v-model="groupSearch" class="form-input admin-search" type="search" :placeholder="$t('common.search')" aria-label="Search groups" />
@@ -320,7 +355,7 @@
         </div>
 
         <!-- Customers tab -->
-        <div v-show="tab === 'customers'" role="tabpanel" id="tab-panel-customers" aria-labelledby="tab-btn-customers">
+        <div v-show="tab === 'customers'" id="tab-panel-customers">
           <div class="tab-toolbar">
             <button class="btn btn-primary btn-sm" @click="showCreateCustomer = true">+ {{ $t('customer.new_customer') }}</button>
             <label class="checkbox-label" style="margin-left:12px;white-space:nowrap">
@@ -377,7 +412,7 @@
         </div>
 
         <!-- Settings tab -->
-        <div v-show="tab === 'settings'" role="tabpanel" id="tab-panel-settings" aria-labelledby="tab-btn-settings">
+        <div v-show="tab === 'settings'" id="tab-panel-settings">
           <div class="settings-grid">
 
             <div class="card settings-card">
@@ -881,7 +916,7 @@
         </div>
 
         <!-- News tab -->
-        <div v-show="tab === 'news'" role="tabpanel" id="tab-panel-news" aria-labelledby="tab-btn-news">
+        <div v-show="tab === 'news'" id="tab-panel-news">
           <div class="tab-toolbar">
             <button class="btn btn-primary btn-sm" @click="openCreateNews">+ {{ $t('admin.news_create') }}</button>
           </div>
@@ -923,7 +958,7 @@
         </div>
 
         <!-- Time tracking tab -->
-        <div v-show="tab === 'time-tracking'" role="tabpanel" id="tab-panel-time-tracking" aria-labelledby="tab-btn-time-tracking">
+        <div v-show="tab === 'time-tracking'" id="tab-panel-time-tracking">
           <div class="tab-toolbar">
             <h2 class="tab-section-title">{{ $t('admin.tt_projects_title') }}</h2>
             <button v-if="!addingTTProject && !editingTTProject" class="btn btn-primary btn-sm" @click="addingTTProject = true; nextTick(() => newTTProjRef?.focus())">+ {{ $t('timeTracking.tt_project_add') }}</button>
@@ -1051,52 +1086,52 @@
         </div>
 
         <!-- SLA policies tab -->
-        <div v-show="tab === 'sla'" role="tabpanel" id="tab-panel-sla" aria-labelledby="tab-btn-sla">
+        <div v-show="tab === 'sla'" id="tab-panel-sla">
           <SlaPoliciesTab />
         </div>
 
         <!-- Macros tab -->
-        <div v-show="tab === 'macros'" role="tabpanel" id="tab-panel-macros" aria-labelledby="tab-btn-macros">
+        <div v-show="tab === 'macros'" id="tab-panel-macros">
           <MacrosTab />
         </div>
 
         <!-- Helpdesk settings tab -->
-        <div v-if="!systemStore.isTimetrackingMode" v-show="tab === 'helpdesk'" role="tabpanel" id="tab-panel-helpdesk" aria-labelledby="tab-btn-helpdesk">
+        <div v-if="!systemStore.isTimetrackingMode" v-show="tab === 'helpdesk'" id="tab-panel-helpdesk">
           <HelpdeskSettingsTab />
         </div>
 
         <!-- Business calendars tab -->
-        <div v-if="!systemStore.isTimetrackingMode" v-show="tab === 'business-calendars'" role="tabpanel" id="tab-panel-business-calendars" aria-labelledby="tab-btn-business-calendars">
+        <div v-if="!systemStore.isTimetrackingMode" v-show="tab === 'business-calendars'" id="tab-panel-business-calendars">
           <BusinessCalendarsTab />
         </div>
 
         <!-- Service catalogue tab -->
-        <div v-if="!systemStore.isTimetrackingMode" v-show="tab === 'service-catalog'" role="tabpanel" id="tab-panel-service-catalog" aria-labelledby="tab-btn-service-catalog">
+        <div v-if="!systemStore.isTimetrackingMode" v-show="tab === 'service-catalog'" id="tab-panel-service-catalog">
           <ServiceCatalogTab />
         </div>
 
         <!-- Change management tab -->
-        <div v-if="!systemStore.isTimetrackingMode" v-show="tab === 'change-management'" role="tabpanel" id="tab-panel-change-management" aria-labelledby="tab-btn-change-management">
+        <div v-if="!systemStore.isTimetrackingMode" v-show="tab === 'change-management'" id="tab-panel-change-management">
           <ChangeManagementTab />
         </div>
 
         <!-- CMDB types tab -->
-        <div v-if="!systemStore.isTimetrackingMode" v-show="tab === 'cmdb-types'" role="tabpanel" id="tab-panel-cmdb-types" aria-labelledby="tab-btn-cmdb-types">
+        <div v-if="!systemStore.isTimetrackingMode" v-show="tab === 'cmdb-types'" id="tab-panel-cmdb-types">
           <CmdbTypesTab />
         </div>
 
         <!-- Ticket checklist templates tab -->
-        <div v-show="tab === 'ticket-checklists'" role="tabpanel" id="tab-panel-ticket-checklists" aria-labelledby="tab-btn-ticket-checklists">
+        <div v-show="tab === 'ticket-checklists'" id="tab-panel-ticket-checklists">
           <TicketChecklistTemplatesTab />
         </div>
 
         <!-- Invoice templates tab -->
-        <div v-show="tab === 'invoice-templates'" role="tabpanel" id="tab-panel-invoice-templates" aria-labelledby="tab-btn-invoice-templates">
+        <div v-show="tab === 'invoice-templates'" id="tab-panel-invoice-templates">
           <InvoiceTemplatesTab />
         </div>
 
         <!-- Backup / Restore tab -->
-        <div v-show="tab === 'backup'" role="tabpanel" id="tab-panel-backup" aria-labelledby="tab-btn-backup">
+        <div v-show="tab === 'backup'" id="tab-panel-backup">
           <!-- Scheduled backups -->
           <div style="margin-bottom:24px">
             <h3 class="form-section-title">{{ $t('admin.backup_schedule_title') }}</h3>
@@ -1194,6 +1229,8 @@
               </tbody>
             </table>
             <p v-else class="form-hint">{{ $t('admin.backup_list_empty') }}</p>
+          </div>
+        </div>
           </div>
         </div>
       </div>
@@ -1966,7 +2003,8 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { visibleAdminMenu } from '@/utils/adminMenu'
 import BaseModal from '@/components/common/BaseModal.vue'
 import DateTimeInput from '@/components/common/DateTimeInput.vue'
 import { adminApi } from '@/api/admin'
@@ -1999,11 +2037,111 @@ const sidebarStore = useSidebarStore()
 const systemStore = useSystemStore()
 const auth = useAuthStore()
 const { formatDateTime } = useDateFormat()
-const tab = ref('users')
+// ── Admin menu ──────────────────────────────────────────────────────────────
+// The menu structure lives in utils/adminMenu.js; this view adds the data
+// each section loads when it is opened.
+const route = useRoute()
+const router = useRouter()
+
+const SECTION_LOADERS = {
+  groups: () => loadGroups(),
+  customers: () => loadAdminCustomers(),
+  projects: () => loadProjects(),
+  'time-tracking': () => { loadAdminTTProjects(); loadAdminTTCustomers() },
+  settings: () => loadSettings(),
+  news: () => loadNews(),
+  backup: () => { loadBackups(); loadSettings() },
+}
+
+const adminMenu = computed(() => visibleAdminMenu(systemStore.isTimetrackingMode))
+
+function findSection(predicate) {
+  for (const group of adminMenu.value) {
+    const item = group.items.find(it => predicate(group, it))
+    if (item) return { group, item }
+  }
+  return null
+}
+
+// The section shown follows the URL; an unknown or hidden path falls back to Users.
+const currentSection = computed(() =>
+  findSection((g, it) => g.path === route.params.group && it.path === route.params.item) ||
+  findSection((g, it) => it.key === 'users'))
+const tab = computed(() => currentSection.value?.item.key || 'users')
+
+function selectSection(key) {
+  const s = findSection((g, it) => it.key === key)
+  if (s) router.push(`/admin/${s.group.path}/${s.item.path}`)
+}
 
 watch(tab, (activeTab) => {
   ui.setHelpContext(`admin.${activeTab}`)
 }, { immediate: true })
+// Load a section's data when it is opened. The first load waits for mount:
+// the loaders use state declared further down in this script.
+watch(tab, (activeTab) => SECTION_LOADERS[activeTab]?.())
+onMounted(() => SECTION_LOADERS[tab.value]?.())
+
+// Menu width: draggable, keyboard-adjustable, remembered per browser.
+const NAV_WIDTH_KEY = 'admin_nav_width'
+const NAV_MIN_WIDTH = 160
+const NAV_MAX_WIDTH = 420
+const NAV_DEFAULT_WIDTH = 220
+const clampNav = (w) => Math.min(NAV_MAX_WIDTH, Math.max(NAV_MIN_WIDTH, Math.round(w)))
+const navWidth = ref((() => {
+  try { return clampNav(parseInt(localStorage.getItem(NAV_WIDTH_KEY), 10) || NAV_DEFAULT_WIDTH) } catch { return NAV_DEFAULT_WIDTH }
+})())
+const resizingNav = ref(false)
+function setNavWidth(w) {
+  navWidth.value = clampNav(w)
+  try { localStorage.setItem(NAV_WIDTH_KEY, String(navWidth.value)) } catch {}
+}
+function startNavResize(e) {
+  if (e.button !== 0) return
+  e.preventDefault()
+  const handle = e.currentTarget
+  const startX = e.clientX
+  const startWidth = navWidth.value
+  resizingNav.value = true
+  handle.setPointerCapture(e.pointerId)
+  const move = (ev) => { navWidth.value = clampNav(startWidth + ev.clientX - startX) }
+  const end = () => {
+    resizingNav.value = false
+    handle.removeEventListener('pointermove', move)
+    handle.removeEventListener('pointerup', end)
+    handle.removeEventListener('pointercancel', end)
+    setNavWidth(navWidth.value)
+  }
+  handle.addEventListener('pointermove', move)
+  handle.addEventListener('pointerup', end)
+  handle.addEventListener('pointercancel', end)
+}
+function onNavResizeKey(e) {
+  const step = e.shiftKey ? 48 : 16
+  const next = { ArrowLeft: navWidth.value - step, ArrowRight: navWidth.value + step, Home: NAV_MIN_WIDTH, End: NAV_MAX_WIDTH }[e.key]
+  if (next === undefined) return
+  e.preventDefault()
+  setNavWidth(next)
+}
+
+// Collapsed groups are remembered per browser; the group holding the open
+// section is always shown expanded.
+const NAV_COLLAPSED_KEY = 'admin_nav_collapsed'
+const collapsedGroups = ref((() => {
+  try { return JSON.parse(localStorage.getItem(NAV_COLLAPSED_KEY) || '[]') } catch { return [] }
+})())
+function isGroupOpen(g) {
+  return currentSection.value?.group.key === g.key || !collapsedGroups.value.includes(g.key)
+}
+function toggleGroup(g) {
+  if (isGroupOpen(g)) {
+    if (currentSection.value?.group.key === g.key) return
+    collapsedGroups.value = [...collapsedGroups.value, g.key]
+  } else {
+    collapsedGroups.value = collapsedGroups.value.filter(k => k !== g.key)
+  }
+  try { localStorage.setItem(NAV_COLLAPSED_KEY, JSON.stringify(collapsedGroups.value)) } catch {}
+}
 
 onBeforeUnmount(() => {
   ui.setHelpContext(null)
@@ -3777,22 +3915,57 @@ async function deleteTTCustomer(c) {
 }
 
 .admin-main { flex: 1; padding: 32px 24px; }
-.admin-container { max-width: 1100px; margin: 0 auto; }
+.admin-container { max-width: 1360px; margin: 0 auto; }
+.admin-layout { display: flex; align-items: stretch; }
+.admin-nav {
+  flex: 0 0 220px; align-self: flex-start; position: sticky; top: 16px;
+  max-height: calc(100vh - 32px); overflow-y: auto; padding-right: 12px;
+}
+/* The resize handle is a wide, invisible hit area around a 1px divider line. */
+.admin-nav-resizer {
+  flex: 0 0 9px; margin-right: 19px; cursor: col-resize; position: relative;
+  touch-action: none; outline: none;
+}
+.admin-nav-resizer::before {
+  content: ''; position: absolute; top: 0; bottom: 0; left: 4px; width: 1px;
+  background: var(--color-border); transition: background .15s, width .15s, left .15s;
+}
+.admin-nav-resizer:hover::before, .admin-nav-resizer.dragging::before, .admin-nav-resizer:focus-visible::before {
+  background: var(--color-primary); width: 3px; left: 3px;
+}
+.admin-nav-resizer:focus-visible { box-shadow: 0 0 0 2px var(--color-primary); border-radius: 2px; }
+.admin-nav-group + .admin-nav-group { margin-top: 10px; }
+.admin-nav-heading {
+  display: flex; align-items: center; gap: 6px; width: 100%;
+  background: none; border: none; cursor: pointer; padding: 4px 6px;
+  font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--color-text-muted); text-align: left; border-radius: var(--radius-sm);
+}
+.admin-nav-heading:hover { color: var(--color-text); }
+.admin-nav-heading:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 1px; }
+.admin-nav-chevron { display: inline-block; transition: transform .15s; }
+.admin-nav-chevron.open { transform: rotate(90deg); }
+.admin-nav-list { list-style: none; margin: 2px 0 0; padding: 0; }
+.admin-nav-link {
+  display: block; padding: 6px 10px 6px 20px; border-radius: var(--radius-sm);
+  font-size: 14px; color: var(--color-text); text-decoration: none;
+  border-left: 3px solid transparent;
+}
+.admin-nav-link:hover { background: color-mix(in srgb, var(--color-primary) 8%, transparent); }
+.admin-nav-link.active {
+  color: var(--color-primary); font-weight: 600; border-left-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+.admin-nav-link:focus-visible { outline: 2px solid var(--color-primary); outline-offset: -2px; }
+.admin-content { flex: 1; min-width: 0; }
+.admin-section-title { font-size: 18px; font-weight: 700; margin: 0 0 16px; }
+.admin-nav-select { display: none; margin-bottom: 16px; }
+@media (max-width: 860px) {
+  .admin-nav, .admin-nav-resizer { display: none; }
+  .admin-nav-select { display: block; }
+}
 h1 { font-size: 22px; font-weight: 700; margin-bottom: 24px; }
 
-.tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid var(--color-border); }
-.tab {
-  padding: 10px 20px;
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--color-text-muted);
-  margin-bottom: -1px;
-}
-.tab.active { color: var(--color-primary); border-bottom-color: var(--color-primary); }
 
 .data-table { width: 100%; border-collapse: collapse; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); overflow: hidden; }
 .data-table th, .data-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--color-border); font-size: 13px; vertical-align: middle; }

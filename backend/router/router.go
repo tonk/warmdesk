@@ -180,6 +180,7 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 				admin.PUT("/business-calendars/:id", handlers.AdminUpdateBusinessCalendar)
 				admin.DELETE("/business-calendars/:id", handlers.AdminDeleteBusinessCalendar)
 				admin.POST("/business-calendars/:id/import-holidays", handlers.AdminImportCalendarHolidays)
+				admin.GET("/public-holidays", handlers.AdminPublicHolidays)
 				admin.PUT("/helpdesk/settings", handlers.AdminUpdateHelpdeskSettings)
 				admin.GET("/service-catalog", handlers.AdminListServiceCatalog)
 				admin.POST("/service-catalog", handlers.AdminCreateServiceCatalogItem)

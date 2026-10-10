@@ -2579,7 +2579,12 @@
     "import_failed": "Pyhäpäivien tuonti epäonnistui",
     "calendar_saved": "Kalenteri tallennettu",
     "calendar_deleted": "Kalenteri poistettu",
-    "delete_calendar_confirm": "Poistetaanko kalenteri \"{name}\"? Sitä käyttävät SLA-käytännöt palaavat 24/7-tilaan."
+    "delete_calendar_confirm": "Poistetaanko kalenteri \"{name}\"? Sitä käyttävät SLA-käytännöt palaavat 24/7-tilaan.",
+    "public_holidays": "Pyhäpäivät",
+    "add_holidays_for_year": "Lisää maan pyhäpäivät vuodelle {year}",
+    "add_holidays_hint": "Lisää maan kyseisen vuoden pyhäpäivät alla olevaan luetteloon; säilytä ne valitsemalla Tallenna.",
+    "holidays_all_listed": "Kaikki vuoden {year} pyhäpäivät ovat jo luettelossa",
+    "holidays_added_unsaved": "{added} pyhäpäivää lisätty ({skipped} oli jo luettelossa) — säilytä ne valitsemalla Tallenna"
   },
   "itsmNav": {
     "knowledge_base": "Tietopankki",
@@ -3131,5 +3136,17 @@
     "ticket_type": "Tyyppi",
     "priority": "Prioriteetti",
     "delete_confirm": "Poistetaanko \"{name}\"? Myös sen suhteet ja tikettilinkit poistetaan."
+  },
+  "adminNav": {
+    "menu": "Ylläpitovalikko",
+    "choose_section": "Valitse osio",
+    "group_people": "Henkilöt ja käyttöoikeudet",
+    "group_customers": "Asiakkaat ja laskutus",
+    "group_work": "Työ",
+    "group_helpdesk": "Tukipalvelu",
+    "group_change": "Muutokset ja konfiguraatio",
+    "group_system": "Järjestelmä",
+    "ticket_settings": "Tikettiasetukset",
+    "resize_menu": "Muuta ylläpitovalikon leveyttä"
   }
 }

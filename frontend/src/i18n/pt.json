@@ -2579,7 +2579,12 @@
     "import_failed": "Falha ao importar feriados",
     "calendar_saved": "Calendário guardado",
     "calendar_deleted": "Calendário eliminado",
-    "delete_calendar_confirm": "Eliminar o calendário \"{name}\"? As políticas SLA que o usam passam a 24/7."
+    "delete_calendar_confirm": "Eliminar o calendário \"{name}\"? As políticas SLA que o usam passam a 24/7.",
+    "public_holidays": "Feriados",
+    "add_holidays_for_year": "Adicionar os feriados de um país para {year}",
+    "add_holidays_hint": "Adiciona os feriados do país para esse ano à lista abaixo; clique em Guardar para os manter.",
+    "holidays_all_listed": "Todos os feriados de {year} já estão na lista",
+    "holidays_added_unsaved": "{added} feriados adicionados ({skipped} já existiam) — clique em Guardar para os manter"
   },
   "itsmNav": {
     "knowledge_base": "Base de conhecimento",
@@ -3131,5 +3136,17 @@
     "ticket_type": "Tipo",
     "priority": "Prioridade",
     "delete_confirm": "Eliminar \"{name}\"? As suas relações e ligações a tickets também são removidas."
+  },
+  "adminNav": {
+    "menu": "Menu de administração",
+    "choose_section": "Escolha uma secção",
+    "group_people": "Pessoas e acesso",
+    "group_customers": "Clientes e faturação",
+    "group_work": "Trabalho",
+    "group_helpdesk": "Apoio",
+    "group_change": "Alterações e configuração",
+    "group_system": "Sistema",
+    "ticket_settings": "Definições de tickets",
+    "resize_menu": "Redimensionar o menu de administração"
   }
 }

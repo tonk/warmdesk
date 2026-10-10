@@ -24,7 +24,7 @@ const routes = [
   { path: '/settings', name: 'settings', component: lazyWithReload(() => import('@/views/SettingsView.vue')) },
   { path: '/chats', name: 'chats', component: lazyWithReload(() => import('@/views/DirectMessagesView.vue')), meta: { chatOnly: true } },
   { path: '/messages', redirect: '/chats' },
-  { path: '/admin', name: 'admin', component: lazyWithReload(() => import('@/views/AdminView.vue')), meta: { adminOnly: true } },
+  { path: '/admin/:group?/:item?', name: 'admin', component: lazyWithReload(() => import('@/views/AdminView.vue')), meta: { adminOnly: true } },
   { path: '/reports', redirect: '/time-tracking?tab=board-report' },
   { path: '/time-tracking', name: 'time-tracking', component: lazyWithReload(() => import('@/views/TimeTrackingView.vue')), meta: { timeTrackingOnly: true } },
   { path: '/invoices', name: 'invoices', component: lazyWithReload(() => import('@/views/InvoicesView.vue')), meta: { adminOnly: true } },
