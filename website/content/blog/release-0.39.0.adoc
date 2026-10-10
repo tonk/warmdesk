@@ -1,0 +1,41 @@
+---
+title: "v0.39.0: a tidier Admin Panel"
+date: "2026-10-10"
+author: "Ton Kersten"
+description: "A grouped, resizable admin menu, a country's public holidays for business-hours calendars in one click, and entry counts in time-report groups."
+draft: false
+---
+:doctype: article
+:icons!:
+
+`v0.38.0` added a lot to the Admin Panel: SLA calendars, a service catalogue, change management, CMDB types. With seventeen tabs in a row, the tab bar ran off the page. This release tidies that up and adds two smaller things people asked for.
+
+== A grouped admin menu
+
+The row of tabs is gone. The Admin Panel now has a menu on the left, grouped into *People & access*, *Customers & billing*, *Work*, *Helpdesk*, *Change & configuration*, and *System*. The former *Helpdesk* tab is now called *Ticket settings*, in the Helpdesk group alongside SLA policies, business hours, macros, checklists, and the service catalogue.
+
+Every section has its own address, such as `/admin/helpdesk/sla-policies`. You can bookmark it or send it to a colleague, the browser's back button works, and the breadcrumb shows where you are. Fold away the groups you don't use by clicking their heading. On a phone the menu becomes a single dropdown.
+
+Need more room for the menu, or for the page? Drag the divider between the two. You can also focus it and use the arrow keys, and double-click resets it. The width is remembered in your browser.
+
+== Holidays for business hours
+
+SLA deadlines can count in business hours, which should skip public holidays. Business-hours calendars now have the same *Add holidays* country menu as the time-tracking week view: pick a year and a country, and its public holidays are added to the calendar. Dates that are already on the list are skipped, and nothing is stored until you click *Save*, so it also works while you're still setting up a new calendar.
+
+== Entries per group
+
+Each group header in the time-tracking report now shows how many entries are in the group, next to its total:
+
+----
+Week 41 (Oct 5–Oct 11)        Entries: 33        45:30
+----
+
+The PDF and Excel exports show the same count, in the export's language.
+
+The demo data (`warmdesk-seed`) also gained three business-hours calendars, two with Dutch public holidays.
+
+See the link:../../docs/admin-guide/[Admin Guide] and the link:../../docs/user-guide/[User Guide] for more.
+
+== Upgrade
+
+Download `v0.39.0` from the link:../../download[download page] or pull the latest release tag. No database migration is needed. Bookmarks to `/admin` keep working and open the Users section.

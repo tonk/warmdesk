@@ -1,5 +1,5 @@
 = WarmDesk — User Guide
-:revnumber: v0.38.0
+:revnumber: v0.39.0
 :revdate: 2026-10-10
 Ton Kersten <tonk@smartowl.nl>
 ifdef::backend-pdf[]
@@ -1475,6 +1475,8 @@ Click *Export options* to expand the export settings before downloading:
 |===
 
 * *Export PDF* / *Export XLSX* — download the report using the selected filters and options.
+
+Each group header shows the group's name, its number of entries (*Entries: 33*), and its total; the PDF and Excel exports show the same count.
 
 When grouped by customer, a group containing billable entries (time entries linked to a contract) shows a *Create Invoice* button — see the Invoices tab below.
 

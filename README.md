@@ -8,11 +8,11 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.38.0)
+## Latest release (v0.39.0)
 
-- **ITIL helpdesk** — Incident, problem, change, and service request management: impact × urgency priorities, categories, resolution codes, business-hours SLAs with warnings and escalation, problem records with a known error database, and a ticket KPI report.
-- **Knowledge base, service catalogue, and approvals** — Public and internal articles (also in the customer portal), orderable services with request forms, and group approvals for requests and changes.
-- **Changes and CMDB** — A change workflow with CAB approval, freeze windows and a month/week change calendar, plus configuration items with relations and impact analysis.
+- **Admin Panel** — A grouped, resizable menu replaces the row of tabs, and every section has its own address.
+- **Business hours** — Add a country's public holidays to a calendar with the same *Add holidays* menu as time tracking.
+- **Time reports** — Each group header shows its number of entries, on screen and in the PDF and Excel exports.
 
 ## Experiment
 
@@ -378,7 +378,7 @@ See [INSTALL.md](INSTALL.md) for full instructions including:
 - **Forgotten password** — users can request a password-reset link by email; link is valid for one hour; requires SMTP to be configured
 - **Password policy** — admin-configurable minimum length, uppercase, lowercase, digit, and special-character requirements; enforced on registration, password change, and reset
 - **Require password change on next login** — admins can flag a user (from New User or Edit User) to be forced through a password change on their next login, via any auth method; a Generate/Copy password helper is available in both forms
-- **Admin panel** — manage all users (create, edit, assign projects, disable, delete) and all projects (including restoring deleted ones); live search on Users, Groups, Customers, and Projects tabs; inactive users hidden by default with a "Show inactive" toggle; toggle public registration on/off; configure global defaults (theme, locale, date format, timezone, font); configure SMTP email; set company name and logo; create, import, and restore backups (bundling the database with uploaded files, mergeable with a backup from another WarmDesk server); restrict API access to specific IPs or CIDR ranges
+- **Admin panel** — a grouped, resizable menu with a bookmarkable address per section; manage all users (create, edit, assign projects, disable, delete) and all projects (including restoring deleted ones); live search on Users, Groups, Customers, and Projects tabs; inactive users hidden by default with a "Show inactive" toggle; toggle public registration on/off; configure global defaults (theme, locale, date format, timezone, font); configure SMTP email; set company name and logo; create, import, and restore backups (bundling the database with uploaded files, mergeable with a backup from another WarmDesk server); restrict API access to specific IPs or CIDR ranges
 - **SMTP email** — configurable from the admin panel without a server restart; username and password are optional for relay servers
 - **Session timeout** — configurable idle timeout (default 60 minutes); set to 0 to disable
 - **Topics** — threaded discussions per project with markdown support and replies
@@ -386,13 +386,13 @@ See [INSTALL.md](INSTALL.md) for full instructions including:
 - **Multiple assignees** — assign more than one user to a card
 - **Watchers** — subscribe to card activity
 - **Favourite people** — mark users for quick access
-- **Time reports** — generate a time overview filtered by period (all / year / month / week / custom date range), project, and one or more assignees; export to server-generated PDF (selectable font and output language, company logo, per-project subtotal badges) or Excel (XLSX); time displayed as H:MM
+- **Time reports** — generate a time overview filtered by period (all / year / month / week / custom date range), project, and one or more assignees; export to server-generated PDF (selectable font and output language, company logo, per-project subtotal badges) or Excel (XLSX); time displayed as H:MM; group headers show the number of entries
 - **Time report chart view** — toggle the Report tab between Table and Chart; chart types are bar, pie, and stacked bar, with a declarable/total/undeclarable time basis switch; click *Other* to drill into the activities folded into it, and a table below the chart lists every activity with its time and share; export the chart as a server-generated PDF
 - **Time tracking PDF options** — the weekly timesheet export and the time-tracking report tab both offer the same PDF Font and PDF Language selects as the main report view; selections are persisted in localStorage; when the report is grouped by Customer a *New page per customer* checkbox appears — each customer is exported to its own page with the full document header repeated and no cross-customer grand total; optional per-row distance and undeclarable-time columns show billable vs. unbillable time and mileage on every entry, not just totals, and the undeclarable/billable breakdown is available for every grouping
 - **Company branding** — set a company name and separate light/dark logos (JPG, PNG, GIF, WebP, or SVG); light logo shown on the login screen's light theme, dark logo on dark theme; logos also appear on reports
 - **Configurable initial columns** — admin can define which columns are created when a new project is made (defaults to "Backlog")
 - **Helpdesk (ITIL)** — email-to-ticket inbox and per-customer ticket lists; incidents, problems, service requests, and change requests with statuses from *New* to *Resolved* and *Closed*; impact × urgency priority matrix, two-level categories, resolution codes, major incidents, typed ticket links, internal notes, macros, and checklists; a `customer` role gives end-customers a portal for their own tickets
-- **SLA management** — SLA policies per priority, type, customer, or category (most specific wins), counted in business hours with holidays; the resolution clock pauses while waiting for the requester; warnings at a configurable threshold and escalation (notify and reassign) on breach
+- **SLA management** — SLA policies per priority, type, customer, or category (most specific wins), counted in business hours with holidays (add a country's public holidays in one click); the resolution clock pauses while waiting for the requester; warnings at a configurable threshold and escalation (notify and reassign) on breach
 - **Problem management** — root cause, workaround, and known-error records linked to the incidents they cause, a Problems page that doubles as the known error database, and resolving all linked incidents at once
 - **Knowledge base** — internal and public Markdown articles with search, helpful votes, suggestions on tickets, and *create article from this ticket*; public articles appear in the customer portal
 - **Service catalogue and approvals** — orderable services with their own request form, fulfilment group, and task checklist; requests and changes can need N approvals from a group, decided on a dedicated Approvals page

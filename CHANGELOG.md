@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.39.0 — 2026-10-10
+
+### Added
+- **Grouped admin menu** — the Admin Panel's row of tabs is replaced by a menu on the left, grouped into *People & access*, *Customers & billing*, *Work*, *Helpdesk*, *Change & configuration*, and *System*; the former *Helpdesk* tab is now *Helpdesk → Ticket settings*. Click a group heading to fold it away. Every section has its own address, such as `/admin/helpdesk/sla-policies`, so you can bookmark or share it, the browser's back button works, and the breadcrumb shows where you are. On a narrow screen the menu becomes a single dropdown.
+- **Resizable admin menu** — drag the divider between the menu and the page to make the menu wider or narrower (or focus it and use the arrow keys; double-click resets it). The width is remembered in your browser.
+- **Add a country's holidays to business hours** — the business-hours calendar editor has the same *Add holidays* country menu as time tracking. Pick a year and a country, and its public holidays are added to the calendar's list, skipping dates that are already on it. They're stored when you click *Save*, so this also works for a new calendar.
+- **Entry count in time-report groups** — each group header in the time-tracking report shows how many entries the group has, next to its total (*Entries: 33*). The PDF and Excel exports show the same count, in the export's language.
+- **Business hours in the demo data** — `warmdesk-seed` creates three business-hours calendars, two of them with this year's and next year's Dutch public holidays, and the demo *Standard* SLA policy counts in Dutch office hours.
+
+### Changed
+- Adding public holidays to a business-hours calendar no longer saves them straight away; they're saved with the rest of the calendar, like a holiday added by hand.
+- The *Add holidays* menu in time tracking can now be used with the keyboard: arrow keys move through the countries and Esc closes the menu.
+
 ## v0.38.0 — 2026-10-10
 
 ### Added

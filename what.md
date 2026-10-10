@@ -938,3 +938,9 @@ Create an application that has all these features and requirements
 - Add change management with change types, risk, planned windows, plans, a change workflow with CAB approval, freeze windows, schedule-conflict detection, and a month/week/list change calendar
 - Add a CMDB with configuration item types, customer-scoped and internal items, relations, impact analysis, and links from tickets and changes
 - Seed demo categories, knowledge base articles, configuration items, problems, catalogue items, approver groups, service requests, changes, and a freeze window
+- Replace the admin panel's tab bar with a grouped left-hand menu (People & access, Customers & billing, Work, Helpdesk, Change & configuration, System), with a URL per section, breadcrumbs, collapsible groups, and a dropdown on narrow screens
+- Make the admin menu resizable by dragging or with the arrow keys, remembering the width per browser
+- Add the time-tracking "Add holidays" country menu to the business-hours calendar editor, adding a year's public holidays to the form so they're saved with the calendar
+- Add GET /api/v1/admin/public-holidays and move the per-country holiday tables to services.PublicHolidays, shared by time tracking, business hours, and the seed
+- Show the number of entries in each time-report group header, on screen and in the PDF and Excel exports
+- Seed three business-hours calendars (two with Dutch public holidays) and let the demo Standard SLA policy count in Dutch office hours

@@ -478,7 +478,7 @@ When a setting is given in more than one place, the first match wins:
 
 === Reports
 
-The *Report* tab shows your own entries for a week, month, year, or custom range, grouped by period, customer, project, or customer + project.
+The *Report* tab shows your own entries for a week, month, year, or custom range, grouped by period, customer, project, or customer + project. Each group header shows the number of entries and the group total, in the exports too.
 Switch between a table and a chart (bar, pie, or stacked bar).
 The chart shows the ten activities with the most time and adds the rest together as *Other*; click *Other* (or the button below the chart) to see the next ten, and *Back* to return.
 A table below the chart lists every activity with its time and share of the total.
