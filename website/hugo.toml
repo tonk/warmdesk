@@ -15,14 +15,15 @@ enableEmoji = true
   # Social preview image (absolute URL built via absURL). Prefer ≥1200×630 PNG/JPEG for best crawler support.
   og_image = "images/logo-full.svg"
   # Release info — update both this and warmdesk-version in [markup.asciidocext.attributes] on each release
-  warmdesk_version = "v0.37.0"
-  release_date     = "2026-10-02"
+  warmdesk_version = "v0.38.0"
+  release_date     = "2026-10-10"
   # Blog post slug for the current release (linked from the homepage "What's new" strip)
-  release_blog     = "blog/release-0.37.0/"
+  release_blog     = "blog/release-0.38.0/"
   # Release highlights shown in the "What's new" strip on the homepage (2-3 bullets)
   release_highlights = [
-    "**One row for Other** — the activity table under the time-report chart folds everything in *Other* into a single row with its total time and share.",
-    "**Expand when you need it** — click the arrow on the left of the *Other* row to list its activities, and again to fold them back.",
+    "**An ITIL helpdesk** — impact × urgency priorities, business-hours SLAs with warnings and escalation, problem records with a known error database, and a ticket KPI report.",
+    "**Knowledge base, service catalogue, and approvals** — public and internal articles, orderable services with request forms, and group approvals for requests and changes.",
+    "**Changes and a CMDB** — a change workflow with CAB approval, freeze windows, and a month/week change calendar, plus configuration items with impact analysis.",
   ]
 
 [markup]
@@ -41,7 +42,7 @@ enableEmoji = true
       "source-highlighter" = "highlight.js"
       "sectanchors" = ""
       "sectlinks" = ""
-      "warmdesk-version" = "v0.37.0"
+      "warmdesk-version" = "v0.38.0"
 
   # Chroma off — fenced Markdown code stays plain <pre><code>; AsciiDoc uses hljs (see theme head).
   [markup.highlight]

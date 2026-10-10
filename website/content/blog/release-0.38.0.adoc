@@ -1,0 +1,63 @@
+---
+title: "v0.38.0: an ITIL helpdesk"
+date: "2026-10-10"
+author: "Ton Kersten"
+description: "The helpdesk grows into an ITIL service desk: incident and problem management, business-hours SLAs with escalation, a knowledge base, a service catalogue with approvals, change management, and a CMDB."
+draft: false
+---
+:doctype: article
+:icons!:
+
+Until now the helpdesk was a solid ticket system: an email inbox, ticket lists per customer, SLA deadlines, macros, and checklists. `v0.38.0` turns it into an ITIL service desk. It's the biggest release so far, so here's the tour.
+
+== Incidents
+
+Tickets get two new statuses. *In progress* means someone is working on it; *Resolved* means the fix has been delivered. Resolved tickets close automatically after a few days (five by default) unless the requester replies, and a reply reopens the ticket and counts as a reopen.
+
+Instead of picking a priority, set *Impact* and *Urgency*: the priority follows from a matrix an administrator can edit, and you can still override it. Tickets also get two-level categories, and resolving one asks for a *resolution code* and notes, which an administrator can make mandatory. Flag a ticket as a *Major incident* and a chosen group is alerted straight away.
+
+Ticket links now have a type (related, duplicate of, caused by, parent of), and you can link to another customer's ticket as long as you have access to it.
+
+== SLAs that count working hours
+
+SLA deadlines can now be counted in business hours: give a policy a calendar with working days, hours, a time zone, and holidays (one click imports a country's public holidays). While a ticket waits for the requester, the resolution clock pauses. A policy can apply to a customer, a ticket type, or a category, and the most specific one wins.
+
+The server now checks every open ticket once a minute. When most of the SLA time is used, the assignee and group get a warning; on a breach the ticket is escalated to the policy's escalation group or user, and reassigned to them unless you switch that off.
+
+This release also fixes a few SLA bugs: tickets closed late are now always marked as breached, raising the priority no longer hands out a fresh deadline, and tickets from email get an SLA too.
+
+== Problems and the known error database
+
+When several incidents share a cause, open a *problem*. Record the root cause and a workaround, mark it as a *known error*, and link the incidents to it with *caused by*. Once it's fixed, resolve all linked incidents at once with a message to each requester. The new *Problems* page lists every problem and doubles as the known error database, and an agent can paste a problem's workaround into a reply with one click.
+
+== Knowledge base
+
+Write how-to articles and solutions in Markdown. Internal articles are for agents; public ones also appear in the customer portal, for every customer or just one. Every ticket shows matching articles, and *Create article from this ticket* turns a resolution into an article in seconds.
+
+== Service catalogue and approvals
+
+Administrators can now publish orderable services, such as a new laptop or access to a project, each with its own request form, fulfilment group, and task checklist. Ordering one creates a service request with the answers, routed to the right group, and customer-portal users can order too.
+
+Requests that cost money can need approval from a group: set how many members must approve, and a single rejection rejects. Until then nobody can start on it. Approvers get an *Approvals* page with all the details they need.
+
+== Changes
+
+Change requests now follow a proper workflow: draft, awaiting approval, approved, scheduled, implementing, review, and completed or failed. A change has a type (standard, normal, or emergency), a risk level, a planned window, and implementation, backout, and test plans. Normal and emergency changes need approval from the change advisory board; standard changes are pre-approved. Freeze windows block scheduling (except for emergencies), and WarmDesk warns when another change touches the same configuration items in the same window.
+
+The new *Change calendar* shows it all in a month view, a week view with a time grid, or a list.
+
+== CMDB
+
+Finally, a configuration management database: keep track of the services, applications, servers, databases, and network gear you support, per customer or internal. Relations such as *depends on* and *runs on* drive an impact analysis that shows everything affected when an item fails, with its open tickets. Link affected items to tickets, and a change shows the combined impact of its items.
+
+== Ticket report
+
+A new *Ticket report* page shows the numbers: tickets created and resolved, backlog and its age, mean time to resolve and to first response, SLA compliance, first-contact resolution, and reopen rate, broken down by priority, type, category, and customer. Export it as PDF or Excel.
+
+`warmdesk-seed` creates demo data for all of the above, so `warmdesk-seed --reset` is the quickest way to try it.
+
+See the Helpdesk sections of the link:../../docs/user-guide/[User Guide] and the link:../../docs/admin-guide/[Admin Guide] for the details.
+
+== Upgrade
+
+Download `v0.38.0` from the link:../../download[download page] or pull the latest release tag. The new tables and columns are created automatically on startup; tickets that were already resolved or closed get their resolution times filled in from their history on the first start.

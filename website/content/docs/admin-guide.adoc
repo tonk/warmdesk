@@ -220,7 +220,12 @@ If the project's contract has time slots configured, the PDF report will break t
 === Helpdesk
 
 * Enable helpdesk access per user (*Admin → Users → Edit → Helpdesk (tickets)*); admins always have access.
-* *SLA policies*, *Macros*, and *Checklist templates* are managed under *Admin → Settings*.
+* *SLA policies*, *Macros*, and *Checklist templates* have their own Admin tabs. An SLA policy can filter on priority, type, customer, and category (the most specific match wins), count in a *business-hours* calendar, warn at a threshold, and escalate to a group or user on breach.
+* *Admin → Helpdesk* holds the impact × urgency priority matrix, the auto-close period for resolved tickets, whether a resolution code is required, the major-incident group, the ticket categories, and the resolution codes.
+* *Admin → Business hours* defines working calendars with holidays (with a public-holiday import per country).
+* *Admin → Service catalogue* defines orderable services: request form, fulfilment group, task checklist, and approver group with the number of approvals needed.
+* *Admin → Change management* sets the change advisory board group and the approvals needed for normal and emergency changes, and manages freeze windows.
+* *Admin → CMDB types* manages the configuration item types.
 * *Incoming Mail (IMAP)* polls a mailbox and turns new mail into tickets; processed messages are moved to a `Processed` folder (or marked `\Seen` if the server lacks `MOVE`). Plain and OAuth2 (Google / Office 365) authentication are supported — OAuth2 client IDs and secrets go in the `oauth2:` block of `warmdesk.yaml` and need a restart.
 
 [[system-settings]]

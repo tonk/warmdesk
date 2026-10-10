@@ -96,6 +96,17 @@ if one app node goes down.
    as the designated "backup node" and enable the schedule there only; the
    others can still take manual on-demand backups if needed.
 
+8. **The helpdesk SLA job runs on every instance — no action needed.** Each
+   instance re-evaluates open tickets once a minute (auto-close, SLA breach
+   flags, warnings, escalation). That's safe to run everywhere: the state it
+   writes is derived from the shared database, and each SLA warning or
+   escalation is claimed with a conditional database update, so exactly one
+   instance sends it. That instance only sees its own WebSocket clients
+   (per-user alerts don't go through Redis, just like @mention
+   notifications), so a user connected to a different instance gets the
+   alert by email — if they have email notifications on — instead of in the
+   app.
+
 ## Known limitation: auth rate limiting is per-instance
 
 The login/register/password-reset rate limiter (10 requests / 15 min per IP)

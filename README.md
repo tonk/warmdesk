@@ -8,9 +8,11 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.37.0)
+## Latest release (v0.38.0)
 
-- **Time report** — The activities in *Other* are combined into one expandable row with their total time and share in the table under the chart.
+- **ITIL helpdesk** — Incident, problem, change, and service request management: impact × urgency priorities, categories, resolution codes, business-hours SLAs with warnings and escalation, problem records with a known error database, and a ticket KPI report.
+- **Knowledge base, service catalogue, and approvals** — Public and internal articles (also in the customer portal), orderable services with request forms, and group approvals for requests and changes.
+- **Changes and CMDB** — A change workflow with CAB approval, freeze windows and a month/week change calendar, plus configuration items with relations and impact analysis.
 
 ## Experiment
 
@@ -113,7 +115,9 @@ warmdesk.exe --url=http://localhost:8080
 
 A seed tool is included in the distribution to populate the database with
 realistic demo content (users, projects, cards, comments, time entries, topics,
-conversations, customer locations, and system settings including company branding):
+conversations, customer locations, helpdesk tickets, problems, knowledge base
+articles, a service catalogue with approvals, changes, CMDB configuration items,
+and system settings including company branding):
 
 ```bash
 cd dist
@@ -386,6 +390,14 @@ See [INSTALL.md](INSTALL.md) for full instructions including:
 - **Time tracking PDF options** — the weekly timesheet export and the time-tracking report tab both offer the same PDF Font and PDF Language selects as the main report view; selections are persisted in localStorage; when the report is grouped by Customer a *New page per customer* checkbox appears — each customer is exported to its own page with the full document header repeated and no cross-customer grand total; optional per-row distance and undeclarable-time columns show billable vs. unbillable time and mileage on every entry, not just totals, and the undeclarable/billable breakdown is available for every grouping
 - **Company branding** — set a company name and separate light/dark logos (JPG, PNG, GIF, WebP, or SVG); light logo shown on the login screen's light theme, dark logo on dark theme; logos also appear on reports
 - **Configurable initial columns** — admin can define which columns are created when a new project is made (defaults to "Backlog")
+- **Helpdesk (ITIL)** — email-to-ticket inbox and per-customer ticket lists; incidents, problems, service requests, and change requests with statuses from *New* to *Resolved* and *Closed*; impact × urgency priority matrix, two-level categories, resolution codes, major incidents, typed ticket links, internal notes, macros, and checklists; a `customer` role gives end-customers a portal for their own tickets
+- **SLA management** — SLA policies per priority, type, customer, or category (most specific wins), counted in business hours with holidays; the resolution clock pauses while waiting for the requester; warnings at a configurable threshold and escalation (notify and reassign) on breach
+- **Problem management** — root cause, workaround, and known-error records linked to the incidents they cause, a Problems page that doubles as the known error database, and resolving all linked incidents at once
+- **Knowledge base** — internal and public Markdown articles with search, helpful votes, suggestions on tickets, and *create article from this ticket*; public articles appear in the customer portal
+- **Service catalogue and approvals** — orderable services with their own request form, fulfilment group, and task checklist; requests and changes can need N approvals from a group, decided on a dedicated Approvals page
+- **Change management** — standard, normal, and emergency changes with risk, planned window, and implementation/backout/test plans; CAB approval, freeze windows, conflict detection on shared configuration items, and a month/week/list change calendar
+- **CMDB** — configuration items per customer or internal, with owner, support group, attributes, and relations; impact analysis shows everything affected when an item fails; link affected items to tickets and changes
+- **Ticket report** — MTTR, first response, SLA compliance, first-contact resolution, reopen rate, backlog age, and breakdowns by priority, type, category, and customer; PDF and Excel export
 - **Ticket API** — list columns and cards (filterable by lane) or fetch a card with comments, create and update cards, add comments, and move cards (also to another project) via API key (for CI/CD pipelines and external integrations); API keys also work on all other authenticated endpoints
 - **Project-scoped API keys** — keys created in Project Settings are locked to that project; personal API keys in User Settings give full access across all projects
 - **Typing indicator** — animated indicator in project chat shows who is currently typing

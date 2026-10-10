@@ -924,3 +924,17 @@ Create an application that has all these features and requirements
 - List every activity below the time-report chart with its customers, time, share, and colour in the current chart
 - Open external links in the desktop app in the default browser instead of navigating the app window away
 - Fold the activities in "Other" into one expandable row with total time and share in the table under the time-report chart
+- Add the In progress and Resolved ticket statuses, with resolved tickets closing automatically after a configurable number of days and requester replies reopening them as a counted reopen
+- Derive ticket priority from an admin-editable impact × urgency matrix, and add two-level ticket categories, resolution codes and notes (optionally required), and a major-incident flag that alerts a configured group
+- Add directional ticket link types (related, duplicate of, caused by, parent of) with access checks on the linked ticket
+- Count SLA deadlines in business calendars with holidays and public-holiday import, pause the resolution clock while pending, and match SLA policies on customer, type, and category with the most specific policy winning
+- Run an SLA job every minute that refreshes breach flags from timestamps, warns at a configurable threshold, and escalates on breach by notifying and optionally reassigning to the escalation group or user
+- Fix SLA breaches being missed for tickets closed late, priority changes restarting the SLA clock, email tickets getting no SLA, and admin replies to email tickets not counting as first response
+- Add problem management with problem status, root cause, workaround, and known-error flag, a Problems page / known error database, and resolving all linked incidents at once
+- Add a ticket KPI report (MTTR, first response, SLA compliance, first-contact resolution, reopen rate, backlog age, breakdowns) with PDF and Excel export, and add MTTR, resolution-SLA, and major-incident Prometheus metrics
+- Add a knowledge base with internal and public articles, search, helpful votes, ticket suggestions, linking, and creating an article from a ticket
+- Add a service catalogue with configurable request forms, fulfilment groups, task checklists, and approval rules, orderable by agents and customer-portal users
+- Add N-of-M group approvals for service requests and changes, blocking fulfilment until approved, with an Approvals page for approvers
+- Add change management with change types, risk, planned windows, plans, a change workflow with CAB approval, freeze windows, schedule-conflict detection, and a month/week/list change calendar
+- Add a CMDB with configuration item types, customer-scoped and internal items, relations, impact analysis, and links from tickets and changes
+- Seed demo categories, knowledge base articles, configuration items, problems, catalogue items, approver groups, service requests, changes, and a freeze window

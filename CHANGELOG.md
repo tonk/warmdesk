@@ -1,5 +1,32 @@
 # Changelog
 
+## v0.38.0 — 2026-10-10
+
+### Added
+- **ITIL incident handling** — two new statuses, *In progress* and *Resolved*. Resolved tickets close automatically after a set number of days (default 5) unless the requester replies, and a reply from the requester reopens a resolved ticket and counts it as a reopen. Set *Impact* and *Urgency* and the priority follows from a priority matrix an administrator can edit, while you can still pick a priority by hand. Tickets also get two-level *categories*, a *resolution code* and *resolution notes* recorded in a resolve dialog (optionally required), and a *Major incident* flag that alerts a chosen group.
+- **Typed ticket links** — link tickets as *related*, *duplicate of*, *caused by*, or *parent of*; the other ticket shows the reverse wording. You can link to tickets of another customer as long as you have access to them.
+- **Business hours and smarter SLAs** — SLA deadlines can count only working hours from a business calendar (working days, hours, time zone, holidays, with a one-click import of a country's public holidays). The resolution clock pauses while a ticket is *Pending*. A policy can apply to a customer, ticket type, or category, and the most specific matching policy wins.
+- **SLA warnings and escalation** — the server checks every open ticket once a minute. When a set share of the SLA time is used (default 75%) the assignee and group are warned. On a breach the ticket is escalated: the policy's escalation group or user is notified and, unless switched off, the ticket is reassigned to them. Alerts appear in WarmDesk, or arrive by email for users who are offline.
+- **Problem management** — problem tickets get a problem status, *root cause*, *workaround*, and a *known error* flag. Link incidents to a problem with *caused by*, resolve all of them in one go with a message to each requester, and reuse a problem's workaround in a reply with one click. The new *Problems* page lists every problem you can access and doubles as the known error database. Problems are never shown to customer-portal users.
+- **Ticket report** — a new *Ticket report* page shows tickets created and resolved, the open backlog and how old it is, major incidents, mean time to resolve and to first response, SLA compliance, first-contact resolution, and reopen rate, broken down by priority, type, category, and customer. Filter it by customer, group, type, priority, or category, and export it as PDF or Excel. Prometheus also gets the major incidents, MTTR, and resolution-SLA figures.
+- **Knowledge base** — write how-to articles and solutions in Markdown, as internal (agents only) or public. Public articles appear in the customer portal, for all customers or for one. A ticket's *Knowledge* panel suggests matching articles and lists the linked ones, and *Create article from this ticket* starts an article from its resolution notes or, for a problem, its root cause and workaround. Readers can mark an article as helpful or not.
+- **Service catalogue** — administrators define orderable services with their own request form, fulfilment group, task checklist, and approval rules. Choosing a service and filling in its form creates a service request ticket with the answers, routed to the right group. Customer-portal users can order from the catalogue too.
+- **Approvals** — service requests and changes can need approval from a group: a set number of members must approve, and a single rejection rejects. Until then the ticket can't be started or resolved. Approvers get an *Approvals* page with the request details and earlier decisions, and approve or reject with a reason; agents can also ask for approval on any other ticket.
+- **Change management** — change requests follow a change workflow (draft, awaiting approval, approved, scheduled, implementing, review, completed or failed). Each change has a type (standard, normal or emergency), a risk level, a planned window, and implementation, backout, and test plans. Normal and emergency changes need approval from the change advisory board; standard changes are pre-approved. Freeze windows block scheduling except for emergency changes, and other changes in the same window on the same configuration items are flagged. The new *Change calendar* shows changes in a month view, a week view with a time grid, or a list, with the freeze windows and the changes not yet scheduled.
+- **CMDB** — keep track of the services, applications, servers, databases, and other configuration items you support, per customer or internal, with an owner, support group, and free attributes. Relations (*depends on*, *runs on*, *part of*, *connected to*) power an impact analysis that shows everything affected if an item fails, with open tickets. Link affected items to tickets; a change shows the combined impact of its items.
+- **Demo data for all of it** — `warmdesk-seed` now also creates ticket categories, knowledge base articles, configuration items with relations, problem records, a service catalogue with approver groups, service requests in every approval state, changes, and a freeze window.
+
+### Fixed
+- **Late tickets not marked as breached** — a ticket closed after its SLA deadline was only flagged as breached if someone opened it between the deadline and its closing. Breaches are now worked out from the timestamps.
+- **Priority change restarted the SLA clock** — raising a ticket's priority gave it a fresh deadline counted from that moment; deadlines are now always counted from when the ticket was created.
+- **Tickets from email had no SLA** — tickets created from incoming email now get an SLA like any other ticket.
+- **First response not recorded** — when an administrator replied to a ticket that came in by email, the reply wasn't recorded as the first response.
+- **Linking to any ticket** — the *Linked tickets* section accepted any ticket number, including tickets of customers you have no access to. Linked tickets are now checked against your access.
+
+### Changed
+- Macros go through the same checks, status workflow, and history as manual changes, and can also set impact, urgency, category, and resolution code.
+- Customer ticket counts include the new statuses: *In progress* counts as open, *Resolved* as awaiting closure.
+
 ## v0.37.0 — 2026-10-02
 
 ### Changed

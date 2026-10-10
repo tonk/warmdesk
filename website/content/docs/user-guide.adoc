@@ -490,15 +490,42 @@ All exports are generated on the server.
 
 == Helpdesk
 
-When the helpdesk is enabled for you, a *Tickets* section appears in the sidebar with an *Inbox* (email tickets not yet assigned to a customer) and one ticket list per customer.
+When the helpdesk is enabled for you, a *Tickets* section appears in the sidebar with an *Inbox* (email tickets not yet assigned to a customer), one ticket list per customer, and the *Problems*, *Ticket report*, *Knowledge base*, *Service catalogue*, *Approvals*, *Change calendar*, and *CMDB* pages.
 
-* Tickets move through *New*, *Open*, *Pending* (with an optional reminder date), *Pending close* (closed automatically on its close date), and *Closed*.
-* In a ticket you can change status, priority, type, assignee, group, and tags, see SLA deadlines, and link other tickets or board cards.
+* Tickets move through *New*, *Open*, *In progress*, *Pending* (with an optional reminder date; the SLA clock pauses), *Resolved* (closes automatically after a few days unless the requester replies), *Pending close* (closed on its close date), and *Closed*. A requester's reply reopens a resolved ticket.
+* Set *Impact* and *Urgency* and the priority follows from the priority matrix; you can still override it. Tickets also have a category, and resolving one records a resolution code and notes.
+* Flag a ticket as a *Major incident* to alert the major-incident group.
+* Link tickets as *related*, *duplicate of*, *caused by*, or *parent of*, and link board cards and affected configuration items.
+* SLA deadlines count in the policy's business hours. You're warned when most of the time is used; on a breach the ticket is escalated and may be reassigned.
 * Reply to the customer, or tick *Private* to post an internal note that is never emailed and hidden from customer-role users.
-* Apply a *macro* to set several fields and pre-fill a reply in one click, or a checklist template; open checklist items block closing the ticket.
+* Apply a *macro* to set several fields and pre-fill a reply in one click, or a checklist template; open checklist items block resolving the ticket.
 * *Mark as Spam* closes a ticket and hides it from the default list.
 
-Users with the *customer* role only see the helpdesk, and only their own customers' tickets.
+=== Problems and known errors
+
+A ticket of type *Problem* records a root cause, a workaround, and whether it's a *known error*. Link incidents to it with *caused by* and resolve them all at once when the problem is fixed. The *Problems* page lists all problems and, with *Known errors only*, works as the known error database.
+
+=== Knowledge base
+
+Articles are internal (agents only) or public (also shown in the customer portal). Each ticket suggests matching articles; agents can link an article or *create an article from this ticket*.
+
+=== Service catalogue and approvals
+
+Order a service from the *Service catalogue* by filling in its form; this creates a service request routed to the right group. Requests and changes can need approval from a group: approvers decide on the *Approvals* page, and until then the ticket can't be started or resolved.
+
+=== Changes
+
+A *Change request* follows the change workflow: draft, awaiting approval (by the change advisory board; standard changes are pre-approved), approved, scheduled, implementing, review, and completed or failed. Fill in the risk, planned window, and implementation, backout, and test plans. Freeze windows block scheduling except for emergency changes. The *Change calendar* shows all changes by month, by week, or as a list.
+
+=== CMDB
+
+The *CMDB* holds your configuration items with their relations. *Impact analysis* shows what is affected when an item fails or changes.
+
+=== Ticket report
+
+The *Ticket report* shows created and resolved tickets, backlog, MTTR, first response, SLA compliance, first-contact resolution, and reopen rate, with breakdowns and PDF/Excel export.
+
+Users with the *customer* role only see the helpdesk, their own customers' tickets, the public knowledge base, and the service catalogue.
 
 == User settings
 
