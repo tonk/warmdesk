@@ -133,6 +133,8 @@ func GetTimeEntryReportXLSX(c *gin.Context) {
 			continue
 		}
 		f.SetCellValue(sheetName, cell(1, row), grp.Label)
+		// Column D, so a long group label can still overflow into B and C.
+		f.SetCellValue(sheetName, cell(4, row), fmt.Sprintf("%s: %d", tr.Entries, len(grp.Entries)))
 		f.SetCellStyle(sheetName, cell(1, row), cell(9, row), bold)
 		row++
 
