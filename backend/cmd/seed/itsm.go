@@ -228,6 +228,10 @@ func seedITSM(db *gorm.DB, users map[string]*models.User, customerIDs []uint, ti
 
 	// ── Problems ──────────────────────────────────────────────────────────────
 	fmt.Println("→ Creating problem records…")
+	// Older demo tickets of type "problem" predate problem management; give
+	// them a problem status so they don't show up as "not set".
+	must(db.Model(&models.Ticket{}).Where("type = ? AND (problem_status = '' OR problem_status IS NULL)", "problem").
+		Update("problem_status", "investigating").Error)
 	type problemSeed struct {
 		customer                                   uint
 		title, desc, status, rootCause, workaround string
