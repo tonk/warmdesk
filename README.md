@@ -8,11 +8,10 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.39.0)
+## Latest release (v0.40.0)
 
-- **Admin Panel** — A grouped, resizable menu replaces the row of tabs, and every section has its own address.
-- **Business hours** — Add a country's public holidays to a calendar with the same *Add holidays* menu as time tracking.
-- **Time reports** — Each group header shows its number of entries, on screen and in the PDF and Excel exports.
+- **Ticket-system-only mode** — Start the server with `--mode=ticketsystem` to run a helpdesk-only WarmDesk: boards, chat, and time tracking are switched off, and you land on your tickets.
+- **Own branding** — A ticket-on-desk logo (with a test variant), a "Ticket system only" badge on the login page, and tray icon and launchers for the desktop app.
 
 ## Experiment
 
@@ -340,6 +339,7 @@ See [INSTALL.md](INSTALL.md) for full instructions including:
 
 ## Features
 
+- **Ticket-system-only mode** — `app_mode: ticketsystem` (or `--mode=ticketsystem`) runs WarmDesk as a dedicated helpdesk server: boards, chat, and time tracking are disabled, ticket-on-desk logos and a login-page badge replace the defaults, and `/` opens your tickets
 - **Customer / Contract / Project hierarchy** — customers are top-level entities; contracts sit under a customer; projects can be linked to a customer and optionally to a contract; manage from the Customers page or from Project Settings; customers (including time-tracking-only ones) can be given a color, used to color-code the time-tracking calendar view
 - **Customer locations** — a customer can have multiple locations, each with a name (shown in time-tracking Location dropdowns), a full address (line 1/2, city, postcode, region, country), phone number, contact person (name, email, phone), and a standard travel distance; managed from the customer detail page's Locations tab
 - **Customers sidebar** — starred customers listed in the sidebar with star/unstar toggle; dedicated Customers page (`/customers`) with grid view and full Customer detail page

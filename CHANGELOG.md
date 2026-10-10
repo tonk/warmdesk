@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.40.0 — 2026-10-10
 
 ### Added
 - **Ticket-system-only mode** — start the server with `--mode=ticketsystem` (or `APP_MODE=ticketsystem`, or `app_mode: "ticketsystem"`) to run WarmDesk as a helpdesk-only server, next to the existing full and `timetracking` modes. Boards, chat, and time tracking are switched off (their routes, menus, and admin sections are gone), while customers, tickets, the knowledge base, service catalogue, changes, the CMDB, incoming mail, and the SLA scheduler keep working. After login you land on your tickets, and the browser tab reads "WarmDesk - Ticket System".

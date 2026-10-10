@@ -944,3 +944,7 @@ Create an application that has all these features and requirements
 - Add GET /api/v1/admin/public-holidays and move the per-country holiday tables to services.PublicHolidays, shared by time tracking, business hours, and the seed
 - Show the number of entries in each time-report group header, on screen and in the PDF and Excel exports
 - Seed three business-hours calendars (two with Dutch public holidays) and let the demo Standard SLA policy count in Dutch office hours
+- Add a ticketsystem app mode (--mode=ticketsystem, APP_MODE, app_mode) that runs a helpdesk-only server with the boards, chat, and time-tracking routes, menus, and admin sections disabled
+- Add ticket-on-desk logos (icon, full wordmark, and orange TEST variants) served in place of the default logos in the web UI and PDF headers in ticketsystem mode
+- Show a "Ticket system only" badge on the login page in ticketsystem mode, translated into all 12 languages, and land on the tickets after login
+- Add ticketsystem tray icons and .deb/.rpm desktop launchers to the desktop app

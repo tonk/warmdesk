@@ -1,0 +1,27 @@
+---
+title: "v0.40.0: a ticket-system-only mode"
+date: "2026-10-10"
+author: "Ton Kersten"
+description: "Run WarmDesk as a helpdesk-only server with --mode=ticketsystem, with its own logo, login badge, and desktop launchers."
+draft: false
+---
+:doctype: article
+:icons!:
+
+WarmDesk has long had a `timetracking` mode for servers that only do time reporting. This release adds the same for the other half: a server that is only a ticket system.
+
+== One flag
+
+Start the server with `--mode=ticketsystem`, set `APP_MODE=ticketsystem`, or put `app_mode: "ticketsystem"` in `warmdesk.yaml`. Boards, chat, and time tracking are switched off, along with their menus and admin sections. Customers, tickets, the knowledge base, the service catalogue, changes, the CMDB, incoming mail, and the SLA scheduler keep working. After login you land on your tickets, and the browser tab reads "WarmDesk - Ticket System".
+
+== Its own look
+
+A ticket on a desk, in the same style as the time-tracking clock, replaces the WarmDesk logo in the web interface and in the header of exported PDFs. The login page shows a "Ticket system only" badge, in all 12 languages. A test instance (`instance_mode: test`) gets an orange version with the "TEST" ribbon.
+
+The desktop app gets a matching tray icon, with the unread badge, and the `.deb` and `.rpm` packages install *WarmDesk Ticket System* and *WarmDesk Ticket System (Test)* launchers.
+
+See the link:../../docs/admin-guide/[Admin Guide] for details.
+
+== Upgrade
+
+Download `v0.40.0` from the link:../../download[download page] or pull the latest release tag. No database migration is needed, and nothing changes unless you set the new mode.

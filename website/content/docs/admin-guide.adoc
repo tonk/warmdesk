@@ -52,6 +52,11 @@ Each can be set as a YAML key, an environment variable, or a CLI flag (the flag 
 |`--mode=timetracking`
 |Runs a time-tracking-only server: board, chat, topic, and helpdesk routes are disabled, related admin settings are hidden, and the time-tracking logos replace the default WarmDesk logos in the web UI and PDFs.
 
+|`app_mode: ticketsystem`
+|`APP_MODE`
+|`--mode=ticketsystem`
+|Runs a helpdesk-only server: board, chat, and time-tracking routes are disabled, related menus and admin sections are hidden, and the ticket logos replace the default WarmDesk logos in the web UI and PDFs.
+
 |`instance_mode: test`
 |`INSTANCE_MODE`
 |`--instance-mode=test`

@@ -1,5 +1,5 @@
 = WarmDesk — Administrator Guide
-:revnumber: v0.39.0
+:revnumber: v0.40.0
 :revdate: 2026-10-10
 Ton Kersten <tonk@smartowl.nl>
 ifdef::backend-pdf[]
@@ -155,7 +155,8 @@ default_locale: "en"
 # Application mode (optional)
 # app_mode: "timetracking"
 # APP_MODE — leave empty for full WarmDesk; set to "timetracking" for
-# a time-tracking-only deployment (see below).
+# a time-tracking-only deployment, or "ticketsystem" for a helpdesk-only
+# deployment (see below).
 
 # Instance mode (optional)
 # instance_mode: "test"
@@ -175,6 +176,20 @@ Effects:
 
 The CLI flag takes precedence over the YAML key, which takes precedence over the environment variable.
 
+=== Ticket-system-only mode
+
+Set `app_mode: "ticketsystem"` (or pass `--mode=ticketsystem` on the command line, or set `APP_MODE=ticketsystem` as an environment variable) to run WarmDesk as a dedicated helpdesk server.
+
+Effects:
+
+* Board, project, chat, and time-tracking API routes are disabled. Customers, tickets, the knowledge base, service catalogue, changes, the CMDB, incoming mail, and the SLA scheduler stay active.
+* The related menus and admin sections (projects, time tracking, board and chat feature switches) are hidden, and after login users land on their tickets.
+* The ticket logos (ticket-on-desk) replace the default WarmDesk logos everywhere: the web interface, the login screen (which also shows a "Ticket system only" badge), and exported PDFs (when no custom company logo is configured in Admin → Branding).
+* The desktop app shows the ticket-system tray icon, and the `.deb`/`.rpm` packages install _WarmDesk Ticket System_ launchers.
+* The `/api/v1/version` endpoint returns `"app_mode": "ticketsystem"` so clients can detect the mode.
+
+The CLI flag takes precedence over the YAML key, which takes precedence over the environment variable.
+
 === Test instance branding
 
 Set `instance_mode: "test"` (or pass `--instance-mode=test` on the command line, or set `INSTANCE_MODE=test` as an environment variable) to mark a deployment as a test or staging instance.
@@ -182,7 +197,7 @@ Set `instance_mode: "test"` (or pass `--instance-mode=test` on the command line,
 Effects:
 
 * The logo variants switch to an orange palette with a "TEST" corner ribbon everywhere: the web interface, the login screen, and exported PDFs (when no custom company logo is configured in Admin → Branding).
-* Combines independently with `app_mode` — a `timetracking` instance with `instance_mode: "test"` serves the orange time-tracking logo, not the orange full-WarmDesk logo.
+* Combines independently with `app_mode` — a `timetracking` instance with `instance_mode: "test"` serves the orange time-tracking logo, and a `ticketsystem` instance the orange ticket logo, not the orange full-WarmDesk logo.
 * The `/api/v1/version` endpoint returns `"instance_mode": "test"` so clients can detect the mode.
 * The desktop app's system tray icon also turns orange, with "(TEST)" appended to its title/tooltip, whenever it is connected to a test-instance server.
 
