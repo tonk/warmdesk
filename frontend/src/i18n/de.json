@@ -1380,7 +1380,8 @@
     "macro_invalid_time": "Ungültige Makro-Start-/Endzeit. Verwenden Sie HH:MM.",
     "macro_default_name": "Makro {id}",
     "macro_copy_suffix": " Kopie",
-    "macro_default_template": "Unterrichtsblock"
+    "macro_default_template": "Unterrichtsblock",
+    "entries_count": "Einträge: {n}"
   },
   "call": {
     "incoming": "Eingehender Anruf",

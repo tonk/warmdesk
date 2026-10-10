@@ -1380,7 +1380,8 @@
     "macro_invalid_time": "Ógild byrjun-/endir tími makró. Notaðu HH:MM.",
     "macro_default_name": "Makró {id}",
     "macro_copy_suffix": " afrit",
-    "macro_default_template": "Kennslublokk"
+    "macro_default_template": "Kennslublokk",
+    "entries_count": "Færslur: {n}"
   },
   "call": {
     "incoming": "Móttekið símtal",

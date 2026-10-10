@@ -194,6 +194,7 @@ type pdfI18n struct {
 	Undeclarable  string // e.g. "Undeclarable"
 	Declarable    string // e.g. "Declarable"
 	TotalDistance string // e.g. "Total Distance"
+	Entries       string // e.g. "Entries" — entry count in time-report group headers
 	ChartTitle    string // e.g. "Time by Activity" — chart PDF export heading
 	ChartOther    string // e.g. "Other" — catch-all bucket for low-volume activities
 	// Period-label words used in board and time-entry PDFs
@@ -249,6 +250,7 @@ var pdfTranslations = map[string]pdfI18n{
 		Undeclarable:  "Undeclarable",
 		Declarable:    "Declarable",
 		TotalDistance: "Total Distance",
+		Entries:       "Entries",
 		ChartTitle:    "Time by Activity",
 		ChartOther:    "Other",
 		AllTime:      "All Time",
@@ -293,6 +295,7 @@ var pdfTranslations = map[string]pdfI18n{
 		ChartTitle:    "Tijd per activiteit",
 		ChartOther:    "Overig",
 		TotalDistance: "Totale afstand",
+		Entries:       "Regels",
 		AllTime:      "Gehele periode",
 		YearPrefix:   "Jaar",
 		WeekLabel:    "Week",
@@ -336,6 +339,7 @@ var pdfTranslations = map[string]pdfI18n{
 		ChartTitle:    "Zeit nach Aktivität",
 		ChartOther:    "Sonstige",
 		TotalDistance: "Gesamtentfernung",
+		Entries:       "Einträge",
 		AllTime:      "Gesamter Zeitraum",
 		YearPrefix:   "Jahr",
 		WeekLabel:    "Woche",
@@ -379,6 +383,7 @@ var pdfTranslations = map[string]pdfI18n{
 		ChartTitle:    "Temps par activité",
 		ChartOther:    "Autre",
 		TotalDistance: "Distance totale",
+		Entries:       "Entrées",
 		AllTime:      "Toute la période",
 		YearPrefix:   "Année",
 		WeekLabel:    "Semaine",
@@ -422,6 +427,7 @@ var pdfTranslations = map[string]pdfI18n{
 		ChartTitle:    "Tiempo por actividad",
 		ChartOther:    "Otro",
 		TotalDistance: "Distancia total",
+		Entries:       "Registros",
 		AllTime:      "Todo el período",
 		YearPrefix:   "Año",
 		WeekLabel:    "Semana",
@@ -463,6 +469,7 @@ var pdfTranslations = map[string]pdfI18n{
 		Undeclarable:  "Ikke fakturerbar",
 		Declarable:    "Fakturerbar",
 		TotalDistance: "Samlet afstand",
+		Entries:       "Poster",
 		ChartTitle:    "Tid pr. aktivitet",
 		ChartOther:    "Andet",
 		AllTime:      "Hele perioden",
@@ -508,6 +515,7 @@ var pdfTranslations = map[string]pdfI18n{
 		ChartTitle:    "Tid per aktivitet",
 		ChartOther:    "Övrigt",
 		TotalDistance: "Total avstånd",
+		Entries:       "Poster",
 		AllTime:      "Hela perioden",
 		YearPrefix:   "År",
 		WeekLabel:    "Vecka",
@@ -549,6 +557,7 @@ var pdfTranslations = map[string]pdfI18n{
 		Undeclarable:  "Ikke fakturerbar",
 		Declarable:    "Fakturerbar",
 		TotalDistance: "Total avstand",
+		Entries:       "Oppføringer",
 		ChartTitle:    "Tid per aktivitet",
 		ChartOther:    "Annet",
 		AllTime:      "Hele perioden",
@@ -594,6 +603,7 @@ var pdfTranslations = map[string]pdfI18n{
 		ChartTitle:    "Aika toiminnoittain",
 		ChartOther:    "Muu",
 		TotalDistance: "Kokonaismatka",
+		Entries:       "Merkinnät",
 		AllTime:      "Koko aika",
 		YearPrefix:   "Vuosi",
 		WeekLabel:    "Viikko",
@@ -637,6 +647,7 @@ var pdfTranslations = map[string]pdfI18n{
 		ChartTitle:    "Tími eftir verkefni",
 		ChartOther:    "Annað",
 		TotalDistance: "Heildarfjarlægð",
+		Entries:       "Færslur",
 		AllTime:      "Allur tíminn",
 		YearPrefix:   "Ár",
 		WeekLabel:    "Vika",
@@ -680,6 +691,7 @@ var pdfTranslations = map[string]pdfI18n{
 		ChartTitle:    "Tempo por atividade",
 		ChartOther:    "Outro",
 		TotalDistance: "Distância total",
+		Entries:       "Registos",
 		AllTime:      "Todo o período",
 		YearPrefix:   "Ano",
 		WeekLabel:    "Semana",
@@ -723,6 +735,7 @@ var pdfTranslations = map[string]pdfI18n{
 		ChartTitle:    "Tempo per attività",
 		ChartOther:    "Altro",
 		TotalDistance: "Distanza totale",
+		Entries:       "Voci",
 		AllTime:      "Tutto il periodo",
 		YearPrefix:   "Anno",
 		WeekLabel:    "Settimana",

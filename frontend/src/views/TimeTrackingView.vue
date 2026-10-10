@@ -1001,6 +1001,7 @@
           <div v-for="grp in report.groups" :key="grp.label" class="rpt-group">
             <div class="rpt-group-hd">
               <span>{{ grp.label }}</span>
+              <span class="rpt-grp-count">{{ $t('timeTracking.entries_count', { n: grp.entries.length }) }}</span>
               <span class="rpt-grp-total">{{ fmtTime(grp.declarable_minutes) }}</span>
               <button
                 v-if="rpt.group_by === 'customer' && grp.entries.some(e => e.contract_id)"
@@ -6869,6 +6870,7 @@ td.c-day-holiday-cell.c-day-popup-open {
   font-size: 13px;
 }
 .rpt-grp-total { color: var(--color-primary); }
+.rpt-grp-count { color: var(--color-text-muted); font-weight: 500; }
 .rpt-grp-empty { padding: 10px 14px; color: var(--color-text-muted); font-size: 12px; }
 .rpt-table tfoot td {
   font-weight: 600;

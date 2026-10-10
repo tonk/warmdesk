@@ -1380,7 +1380,8 @@
     "macro_invalid_time": "Ongeldige macro start-/eindtijd. Gebruik HH:MM.",
     "macro_default_name": "Macro {id}",
     "macro_copy_suffix": " kopie",
-    "macro_default_template": "Lesblok"
+    "macro_default_template": "Lesblok",
+    "entries_count": "Regels: {n}"
   },
   "call": {
     "incoming": "Inkomende oproep",

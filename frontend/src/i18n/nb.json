@@ -1380,7 +1380,8 @@
     "macro_invalid_time": "Ugyldig makro start-/sluttid. Bruk HH:MM.",
     "macro_default_name": "Makro {id}",
     "macro_copy_suffix": " kopi",
-    "macro_default_template": "Undervisningsblokk"
+    "macro_default_template": "Undervisningsblokk",
+    "entries_count": "Oppføringer: {n}"
   },
   "call": {
     "incoming": "Innkommende anrop",

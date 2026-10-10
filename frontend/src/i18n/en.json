@@ -1549,7 +1549,8 @@
     "macro_invalid_time": "Invalid macro start/end time. Use HH:MM.",
     "macro_default_name": "Macro {id}",
     "macro_copy_suffix": " copy",
-    "macro_default_template": "Teaching block"
+    "macro_default_template": "Teaching block",
+    "entries_count": "Entries: {n}"
   },
   "call": {
     "incoming": "Incoming call",

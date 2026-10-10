@@ -1380,7 +1380,8 @@
     "macro_invalid_time": "Virheellinen makron alku-/loppuaika. Käytä HH:MM.",
     "macro_default_name": "Makro {id}",
     "macro_copy_suffix": " kopio",
-    "macro_default_template": "Opetusjakso"
+    "macro_default_template": "Opetusjakso",
+    "entries_count": "Merkinnät: {n}"
   },
   "call": {
     "incoming": "Saapuva puhelu",

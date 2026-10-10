@@ -1380,7 +1380,8 @@
     "macro_invalid_time": "Hora de inicio/fin de macro no válida. Usa HH:MM.",
     "macro_default_name": "Macro {id}",
     "macro_copy_suffix": " copia",
-    "macro_default_template": "Bloque de enseñanza"
+    "macro_default_template": "Bloque de enseñanza",
+    "entries_count": "Registros: {n}"
   },
   "call": {
     "incoming": "Llamada entrante",
