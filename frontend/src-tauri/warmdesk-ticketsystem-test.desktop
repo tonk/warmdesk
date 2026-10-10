@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=WarmDesk Ticket System (Test)
+GenericName=Ticket System
+Comment=Self-hosted helpdesk and ticket management — test instance
+Exec=/usr/bin/warmdesk
+Icon=warmdesk-ticketsystem-test
+Categories=Office;ProjectManagement;
+Keywords=tickets;helpdesk;servicedesk;support;incident;test;
+StartupWMClass=WarmDesk
+StartupNotify=true
+Terminal=false

@@ -22,6 +22,7 @@ export function useTrayUnread() {
       () => auth.user?.tray_icon_enabled,
       () => auth.user?.close_to_tray_enabled,
       () => systemStore.isTimetrackingMode,
+      () => systemStore.isTicketsystemMode,
       () => systemStore.isTestInstance,
     ],
     async () => {
@@ -36,6 +37,7 @@ export function useTrayUnread() {
           count: total,
           enabled,
           isTimetracking: systemStore.isTimetrackingMode,
+          isTicketsystem: systemStore.isTicketsystemMode,
           isTest: systemStore.isTestInstance,
           closeToTray,
         })

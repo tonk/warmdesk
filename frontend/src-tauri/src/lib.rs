@@ -745,35 +745,46 @@ fn set_tray_unread(
     count: u32,
     enabled: bool,
     is_timetracking: bool,
+    is_ticketsystem: bool,
     is_test: bool,
     close_to_tray: bool,
 ) -> Result<(), String> {
     CLOSE_TO_TRAY_ENABLED.store(close_to_tray, Ordering::Relaxed);
 
-    let (normal_icon, badge_icon) = match (is_timetracking, is_test) {
-        (true, true) => (
+    let (normal_icon, badge_icon) = match (is_timetracking, is_ticketsystem, is_test) {
+        (true, _, true) => (
             include_bytes!("../icons/timetracking-tray-icon-test.png") as &[u8],
             include_bytes!("../icons/timetracking-tray-icon-test-badge.png") as &[u8],
         ),
-        (true, false) => (
+        (true, _, false) => (
             include_bytes!("../icons/timetracking-tray-icon.png") as &[u8],
             include_bytes!("../icons/timetracking-tray-icon-badge.png") as &[u8],
         ),
-        (false, true) => (
+        (false, true, true) => (
+            include_bytes!("../icons/ticketsystem-tray-icon-test.png") as &[u8],
+            include_bytes!("../icons/ticketsystem-tray-icon-test-badge.png") as &[u8],
+        ),
+        (false, true, false) => (
+            include_bytes!("../icons/ticketsystem-tray-icon.png") as &[u8],
+            include_bytes!("../icons/ticketsystem-tray-icon-badge.png") as &[u8],
+        ),
+        (false, false, true) => (
             include_bytes!("../icons/tray-icon-test.png") as &[u8],
             include_bytes!("../icons/tray-icon-test-badge.png") as &[u8],
         ),
-        (false, false) => (
+        (false, false, false) => (
             include_bytes!("../icons/tray-icon.png") as &[u8],
             include_bytes!("../icons/tray-icon-badge.png") as &[u8],
         ),
     };
 
-    let title = match (is_timetracking, is_test) {
-        (true, true) => "WarmDesk — Time Tracking (TEST)",
-        (true, false) => "WarmDesk — Time Tracking",
-        (false, true) => "WarmDesk (TEST)",
-        (false, false) => "WarmDesk",
+    let title = match (is_timetracking, is_ticketsystem, is_test) {
+        (true, _, true) => "WarmDesk — Time Tracking (TEST)",
+        (true, _, false) => "WarmDesk — Time Tracking",
+        (false, true, true) => "WarmDesk — Ticket System (TEST)",
+        (false, true, false) => "WarmDesk — Ticket System",
+        (false, false, true) => "WarmDesk (TEST)",
+        (false, false, false) => "WarmDesk",
     };
 
     // Tray/icon mutation touches GTK (via libayatana-appindicator on Linux) and
