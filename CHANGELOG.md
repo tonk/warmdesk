@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- **Ticket-system-only mode** — start the server with `--mode=ticketsystem` (or `APP_MODE=ticketsystem`, or `app_mode: "ticketsystem"`) to run WarmDesk as a helpdesk-only server, next to the existing full and `timetracking` modes. Boards, chat, and time tracking are switched off (their routes, menus, and admin sections are gone), while customers, tickets, the knowledge base, service catalogue, changes, the CMDB, incoming mail, and the SLA scheduler keep working. After login you land on your tickets, and the browser tab reads "WarmDesk - Ticket System".
+- **Ticket-system logos** — a new ticket-on-desk icon and a "Ticket System" wordmark in the same style as the time-tracking logos, with orange "TEST" variants for `instance_mode: test`. They replace the default logos in the web UI and in exported PDF headers.
+- **Login badge** — in this mode the login page shows a "Ticket system only" badge, translated into all 12 languages.
+- **Desktop app support** — the system tray shows the ticket-system icon (with unread badge, and a test variant) and "WarmDesk — Ticket System" as its tooltip, and the `.deb`/`.rpm` packages install *WarmDesk Ticket System* and *WarmDesk Ticket System (Test)* launchers with their own icons.
+
 ## v0.39.0 — 2026-10-10
 
 ### Added
