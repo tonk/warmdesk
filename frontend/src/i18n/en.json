@@ -92,7 +92,12 @@
     "customer": "Customer",
     "contract": "Contract",
     "no_customer": "No customer",
-    "customer_required": "A customer is required"
+    "customer_required": "A customer is required",
+    "view_tiles": "Tiles",
+    "view_list": "List",
+    "view_mode": "Project view",
+    "open_cards_col": "Open cards",
+    "actions": "Actions"
   },
   "customer": {
     "customers": "Customers",
@@ -472,7 +477,9 @@
     "view_lanes": "Lane View",
     "card_ref": "Ref",
     "table_column": "Column",
-    "table_no_cards": "No cards to show."
+    "table_no_cards": "No cards to show.",
+    "open_first": "Open first",
+    "open_first_tooltip": "Show open cards at the top of this column"
   },
   "chat": {
     "title": "Team Chat",

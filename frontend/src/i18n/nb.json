@@ -92,7 +92,12 @@
     "customer": "Kunde",
     "contract": "Kontrakt",
     "no_customer": "Ingen kunde",
-    "customer_required": "En kunde er påkrevd"
+    "customer_required": "En kunde er påkrevd",
+    "view_tiles": "Fliser",
+    "view_list": "Liste",
+    "view_mode": "Prosjektvisning",
+    "open_cards_col": "Åpne kort",
+    "actions": "Handlinger"
   },
   "customer": {
     "customers": "Kunder",
@@ -449,7 +454,9 @@
     "view_lanes": "Kolonnevisning",
     "card_ref": "Ref",
     "table_column": "Kolonne",
-    "table_no_cards": "Ingen kort å vise."
+    "table_no_cards": "Ingen kort å vise.",
+    "open_first": "Åpne først",
+    "open_first_tooltip": "Vis åpne kort øverst i denne kolonnen"
   },
   "chat": {
     "title": "Teamchat",

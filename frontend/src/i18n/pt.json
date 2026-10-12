@@ -92,7 +92,12 @@
     "customer": "Cliente",
     "contract": "Contrato",
     "no_customer": "Sem cliente",
-    "customer_required": "É necessário um cliente"
+    "customer_required": "É necessário um cliente",
+    "view_tiles": "Mosaicos",
+    "view_list": "Lista",
+    "view_mode": "Vista de projetos",
+    "open_cards_col": "Cartões abertos",
+    "actions": "Ações"
   },
   "customer": {
     "customers": "Clientes",
@@ -449,7 +454,9 @@
     "view_lanes": "Vista de colunas",
     "card_ref": "Ref",
     "table_column": "Coluna",
-    "table_no_cards": "Nenhum cartão para mostrar."
+    "table_no_cards": "Nenhum cartão para mostrar.",
+    "open_first": "Abertos primeiro",
+    "open_first_tooltip": "Mostrar cartões abertos no topo desta coluna"
   },
   "chat": {
     "title": "Chat da equipa",

@@ -92,7 +92,12 @@
     "customer": "Viðskiptavinur",
     "contract": "Samningur",
     "no_customer": "Enginn viðskiptavinur",
-    "customer_required": "Viðskiptavinur er nauðsynlegur"
+    "customer_required": "Viðskiptavinur er nauðsynlegur",
+    "view_tiles": "Reitir",
+    "view_list": "Listi",
+    "view_mode": "Verkefnasýn",
+    "open_cards_col": "Opin spjöld",
+    "actions": "Aðgerðir"
   },
   "customer": {
     "customers": "Viðskiptavinir",
@@ -449,7 +454,9 @@
     "view_lanes": "Dálkaskoðun",
     "card_ref": "Tilv",
     "table_column": "Dálkur",
-    "table_no_cards": "Engin spjöld til að sýna."
+    "table_no_cards": "Engin spjöld til að sýna.",
+    "open_first": "Opin fyrst",
+    "open_first_tooltip": "Sýna opin spjöld efst í þessum dálki"
   },
   "chat": {
     "title": "Liðsspjall",

@@ -70,6 +70,14 @@
       <button v-if="sortField" class="sort-dir-btn" @click="sortDir = sortDir === 'asc' ? 'desc' : 'asc'" :title="sortDir === 'asc' ? $t('board.sort_asc') : $t('board.sort_desc')" :aria-label="sortDir === 'asc' ? $t('board.sort_desc_action') : $t('board.sort_asc_action')">
         {{ sortDir === 'asc' ? '△' : '▽' }}
       </button>
+      <button
+        v-if="showClosed"
+        type="button"
+        class="sort-dir-btn open-first-btn"
+        :aria-pressed="openFirst"
+        :title="$t('board.open_first_tooltip')"
+        @click="toggleOpenFirst"
+      >{{ $t('board.open_first') }}</button>
     </div>
 
     <div class="cards-list" ref="listEl">
@@ -112,6 +120,8 @@ let sortable = null
 
 const sortField = ref('')
 const sortDir = ref('asc')
+const openFirstKey = `board_open_first_${props.column.id}`
+const openFirst = ref(readOpenFirst())
 const countTipPinned = ref(false)
 const wipTipPinned = ref(false)
 
@@ -137,6 +147,15 @@ const wipBadgeTooltip = computed(() => {
   return t('board.column_wip_tooltip', { count, limit })
 })
 
+function readOpenFirst() {
+  try { return localStorage.getItem(openFirstKey) === 'true' } catch { return false }
+}
+
+function toggleOpenFirst() {
+  openFirst.value = !openFirst.value
+  try { localStorage.setItem(openFirstKey, String(openFirst.value)) } catch { /* storage unavailable */ }
+}
+
 function togglePinnedCount() {
   countTipPinned.value = !countTipPinned.value
   if (countTipPinned.value) wipTipPinned.value = false
@@ -149,8 +168,11 @@ function togglePinnedWip() {
 
 const sortedCards = computed(() => {
   const cards = visibleCards.value
-  if (!sortField.value) return cards
+  const openFirstActive = openFirst.value && props.showClosed
+  if (!sortField.value && !openFirstActive) return cards
   return [...cards].sort((a, b) => {
+    if (openFirstActive && !!a.closed !== !!b.closed) return a.closed ? 1 : -1
+    if (!sortField.value) return 0
     let av, bv
     if (sortField.value === 'due_date') {
       av = a.due_date ? new Date(a.due_date).getTime() : Infinity
@@ -347,6 +369,8 @@ onBeforeUnmount(() => sortable?.destroy())
   line-height: 1;
 }
 .sort-dir-btn:hover { background: var(--color-bg); }
+.open-first-btn { font-size: 11px; white-space: nowrap; }
+.open-first-btn[aria-pressed="true"] { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
 
 .cards-list {
   flex: 1;

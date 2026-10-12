@@ -92,7 +92,12 @@
     "customer": "Klant",
     "contract": "Contract",
     "no_customer": "Zonder klant",
-    "customer_required": "Een klant is verplicht"
+    "customer_required": "Een klant is verplicht",
+    "view_tiles": "Tegels",
+    "view_list": "Lijst",
+    "view_mode": "Projectweergave",
+    "open_cards_col": "Open kaarten",
+    "actions": "Acties"
   },
   "customer": {
     "customers": "Klanten",
@@ -449,7 +454,9 @@
     "view_lanes": "Kolomweergave",
     "card_ref": "Ref",
     "table_column": "Kolom",
-    "table_no_cards": "Geen kaarten om te tonen."
+    "table_no_cards": "Geen kaarten om te tonen.",
+    "open_first": "Open eerst",
+    "open_first_tooltip": "Toon open kaarten bovenaan deze kolom"
   },
   "chat": {
     "title": "Teamchat",

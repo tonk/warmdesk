@@ -92,7 +92,12 @@
     "customer": "Asiakas",
     "contract": "Sopimus",
     "no_customer": "Ei asiakasta",
-    "customer_required": "Asiakas vaaditaan"
+    "customer_required": "Asiakas vaaditaan",
+    "view_tiles": "Ruudut",
+    "view_list": "Lista",
+    "view_mode": "Projektinäkymä",
+    "open_cards_col": "Avoimet kortit",
+    "actions": "Toiminnot"
   },
   "customer": {
     "customers": "Asiakkaat",
@@ -449,7 +454,9 @@
     "view_lanes": "Sarakenäkymä",
     "card_ref": "Viite",
     "table_column": "Sarake",
-    "table_no_cards": "Ei kortteja näytettäväksi."
+    "table_no_cards": "Ei kortteja näytettäväksi.",
+    "open_first": "Avoimet ensin",
+    "open_first_tooltip": "Näytä avoimet kortit tämän sarakkeen yläosassa"
   },
   "chat": {
     "title": "Tiimichatti",

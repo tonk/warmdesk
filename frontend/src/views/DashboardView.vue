@@ -8,6 +8,20 @@
               <option value="">{{ $t('customer.all_customers') }}</option>
               <option v-for="c in customerOptions" :key="c.value" :value="c.value">{{ c.label }}</option>
             </select>
+            <div class="view-switch" role="group" :aria-label="$t('project.view_mode')">
+              <button
+                type="button"
+                class="btn btn-ghost btn-sm view-switch-btn"
+                :aria-pressed="viewMode === 'tiles'"
+                @click="setViewMode('tiles')"
+              ><span aria-hidden="true">▦</span> {{ $t('project.view_tiles') }}</button>
+              <button
+                type="button"
+                class="btn btn-ghost btn-sm view-switch-btn"
+                :aria-pressed="viewMode === 'list'"
+                @click="setViewMode('list')"
+              ><span aria-hidden="true">☰</span> {{ $t('project.view_list') }}</button>
+            </div>
             <button v-if="canCreateProject" class="btn btn-primary" @click="showCreate = true">+ {{ $t('project.new_project') }}</button>
           </div>
         </div>
@@ -21,6 +35,46 @@
 
         <div v-else-if="projectStore.projects.length === 0" class="empty-state">
           <p>{{ $t('project.no_projects') }}</p>
+        </div>
+
+        <div v-else-if="viewMode === 'list'" class="projects-table-wrap">
+          <table class="projects-table">
+            <thead>
+              <tr>
+                <th v-for="col in listColumns" :key="col.field" scope="col" :aria-sort="ariaSort(col.field)">
+                  <button type="button" class="th-sort-btn" @click="toggleListSort(col.field)">
+                    {{ col.label }}
+                    <span v-if="listSortField === col.field" aria-hidden="true">{{ listSortDir === 'asc' ? '▲' : '▼' }}</span>
+                  </button>
+                </th>
+                <th scope="col"><span class="sr-only">{{ $t('project.actions') }}</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="project in sortedListProjects" :key="project.id">
+                <td class="col-name">
+                  <span class="project-color-dot" :style="{ background: project.color || '#6366f1' }" aria-hidden="true"></span>
+                  <img v-if="projectAvatar(project)" :src="projectAvatar(project)" class="project-avatar" alt="" />
+                  <RouterLink :to="`/projects/${project.slug}`" class="project-link">{{ project.name }}</RouterLink>
+                </td>
+                <td>{{ project.customer?.name || '—' }}</td>
+                <td>
+                  <span class="board-type-badge" :class="project.board_type || 'kanban'">{{ $t(`sprint.board_type_${project.board_type || 'kanban'}`) }}</span>
+                </td>
+                <td>{{ project.open_card_count ?? 0 }}</td>
+                <td class="col-actions">
+                  <button
+                    class="btn btn-ghost btn-sm star-btn"
+                    :class="{ starred: sidebarStore.isStarred(project.slug) }"
+                    @click="toggleStar(project)"
+                    :title="sidebarStore.isStarred(project.slug) ? $t('project.unstar') : $t('project.star')"
+                    :aria-label="sidebarStore.isStarred(project.slug) ? 'Unstar ' + project.name : 'Star ' + project.name"
+                  >★</button>
+                  <RouterLink :to="`/projects/${project.slug}/settings`" class="btn btn-ghost btn-sm" aria-label="Project settings">⚙</RouterLink>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         <div v-else class="projects-grid" ref="gridEl">
@@ -121,6 +175,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import Sortable from 'sortablejs'
 import BaseModal from '@/components/common/BaseModal.vue'
 import DashboardNews from '@/components/common/DashboardNews.vue'
@@ -132,6 +187,7 @@ import { useSystemStore } from '@/stores/system'
 import { resolveAssetUrl } from '@/api/serverConfig'
 import { customersApi } from '@/api/customers'
 
+const { t } = useI18n()
 const router = useRouter()
 const projectStore = useProjectStore()
 const ui = useUIStore()
@@ -161,6 +217,66 @@ const customerOptions = computed(() => {
 const filteredProjects = computed(() => {
   if (!selectedCustomer.value) return projectStore.projects
   return projectStore.projects.filter(p => String(p.customer?.id) === selectedCustomer.value)
+})
+
+function readStorage(key, fallback) {
+  try { return localStorage.getItem(key) ?? fallback } catch { return fallback }
+}
+function writeStorage(key, value) {
+  try { localStorage.setItem(key, value) } catch { /* storage unavailable */ }
+}
+
+const viewMode = ref(readStorage('dashboard_project_view', 'tiles') === 'list' ? 'list' : 'tiles')
+function setViewMode(mode) {
+  viewMode.value = mode
+  writeStorage('dashboard_project_view', mode)
+}
+
+const listColumns = computed(() => [
+  { field: 'name', label: t('project.project_name') },
+  { field: 'customer', label: t('project.customer') },
+  { field: 'board_type', label: t('sprint.board_type') },
+  { field: 'open_cards', label: t('project.open_cards_col') },
+])
+const LIST_SORT_FIELDS = ['name', 'customer', 'board_type', 'open_cards']
+const storedSort = readStorage('dashboard_project_sort', 'name:asc').split(':')
+const listSortField = ref(LIST_SORT_FIELDS.includes(storedSort[0]) ? storedSort[0] : 'name')
+const listSortDir = ref(storedSort[1] === 'desc' ? 'desc' : 'asc')
+
+function toggleListSort(field) {
+  if (listSortField.value === field) {
+    listSortDir.value = listSortDir.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    listSortField.value = field
+    listSortDir.value = field === 'open_cards' ? 'desc' : 'asc'
+  }
+  writeStorage('dashboard_project_sort', `${listSortField.value}:${listSortDir.value}`)
+}
+
+function ariaSort(field) {
+  if (listSortField.value !== field) return 'none'
+  return listSortDir.value === 'asc' ? 'ascending' : 'descending'
+}
+
+function listSortValue(p, field) {
+  if (field === 'customer') return p.customer?.name || ''
+  if (field === 'board_type') return p.board_type || 'kanban'
+  if (field === 'open_cards') return p.open_card_count ?? 0
+  return p.name || ''
+}
+
+const sortedListProjects = computed(() => {
+  const field = listSortField.value
+  const dir = listSortDir.value === 'asc' ? 1 : -1
+  return [...filteredProjects.value].sort((a, b) => {
+    const av = listSortValue(a, field)
+    const bv = listSortValue(b, field)
+    // Empty customers always go last, regardless of direction.
+    if (field === 'customer' && !av !== !bv) return av ? -1 : 1
+    const cmp = typeof av === 'number' ? av - bv : av.localeCompare(bv, undefined, { sensitivity: 'base' })
+    if (cmp !== 0) return cmp * dir
+    return (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' })
+  })
 })
 
 const creating = ref(false)
@@ -199,8 +315,15 @@ onMounted(async () => {
   await projectStore.fetchProjects()
   sidebarStore.fetchStarred()
   customersApi.list().then(r => { createCustomers.value = r.data || [] }).catch(() => {})
-  if (isAdmin.value && gridEl.value) {
-    sortable = Sortable.create(gridEl.value, {
+})
+
+// The tile grid is only rendered in tile view, so (re)attach drag-to-reorder
+// whenever its element appears.
+watch(gridEl, (el) => {
+  sortable?.destroy()
+  sortable = null
+  if (isAdmin.value && el) {
+    sortable = Sortable.create(el, {
       handle: '.drag-handle',
       animation: 150,
       onEnd({ oldIndex, newIndex }) {
@@ -212,7 +335,7 @@ onMounted(async () => {
       }
     })
   }
-})
+}, { flush: 'post' })
 
 onUnmounted(() => sortable?.destroy())
 
@@ -263,6 +386,32 @@ async function handleCreate() {
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 16px;
 }
+
+.view-switch { display: inline-flex; border: 1px solid var(--color-border); border-radius: var(--radius-sm); overflow: hidden; }
+.view-switch-btn { border-radius: 0; }
+.view-switch-btn[aria-pressed="true"] { background: var(--color-primary); color: #fff; }
+
+.projects-table-wrap { overflow-x: auto; }
+.projects-table { width: 100%; border-collapse: collapse; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); }
+.projects-table th, .projects-table td { padding: 8px 14px; text-align: left; border-bottom: 1px solid var(--color-border); font-size: 13px; vertical-align: middle; white-space: nowrap; }
+.projects-table th { font-weight: 600; color: var(--color-text-muted); font-size: 12px; background: var(--color-bg); }
+.projects-table tbody tr:hover { background: var(--color-bg); }
+.projects-table .col-name { display: flex; align-items: center; gap: 8px; }
+.projects-table .col-actions { text-align: right; }
+.projects-table .board-type-badge { margin-left: 0; }
+.project-color-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.project-link { color: var(--color-text); font-weight: 600; text-decoration: none; }
+.project-link:hover, .project-link:focus-visible { color: var(--color-primary); text-decoration: underline; }
+.th-sort-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+.th-sort-btn:hover { color: var(--color-text); }
 
 .star-btn { color: var(--color-text-muted); }
 .star-btn.starred { color: var(--color-warning); }

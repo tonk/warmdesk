@@ -92,7 +92,12 @@
     "customer": "Cliente",
     "contract": "Contratto",
     "no_customer": "Nessun cliente",
-    "customer_required": "È richiesto un cliente"
+    "customer_required": "È richiesto un cliente",
+    "view_tiles": "Riquadri",
+    "view_list": "Elenco",
+    "view_mode": "Vista progetti",
+    "open_cards_col": "Schede aperte",
+    "actions": "Azioni"
   },
   "customer": {
     "customers": "Clienti",
@@ -449,7 +454,9 @@
     "view_lanes": "Vista colonne",
     "card_ref": "Rif",
     "table_column": "Colonna",
-    "table_no_cards": "Nessuna scheda da mostrare."
+    "table_no_cards": "Nessuna scheda da mostrare.",
+    "open_first": "Aperte prima",
+    "open_first_tooltip": "Mostra le schede aperte in cima a questa colonna"
   },
   "chat": {
     "title": "Chat del team",

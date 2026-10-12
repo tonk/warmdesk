@@ -92,7 +92,12 @@
     "customer": "Kund",
     "contract": "Kontrakt",
     "no_customer": "Ingen kund",
-    "customer_required": "En kund krävs"
+    "customer_required": "En kund krävs",
+    "view_tiles": "Rutor",
+    "view_list": "Lista",
+    "view_mode": "Projektvy",
+    "open_cards_col": "Öppna kort",
+    "actions": "Åtgärder"
   },
   "customer": {
     "customers": "Kunder",
@@ -449,7 +454,9 @@
     "view_lanes": "Kolumnvy",
     "card_ref": "Ref",
     "table_column": "Kolumn",
-    "table_no_cards": "Inga kort att visa."
+    "table_no_cards": "Inga kort att visa.",
+    "open_first": "Öppna först",
+    "open_first_tooltip": "Visa öppna kort överst i denna kolumn"
   },
   "chat": {
     "title": "Teamchatt",

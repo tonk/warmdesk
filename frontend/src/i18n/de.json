@@ -92,7 +92,12 @@
     "customer": "Kunde",
     "contract": "Vertrag",
     "no_customer": "Kein Kunde",
-    "customer_required": "Ein Kunde ist erforderlich"
+    "customer_required": "Ein Kunde ist erforderlich",
+    "view_tiles": "Kacheln",
+    "view_list": "Liste",
+    "view_mode": "Projektansicht",
+    "open_cards_col": "Offene Karten",
+    "actions": "Aktionen"
   },
   "customer": {
     "customers": "Kunden",
@@ -449,7 +454,9 @@
     "view_lanes": "Spaltenansicht",
     "card_ref": "Ref",
     "table_column": "Spalte",
-    "table_no_cards": "Keine Karten vorhanden."
+    "table_no_cards": "Keine Karten vorhanden.",
+    "open_first": "Offene zuerst",
+    "open_first_tooltip": "Offene Karten oben in dieser Spalte anzeigen"
   },
   "chat": {
     "title": "Team-Chat",
