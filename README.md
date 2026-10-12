@@ -8,10 +8,10 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.40.0)
+## Latest release (v0.41.0)
 
-- **Ticket-system-only mode** — Start the server with `--mode=ticketsystem` to run a helpdesk-only WarmDesk: boards, chat, and time tracking are switched off, and you land on your tickets.
-- **Own branding** — A ticket-on-desk logo (with a test variant), a "Ticket system only" badge on the login page, and tray icon and launchers for the desktop app.
+- **Open cards first** — An *Open first* button on each board column puts open cards above closed ones, on its own or combined with the other sort options.
+- **Projects as a list** — Switch the dashboard between tiles and a sortable list of your projects (name, customer, board type, open cards).
 
 ## Experiment
 
@@ -349,7 +349,7 @@ See [INSTALL.md](INSTALL.md) for full instructions including:
 - **Git issue linking** — optionally attach an external issue URL (GitHub, GitLab, Gitea, Forgejo, etc.) and a short reference to any card; reference is auto-filled from the URL path (`/issues/42`, `/pull/7`, `/merge_requests/5`) but can be edited; opens in a new tab; toggled via the card ⋮ menu
 - **Scrum** — choose Kanban or Scrum when creating a project (immutable thereafter); Scrum projects add a **Backlog** view (two-panel sprint planner with drag-and-drop card assignment, sprint CRUD, goal and date editing, and a velocity SVG chart of completed sprints) and a **Sprint Board** view (board filtered to the active sprint's cards); sprint lifecycle: planning → active → completed; completing a sprint returns unfinished cards to the backlog; optional story-points field on cards (enabled in Admin → Settings)
 - **Gantt chart** — timeline view per project; cards with a start or due date appear as bars; click any bar to open the card detail; zoom between day, week, and month views
-- **Card sorting** — sort column cards by date, assignee, or priority (ascending / descending)
+- **Card sorting** — sort column cards by date, assignee, or priority (ascending / descending), optionally with open cards first
 - **Copy card** — duplicate a card within the same column with one click
 - **Transfer card** — copy or move a card to any other project you have access to; choose the destination project and column. A move keeps comments, checklist, attachments, and history, and the card's old number (e.g. `PRJ-12`) keeps resolving after it is renumbered in the target project
 - **Close / reopen cards** — mark cards as closed; closed cards stay on the board with a strikethrough and muted style and can be reopened at any time
@@ -361,7 +361,7 @@ See [INSTALL.md](INSTALL.md) for full instructions including:
 - **Time tracking calendar view** — toggle the Log Time tab between the weekly table and a drag-and-drop calendar: entries render as blocks positioned by start/end time, draggable to move between days/times and resizable to change duration; right-click or click-drag an empty slot to create a new entry; select several blocks or a whole day to copy, paste (shifted to the clicked time or at the original times), or delete them together; zoomable grid density (remembered per browser); blocks color-coded per customer or per project (switchable via a "Calendar block color" user setting); a "Log Time view" user setting picks which one opens by default
 - **Global search** — the search bar in the header matches card titles/descriptions, card comments, chat and direct messages, ticket subjects, and time-entry descriptions, scoped to what you have access to; clicking a comment or time-entry result jumps straight to and highlights it
 - **Search & replace** — find and replace text across cards, card comments, direct messages, tickets, and time entries; pick which categories to include, preview every match (with a before/after snippet) before anything changes, and matches you don't have permission to edit are shown greyed out and can't be applied; the 20-per-category preview limit is adjustable up to 500
-- **Multi-project** — each project has its own board, members, and chat; open card counts shown on project tiles and in the admin panel; admins can drag-reorder projects on the dashboard
+- **Multi-project** — each project has its own board, members, and chat; open card counts shown on project tiles and in the admin panel; admins can drag-reorder projects on the dashboard; switch the dashboard between tiles and a list sortable by name, customer, board type, or open cards
 - **Role-based access** — global roles (admin / user / viewer / metrics / backup / customer) and per-project roles (owner / admin / member / viewer); project admins can manage columns; the `customer` role gives end-customers a read/comment-only ticket portal; project creation itself can be restricted to explicitly-permitted users (Admin → Users), off by default for non-admins
 - **Real-time** — board changes, card moves, and chat messages sync instantly across all connected users via WebSocket
 - **Internal chat** — per-project team chat and direct messages between users; group chats support custom avatars and member management; every user group automatically gets a linked group conversation that stays in sync with group membership

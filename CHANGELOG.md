@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.41.0 — 2026-10-12
+
+### Added
+- **Open cards first** — each board column's sort bar has an *Open first* button that moves open cards above closed ones. It works on its own (keeping your own card order) or together with sorting by date, assignee, or priority, and is remembered per column in your browser. The button only shows while closed cards are visible.
+- **List view for the projects overview** — a *Tiles* / *List* switch on the dashboard shows your projects as a table with name, customer, board type, and open card count. Click a column header to sort by it, and click again to reverse the order. The customer filter works in both views, and your view and sort order are remembered in your browser.
+
 ## v0.40.0 — 2026-10-10
 
 ### Added

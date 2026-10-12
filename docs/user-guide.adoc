@@ -1,6 +1,6 @@
 = WarmDesk — User Guide
-:revnumber: v0.40.0
-:revdate: 2026-10-10
+:revnumber: v0.41.0
+:revdate: 2026-10-12
 Ton Kersten <tonk@smartowl.nl>
 ifdef::backend-pdf[]
 :title-page:
@@ -257,6 +257,14 @@ When your projects belong to multiple customers, a *customer selector* appears i
 Choose a customer to show only their projects; choose *All Customers* to go back to the full list.
 The selector is hidden when all visible projects belong to a single customer.
 
+=== Tile and list view
+
+The *Tiles* / *List* switch at the top of the dashboard changes how your projects are shown.
+*Tiles* shows a card per project; administrators can drag tiles by their handle to change the order for everyone.
+*List* shows a table with each project's name, customer, board type, and number of open cards.
+Click a column header to sort by it, and click again to reverse the order.
+The customer selector works in both views, and your choice of view and sort order is remembered on this browser.
+
 === Creating a project
 
 Click *+ New Project* on the dashboard.
@@ -353,6 +361,10 @@ Use the sort controls at the top of any column to order cards by:
 * *Date* (due date) — ascending or descending
 * *Assignee* — alphabetical by display name
 * *Priority* — critical → high → medium → low → none
+
+Click *Open first* in the same sort bar to show open cards above closed ones.
+It works with *Default order* (open cards keep your own order) and with each of the sort options above, and is remembered per column on this browser.
+The button is only shown while closed cards are visible (see *Hide Closed* in the toolbar).
 
 === Moving cards
 

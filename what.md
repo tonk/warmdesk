@@ -948,3 +948,5 @@ Create an application that has all these features and requirements
 - Add ticket-on-desk logos (icon, full wordmark, and orange TEST variants) served in place of the default logos in the web UI and PDF headers in ticketsystem mode
 - Show a "Ticket system only" badge on the login page in ticketsystem mode, translated into all 12 languages, and land on the tickets after login
 - Add ticketsystem tray icons and .deb/.rpm desktop launchers to the desktop app
+- Add an "Open first" toggle to each board column's sort bar that puts open cards above closed ones, combinable with the existing sort options and remembered per column
+- Add a Tiles/List switch to the projects overview, with a list view sortable by name, customer, board type, and open card count

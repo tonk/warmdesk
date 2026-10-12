@@ -1,0 +1,25 @@
+---
+title: "v0.41.0: open cards first, and projects as a list"
+date: "2026-10-12"
+author: "Ton Kersten"
+description: "Put a column's open cards above the closed ones, and view the projects overview as a sortable list."
+draft: false
+---
+:doctype: article
+:icons!:
+
+A small release with two quality-of-life improvements for boards and the projects overview.
+
+== Open cards first
+
+Each board column's sort bar now has an *Open first* button. Click it and the open cards move above the closed ones. It works with the column's default order, so open cards keep the order you gave them, and with sorting by date, assignee, or priority. The setting is remembered per column in your browser. The button is only shown while closed cards are visible.
+
+== Projects as a list
+
+The dashboard has a new *Tiles* / *List* switch. The list view shows your projects in a table with their name, customer, board type, and number of open cards. Click a column header to sort by it, and click again to reverse the order. The customer filter works in both views, and your view and sort order are remembered in your browser.
+
+See the link:../../docs/user-guide/[User Guide] for details.
+
+== Upgrade
+
+Download `v0.41.0` from the link:../../download[download page] or pull the latest release tag. No database migration or configuration change is needed.
