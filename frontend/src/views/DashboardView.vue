@@ -53,9 +53,11 @@
             <tbody>
               <tr v-for="project in sortedListProjects" :key="project.id">
                 <td class="col-name">
-                  <span class="project-color-dot" :style="{ background: project.color || '#6366f1' }" aria-hidden="true"></span>
-                  <img v-if="projectAvatar(project)" :src="projectAvatar(project)" class="project-avatar" alt="" />
-                  <RouterLink :to="`/projects/${project.slug}`" class="project-link">{{ project.name }}</RouterLink>
+                  <div class="col-name-inner">
+                    <span class="project-color-dot" :style="{ background: project.color || '#6366f1' }" aria-hidden="true"></span>
+                    <img v-if="projectAvatar(project)" :src="projectAvatar(project)" class="project-avatar" alt="" />
+                    <RouterLink :to="`/projects/${project.slug}`" class="project-link">{{ project.name }}</RouterLink>
+                  </div>
                 </td>
                 <td>{{ project.customer?.name || '—' }}</td>
                 <td>
@@ -396,7 +398,7 @@ async function handleCreate() {
 .projects-table th, .projects-table td { padding: 8px 14px; text-align: left; border-bottom: 1px solid var(--color-border); font-size: 13px; vertical-align: middle; white-space: nowrap; }
 .projects-table th { font-weight: 600; color: var(--color-text-muted); font-size: 12px; background: var(--color-bg); }
 .projects-table tbody tr:hover { background: var(--color-bg); }
-.projects-table .col-name { display: flex; align-items: center; gap: 8px; }
+.projects-table .col-name-inner { display: flex; align-items: center; gap: 8px; }
 .projects-table .col-actions { text-align: right; }
 .projects-table .board-type-badge { margin-left: 0; }
 .project-color-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
