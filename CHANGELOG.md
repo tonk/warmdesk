@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.41.1 — 2026-10-12
+
+### Fixed
+- **Projects list view** — the line under each project name now joins up with the rest of the row, instead of stopping short of the *Customer* column.
+
 ## v0.41.0 — 2026-10-12
 
 ### Added

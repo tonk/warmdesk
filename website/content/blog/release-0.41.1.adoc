@@ -1,0 +1,19 @@
+---
+title: "v0.41.1: projects list fix"
+date: "2026-10-12"
+author: "Ton Kersten"
+description: "A small fix for the row lines in the projects list view."
+draft: false
+---
+:doctype: article
+:icons!:
+
+A patch release with one visual fix for the projects list view introduced in v0.41.0.
+
+== Fixed
+
+In the projects list view, the line under each project name stopped short of the *Customer* column, so the rows didn't look connected. The lines now run straight across the whole row.
+
+== Upgrade
+
+Download `v0.41.1` from the link:../../download[download page] or pull the latest release tag. No database migration or configuration change is needed.

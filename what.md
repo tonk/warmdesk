@@ -950,3 +950,4 @@ Create an application that has all these features and requirements
 - Add ticketsystem tray icons and .deb/.rpm desktop launchers to the desktop app
 - Add an "Open first" toggle to each board column's sort bar that puts open cards above closed ones, combinable with the existing sort options and remembered per column
 - Add a Tiles/List switch to the projects overview, with a list view sortable by name, customer, board type, and open card count
+- Fix the row borders of the name column in the projects list view so they line up with the other columns

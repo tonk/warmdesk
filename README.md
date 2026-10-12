@@ -8,10 +8,9 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.41.0)
+## Latest release (v0.41.1)
 
-- **Open cards first** — An *Open first* button on each board column puts open cards above closed ones, on its own or combined with the other sort options.
-- **Projects as a list** — Switch the dashboard between tiles and a sortable list of your projects (name, customer, board type, open cards).
+- **Projects list fix** — The row lines in the projects list view now run straight across every column.
 
 ## Experiment
 
