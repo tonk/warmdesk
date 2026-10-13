@@ -279,6 +279,23 @@ input, textarea, select {
   outline: none;
 }
 input.form-input, select.form-input { height: 36px; }
+/* Drop the native widget look: WebKitGTK (Tauri on Linux) adds GTK padding on
+   top of ours, which clips the text inside the fixed 36px height. The arrow is
+   drawn with currentColor gradients so it follows the theme. */
+select.form-input:not([multiple]) {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-right: 32px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 17px) 50%, calc(100% - 12px) 50%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+}
+select.form-input[multiple] { height: auto; }
 .form-input:focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(99,102,241,.1); }
 .form-input::placeholder { color: var(--color-text-muted); }
 
