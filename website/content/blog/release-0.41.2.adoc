@@ -1,0 +1,19 @@
+---
+title: "v0.41.2: dropdown fix"
+date: "2026-10-13"
+author: "Ton Kersten"
+description: "Dropdowns no longer cut off their text in the Linux desktop app."
+draft: false
+---
+:doctype: article
+:icons!:
+
+A patch release with one visual fix for the desktop app on Linux.
+
+== Fixed
+
+In the Linux desktop app, the text in dropdowns was cut off at the bottom. It was most visible in the time-tracking calendar's entry dialog, where the *Customer*, *Project*, and *Location* fields only showed the top half of their text. Dropdowns now show their text in full, and look the same as the other input fields in every theme.
+
+== Upgrade
+
+Download `v0.41.2` from the link:../../download[download page] or pull the latest release tag. No database migration or configuration change is needed.

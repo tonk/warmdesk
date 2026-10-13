@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.41.2 — 2026-10-13
+
+### Fixed
+- **Cut-off text in select boxes** — in the desktop app on Linux, the text in dropdowns (for example *Customer*, *Project*, and *Location* in the time-tracking calendar's entry dialog) was clipped at the bottom. Dropdowns now show their text in full, and match the other input fields in every theme.
+
 ## v0.41.1 — 2026-10-12
 
 ### Fixed
