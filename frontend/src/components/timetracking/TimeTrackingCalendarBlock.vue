@@ -38,6 +38,18 @@
       aria-hidden="true"
       @pointerdown.stop="onResizePointerDown('bottom', $event)"
     />
+    <Teleport to="body">
+      <div
+        v-if="dragInfo"
+        class="cal-resize-popup"
+        aria-hidden="true"
+        :style="{ left: `${dragInfo.x + 14}px`, top: `${dragInfo.y + 14}px` }"
+      >
+        <span v-if="dragInfo.date" class="cal-resize-popup-date">{{ dragInfo.date }}</span>
+        <span class="cal-resize-popup-range">{{ dragInfo.range }}</span>
+        <span class="cal-resize-popup-dur">{{ dragInfo.duration }}</span>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -71,10 +83,10 @@ const props = defineProps({
 const emit = defineEmits(['open', 'contextmenu', 'move', 'resize', 'toggle-select'])
 
 const { t } = useI18n()
-const { formatTime } = useDateFormat()
+const { formatTime, formatDate } = useDateFormat()
 
 const blockEl = ref(null)
-const drag = ref(null) // { kind: 'move' | 'resize', edge?, startX, startY, dx, dy, moved }
+const drag = ref(null) // { kind: 'move' | 'resize', edge?, startX, startY, dx, dy, x, y }
 // A completed drag still fires a native 'click' on pointerup; suppress that one click.
 let suppressNextClick = false
 
@@ -96,6 +108,68 @@ const blockStyle = computed(() => {
     }
   }
   return style
+})
+
+// New start/end (minutes since midnight) for a resize of the given edge by dy pixels.
+function resizedTimes(edge, dy) {
+  const startM = parseWallClock(props.entry.start_time)
+  const endM = parseWallClock(props.entry.end_time)
+  if (edge === 'top') {
+    const clampedDy = Math.min(dy, props.height - MIN_BLOCK_HEIGHT_PX)
+    let newStartM = parseWallClock(pxToWallClock(props.top + clampedDy, props.pxPerHour, DEFAULT_SNAP_MINUTES))
+    // Only a same-day ('full') entry needs its new start clamped below the
+    // (unchanged) end time — an overnight 'start' segment's end lives on the
+    // next day, so that comparison would be meaningless here.
+    if (props.segment === 'full') newStartM = Math.min(endM - DEFAULT_SNAP_MINUTES, newStartM)
+    return { startM: newStartM, endM }
+  }
+  const clampedDy = Math.max(dy, MIN_BLOCK_HEIGHT_PX - props.height)
+  let newEndM = parseWallClock(pxToWallClock(props.top + props.height + clampedDy, props.pxPerHour, DEFAULT_SNAP_MINUTES))
+  if (props.segment === 'full') newEndM = Math.max(startM + DEFAULT_SNAP_MINUTES, newEndM)
+  return { startM, endM: newEndM }
+}
+
+// Target day column, start and end (minutes) for a move by dy pixels, dropped at clientX.
+function movedTimes(dy, clientX) {
+  const startM = parseWallClock(props.entry.start_time)
+  const endM = parseWallClock(props.entry.end_time)
+  const duration = wallClockSpanMinutes(startM, endM) ?? 60
+  const dayDelta = dayColumnIndexFromX(clientX, props.getColumnRects()) - props.dayIndex
+  const newStartTime = pxToWallClock(props.top + dy, props.pxPerHour, DEFAULT_SNAP_MINUTES)
+  const newStartM = parseWallClock(newStartTime)
+  const newEndM = Math.min(24 * 60 - 1, newStartM + duration)
+  const newDayIndex = Math.max(0, Math.min(props.weekDays.length - 1, props.dayIndex + dayDelta))
+  return { dayDelta, newDayIndex, newStartTime, newStartM, newEndM }
+}
+
+function fmtDuration(minutes) {
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  return h ? (m ? `${h}h ${m}m` : `${h}h`) : `${m}m`
+}
+
+// Live start–end/duration shown next to the pointer while a move or resize is in progress.
+const dragInfo = computed(() => {
+  const d = drag.value
+  if (!d) return null
+  const day = props.entry.date.slice(0, 10)
+  let startM, endM, date = ''
+  if (d.kind === 'resize') {
+    ;({ startM, endM } = resizedTimes(d.edge, d.dy))
+  } else {
+    const m = movedTimes(d.dy, d.x)
+    startM = m.newStartM
+    endM = m.newEndM
+    if (m.dayDelta !== 0) date = formatDate(`${props.weekDays[m.newDayIndex].iso}T12:00:00`)
+  }
+  const minutes = wallClockSpanMinutes(startM, endM) ?? DEFAULT_SNAP_MINUTES
+  return {
+    x: d.x,
+    y: d.y,
+    date,
+    range: `${formatTime(`${day}T${fmtWallClock(startM)}:00`)} – ${formatTime(`${day}T${fmtWallClock(endM)}:00`)}`,
+    duration: fmtDuration(minutes),
+  }
 })
 
 const accessibleLabel = computed(() => {
@@ -137,7 +211,7 @@ function onMovePointerDown(e) {
   e.preventDefault()
   const el = blockEl.value
   el.setPointerCapture(e.pointerId)
-  drag.value = { kind: 'move', pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, dx: 0, dy: 0 }
+  drag.value = { kind: 'move', pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, dx: 0, dy: 0, x: e.clientX, y: e.clientY }
   el.addEventListener('pointermove', onMovePointerMove)
   el.addEventListener('pointerup', onMovePointerUp, { once: true })
 }
@@ -146,6 +220,8 @@ function onMovePointerMove(e) {
   if (!drag.value || drag.value.kind !== 'move') return
   drag.value.dx = e.clientX - drag.value.startX
   drag.value.dy = e.clientY - drag.value.startY
+  drag.value.x = e.clientX
+  drag.value.y = e.clientY
 }
 
 function onMovePointerUp(e) {
@@ -156,18 +232,10 @@ function onMovePointerUp(e) {
   if (!d) return
   el.releasePointerCapture?.(e.pointerId)
 
-  const dayDelta = dayColumnIndexFromX(e.clientX, props.getColumnRects()) - props.dayIndex
+  const { dayDelta, newDayIndex, newStartTime, newStartM, newEndM } = movedTimes(d.dy, e.clientX)
   // Below the drag threshold: treat as a plain click and let the browser's own
   // 'click' event (fired after this pointerup) open the entry via onClick.
   if (Math.abs(d.dy) < CLICK_THRESHOLD_PX && dayDelta === 0) return
-
-  const startM = parseWallClock(props.entry.start_time)
-  const endM = parseWallClock(props.entry.end_time)
-  const duration = wallClockSpanMinutes(startM, endM) ?? 60
-  const newStartTime = pxToWallClock(props.top + d.dy, props.pxPerHour, DEFAULT_SNAP_MINUTES)
-  const newStartM = parseWallClock(newStartTime)
-  const newEndM = Math.min(24 * 60 - 1, newStartM + duration)
-  const newDayIndex = Math.max(0, Math.min(props.weekDays.length - 1, props.dayIndex + dayDelta))
 
   suppressNextClick = true
   emit('move', {
@@ -184,7 +252,7 @@ function onResizePointerDown(edge, e) {
   e.preventDefault()
   const el = blockEl.value
   el.setPointerCapture(e.pointerId)
-  drag.value = { kind: 'resize', edge, pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, dx: 0, dy: 0 }
+  drag.value = { kind: 'resize', edge, pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, dx: 0, dy: 0, x: e.clientX, y: e.clientY }
   el.addEventListener('pointermove', onResizePointerMove)
   el.addEventListener('pointerup', onResizePointerUp, { once: true })
 }
@@ -192,6 +260,8 @@ function onResizePointerDown(edge, e) {
 function onResizePointerMove(e) {
   if (!drag.value || drag.value.kind !== 'resize') return
   drag.value.dy = e.clientY - drag.value.startY
+  drag.value.x = e.clientX
+  drag.value.y = e.clientY
 }
 
 function onResizePointerUp(e) {
@@ -203,40 +273,14 @@ function onResizePointerUp(e) {
   el.releasePointerCapture?.(e.pointerId)
   suppressNextClick = true
 
-  const startM = parseWallClock(props.entry.start_time)
-  const endM = parseWallClock(props.entry.end_time)
-  const newDate = props.entry.date.slice(0, 10)
-
-  if (d.edge === 'top') {
-    const clampedDy = Math.min(d.dy, props.height - MIN_BLOCK_HEIGHT_PX)
-    const newStartTime = pxToWallClock(props.top + clampedDy, props.pxPerHour, DEFAULT_SNAP_MINUTES)
-    let newStartM = parseWallClock(newStartTime)
-    // Only a same-day ('full') entry needs its new start clamped below the
-    // (unchanged) end time — an overnight 'start' segment's end lives on the
-    // next day, so that comparison would be meaningless here.
-    if (props.segment === 'full') newStartM = Math.min(endM - DEFAULT_SNAP_MINUTES, newStartM)
-    const newMinutes = wallClockSpanMinutes(newStartM, endM) ?? DEFAULT_SNAP_MINUTES
-    emit('resize', {
-      entry: props.entry,
-      newDate,
-      newStartTime: fmtWallClock(newStartM),
-      newEndTime: props.entry.end_time,
-      newMinutes,
-    })
-  } else {
-    const clampedDy = Math.max(d.dy, MIN_BLOCK_HEIGHT_PX - props.height)
-    const newEndTime = pxToWallClock(props.top + props.height + clampedDy, props.pxPerHour, DEFAULT_SNAP_MINUTES)
-    let newEndM = parseWallClock(newEndTime)
-    if (props.segment === 'full') newEndM = Math.max(startM + DEFAULT_SNAP_MINUTES, newEndM)
-    const newMinutes = wallClockSpanMinutes(startM, newEndM) ?? DEFAULT_SNAP_MINUTES
-    emit('resize', {
-      entry: props.entry,
-      newDate,
-      newStartTime: props.entry.start_time,
-      newEndTime: fmtWallClock(newEndM),
-      newMinutes,
-    })
-  }
+  const { startM, endM } = resizedTimes(d.edge, d.dy)
+  emit('resize', {
+    entry: props.entry,
+    newDate: props.entry.date.slice(0, 10),
+    newStartTime: d.edge === 'top' ? fmtWallClock(startM) : props.entry.start_time,
+    newEndTime: d.edge === 'top' ? props.entry.end_time : fmtWallClock(endM),
+    newMinutes: wallClockSpanMinutes(startM, endM) ?? DEFAULT_SNAP_MINUTES,
+  })
 }
 </script>
 
@@ -316,6 +360,25 @@ function onResizePointerUp(e) {
 }
 
 .cal-resize-handle:hover::after { opacity: 1; }
+
+.cal-resize-popup {
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  gap: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.cal-resize-popup-date { opacity: 0.8; }
+.cal-resize-popup-range { font-weight: 600; }
 
 .cal-resize-top { top: 0; }
 .cal-resize-bottom { bottom: 0; }
