@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.42.0 — 2026-10-16
+
+### Added
+- **Board-only mode** — start the server with `--mode=board` (or `APP_MODE=board`, or `app_mode: "board"`) to run WarmDesk as a board-only server, next to the existing full, `timetracking`, and `ticketsystem` modes. Time tracking (with its reports and invoices) and the helpdesk are switched off — their routes, menus, and admin sections are gone — while boards, topics, and chat keep working. The login page shows a "Board only" badge, translated into all 12 languages, and the browser tab reads "WarmDesk - Board".
+- **Live time while moving or resizing** — dragging or resizing an entry in the time-tracking calendar now shows a small popup next to the pointer with the new start and end time and the duration. When you drag an entry to another day, the date is shown too. The popup follows your time and date format settings and disappears when you release the mouse button.
+
 ## v0.41.2 — 2026-10-13
 
 ### Fixed

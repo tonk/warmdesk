@@ -57,6 +57,11 @@ Each can be set as a YAML key, an environment variable, or a CLI flag (the flag 
 |`--mode=ticketsystem`
 |Runs a helpdesk-only server: board, chat, and time-tracking routes are disabled, related menus and admin sections are hidden, and the ticket logos replace the default WarmDesk logos in the web UI and PDFs.
 
+|`app_mode: board`
+|`APP_MODE`
+|`--mode=board`
+|Runs a board-only server: time-tracking and helpdesk routes are disabled and related menus and admin sections are hidden, while boards, topics, and chat stay. The default WarmDesk logos are kept.
+
 |`instance_mode: test`
 |`INSTANCE_MODE`
 |`--instance-mode=test`

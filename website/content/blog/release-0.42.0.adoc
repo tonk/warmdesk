@@ -1,0 +1,25 @@
+---
+title: "v0.42.0: board-only mode, and live times in the calendar"
+date: "2026-10-16"
+author: "Ton Kersten"
+description: "Run WarmDesk as a board-only server, and see the new time and duration while you move or resize a time-tracking entry."
+draft: false
+---
+:doctype: article
+:icons!:
+
+This release adds a fourth way to run WarmDesk, and a small improvement to the time-tracking calendar.
+
+== Board-only mode
+
+Next to the full, `timetracking`, and `ticketsystem` modes there is now a `board` mode. Start the server with `--mode=board` (or `APP_MODE=board`, or `app_mode: "board"` in `warmdesk.yaml`) and time tracking, with its reports and invoices, and the helpdesk are switched off. Their routes, menus, and admin sections are gone, while boards, topics, and chat keep working. The login page shows a "Board only" badge and the browser tab reads "WarmDesk - Board".
+
+See the link:../../docs/admin-guide/[Admin Guide] for details.
+
+== Live times in the time-tracking calendar
+
+While you drag or resize an entry in the calendar, a small popup next to the pointer shows the new start and end time and the duration. When you drag an entry to another day, the date is shown too. The popup follows your time and date format settings and disappears when you release the mouse button.
+
+== Upgrade
+
+Download `v0.42.0` from the link:../../download[download page] or pull the latest release tag. No database migration or configuration change is needed.

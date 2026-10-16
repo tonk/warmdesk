@@ -952,3 +952,5 @@ Create an application that has all these features and requirements
 - Add a Tiles/List switch to the projects overview, with a list view sortable by name, customer, board type, and open card count
 - Fix the row borders of the name column in the projects list view so they line up with the other columns
 - Fix select boxes clipping their text at the bottom in the Linux desktop app
+- Add a board-only app mode (`--mode=board`) that disables the time-tracking and helpdesk routes, menus, and admin sections while keeping boards, topics, and chat
+- Show a live start/end/duration popup next to the pointer while moving or resizing entries in the time-tracking calendar

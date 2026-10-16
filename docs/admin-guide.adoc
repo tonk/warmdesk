@@ -1,6 +1,6 @@
 = WarmDesk — Administrator Guide
-:revnumber: v0.41.2
-:revdate: 2026-10-13
+:revnumber: v0.42.0
+:revdate: 2026-10-16
 Ton Kersten <tonk@smartowl.nl>
 ifdef::backend-pdf[]
 :title-page:
@@ -155,8 +155,8 @@ default_locale: "en"
 # Application mode (optional)
 # app_mode: "timetracking"
 # APP_MODE — leave empty for full WarmDesk; set to "timetracking" for
-# a time-tracking-only deployment, or "ticketsystem" for a helpdesk-only
-# deployment (see below).
+# a time-tracking-only deployment, "ticketsystem" for a helpdesk-only
+# deployment, or "board" for a board-only deployment (see below).
 
 # Instance mode (optional)
 # instance_mode: "test"
@@ -187,6 +187,19 @@ Effects:
 * The ticket logos (ticket-on-desk) replace the default WarmDesk logos everywhere: the web interface, the login screen (which also shows a "Ticket system only" badge), and exported PDFs (when no custom company logo is configured in Admin → Branding).
 * The desktop app shows the ticket-system tray icon, and the `.deb`/`.rpm` packages install _WarmDesk Ticket System_ launchers.
 * The `/api/v1/version` endpoint returns `"app_mode": "ticketsystem"` so clients can detect the mode.
+
+The CLI flag takes precedence over the YAML key, which takes precedence over the environment variable.
+
+=== Board-only mode
+
+Set `app_mode: "board"` (or pass `--mode=board` on the command line, or set `APP_MODE=board` as an environment variable) to run WarmDesk as a dedicated board server.
+
+Effects:
+
+* Time-tracking (including reports and invoices) and helpdesk API routes are disabled. Boards, projects, topics, and chat stay active.
+* The related menus and admin sections (time tracking, helpdesk, change management) are hidden, and the login screen shows a "Board only" badge.
+* The default WarmDesk logos are kept.
+* The `/api/v1/version` endpoint returns `"app_mode": "board"` so clients can detect the mode.
 
 The CLI flag takes precedence over the YAML key, which takes precedence over the environment variable.
 

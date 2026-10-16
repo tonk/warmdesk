@@ -8,9 +8,10 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.41.2)
+## Latest release (v0.42.0)
 
-- **Dropdown fix** — Text in dropdowns is no longer cut off at the bottom in the Linux desktop app.
+- **Board-only mode** — Run the server with `--mode=board` to get boards, topics, and chat without time tracking or the helpdesk.
+- **Live time popup** — Moving or resizing an entry in the time-tracking calendar shows its new start, end, and duration next to the pointer.
 
 ## Experiment
 
