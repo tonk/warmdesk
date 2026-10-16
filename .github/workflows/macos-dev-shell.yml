@@ -34,7 +34,7 @@ permissions:
 jobs:
   shell:
     name: Interactive macOS debug session
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: ${{ inputs.minutes }}
 
     steps:
