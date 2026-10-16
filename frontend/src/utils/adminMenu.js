@@ -13,9 +13,9 @@ export const ADMIN_MENU = [
   ] },
   { key: 'work', path: 'work', labelKey: 'adminNav.group_work', items: [
     { key: 'projects', path: 'projects', labelKey: 'admin.projects', hideInTimetracking: true, hideInTicketsystem: true },
-    { key: 'time-tracking', path: 'time-tracking', labelKey: 'admin.time_tracking', hideInTicketsystem: true },
+    { key: 'time-tracking', path: 'time-tracking', labelKey: 'admin.time_tracking', hideInTicketsystem: true, hideInBoard: true },
   ] },
-  { key: 'helpdesk', path: 'helpdesk', labelKey: 'adminNav.group_helpdesk', hideInTimetracking: true, items: [
+  { key: 'helpdesk', path: 'helpdesk', labelKey: 'adminNav.group_helpdesk', hideInTimetracking: true, hideInBoard: true, items: [
     { key: 'helpdesk', path: 'ticket-settings', labelKey: 'adminNav.ticket_settings' },
     { key: 'sla', path: 'sla-policies', labelKey: 'sla.title' },
     { key: 'business-calendars', path: 'business-hours', labelKey: 'helpdeskAdmin.business_hours' },
@@ -23,7 +23,7 @@ export const ADMIN_MENU = [
     { key: 'ticket-checklists', path: 'checklists', labelKey: 'ticketChecklist.title' },
     { key: 'service-catalog', path: 'service-catalogue', labelKey: 'catalogAdmin.title' },
   ] },
-  { key: 'change', path: 'change', labelKey: 'adminNav.group_change', hideInTimetracking: true, items: [
+  { key: 'change', path: 'change', labelKey: 'adminNav.group_change', hideInTimetracking: true, hideInBoard: true, items: [
     { key: 'change-management', path: 'change-management', labelKey: 'changeAdmin.title' },
     { key: 'cmdb-types', path: 'cmdb-types', labelKey: 'cmdbAdmin.title' },
   ] },
@@ -35,9 +35,9 @@ export const ADMIN_MENU = [
 ]
 
 // visibleAdminMenu drops the groups and items hidden in the given app mode
-// ('' | 'timetracking' | 'ticketsystem').
+// ('' | 'timetracking' | 'ticketsystem' | 'board').
 export function visibleAdminMenu(appMode) {
-  const hidden = x => (appMode === 'timetracking' && x.hideInTimetracking) || (appMode === 'ticketsystem' && x.hideInTicketsystem)
+  const hidden = x => (appMode === 'timetracking' && x.hideInTimetracking) || (appMode === 'ticketsystem' && x.hideInTicketsystem) || (appMode === 'board' && x.hideInBoard)
   return ADMIN_MENU
     .filter(g => !hidden(g))
     .map(g => ({ ...g, items: g.items.filter(it => !hidden(it)) }))

@@ -13,6 +13,10 @@ export const useSystemStore = defineStore('system', () => {
   const instanceMode = ref('')
   const isTimetrackingMode = computed(() => appMode.value === 'timetracking')
   const isTicketsystemMode = computed(() => appMode.value === 'ticketsystem')
+  const isBoardMode = computed(() => appMode.value === 'board')
+  // Modes without the helpdesk module / without time tracking
+  const noHelpdeskMode = computed(() => isTimetrackingMode.value || isBoardMode.value)
+  const noTimeTrackingMode = computed(() => isTicketsystemMode.value || isBoardMode.value)
   // Modes that expose neither boards/projects nor chat
   const isRestrictedMode = computed(() => isTimetrackingMode.value || isTicketsystemMode.value)
   const isTestInstance = computed(() => instanceMode.value === 'test')
@@ -62,5 +66,5 @@ export const useSystemStore = defineStore('system', () => {
     } catch {}
   }
 
-  return { registrationEnabled, scrumStorypointsEnabled, externalImageProxyEnabled, sessionTimeoutMinutes, appMode, isTimetrackingMode, isTicketsystemMode, isRestrictedMode, instanceMode, isTestInstance, logoSrc, logoFullSrc, defaults, fetchAppMode, fetchSettings }
+  return { registrationEnabled, scrumStorypointsEnabled, externalImageProxyEnabled, sessionTimeoutMinutes, appMode, isTimetrackingMode, isTicketsystemMode, isBoardMode, noHelpdeskMode, noTimeTrackingMode, isRestrictedMode, instanceMode, isTestInstance, logoSrc, logoFullSrc, defaults, fetchAppMode, fetchSettings }
 })

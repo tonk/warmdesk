@@ -59,7 +59,8 @@
     "must_change_password": "Ein Administrator verlangt, dass Sie vor dem Fortfahren ein neues Passwort festlegen.",
     "remember_me": "Benutzername merken",
     "timetracking_mode": "Nur Zeiterfassung",
-    "ticketsystem_mode": "Nur Ticketsystem"
+    "ticketsystem_mode": "Nur Ticketsystem",
+    "board_mode": "Nur Board"
   },
   "project": {
     "projects": "Projekte",

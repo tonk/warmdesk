@@ -107,7 +107,7 @@ func (o overlayFS) Open(name string) (fs.File, error) {
 func main() {
 	configFile  := flag.String("config", "", "path to config file (overrides CONFIG_FILE env var)")
 	showVersion := flag.Bool("version", false, "print version and exit")
-	appMode     := flag.String("mode", "", "application mode: '' (full), 'timetracking' or 'ticketsystem'")
+	appMode     := flag.String("mode", "", "application mode: '' (full), 'timetracking', 'ticketsystem' or 'board'")
 	instanceMode := flag.String("instance-mode", "", "instance mode: '' (production) or 'test'")
 	portFlag    := flag.String("port", "", "port to listen on (overrides config file and PORT env var)")
 	flag.Parse()
@@ -129,8 +129,8 @@ func main() {
 	if *portFlag != "" {
 		cfg.Port = *portFlag
 	}
-	if cfg.AppMode != "" && cfg.AppMode != "timetracking" && cfg.AppMode != "ticketsystem" {
-		log.Fatalf("invalid --mode %q: valid values are '' (full), 'timetracking' and 'ticketsystem'", cfg.AppMode)
+	if cfg.AppMode != "" && cfg.AppMode != "timetracking" && cfg.AppMode != "ticketsystem" && cfg.AppMode != "board" {
+		log.Fatalf("invalid --mode %q: valid values are '' (full), 'timetracking', 'ticketsystem' and 'board'", cfg.AppMode)
 	}
 	if cfg.InstanceMode != "" && cfg.InstanceMode != "test" {
 		log.Fatalf("invalid --instance-mode %q: valid values are '' (production) and 'test'", cfg.InstanceMode)
@@ -141,6 +141,9 @@ func main() {
 	} else if cfg.AppMode == "ticketsystem" {
 		log.Printf("Starting WarmDesk - Ticket System %s", version)
 		log.Println("Running in ticket-system-only mode: boards, chat, and time-tracking routes are disabled")
+	} else if cfg.AppMode == "board" {
+		log.Printf("Starting WarmDesk - Board %s", version)
+		log.Println("Running in board-only mode: time-tracking and helpdesk routes are disabled")
 	} else {
 		log.Printf("Starting WarmDesk %s", version)
 	}
@@ -200,7 +203,7 @@ func main() {
 	}
 	handlers.MigrateWebhookTokenHashes()
 	handlers.StartBackupScheduler()
-	if cfg.AppMode != "timetracking" {
+	if cfg.AppMode != "timetracking" && cfg.AppMode != "board" {
 		services.SeedResolutionCodes()
 		handlers.SeedCITypes()
 		services.StartTicketSlaScheduler()

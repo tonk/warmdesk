@@ -59,7 +59,8 @@
     "must_change_password": "Een beheerder vereist dat u een nieuw wachtwoord instelt voordat u verdergaat.",
     "remember_me": "Onthoud mij",
     "timetracking_mode": "Alleen tijdregistratie",
-    "ticketsystem_mode": "Alleen ticketsysteem"
+    "ticketsystem_mode": "Alleen ticketsysteem",
+    "board_mode": "Alleen board"
   },
   "project": {
     "projects": "Projecten",

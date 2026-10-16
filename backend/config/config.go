@@ -26,7 +26,7 @@ type Config struct {
 	DefaultLocale  string `yaml:"default_locale"`
 	GinMode        string `yaml:"gin_mode"`   // debug | release (default: release)
 	DBLog          string `yaml:"db_log"`     // silent | error | warn | info (default: info)
-	AppMode        string `yaml:"app_mode"`   // "" (full) | "timetracking" | "ticketsystem"
+	AppMode        string `yaml:"app_mode"`   // "" (full) | "timetracking" | "ticketsystem" | "board"
 	InstanceMode   string `yaml:"instance_mode"` // "" (production) | "test"
 	APILog         bool   `yaml:"api_log"`  // log HTTP requests (default: true)
 	UploadDir      string `yaml:"upload_dir"`    // directory for uploaded files (default: ./uploads)

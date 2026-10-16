@@ -220,6 +220,7 @@ let titleBlinkOn = false
 function baseTitle() {
   if (systemStore.isTimetrackingMode) return 'WarmDesk - Time Tracking'
   if (systemStore.isTicketsystemMode) return 'WarmDesk - Ticket System'
+  if (systemStore.isBoardMode) return 'WarmDesk - Board'
   return 'WarmDesk'
 }
 

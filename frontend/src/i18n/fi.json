@@ -59,7 +59,8 @@
     "must_change_password": "Järjestelmänvalvoja edellyttää, että asetat uuden salasanan ennen jatkamista.",
     "remember_me": "Muista minut",
     "timetracking_mode": "Vain ajanseuranta",
-    "ticketsystem_mode": "Vain tiketöintijärjestelmä"
+    "ticketsystem_mode": "Vain tiketöintijärjestelmä",
+    "board_mode": "Vain taulu"
   },
   "project": {
     "projects": "Projektit",

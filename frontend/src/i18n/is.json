@@ -59,7 +59,8 @@
     "must_change_password": "Stjórnandi krefst þess að þú stillir nýtt lykilorð áður en þú heldur áfram.",
     "remember_me": "Muna mig",
     "timetracking_mode": "Einungis timaskraning",
-    "ticketsystem_mode": "Einungis miðakerfi"
+    "ticketsystem_mode": "Einungis miðakerfi",
+    "board_mode": "Einungis borð"
   },
   "project": {
     "projects": "Verkefni",

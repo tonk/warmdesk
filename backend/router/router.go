@@ -17,6 +17,11 @@ import (
 func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, apiLog bool, uploadDir string, trustedProxies []string, appMode string, instanceMode string) *gin.Engine {
 	ttMode := appMode == "timetracking"
 	tsMode := appMode == "ticketsystem"
+	bdMode := appMode == "board"
+	// noHelpdesk: modes without the helpdesk/ticketing module.
+	noHelpdesk := ttMode || bdMode
+	// noTimeTracking: modes without time tracking, reports and invoices.
+	noTimeTracking := tsMode || bdMode
 	// noBoards: modes that expose neither boards/projects nor chat.
 	noBoards := ttMode || tsMode
 	testMode := instanceMode == "test"
@@ -164,7 +169,7 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 			admin.PUT("/news/:id", handlers.AdminUpdateNews)
 			admin.DELETE("/news/:id", handlers.AdminDeleteNews)
 
-			if !ttMode {
+			if !noHelpdesk {
 				// SLA policies (helpdesk)
 				admin.GET("/sla-policies", handlers.AdminListSlaPolicies)
 				admin.POST("/sla-policies", handlers.AdminCreateSlaPolicy)
@@ -230,7 +235,7 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 		protected.GET("/docs/user-guide.pdf", handlers.DownloadUserGuide)
 		protected.GET("/docs/admin-guide.pdf", middleware.AdminOnly(), handlers.DownloadAdminGuide)
 
-		if !ttMode {
+		if !noHelpdesk {
 			// Macros — active list visible to all helpdesk users
 			protected.GET("/macros", handlers.ListMacros)
 
@@ -292,7 +297,7 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 			customers.POST("/:customerId/groups/:groupId/members", handlers.CustomerAddGroupMember)
 			customers.DELETE("/:customerId/groups/:groupId/members/:userId", handlers.CustomerRemoveGroupMember)
 
-			if !ttMode {
+			if !noHelpdesk {
 				helpdesk := protected.Group("")
 				helpdesk.Use(middleware.RequireFeature("helpdesk_enabled"))
 				{
@@ -429,7 +434,7 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 			protected.GET("/link-preview", handlers.LinkPreview)
 		}
 
-		if !tsMode {
+		if !noTimeTracking {
 			// Reports
 			protected.GET("/reports/time", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimeReport)
 			protected.GET("/reports/time/pdf", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimeReportPDF)
@@ -476,7 +481,7 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 			protected.PUT("/time-entries/row-order", middleware.RequireFeature("time_tracking_enabled"), handlers.UpdateTimeEntryRowOrder)
 			protected.GET("/time-entries/macro-library", middleware.RequireFeature("time_tracking_enabled"), handlers.GetTimeMacroLibrary)
 			protected.PUT("/time-entries/macro-library", middleware.RequireFeature("time_tracking_enabled"), handlers.UpdateTimeMacroLibrary)
-		} // end if !tsMode (time tracking, reports, invoices)
+		} // end if !noTimeTracking (time tracking, reports, invoices)
 
 		// Prometheus metrics (admin or metrics role)
 		protected.GET("/metrics", middleware.MetricsAuth(), handlers.GetMetrics)

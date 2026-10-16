@@ -59,7 +59,8 @@
     "must_change_password": "Un administrateur exige que vous définissiez un nouveau mot de passe avant de continuer.",
     "remember_me": "Se souvenir de moi",
     "timetracking_mode": "Suivi du temps uniquement",
-    "ticketsystem_mode": "Système de tickets uniquement"
+    "ticketsystem_mode": "Système de tickets uniquement",
+    "board_mode": "Tableau uniquement"
   },
   "project": {
     "projects": "Projets",

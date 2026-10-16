@@ -303,7 +303,7 @@ watch(() => newProject.value.name, (name) => {
 })
 
 onMounted(async () => {
-  if ((auth.user?.dashboard_default === 'tickets' || systemStore.isTicketsystemMode) && auth.helpdeskEnabled) {
+  if ((auth.user?.dashboard_default === 'tickets' || systemStore.isTicketsystemMode) && auth.helpdeskEnabled && !systemStore.isBoardMode) {
     try {
       const { data } = await customersApi.list()
       const list = data || []

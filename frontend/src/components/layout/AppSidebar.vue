@@ -152,7 +152,7 @@
           {{ $t('sidebar.no_customers') }}
         </div>
         <nav class="sidebar-nav">
-          <RouterLink v-if="auth.isAdmin && !systemStore.isRestrictedMode" to="/invoices" class="sidebar-link">
+          <RouterLink v-if="auth.isAdmin && !systemStore.isRestrictedMode && !systemStore.isBoardMode" to="/invoices" class="sidebar-link">
             <span class="link-icon" aria-hidden="true">🧾</span>
             <span class="link-text">{{ $t('sidebar.all_invoices') }}</span>
           </RouterLink>
@@ -207,7 +207,7 @@
     </section>
 
     <!-- Helpdesk (tickets) -->
-    <section v-if="auth.helpdeskEnabled && !systemStore.isTimetrackingMode && shownSections.helpdesk" class="sidebar-section" :style="sectionStyle('helpdesk')" data-section-key="helpdesk">
+    <section v-if="auth.helpdeskEnabled && !systemStore.noHelpdeskMode && shownSections.helpdesk" class="sidebar-section" :style="sectionStyle('helpdesk')" data-section-key="helpdesk">
       <button class="section-header" @click="toggle('helpdesk')" :aria-expanded="open.helpdesk" aria-controls="section-body-helpdesk">
         <span class="section-drag-handle" aria-hidden="true" @pointerdown.prevent.stop="onSectionHandleDown($event, 'helpdesk')">⠿</span>
         <span class="section-title">{{ $t('ticket.tickets') }}</span>
@@ -457,7 +457,7 @@ const sectionsMenuConfig = computed(() => [
   { key: 'customers', label: t('sidebar.customers'), enabled: true },
   { key: 'allCustomers', label: t('customer.all_customers'), enabled: true },
   { key: 'favorites', label: t('sidebar.favorites'), enabled: auth.chatEnabled && !systemStore.isRestrictedMode },
-  { key: 'helpdesk', label: t('ticket.tickets'), enabled: auth.helpdeskEnabled && !systemStore.isTimetrackingMode },
+  { key: 'helpdesk', label: t('ticket.tickets'), enabled: auth.helpdeskEnabled && !systemStore.noHelpdeskMode },
   { key: 'people', label: t('sidebar.users'), enabled: auth.chatEnabled && !systemStore.isRestrictedMode },
   { key: 'chats', label: t('nav.messages'), enabled: auth.chatEnabled && !systemStore.isRestrictedMode },
 ].filter(s => s.enabled))

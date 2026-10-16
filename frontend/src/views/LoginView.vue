@@ -25,6 +25,7 @@
           <h1 class="auth-title">{{ $t('auth.login_title') }}</h1>
           <p v-if="systemStore.isTimetrackingMode" class="auth-mode-badge">{{ $t('auth.timetracking_mode') }}</p>
           <p v-if="systemStore.isTicketsystemMode" class="auth-mode-badge">{{ $t('auth.ticketsystem_mode') }}</p>
+          <p v-if="systemStore.isBoardMode" class="auth-mode-badge">{{ $t('auth.board_mode') }}</p>
           <form @submit.prevent="handleSubmit">
             <div class="form-group">
               <label class="form-label">{{ $t('auth.email') }} / {{ $t('auth.username') }}</label>
@@ -114,6 +115,7 @@
         <h1 class="auth-title">{{ $t('auth.login_title') }}</h1>
         <p v-if="systemStore.isTimetrackingMode" class="auth-mode-badge">{{ $t('auth.timetracking_mode') }}</p>
           <p v-if="systemStore.isTicketsystemMode" class="auth-mode-badge">{{ $t('auth.ticketsystem_mode') }}</p>
+          <p v-if="systemStore.isBoardMode" class="auth-mode-badge">{{ $t('auth.board_mode') }}</p>
         <form @submit.prevent="handleSubmit">
           <div class="form-group">
             <label class="form-label">{{ $t('auth.email') }} / {{ $t('auth.username') }}</label>

@@ -59,7 +59,8 @@
     "must_change_password": "En administrator krever at du angir et nytt passord før du fortsetter.",
     "remember_me": "Husk meg",
     "timetracking_mode": "Kun tidsregistrering",
-    "ticketsystem_mode": "Kun saksbehandlingssystem"
+    "ticketsystem_mode": "Kun saksbehandlingssystem",
+    "board_mode": "Kun board"
   },
   "project": {
     "projects": "Prosjekter",

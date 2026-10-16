@@ -17,7 +17,7 @@
         <span v-if="notificationsStore.hasUnread" class="nav-unread-dot" aria-hidden="true"></span>
         <span v-if="notificationsStore.hasUnread" class="sr-only">({{ $t('sidebar.unread_messages') }})</span>
       </RouterLink>
-      <RouterLink v-if="!systemStore.isRestrictedMode && (auth.timeTrackingEnabled || auth.canViewReports)" to="/time-tracking" class="header-nav-link" :class="{ active: route.path.startsWith('/time-tracking') }">{{ $t('timeTracking.nav') }}</RouterLink>
+      <RouterLink v-if="!systemStore.isRestrictedMode && !systemStore.isBoardMode && (auth.timeTrackingEnabled || auth.canViewReports)" to="/time-tracking" class="header-nav-link" :class="{ active: route.path.startsWith('/time-tracking') }">{{ $t('timeTracking.nav') }}</RouterLink>
     </nav>
     <div class="header-right">
       <span class="presence-count" v-if="presenceCount > 0" :title="`${presenceCount} ${$t('presence.online')}`">
@@ -143,7 +143,7 @@
             <span v-if="notificationsStore.hasUnread" class="msg-unread-dot" aria-hidden="true"></span>
             <span v-if="notificationsStore.hasUnread" class="sr-only">({{ $t('sidebar.unread_messages') }})</span>
           </div>
-          <div class="dropdown-item" role="menuitem" v-if="!systemStore.isTicketsystemMode && (auth.timeTrackingEnabled || auth.canViewReports)" @click="navigate('/time-tracking')">{{ $t('timeTracking.nav') }}</div>
+          <div class="dropdown-item" role="menuitem" v-if="!systemStore.noTimeTrackingMode && (auth.timeTrackingEnabled || auth.canViewReports)" @click="navigate('/time-tracking')">{{ $t('timeTracking.nav') }}</div>
           <div class="dropdown-divider" role="separator"></div>
           <div class="dropdown-item" role="menuitem" @click="openShortcuts">{{ $t('nav.keyboard_shortcuts') }}</div>
           <div
@@ -208,7 +208,7 @@ const emit = defineEmits(['open-shortcuts'])
 
 const auth = useAuthStore()
 // The timer endpoints need the time_tracking_enabled feature (admins always have it).
-const showTimer = computed(() => !systemStore.isTicketsystemMode && !!auth.user && (auth.isAdmin || !!auth.user.time_tracking_enabled))
+const showTimer = computed(() => !systemStore.noTimeTrackingMode && !!auth.user && (auth.isAdmin || !!auth.user.time_tracking_enabled))
 const systemStore = useSystemStore()
 const router = useRouter()
 const route = useRoute()

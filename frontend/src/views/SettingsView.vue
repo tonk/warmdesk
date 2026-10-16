@@ -245,14 +245,14 @@
                 <option value="tickets">{{ $t('settings.dashboard_default_tickets') }}</option>
               </select>
             </div>
-            <div v-if="auth.timeTrackingEnabled && !systemStore.isTicketsystemMode" class="form-group">
+            <div v-if="auth.timeTrackingEnabled && !systemStore.noTimeTrackingMode" class="form-group">
               <label class="form-label" for="tt-view-default-select">{{ $t('settings.time_tracking_view_default') }}</label>
               <select id="tt-view-default-select" class="form-input" v-model="form.time_tracking_view_default">
                 <option value="table">{{ $t('settings.time_tracking_view_default_table') }}</option>
                 <option value="calendar">{{ $t('settings.time_tracking_view_default_calendar') }}</option>
               </select>
             </div>
-            <div v-if="auth.timeTrackingEnabled && !systemStore.isTicketsystemMode" class="form-group">
+            <div v-if="auth.timeTrackingEnabled && !systemStore.noTimeTrackingMode" class="form-group">
               <label class="form-label" for="calendar-color-mode-select">{{ $t('settings.calendar_color_mode') }}</label>
               <select id="calendar-color-mode-select" class="form-input" v-model="form.calendar_color_mode">
                 <option value="customer">{{ $t('settings.calendar_color_mode_customer') }}</option>

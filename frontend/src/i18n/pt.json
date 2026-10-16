@@ -59,7 +59,8 @@
     "must_change_password": "Um administrador exige que defina uma nova palavra-passe antes de continuar.",
     "remember_me": "Lembrar de mim",
     "timetracking_mode": "Apenas registo de tempo",
-    "ticketsystem_mode": "Apenas sistema de tickets"
+    "ticketsystem_mode": "Apenas sistema de tickets",
+    "board_mode": "Apenas quadro"
   },
   "project": {
     "projects": "Projetos",

@@ -65,6 +65,7 @@ router.beforeEach((to) => {
   if (!to.meta.public && !auth.isLoggedIn) return '/login'
   if (system.isTimetrackingMode && to.path === '/') return '/time-tracking'
   if (system.isTicketsystemMode && /^\/(projects|chats|messages|time-tracking|reports|invoices)(\/|$)/.test(to.path)) return '/'
+  if (system.isBoardMode && /^\/(time-tracking|reports|invoices|tickets|helpdesk|kb)(\/|$)|^\/customers\/[^/]+\/tickets/.test(to.path)) return '/'
   if (to.meta.adminOnly && !auth.isAdmin) return '/'
   if (to.meta.reportsOnly && !auth.canViewReports) return '/'
   if (to.meta.timeTrackingOnly && !auth.timeTrackingEnabled && !auth.canViewReports) return '/'

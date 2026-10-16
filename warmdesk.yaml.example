@@ -203,7 +203,11 @@ oauth2:
 #     helpdesk (customers, tickets, knowledge base, CMDB, changes) remains.
 #   - The ticket logos (ticket-on-desk) replace the default WarmDesk logos in the
 #     web UI and in exported PDFs, and the login page shows "Ticket system only".
-# Can also be passed as the --mode=timetracking / --mode=ticketsystem CLI flag (takes precedence over this setting).
+# Set to "board" to run as a board-only server:
+#   - Time-tracking (incl. reports and invoices) and helpdesk API routes are disabled;
+#     boards/projects, topics and chat remain. The default WarmDesk logos are used and
+#     the login page shows "Board only".
+# Can also be passed as the --mode=timetracking / --mode=ticketsystem / --mode=board CLI flag (takes precedence over this setting).
 # Can also be set via the APP_MODE environment variable.
 # app_mode: "timetracking"
 

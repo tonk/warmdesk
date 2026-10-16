@@ -163,9 +163,9 @@
                   <th>{{ $t('admin.user') }}</th>
                   <th v-if="!systemStore.isRestrictedMode" style="text-align:center;width:70px;">{{ $t('feature.board') }}</th>
                   <th v-if="!systemStore.isRestrictedMode" style="text-align:center;width:70px;">{{ $t('feature.chat') }}</th>
-                  <th v-if="!systemStore.isTicketsystemMode" style="text-align:center;width:90px;">{{ $t('feature.time_tracking') }}</th>
-                  <th v-if="!systemStore.isTicketsystemMode" style="text-align:center;width:100px;">{{ $t('admin.timetracking_viewer') }}</th>
-                  <th v-if="!systemStore.isTimetrackingMode" style="text-align:center;width:90px;">{{ $t('feature.helpdesk') }}</th>
+                  <th v-if="!systemStore.noTimeTrackingMode" style="text-align:center;width:90px;">{{ $t('feature.time_tracking') }}</th>
+                  <th v-if="!systemStore.noTimeTrackingMode" style="text-align:center;width:100px;">{{ $t('admin.timetracking_viewer') }}</th>
+                  <th v-if="!systemStore.noHelpdeskMode" style="text-align:center;width:90px;">{{ $t('feature.helpdesk') }}</th>
                   <th v-if="!systemStore.isRestrictedMode" style="text-align:center;width:110px;">{{ $t('feature.create_projects') }}</th>
                   <th style="text-align:center;width:60px;">{{ $t('admin.mfa_enabled') }}</th>
                 </tr>
@@ -191,17 +191,17 @@
                     <span v-else-if="user.global_role === 'metrics' || user.global_role === 'backup'" class="feat-check feat-off">—</span>
                     <input v-else type="checkbox" class="feat-toggle" :checked="user.chat_enabled !== false" @change="toggleFeature(user, 'chat_enabled', $event.target.checked)" />
                   </td>
-                  <td v-if="!systemStore.isTicketsystemMode" style="text-align:center;">
+                  <td v-if="!systemStore.noTimeTrackingMode" style="text-align:center;">
                     <template v-if="user.global_role === 'customer'"><span class="feat-check feat-off">—</span></template>
                     <span v-else-if="user.global_role === 'metrics' || user.global_role === 'backup'" class="feat-check feat-off">—</span>
                     <input v-else type="checkbox" class="feat-toggle" :checked="!!user.time_tracking_enabled" @change="toggleFeature(user, 'time_tracking_enabled', $event.target.checked)" />
                   </td>
-                  <td v-if="!systemStore.isTicketsystemMode" style="text-align:center;">
+                  <td v-if="!systemStore.noTimeTrackingMode" style="text-align:center;">
                     <template v-if="user.global_role === 'customer'"><span class="feat-check feat-off">—</span></template>
                     <span v-else-if="user.global_role === 'metrics' || user.global_role === 'backup'" class="feat-check feat-off">—</span>
                     <input v-else type="checkbox" class="feat-toggle" :checked="!!user.time_tracking_viewer" @change="toggleFeature(user, 'time_tracking_viewer', $event.target.checked)" />
                   </td>
-                  <td v-if="!systemStore.isTimetrackingMode" style="text-align:center;">
+                  <td v-if="!systemStore.noHelpdeskMode" style="text-align:center;">
                     <template v-if="user.global_role === 'admin'"><span class="feat-check feat-always">✓</span></template>
                     <template v-else-if="user.global_role === 'customer'"><span class="feat-check feat-always">✓</span></template>
                     <span v-else-if="user.global_role === 'metrics' || user.global_role === 'backup'" class="feat-check feat-off">—</span>
@@ -642,7 +642,7 @@
               </div>
             </div>
 
-            <div class="card settings-card" v-if="!systemStore.isTimetrackingMode">
+            <div class="card settings-card" v-if="!systemStore.noHelpdeskMode">
               <h3 class="settings-subsection">
                 {{ $t('admin.imap_title') }}
                 <HelpIcon i18n-key="admin.imap_hint" :label="$t('admin.imap_title')" />
@@ -1096,27 +1096,27 @@
         </div>
 
         <!-- Helpdesk settings tab -->
-        <div v-if="!systemStore.isTimetrackingMode" v-show="tab === 'helpdesk'" id="tab-panel-helpdesk">
+        <div v-if="!systemStore.noHelpdeskMode" v-show="tab === 'helpdesk'" id="tab-panel-helpdesk">
           <HelpdeskSettingsTab />
         </div>
 
         <!-- Business calendars tab -->
-        <div v-if="!systemStore.isTimetrackingMode" v-show="tab === 'business-calendars'" id="tab-panel-business-calendars">
+        <div v-if="!systemStore.noHelpdeskMode" v-show="tab === 'business-calendars'" id="tab-panel-business-calendars">
           <BusinessCalendarsTab />
         </div>
 
         <!-- Service catalogue tab -->
-        <div v-if="!systemStore.isTimetrackingMode" v-show="tab === 'service-catalog'" id="tab-panel-service-catalog">
+        <div v-if="!systemStore.noHelpdeskMode" v-show="tab === 'service-catalog'" id="tab-panel-service-catalog">
           <ServiceCatalogTab />
         </div>
 
         <!-- Change management tab -->
-        <div v-if="!systemStore.isTimetrackingMode" v-show="tab === 'change-management'" id="tab-panel-change-management">
+        <div v-if="!systemStore.noHelpdeskMode" v-show="tab === 'change-management'" id="tab-panel-change-management">
           <ChangeManagementTab />
         </div>
 
         <!-- CMDB types tab -->
-        <div v-if="!systemStore.isTimetrackingMode" v-show="tab === 'cmdb-types'" id="tab-panel-cmdb-types">
+        <div v-if="!systemStore.noHelpdeskMode" v-show="tab === 'cmdb-types'" id="tab-panel-cmdb-types">
           <CmdbTypesTab />
         </div>
 
