@@ -50,6 +50,9 @@ func must(err error) {
 	}
 }
 
+// durPtr returns a pointer to d, for optional duration fields in seed specs.
+func durPtr(d time.Duration) *time.Duration { return &d }
+
 // seedSetting upserts a system setting by key.
 //
 // Uses a single atomic INSERT ... ON CONFLICT DO UPDATE (GORM translates
@@ -268,6 +271,10 @@ func main() {
 	seedSetting(db, "company_payment_terms", "30")
 	seedSetting(db, "invoice_number_prefix", "INV")
 	seedSetting(db, "default_vat_rate", "21")
+	seedSetting(db, services.SettingHelpdeskResolvedAutoClose, "5")
+	seedSetting(db, services.SettingHelpdeskRequireResolution, "false")
+	seedSetting(db, services.SettingHelpdeskPriorityMatrix, `{"high:high":"critical","high:medium":"high","high:low":"medium","medium:high":"high","medium:medium":"medium","medium:low":"low","low:high":"medium","low:medium":"low","low:low":"low"}`)
+	seedSetting(db, "backup_include_uploads", "true")
 
 	// ── 1. Users ──────────────────────────────────────────────────────────────
 	fmt.Println("→ Creating users…")
@@ -3368,6 +3375,10 @@ Pagerduty schedules will be updated to match this by Friday.`,
 		assignedToKey string
 		createdAgo    time.Duration // how long ago the ticket was created
 		messages      []ticketMsgSpec
+		privateNotes  []ticketMsgSpec // internal notes (is_private) — hoursAgo counts like messages
+		reminderIn    *time.Duration  // pending: reminder date, relative to now (negative = due)
+		closeIn       *time.Duration  // pending_close: auto-close date, relative to now
+		majorIncident bool
 	}
 
 	// Build a lookup from customer name → demoCustomerIDs index
@@ -3424,6 +3435,10 @@ Pagerduty schedules will be updated to match this by Friday.`,
 				{"admin", "Great, thanks Priya. Please CC Sarah on the re-send so she's in the loop.", 118},
 				{"priya", "Done. Invoice re-issued and sent to both Acme Finance and Sarah. Closing this out.", 96},
 			},
+			privateNotes: []ticketMsgSpec{
+				{"priya", "Internal: the reduced-rate flag on Acme's billing profile was dropped during last month's migration. Checked the other accounts — only Acme is affected.", 110},
+			},
+			closeIn: durPtr(48 * time.Hour),
 		},
 		{
 			customerIdx:  customerIdx["Initech Ltd"],
@@ -3452,6 +3467,10 @@ Pagerduty schedules will be updated to match this by Friday.`,
 				{"sarah", "Can you share the test results?", 310},
 				{"raj", "Attached in the ticket. 300 req/min sustained with 0% error rate for 30 minutes.", 308},
 			},
+			privateNotes: []ticketMsgSpec{
+				{"raj", "Internal: root cause was the counter key including the token's jti. Add a regression test before the next release.", 309},
+			},
+			closeIn: durPtr(-2 * time.Hour), // already due — auto-close picks it up
 		},
 		{
 			customerIdx:   customerIdx["Acme Corporation"],
@@ -3491,6 +3510,42 @@ Pagerduty schedules will be updated to match this by Friday.`,
 			createdAgo:   12 * time.Hour,
 			messages:     nil,
 		},
+		{
+			customerIdx:   customerIdx["Initech Ltd"],
+			subject:       "Waiting for customer: certificate renewal details",
+			description:   "Initech's TLS certificate for the API gateway expires soon. We need the new CSR from their security team before we can renew it.",
+			ticketType:    "service_request",
+			status:        "pending",
+			priority:      "medium",
+			createdByKey:  "admin",
+			assignedToKey: "elena",
+			createdAgo:    72 * time.Hour,
+			messages: []ticketMsgSpec{
+				{"elena", "Hi, could you send us the CSR for the new gateway certificate? We'll renew as soon as we have it.", 60},
+			},
+			privateNotes: []ticketMsgSpec{
+				{"elena", "Internal: current cert expires in 12 days. Reminder set — chase their security team if nothing arrives.", 59},
+			},
+			reminderIn: durPtr(-24 * time.Hour), // due — sorts to the top of the list
+		},
+		{
+			customerIdx:   customerIdx["Globex Systems"],
+			subject:       "Production database cluster unreachable",
+			description:   "All write traffic to the primary PostgreSQL cluster is failing since 09:12. Customer-facing checkout is down.\n\n**Impact:** all Globex users. **Urgency:** immediate.",
+			ticketType:    "incident",
+			status:        "in_progress",
+			priority:      "critical",
+			createdByKey:  "lisa",
+			assignedToKey: "marc",
+			createdAgo:    3 * time.Hour,
+			majorIncident: true,
+			messages: []ticketMsgSpec{
+				{"marc", "Acknowledged. The primary lost quorum after a network partition. Failing over to the replica now.", 2},
+			},
+			privateNotes: []ticketMsgSpec{
+				{"marc", "Internal: do NOT restart the old primary until we've confirmed which node has the latest WAL.", 2},
+			},
+		},
 	}
 
 	createdTickets := map[string]*models.Ticket{}
@@ -3512,6 +3567,17 @@ Pagerduty schedules will be updated to match this by Friday.`,
 			AssignedToID: &assignedTo.ID,
 			CreatedAt:    createdAt,
 			UpdatedAt:    createdAt,
+		}
+		ticket.IsMajorIncident = ts.majorIncident
+		if ts.reminderIn != nil {
+			t := now.Add(*ts.reminderIn).UTC().Truncate(24 * time.Hour).Add(12 * time.Hour) // date-only, stored as T12:00:00Z
+			ticket.ReminderAt = &t
+			ticket.Title = "[" + t.Format("2006-01-02") + "] " + ticket.Title
+		}
+		if ts.closeIn != nil {
+			t := now.Add(*ts.closeIn).UTC().Truncate(24 * time.Hour).Add(12 * time.Hour)
+			ticket.CloseAt = &t
+			ticket.Title = "[" + t.Format("2006-01-02") + "] " + ticket.Title
 		}
 		// Assign SLA policy matching the ticket's priority
 		if policy, ok := slaByPriority[ts.priority]; ok {
@@ -3546,11 +3612,123 @@ Pagerduty schedules will be updated to match this by Friday.`,
 				}
 			}
 		}
+		for _, m := range ts.privateNotes {
+			author := users[m.userKey]
+			noteAt := ticket.CreatedAt.Add(time.Duration(-m.hoursAgo) * time.Hour)
+			must(db.Create(&models.TicketMessage{
+				TicketID:  ticket.ID,
+				UserID:    author.ID,
+				Body:      m.body,
+				IsPrivate: true,
+				CreatedAt: noteAt,
+				UpdatedAt: noteAt,
+			}).Error)
+		}
 		if firstResponseAt != nil {
 			db.Model(&ticket).Update("first_response_at", firstResponseAt)
 		}
 	}
 	fmt.Printf("   Created %d tickets with messages\n", len(ticketSeeds))
+
+	// ── 8a0. Customer contacts, DMs, favourite users, API keys, login history ──
+	fmt.Println("→ Creating customer contacts, direct messages, API keys and login history…")
+	{
+		type contactSpec struct {
+			customer, name, dept, phone, email string
+			primary                            bool
+		}
+		for _, c := range []contactSpec{
+			{"Acme Corporation", "Priya Shah", "Operations", "+44 20 7946 0102", "priya.shah@acme.example", true},
+			{"Acme Corporation", "Tom Fielding", "Logistics", "+44 161 496 0002", "tom.fielding@acme.example", false},
+			{"Acme Corporation", "Dana Whitfield", "Finance", "+44 20 7946 0140", "finance@acme.example", false},
+			{"Globex Systems", "Sean O'Brien", "Engineering", "+353 1 555 0101", "sean.obrien@globex.example", true},
+			{"Globex Systems", "Aoife Murphy", "IT Security", "+353 1 555 0145", "aoife.murphy@globex.example", false},
+			{"Initech Ltd", "Bram de Vries", "IT", "+31 20 555 0101", "bram.devries@initech.example", true},
+		} {
+			must(db.Create(&models.CustomerContact{
+				CustomerID: demoCustomerIDs[customerIdx[c.customer]],
+				Name:       c.name, Department: c.dept, Phone: c.phone, Email: c.email, IsPrimary: c.primary,
+			}).Error)
+		}
+
+		// Direct messages (oldest first); sender, receiver, body, hours ago
+		for _, d := range []struct {
+			from, to, body string
+			hoursAgo       int
+		}{
+			{"admin", "sarah", "Hi Sarah, do you have a minute to go over the Acme launch checklist?", 30},
+			{"sarah", "admin", "Sure — give me ten minutes, I'm finishing the QA sign-off.", 29},
+			{"admin", "sarah", "Perfect, I'll start a call then.", 29},
+			{"marc", "admin", "The staging deploy is green again. Want me to cut the release?", 8},
+			{"admin", "marc", "Yes please, and tag it in the board when done.", 7},
+		} {
+			at := now.Add(-time.Duration(d.hoursAgo) * time.Hour)
+			must(db.Create(&models.DirectMessage{
+				SenderID: users[d.from].ID, ReceiverID: users[d.to].ID, Body: d.body, CreatedAt: at, UpdatedAt: at,
+			}).Error)
+		}
+
+		for _, f := range [][2]string{{"admin", "sarah"}, {"admin", "marc"}, {"sarah", "admin"}} {
+			must(db.Create(&models.FavoriteUser{UserID: users[f[0]].ID, FavoriteUserID: users[f[1]].ID}).Error)
+		}
+
+		// API keys — random plaintext, only the SHA-256 hash is stored (never shown again)
+		for _, k := range []struct {
+			user, name, project string
+		}{
+			{"admin", "CI/CD pipeline", ""},
+			{"marc", "Deploy bot (devops-infra)", "devops-infra"},
+			{"metrics", "Prometheus scraper", ""},
+		} {
+			sum := sha256.Sum256([]byte("seed-demo-key-" + k.user + "-" + k.name))
+			hash := hex.EncodeToString(sum[:])
+			key := models.APIKey{UserID: users[k.user].ID, Name: k.name, KeyHash: hash, KeyPrefix: "cwk_" + hash[:8]}
+			if pd, ok := projects[k.project]; ok && k.project != "" {
+				pid := pd.project.ID
+				key.ProjectID = &pid
+			}
+			if k.user == "admin" {
+				used := now.Add(-2 * time.Hour)
+				key.LastUsedAt = &used
+			}
+			must(db.Create(&key).Error)
+		}
+
+		// Login history for tonk and admin
+		// tonk is not a demo user, so --reset doesn't remove their rows: clear earlier seeded ones (documentation-range IP)
+		db.Where("ip = ?", "192.0.2.10").Delete(&models.LoginHistory{})
+		for _, h := range []struct {
+			user, event, detail, client string
+			hoursAgo                    int
+		}{
+			{"tonk", "login_ok", "", "Firefox 131 on Linux", 1},
+			{"tonk", "login_failed", "bad password", "Firefox 131 on Linux", 26},
+			{"tonk", "login_ok", "", "WarmDesk desktop on Linux", 27},
+			{"tonk", "password_changed", "", "Firefox 131 on Linux", 24 * 20},
+			{"admin", "login_ok", "", "Chrome 130 on macOS", 3},
+			{"admin", "mfa_enabled", "", "Chrome 130 on macOS", 24 * 9},
+			{"admin", "api_key_created", "CI/CD pipeline", "Chrome 130 on macOS", 24 * 9},
+		} {
+			u := tonk
+			if h.user != "tonk" {
+				u = *users[h.user]
+			}
+			must(db.Create(&models.LoginHistory{
+				UserID: u.ID, Username: u.Username, ActorID: u.ID, ActorUsername: u.Username,
+				Event: h.event, Detail: h.detail, IP: "192.0.2.10", Client: h.client,
+				CreatedAt: now.Add(-time.Duration(h.hoursAgo) * time.Hour),
+			}).Error)
+		}
+	}
+
+	// ── 8a. Moved card: old key keeps resolving via CardKeyAlias ───────────────
+	fmt.Println("→ Creating card key alias (moved card)…")
+	{
+		var moved models.Card
+		if err := db.Where("project_id = ?", projects["website-redesign"].project.ID).Order("id").First(&moved).Error; err == nil {
+			must(db.Create(&models.CardKeyAlias{KeyPrefix: "MOBL", CardNumber: 901, CardID: moved.ID}).Error)
+		}
+	}
 
 	// ── 8b. Ticket–Card links ─────────────────────────────────────────────────
 	fmt.Println("→ Creating ticket–card links…")
@@ -3983,6 +4161,11 @@ Pagerduty schedules will be updated to match this by Friday.`,
 		{user: "marc", customer: "Acme Corporation", project: "mobile-app-v2", contractName: "Phase 2 — Mobile Apps", daysAgo: 5, minutes: 80, distance: 55.0, desc: "Return travel from Acme"},
 	}
 
+	travelLocationByCustomer := map[string]string{
+		"Acme Corporation": "Slough Warehouse",
+		"Globex Systems":   "Cork Data Centre",
+	}
+
 	dayTimes := newDayTimeCursor()
 	totalTimeEntries := 0
 	for _, s := range teSpecs {
@@ -4005,6 +4188,17 @@ Pagerduty schedules will be updated to match this by Friday.`,
 		}
 		if cid, ok := custIDByName[s.customer]; ok {
 			entry.CustomerID = pUint(cid)
+			// Travel to a known customer location: remember the location and use
+			// its travel distance, as picking it in the UI would.
+			if locName, ok := travelLocationByCustomer[s.customer]; ok && s.distance > 0 {
+				var loc models.CustomerLocation
+				if db.Where("customer_id = ? AND name = ?", cid, locName).First(&loc).Error == nil {
+					entry.LocationID = pUint(loc.ID)
+					if loc.TravelDistance != nil {
+						entry.Distance = ptr(*loc.TravelDistance)
+					}
+				}
+			}
 		}
 		if s.project != "" {
 			if pd, ok := projects[s.project]; ok {
@@ -4186,6 +4380,21 @@ Pagerduty schedules will be updated to match this by Friday.`,
 	}
 	fmt.Printf("   Created %d TT-only customers, %d TT-only projects, %d personal time entries for tonk\n",
 		len(ttCustomers), len(ttProjectSpecs), len(ttEntries))
+
+	// ── 10b1. Running timer for tonk ─────────────────────────────────────────
+	fmt.Println("→ Starting a running timer for tonk…")
+	{
+		timer := models.TimeTimer{
+			UserID:      tonk.ID,
+			CustomerID:  pUint(custIDByName["Acme Corporation"]),
+			ProjectID:   pUint(projects["website-redesign"].project.ID),
+			Description: "Reviewing homepage mock-ups",
+			TimeZone:    "Europe/Amsterdam",
+			StartedAt:   time.Now().UTC().Add(-47 * time.Minute),
+		}
+		db.Where("user_id = ?", tonk.ID).Delete(&models.TimeTimer{})
+		must(db.Create(&timer).Error)
+	}
 
 	// ── 10b2. Time macro libraries ───────────────────────────────────────────
 	fmt.Println("→ Creating time macro libraries…")
@@ -5134,6 +5343,7 @@ func removeDemoData(db *gorm.DB) {
 			db.Exec("DELETE FROM card_labels WHERE card_id IN ?", cardIDs)
 			db.Exec("DELETE FROM card_assignees WHERE card_id IN ?", cardIDs)
 			db.Exec("DELETE FROM sprint_cards WHERE card_id IN ?", cardIDs)
+			db.Where("card_id IN ?", cardIDs).Delete(&models.CardKeyAlias{})
 			db.Where("source_card_id IN ? OR target_card_id IN ?", cardIDs, cardIDs).Delete(&models.CardReference{})
 		}
 
@@ -5244,6 +5454,7 @@ func removeDemoData(db *gorm.DB) {
 		db.Where("customer_id IN ?", custIDs).Delete(&models.TimeEntry{})
 		db.Where("customer_id IN ?", custIDs).Delete(&models.Invoice{})
 		db.Where("customer_id IN ?", custIDs).Delete(&models.CustomerFavorite{})
+		db.Where("customer_id IN ?", custIDs).Delete(&models.CustomerContact{})
 		db.Where("customer_id IN ?", custIDs).Delete(&models.CustomerLocation{})
 		db.Where("customer_id IN ?", custIDs).Delete(&models.Contract{})
 		db.Where("id IN ?", custIDs).Delete(&models.Customer{})
@@ -5268,6 +5479,11 @@ func removeDemoData(db *gorm.DB) {
 		}
 		db.Where("user_id IN ?", userIDs).Delete(&models.TimeEntry{})
 		db.Where("user_id IN ?", userIDs).Delete(&models.TimeMacroLibrary{})
+		db.Where("user_id IN ?", userIDs).Delete(&models.TimeTimer{})
+		db.Where("sender_id IN ? OR receiver_id IN ?", userIDs, userIDs).Delete(&models.DirectMessage{})
+		db.Where("user_id IN ? OR favorite_user_id IN ?", userIDs, userIDs).Delete(&models.FavoriteUser{})
+		db.Where("user_id IN ?", userIDs).Delete(&models.APIKey{})
+		db.Where("user_id IN ? OR actor_id IN ?", userIDs, userIDs).Delete(&models.LoginHistory{})
 		db.Unscoped().Where("id IN ?", userIDs).Delete(&models.User{})
 	}
 

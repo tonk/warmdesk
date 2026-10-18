@@ -29,7 +29,7 @@ var (
 		"WarmDesk SaaS platform", "Core network", "Backup storage",
 	}
 	seedCatalogNames  = []string{"New laptop", "Software licence", "Access to a project"}
-	seedITSMGroups    = []string{"Change Advisory Board", "Service Approvers"}
+	seedITSMGroups    = []string{"Change Advisory Board", "Service Approvers", "Major Incident Team"}
 	seedFreezeNames   = []string{"Year-end change freeze"}
 	seedCalendarNames = []string{"Netherlands office", "UK support desk", "Extended hours NL"}
 	seedCITypeDefault = []struct{ name, icon string }{
@@ -354,6 +354,8 @@ func seedITSM(db *gorm.DB, users map[string]*models.User, customerIDs []uint, ti
 	}
 	cab := mkGroup("Change Advisory Board", "Approves normal and emergency changes.", "admin", "marc", "lisa")
 	approvers := mkGroup("Service Approvers", "Approves service requests that cost money.", "admin", "sarah")
+	mit := mkGroup("Major Incident Team", "Notified when a ticket is flagged as a major incident.", "admin", "marc", "raj")
+	seedSetting(db, services.SettingHelpdeskMajorIncidentGroup, fmt.Sprint(mit))
 	seedSetting(db, services.SettingChangeCABGroup, fmt.Sprint(cab))
 	seedSetting(db, services.SettingChangeApprovals, "2")
 	seedSetting(db, services.SettingChangeEmergencyApprovals, "1")
