@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"html"
 	"net/http"
 	"strconv"
 	"time"
@@ -416,8 +417,12 @@ func SendInvoice(c *gin.Context) {
 
 	bodyHTML := req.BodyHTML
 	if bodyHTML == "" {
-		bodyHTML = "<p>" + body + "</p>"
+		bodyHTML = "<p>" + html.EscapeString(body) + "</p>"
 	}
+	// Wrap in the branded email shell so the company logo is included.
+	bodyHTML = services.WrapHTML("Invoice "+html.EscapeString(invoice.InvoiceNumber),
+		`<tr><td class="wd-body" style="padding:28px 32px;font-size:15px;color:#333;line-height:1.6">`+
+			bodyHTML+`</td></tr>`)
 	if err := svc.SendWithHTMLAndAttachment(req.To, subject, body, bodyHTML, invoice.InvoiceNumber+".pdf", "application/pdf", pdfBytes); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to send email: " + err.Error()})
 		return

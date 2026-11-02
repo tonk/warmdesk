@@ -2,9 +2,9 @@ package services
 
 import (
 	"crypto/rand"
-	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"html"
 	"net/mail"
 	"net/smtp"
 	"regexp"
@@ -129,85 +129,60 @@ func foldHeader(value string) string {
 // SendReply sends an email reply to a ticket's original sender with threading
 // headers (Message-ID, In-Reply-To, References) so the customer's follow-up
 // reply is threaded back to the same ticket by the IMAP polling service.
+// The plain-text part carries the reply unchanged (the IMAP poller reads that
+// part of the customer's answer); the HTML part wraps it in the branded shell
+// so the company logo is shown.
 func (s *EmailService) SendReply(to, subject, body string, ticketID uint, inReplyTo, references string) error {
 	cfg := s.cfg()
 	if cfg.Host == "" {
 		return nil
 	}
-	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
-	from := cfg.From
-	if from == "" {
-		from = "warmdesk@localhost"
-	}
+	from := s.from(cfg)
 
 	// Generate a unique Message-ID with the ticket ID embedded for lookup
 	randBytes := make([]byte, 8)
 	rand.Read(randBytes) //nolint:errcheck
 	domain := "warmdesk.local"
 	if at := strings.LastIndex(from, "@"); at != -1 {
-		if d := from[at+1:]; d != "" {
+		if d := strings.TrimRight(from[at+1:], ">"); d != "" {
 			domain = d
 		}
 	}
 	msgID := fmt.Sprintf("<warmdesk-%d-%s@%s>", ticketID, hex.EncodeToString(randBytes), domain)
 
-	var b strings.Builder
-	fmt.Fprintf(&b, "From: %s\r\n", from)
-	fmt.Fprintf(&b, "To: %s\r\n", to)
-	fmt.Fprintf(&b, "Subject: %s\r\n", foldHeader(subject))
-	fmt.Fprintf(&b, "Message-ID: %s\r\n", msgID)
+	headers := []string{
+		"From: " + from,
+		"To: " + to,
+		"Subject: " + foldHeader(subject),
+		"Message-ID: " + msgID,
+	}
 	if inReplyTo != "" {
-		fmt.Fprintf(&b, "In-Reply-To: %s\r\n", inReplyTo)
-		fmt.Fprintf(&b, "References: %s\r\n", inReplyTo)
+		headers = append(headers, "In-Reply-To: "+inReplyTo)
+		refs := inReplyTo
 		if references != "" && references != inReplyTo {
-			fmt.Fprintf(&b, "References: %s %s\r\n", inReplyTo, strings.Trim(references, "<>"))
+			refs = references + " " + inReplyTo
 		}
+		headers = append(headers, "References: "+refs)
 	}
-	fmt.Fprintf(&b, "X-WarmDesk-Ticket-Id: %d\r\n", ticketID)
-	fmt.Fprintf(&b, "Content-Type: text/plain; charset=UTF-8\r\n")
-	fmt.Fprintf(&b, "\r\n%s", foldBody(body))
+	headers = append(headers, fmt.Sprintf("X-WarmDesk-Ticket-Id: %d", ticketID))
 
-	var auth smtp.Auth
-	if cfg.Username != "" {
-		auth = smtp.PlainAuth("", cfg.Username, cfg.Password, cfg.Host)
-	}
+	return s.deliver(cfg, from, []string{to}, buildMIMEMessage(headers, body, ticketReplyHTML(ticketID, body), nil))
+}
 
-	return smtp.SendMail(addr, auth, envelopeAddress(from), []string{to}, []byte(b.String()))
+// ticketReplyHTML renders a plain-text ticket reply as a branded HTML email.
+func ticketReplyHTML(ticketID uint, body string) string {
+	escaped := strings.ReplaceAll(html.EscapeString(strings.ReplaceAll(body, "\r\n", "\n")), "\n", "<br>\n")
+	content := `<tr><td class="wd-body" style="padding:28px 32px;font-size:15px;color:#333;line-height:1.6">` +
+		escaped + `</td></tr>`
+	return WrapHTML(fmt.Sprintf("Ticket #%d", ticketID), content)
 }
 
 // SendHTML sends a multipart/alternative email with both a plain-text fallback
 // and an HTML body. Clients that support HTML will render the HTML version.
+// Images embedded as data: URIs (company logo, WarmDesk icon) are sent as
+// inline cid: parts.
 func (s *EmailService) SendHTML(to, subject, htmlBody, textBody string) error {
-	cfg := s.cfg()
-	if cfg.Host == "" {
-		return nil
-	}
-	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
-	from := cfg.From
-	if from == "" {
-		from = "warmdesk@localhost"
-	}
-
-	boundary := "==WarmDesk_boundary_42=="
-	var b strings.Builder
-	fmt.Fprintf(&b, "From: %s\r\n", from)
-	fmt.Fprintf(&b, "To: %s\r\n", to)
-	fmt.Fprintf(&b, "Subject: %s\r\n", foldHeader(subject))
-	fmt.Fprintf(&b, "MIME-Version: 1.0\r\n")
-	fmt.Fprintf(&b, "Content-Type: multipart/alternative; boundary=%q\r\n", boundary)
-	fmt.Fprintf(&b, "\r\n")
-	fmt.Fprintf(&b, "--%s\r\n", boundary)
-	fmt.Fprintf(&b, "Content-Type: text/plain; charset=UTF-8\r\n\r\n%s\r\n", foldBody(textBody))
-	fmt.Fprintf(&b, "--%s\r\n", boundary)
-	fmt.Fprintf(&b, "Content-Type: text/html; charset=UTF-8\r\n\r\n%s\r\n", foldBody(htmlBody))
-	fmt.Fprintf(&b, "--%s--\r\n", boundary)
-
-	var auth smtp.Auth
-	if cfg.Username != "" {
-		auth = smtp.PlainAuth("", cfg.Username, cfg.Password, cfg.Host)
-	}
-
-	return smtp.SendMail(addr, auth, envelopeAddress(from), []string{to}, []byte(b.String()))
+	return s.SendHTMLMulti([]string{to}, subject, htmlBody, textBody)
 }
 
 // SendHTMLMulti is like SendHTML but delivers a single message to multiple
@@ -221,32 +196,13 @@ func (s *EmailService) SendHTMLMulti(to []string, subject, htmlBody, textBody st
 	if cfg.Host == "" {
 		return nil
 	}
-	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
-	from := cfg.From
-	if from == "" {
-		from = "warmdesk@localhost"
+	from := s.from(cfg)
+	headers := []string{
+		"From: " + from,
+		"To: " + strings.Join(to, ", "),
+		"Subject: " + foldHeader(subject),
 	}
-
-	boundary := "==WarmDesk_boundary_42=="
-	var b strings.Builder
-	fmt.Fprintf(&b, "From: %s\r\n", from)
-	fmt.Fprintf(&b, "To: %s\r\n", strings.Join(to, ", "))
-	fmt.Fprintf(&b, "Subject: %s\r\n", foldHeader(subject))
-	fmt.Fprintf(&b, "MIME-Version: 1.0\r\n")
-	fmt.Fprintf(&b, "Content-Type: multipart/alternative; boundary=%q\r\n", boundary)
-	fmt.Fprintf(&b, "\r\n")
-	fmt.Fprintf(&b, "--%s\r\n", boundary)
-	fmt.Fprintf(&b, "Content-Type: text/plain; charset=UTF-8\r\n\r\n%s\r\n", foldBody(textBody))
-	fmt.Fprintf(&b, "--%s\r\n", boundary)
-	fmt.Fprintf(&b, "Content-Type: text/html; charset=UTF-8\r\n\r\n%s\r\n", foldBody(htmlBody))
-	fmt.Fprintf(&b, "--%s--\r\n", boundary)
-
-	var auth smtp.Auth
-	if cfg.Username != "" {
-		auth = smtp.PlainAuth("", cfg.Username, cfg.Password, cfg.Host)
-	}
-
-	return smtp.SendMail(addr, auth, envelopeAddress(from), to, []byte(b.String()))
+	return s.deliver(cfg, from, to, buildMIMEMessage(headers, textBody, htmlBody, nil))
 }
 
 // SendWithHTMLAndAttachment sends a multipart/mixed email with an HTML body (and
@@ -256,55 +212,30 @@ func (s *EmailService) SendWithHTMLAndAttachment(to, subject, plainText, htmlBod
 	if cfg.Host == "" {
 		return nil
 	}
-	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
-	from := cfg.From
-	if from == "" {
-		from = "warmdesk@localhost"
+	from := s.from(cfg)
+	headers := []string{
+		"From: " + from,
+		"To: " + to,
+		"Subject: " + foldHeader(subject),
 	}
+	att := &mailAttachment{filename: filename, contentType: mimeType, data: data}
+	return s.deliver(cfg, from, []string{to}, buildMIMEMessage(headers, plainText, htmlBody, att))
+}
 
-	outerBoundary := "==WarmDesk_outer_boundary=="
-	altBoundary := "==WarmDesk_alt_boundary=="
-
-	encoded := base64.StdEncoding.EncodeToString(data)
-	var wrapped strings.Builder
-	for i := 0; i < len(encoded); i += 76 {
-		end := i + 76
-		if end > len(encoded) {
-			end = len(encoded)
-		}
-		wrapped.WriteString(encoded[i:end])
-		wrapped.WriteString("\r\n")
+func (s *EmailService) from(cfg config.SMTPConfig) string {
+	if cfg.From == "" {
+		return "warmdesk@localhost"
 	}
+	return cfg.From
+}
 
-	var b strings.Builder
-	fmt.Fprintf(&b, "From: %s\r\n", from)
-	fmt.Fprintf(&b, "To: %s\r\n", to)
-	fmt.Fprintf(&b, "Subject: %s\r\n", foldHeader(subject))
-	fmt.Fprintf(&b, "MIME-Version: 1.0\r\n")
-	fmt.Fprintf(&b, "Content-Type: multipart/mixed; boundary=%q\r\n\r\n", outerBoundary)
-
-	// Body part: multipart/alternative (plain + html).
-	fmt.Fprintf(&b, "--%s\r\n", outerBoundary)
-	fmt.Fprintf(&b, "Content-Type: multipart/alternative; boundary=%q\r\n\r\n", altBoundary)
-	fmt.Fprintf(&b, "--%s\r\n", altBoundary)
-	fmt.Fprintf(&b, "Content-Type: text/plain; charset=UTF-8\r\n\r\n%s\r\n\r\n", foldBody(plainText))
-	fmt.Fprintf(&b, "--%s\r\n", altBoundary)
-	fmt.Fprintf(&b, "Content-Type: text/html; charset=UTF-8\r\n\r\n%s\r\n\r\n", htmlBody)
-	fmt.Fprintf(&b, "--%s--\r\n\r\n", altBoundary)
-
-	// Attachment part.
-	fmt.Fprintf(&b, "--%s\r\n", outerBoundary)
-	fmt.Fprintf(&b, "Content-Type: %s\r\n", mimeType)
-	fmt.Fprintf(&b, "Content-Transfer-Encoding: base64\r\n")
-	fmt.Fprintf(&b, "Content-Disposition: attachment; filename=%q\r\n\r\n", filename)
-	fmt.Fprintf(&b, "%s", wrapped.String())
-	fmt.Fprintf(&b, "--%s--\r\n", outerBoundary)
-
+func (s *EmailService) deliver(cfg config.SMTPConfig, from string, to []string, msg string) error {
 	var auth smtp.Auth
 	if cfg.Username != "" {
 		auth = smtp.PlainAuth("", cfg.Username, cfg.Password, cfg.Host)
 	}
-	return smtp.SendMail(addr, auth, envelopeAddress(from), []string{to}, []byte(b.String()))
+	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+	return smtp.SendMail(addr, auth, envelopeAddress(from), to, []byte(msg))
 }
 
 // NotificationService sends in-app and email notifications.

@@ -248,14 +248,14 @@ func logoAsDataURI(raw string) string {
 		if attachmentCfg != nil && attachmentCfg.UploadDir != "" {
 			uploadDir = attachmentCfg.UploadDir
 		}
-		storedName := strings.TrimPrefix(raw, "/uploads/")
+		storedName := filepath.Base(strings.TrimPrefix(raw, "/uploads/"))
 		var err error
 		data, err = os.ReadFile(filepath.Join(uploadDir, storedName))
 		if err != nil {
 			return ""
 		}
 		mime = mimeFromExt(filepath.Ext(storedName))
-	} else if strings.HasPrefix(raw, "https://") {
+	} else if lower := strings.ToLower(raw); strings.HasPrefix(lower, "https://") || strings.HasPrefix(lower, "http://") {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, raw, nil)
