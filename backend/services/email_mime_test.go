@@ -102,7 +102,8 @@ func TestBuildMIMEMessage_inlineLogo(t *testing.T) {
 	assert.Contains(t, htmlBody, `src="cid:`+cid+`"`)
 	assert.True(t, strings.HasPrefix(mail.Header(logo.header).Get("Content-Disposition"), "inline"))
 
-	assert.Equal(t, "image/svg+xml", parts[3].mediaType)
+	assert.Equal(t, "image/png", parts[3].mediaType)
+	assert.Equal(t, warmDeskEmailIconPNG, parts[3].body)
 }
 
 func TestBuildMIMEMessage_noImages(t *testing.T) {

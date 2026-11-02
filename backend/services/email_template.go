@@ -1,6 +1,7 @@
 package services
 
 import (
+	_ "embed"
 	"encoding/base64"
 	"fmt"
 	"strings"
@@ -28,21 +29,18 @@ func GetAppInfo() (version, companyName, logoURL, instanceURL string) {
 	return getAppInfo()
 }
 
-// warmDeskLogoSVG is a minimal, Inkscape-metadata-free version of the WarmDesk icon.
-const warmDeskLogoSVG = `<svg width="160" height="156.5" viewBox="0 0 160 156.5" xmlns="http://www.w3.org/2000/svg">` +
-	`<rect fill="#1D9E75" x="24" y="104.5" width="11" height="52" rx="3"/>` +
-	`<rect fill="#1D9E75" x="125" y="104.5" width="11" height="52" rx="3"/>` +
-	`<rect fill="#5DCAA5" x="10" y="88.5" width="140" height="20" rx="5"/>` +
-	`<rect fill="#9FE1CB" x="0" y="76.5" width="160" height="16" rx="4"/>` +
-	`<rect fill="#1D9E75" x="54" y="40.5" width="52" height="40" rx="5"/>` +
-	`<rect fill="#0F6E56" x="48" y="34.5" width="64" height="10" rx="4"/>` +
-	`<path d="m106,50.5q20,0 20,10 0,10-20,10" fill="none" stroke="#9FE1CB" stroke-width="5" stroke-linecap="round"/>` +
-	`<path d="m66,30.5q-4,-12 0,-24" fill="none" stroke="#9FE1CB" stroke-width="3" stroke-linecap="round"/>` +
-	`<path d="m80,27.5q-4,-13 0,-26" fill="none" stroke="#9FE1CB" stroke-width="3" stroke-linecap="round"/>` +
-	`<path d="m94,30.5q-4,-12 0,-24" fill="none" stroke="#9FE1CB" stroke-width="3" stroke-linecap="round"/>` +
-	`</svg>`
+// warmDeskEmailIconPNG is the WarmDesk icon rendered as a 54×54 PNG (3× the
+// 18px footer size, for HiDPI screens). PNG instead of SVG because Gmail and
+// Outlook don't render SVG images. Source: assets/warmdesk-email-icon.svg;
+// regenerate with:
+//
+//	inkscape warmdesk-email-icon.svg --export-type=png --export-width=54 --export-filename=raw.png
+//	magick raw.png -background none -gravity center -extent 54x54 -strip warmdesk-email-icon.png
+//
+//go:embed assets/warmdesk-email-icon.png
+var warmDeskEmailIconPNG []byte
 
-var warmDeskLogoDataURI = "data:image/svg+xml;base64," + base64.StdEncoding.EncodeToString([]byte(warmDeskLogoSVG))
+var warmDeskLogoDataURI = "data:image/png;base64," + base64.StdEncoding.EncodeToString(warmDeskEmailIconPNG)
 
 // WrapHTML wraps bodyHTML in the standard WarmDesk email shell:
 //   - blue header with company name/logo and a subtitle line
