@@ -954,3 +954,6 @@ Create an application that has all these features and requirements
 - Fix select boxes clipping their text at the bottom in the Linux desktop app
 - Add a board-only app mode (`--mode=board`) that disables the time-tracking and helpdesk routes, menus, and admin sections while keeping boards, topics, and chat
 - Show a live start/end/duration popup next to the pointer while moving or resizing entries in the time-tracking calendar
+- Embed the company logo and the WarmDesk icon as inline images in every e-mail so they show in Gmail, Outlook, and other mail programs
+- Send ticket replies and invoice e-mails in the branded HTML layout with the company logo
+- Seed time entry locations, a running timer, private ticket notes, reminders, a major incident, and more in the demo data

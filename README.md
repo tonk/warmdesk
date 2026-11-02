@@ -8,10 +8,9 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.42.0)
+## Latest release (v0.42.1)
 
-- **Board-only mode** — Run the server with `--mode=board` to get boards, topics, and chat without time tracking or the helpdesk.
-- **Live time popup** — Moving or resizing an entry in the time-tracking calendar shows its new start, end, and duration next to the pointer.
+- **Company logo in every e-mail** — The logo is embedded in the e-mail itself, so it shows in Gmail, Outlook, and other mail programs, also in ticket replies and invoices.
 
 ## Experiment
 
@@ -116,8 +115,10 @@ A seed tool is included in the distribution to populate the database with
 realistic demo content (users, projects, cards, comments, time entries, topics,
 conversations, customer locations, helpdesk tickets, problems, knowledge base
 articles, a service catalogue with approvals, changes, CMDB configuration items,
-business-hours calendars with public holidays, and system settings including
-company branding):
+business-hours calendars with public holidays, a running timer, travel entries
+with customer locations, private ticket notes, a major incident, customer
+contacts, direct messages, API keys, login history, and system settings
+including company branding):
 
 ```bash
 cd dist

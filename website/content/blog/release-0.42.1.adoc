@@ -1,0 +1,23 @@
+---
+title: "v0.42.1: company logo in every e-mail"
+date: "2026-11-02"
+author: "Ton Kersten"
+description: "The company logo now shows in every e-mail, in every mail program, including ticket replies and invoices."
+draft: false
+---
+:doctype: article
+:icons!:
+
+A patch release that makes your company logo show up in WarmDesk e-mails.
+
+== Fixed
+
+The company logo in WarmDesk e-mails stayed blank in Gmail, Outlook, and many other mail programs. The logo is now sent as an embedded image inside the e-mail itself, so it shows up everywhere, even when the recipient's computer can't reach your WarmDesk server. Logos set as an `http://` address are embedded too.
+
+Replies sent to a ticket's requester used to be plain text only, and invoice e-mails had no header. Both now use the same branded layout as the other e-mails, with your company logo. The plain-text version of a ticket reply is unchanged, so customer replies keep threading into the ticket.
+
+The small WarmDesk icon in the e-mail footer is now a PNG image, because Gmail and Outlook don't display SVG images. For the same reason, upload your company logo as PNG or JPG rather than SVG.
+
+== Upgrade
+
+Download `v0.42.1` from the link:../../download[download page] or pull the latest release tag. No database migration or configuration change is needed.

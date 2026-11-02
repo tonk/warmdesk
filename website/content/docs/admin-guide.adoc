@@ -305,7 +305,7 @@ When LiveKit is not configured, one-on-one WebRTC calls continue to work and the
 Set these under *Admin → Settings → Branding & Billing*:
 
 * *Company name* — shown in the login screen branding panel and in report headers / PDF footers
-* *Company logo* — separate logos for light and dark backgrounds (JPG, PNG, GIF, WebP, or SVG), used on the login screen, reports, and PDFs
+* *Company logo* — separate logos for light and dark backgrounds (JPG, PNG, GIF, WebP, or SVG), used on the login screen, reports, PDFs, and embedded in every e-mail WarmDesk sends (use PNG or JPG: Gmail and Outlook don't display SVG)
 * *Show company branding on the login screen* — splits the login page into a branding panel and the login form
 * *Billing* — company address, VAT and CoC numbers, IBAN/BIC, payment terms, default VAT rate, invoice number prefix, and a VAT-exempt toggle, all used on invoice PDFs
 

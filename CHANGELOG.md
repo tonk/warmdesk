@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.42.1 — 2026-11-02
+
+### Fixed
+- **Company logo in e-mails** — the company logo in WarmDesk e-mails stayed blank in Gmail, Outlook, and many other mail programs. The logo is now sent as an embedded image inside the e-mail itself, so it shows up in every mail program, even when the recipient's computer can't reach your WarmDesk server. Logos set as an `http://` address are embedded too.
+- **Logo in ticket replies and invoices** — replies sent to a ticket's requester were plain text only, and invoice e-mails had no header. Both now use the same branded layout as the other e-mails, with your company logo. The plain-text version of a ticket reply is unchanged, so customer replies keep threading into the ticket.
+- **WarmDesk icon in e-mails** — the small WarmDesk icon in the e-mail footer is now a PNG image, because Gmail and Outlook don't display SVG images.
+
 ## v0.42.0 — 2026-10-16
 
 ### Added

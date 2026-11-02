@@ -1,6 +1,6 @@
 = WarmDesk — Administrator Guide
-:revnumber: v0.42.0
-:revdate: 2026-10-16
+:revnumber: v0.42.1
+:revdate: 2026-11-02
 Ton Kersten <tonk@smartowl.nl>
 ifdef::backend-pdf[]
 :title-page:
@@ -1571,7 +1571,7 @@ Go to *Admin → Settings → Branding & Billing* to set:
 |Appears in the login screen branding panel and in the report header / PDF footer
 
 |Company logo (light background)
-|Upload an image file (JPG, PNG, GIF, WebP, or SVG) for use on light-themed screens; displayed in the login screen branding panel, the on-screen report header, and in exported PDFs. Click *Clear* to remove.
+|Upload an image file (JPG, PNG, GIF, WebP, or SVG) for use on light-themed screens; displayed in the login screen branding panel, the on-screen report header, in exported PDFs, and embedded in the header of every e-mail WarmDesk sends. Click *Clear* to remove. Use PNG or JPG for the e-mail logo to show everywhere: Gmail and Outlook don't display SVG images.
 
 |Company logo (dark background)
 |Optional second logo shown when the login page is in dark mode; if omitted, the light logo is used on both themes.
