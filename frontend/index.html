@@ -50,7 +50,9 @@
                   req.method !== 'HEAD'
                 ) {
                   try {
-                    normalizedInit.body = await req.clone().text()
+                    // Read as raw bytes: .text() decodes as UTF-8 and mangles
+                    // binary bodies (multipart image uploads arrived corrupted).
+                    normalizedInit.body = await req.clone().arrayBuffer()
                   } catch (_) {}
                 }
                 return window.__tauriFetch(req.url, normalizedInit)

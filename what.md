@@ -960,3 +960,4 @@ Create an application that has all these features and requirements
 - Add a *My cards* dashboard view listing every open card assigned to the current user across all projects, with sortable columns and overdue due dates highlighted
 - Show the number of open cards assigned to the current user as a badge on the dashboard's *My cards* button
 - Add a `my_cards` lookup to the Ansible collection that lists all open cards assigned to the authenticated user
+- Pass request bodies through the desktop app's fetch proxy as raw bytes so multipart image uploads are no longer corrupted

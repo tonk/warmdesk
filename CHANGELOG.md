@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.44.1 — 2026-11-03
+
+### Fixed
+- **Image uploads in the desktop app** — uploading a customer logo, avatar, or other image in the desktop app failed with "file must be an image" even for valid PNG/JPEG files, because the upload was corrupted on its way to the server. Uploads from the desktop app now arrive intact. The web interface was not affected.
+
 ## v0.44.0 — 2026-11-03
 
 ### Added

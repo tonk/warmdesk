@@ -8,10 +8,9 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.44.0)
+## Latest release (v0.44.1)
 
-- **Card count on My cards** — The *My cards* button shows how many open cards are assigned to you, in every dashboard view.
-- **`my_cards` Ansible lookup** — List your open cards from a playbook with the new `ansilabnl.warmdesk.my_cards` lookup.
+- **Desktop image uploads fixed** — Customer logos, avatars, and other images no longer fail with "file must be an image" in the desktop app.
 
 ## Experiment
 

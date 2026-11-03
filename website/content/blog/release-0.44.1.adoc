@@ -1,0 +1,19 @@
+---
+title: "v0.44.1: image uploads fixed in the desktop app"
+date: "2026-11-03"
+author: "Ton Kersten"
+description: "Customer logos, avatars, and other images can be uploaded again in the desktop app."
+draft: false
+---
+:doctype: article
+:icons!:
+
+A patch release that fixes image uploads in the desktop app.
+
+== Fixed
+
+Uploading a customer logo, avatar, or other image in the desktop app failed with "file must be an image", even for a valid PNG or JPEG file. The image was damaged on its way to the server, so the server no longer recognised it. Uploads from the desktop app now arrive intact. The web interface was not affected.
+
+== Upgrade
+
+Download `v0.44.1` from the link:../../download[download page] or pull the latest release tag. No database migration or configuration change is needed. Only the desktop app needs updating to get the fix.
