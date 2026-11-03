@@ -26,7 +26,10 @@
                 class="btn btn-ghost btn-sm view-switch-btn"
                 :aria-pressed="viewMode === 'mine'"
                 @click="setViewMode('mine')"
-              ><span aria-hidden="true">👤</span> {{ $t('project.view_my_cards') }}</button>
+              ><span aria-hidden="true">👤</span> {{ $t('project.view_my_cards') }}<template v-if="myCardsLoaded && filteredMyCards.length > 0">
+                <span class="view-switch-count" aria-hidden="true">{{ filteredMyCards.length }}</span>
+                <span class="sr-only">({{ filteredMyCards.length }} {{ $t('board.open_cards') }})</span>
+              </template></button>
             </div>
             <button v-if="canCreateProject && viewMode !== 'mine'" class="btn btn-primary" @click="showCreate = true">+ {{ $t('project.new_project') }}</button>
           </div>
@@ -295,14 +298,20 @@ function setViewMode(mode) {
 const { formatDate } = useDateFormat()
 const myCards = ref([])
 const myCardsLoading = ref(false)
+// True once the list has been fetched; the count badge on the view button
+// stays hidden until then, so it never flashes a wrong number.
+const myCardsLoaded = ref(false)
 
+// Also called on mount in the other views to fill the count badge; only
+// report a failure when the user is actually looking at the list.
 async function loadMyCards() {
   myCardsLoading.value = true
   try {
     const { data } = await projectsApi.myCards()
     myCards.value = data || []
+    myCardsLoaded.value = true
   } catch {
-    ui.error(t('project.my_cards_load_failed'))
+    if (viewMode.value === 'mine') ui.error(t('project.my_cards_load_failed'))
   } finally {
     myCardsLoading.value = false
   }
@@ -463,7 +472,7 @@ onMounted(async () => {
     }
     return
   }
-  if (viewMode.value === 'mine') loadMyCards()
+  loadMyCards()
   await projectStore.fetchProjects()
   sidebarStore.fetchStarred()
   customersApi.list().then(r => { createCustomers.value = r.data || [] }).catch(() => {})
@@ -542,6 +551,20 @@ async function handleCreate() {
 .view-switch { display: inline-flex; border: 1px solid var(--color-border); border-radius: var(--radius-sm); overflow: hidden; }
 .view-switch-btn { border-radius: 0; }
 .view-switch-btn[aria-pressed="true"] { background: var(--color-primary); color: #fff; }
+.view-switch-count {
+  display: inline-block;
+  min-width: 18px;
+  margin-left: 6px;
+  padding: 0 5px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+  background: var(--color-primary);
+  color: #fff;
+}
+.view-switch-btn[aria-pressed="true"] .view-switch-count { background: #fff; color: var(--color-primary); }
 
 .projects-table-wrap { overflow-x: auto; }
 .projects-table { width: 100%; border-collapse: collapse; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); }
