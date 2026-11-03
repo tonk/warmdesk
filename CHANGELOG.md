@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.44.2 — 2026-11-03
+
+### Fixed
+- **Clearer image-upload errors** — when the server rejects an uploaded image, the message now says which file type it received (for example `got application/octet-stream`), and the server logs the file name, size, and detected type, which makes problems like a corrupted upload easy to spot.
+- **Upload requests no longer set a hand-written multipart header** — image, attachment, conversation-avatar, and backup uploads leave the multipart boundary to the browser/runtime instead of sending an incomplete `Content-Type`.
+- **Choosing the same image again works reliably** — the file input is now reset after the upload finishes instead of before it starts.
+
+### Changed
+- Avatar and logo uploads in the admin panel, customer, user, and project settings share one upload helper, so they behave and report errors the same way. The project settings avatar upload now shows the server's error message instead of a generic one.
+- Added regression tests for the desktop fetch proxy and for image uploads, and a release-checklist step that requires desktop-affecting fixes to be checked in a real desktop build.
+
 ## v0.44.1 — 2026-11-03
 
 ### Fixed

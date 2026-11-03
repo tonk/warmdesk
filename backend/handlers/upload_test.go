@@ -1,10 +1,17 @@
 package handlers
 
 import (
+	"bytes"
+	"encoding/json"
+	"mime/multipart"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tonk/warmdesk/config"
@@ -67,4 +74,64 @@ func TestDeleteOldUpload(t *testing.T) {
 	t.Run("no-op when the old file no longer exists on disk", func(t *testing.T) {
 		deleteOldUpload("/uploads/does-not-exist.png", "/uploads/new.png")
 	})
+}
+
+func postImage(t *testing.T, name string, data []byte) *httptest.ResponseRecorder {
+	t.Helper()
+	gin.SetMode(gin.TestMode)
+	var body bytes.Buffer
+	mw := multipart.NewWriter(&body)
+	part, err := mw.CreateFormFile("file", name)
+	require.NoError(t, err)
+	_, err = part.Write(data)
+	require.NoError(t, err)
+	require.NoError(t, mw.Close())
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest(http.MethodPost, "/upload/image", &body)
+	c.Request.Header.Set("Content-Type", mw.FormDataContentType())
+	UploadImage(c)
+	return w
+}
+
+// A minimal valid 1x1 PNG.
+var tinyPNG = []byte{
+	0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+	0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x06, 0x00, 0x00, 0x00, 0x1f, 0x15, 0xc4,
+	0x89, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x63, 0xf8, 0xcf, 0xc0, 0xf0,
+	0x1f, 0x00, 0x05, 0x00, 0x01, 0xff, 0x89, 0x99, 0x3d, 0x1d, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45,
+	0x4e, 0x44, 0xae, 0x42, 0x60, 0x82,
+}
+
+func TestUploadImage_AcceptsPNGByteForByte(t *testing.T) {
+	dir := t.TempDir()
+	prevCfg := attachmentCfg
+	attachmentCfg = &config.Config{UploadDir: dir, MaxUploadMB: 5}
+	defer func() { attachmentCfg = prevCfg }()
+
+	w := postImage(t, "logo.png", tinyPNG)
+	require.Equal(t, http.StatusOK, w.Code, w.Body.String())
+
+	var resp struct {
+		URL string `json:"url"`
+	}
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
+	saved, err := os.ReadFile(filepath.Join(dir, filepath.Base(resp.URL)))
+	require.NoError(t, err)
+	assert.Equal(t, tinyPNG, saved, "stored bytes must equal the uploaded bytes")
+}
+
+func TestUploadImage_RejectsMangledPNGAndReportsType(t *testing.T) {
+	dir := t.TempDir()
+	prevCfg := attachmentCfg
+	attachmentCfg = &config.Config{UploadDir: dir, MaxUploadMB: 5}
+	defer func() { attachmentCfg = prevCfg }()
+
+	// What a UTF-8 round-trip does to a PNG: invalid bytes become U+FFFD.
+	mangled := []byte(strings.ToValidUTF8(string(tinyPNG), "�"))
+	w := postImage(t, "logo.png", mangled)
+	require.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Contains(t, w.Body.String(), "got ")
+	assert.NotContains(t, w.Body.String(), "got image/png")
 }

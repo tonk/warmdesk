@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -39,7 +40,12 @@ func UploadImage(c *gin.Context) {
 	detected, err := mimetype.DetectReader(f)
 	f.Close()
 	if err != nil || !allowedImageTypes[detected.String()] {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "file must be an image (jpeg, png, gif, webp, svg)"})
+		got := "unknown"
+		if err == nil {
+			got = detected.String()
+		}
+		log.Printf("upload: rejected %q (%d bytes): detected %s", fh.Filename, fh.Size, got)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "file must be an image (jpeg, png, gif, webp, svg), got " + got})
 		return
 	}
 	mimeType := detected.String()

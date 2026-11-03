@@ -34,7 +34,7 @@ export const adminApi = {
   uploadBackup: (file) => {
     const fd = new FormData()
     fd.append('file', file)
-    return client.post('/admin/system/backups/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+    return client.post('/admin/system/backups/upload', fd)
   },
   listBackups: () => client.get('/admin/system/backups'),
   restoreBackup: (filename, mode = 'replace') => client.post('/admin/system/backups/restore', { filename, mode }),

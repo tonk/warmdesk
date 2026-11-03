@@ -1,0 +1,25 @@
+---
+title: "v0.44.2: clearer and sturdier image uploads"
+date: "2026-11-03"
+author: "Ton Kersten"
+description: "Rejected images now report the file type the server received, and avatar and logo uploads share one well-tested code path."
+draft: false
+---
+:doctype: article
+:icons!:
+
+A patch release that follows up on the desktop upload fix in v0.44.1.
+
+== Fixed
+
+When the server rejects an uploaded image, the message now says which file type it received, for example `got application/octet-stream`. The server also logs the file name, size, and detected type, so a corrupted upload is easy to recognise.
+
+Upload requests no longer send a hand-written multipart header; the browser or runtime sets the complete one. Choosing the same image twice in a row works reliably, because the file input is reset after the upload finishes.
+
+== Changed
+
+Avatar and logo uploads in the admin panel and in the customer, user, and project settings now share one upload helper. Regression tests cover both the desktop upload path and the server-side image check.
+
+== Upgrade
+
+Download `v0.44.2` from the link:../../download[download page] or pull the latest release tag. No database migration or configuration change is needed.

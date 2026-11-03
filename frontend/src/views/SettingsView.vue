@@ -569,7 +569,7 @@ import {
   decodeCreationOptions,
   serializeRegistrationCredential,
 } from '@/api/passkeys'
-import { attachmentsApi } from '@/api/attachments'
+import { useImageUpload } from '@/composables/useImageUpload'
 import { resolveAssetUrl } from '@/api/serverConfig'
 import { applyUserPreferences } from '@/composables/useUserPreferences'
 import { useDateFormat } from '@/composables/useDateFormat'
@@ -578,6 +578,7 @@ const isTauri = !!window.__TAURI_INTERNALS__
 const route = useRoute()
 const auth = useAuthStore()
 const ui = useUIStore()
+const { uploadFromInput } = useImageUpload()
 const systemStore = useSystemStore()
 const tab = ref('profile')
 const passwordExpired = ref(false)
@@ -708,17 +709,11 @@ const generatedPersonalKey = ref('')
 const savingPassword = ref(false)
 const avatarError = ref(false)
 
-async function onAvatarFileSelected(e) {
-  const file = e.target.files[0]
-  if (!file) return
-  e.target.value = ''
-  try {
-    const { data } = await attachmentsApi.uploadImage(file)
-    form.value.avatar_url = data.url
+function onAvatarFileSelected(e) {
+  return uploadFromInput(e, (url) => {
+    form.value.avatar_url = url
     avatarError.value = false
-  } catch (e) {
-    ui.error(e.response?.data?.error || 'Failed to upload image')
-  }
+  }, 'Failed to upload image')
 }
 
 // MFA

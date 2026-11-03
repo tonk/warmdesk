@@ -961,3 +961,7 @@ Create an application that has all these features and requirements
 - Show the number of open cards assigned to the current user as a badge on the dashboard's *My cards* button
 - Add a `my_cards` lookup to the Ansible collection that lists all open cards assigned to the authenticated user
 - Pass request bodies through the desktop app's fetch proxy as raw bytes so multipart image uploads are no longer corrupted
+- Report the detected file type in the image-upload error and log rejected uploads on the server
+- Stop sending a hand-written multipart Content-Type header on upload requests
+- Share one image-upload helper across avatar and logo pickers and reset the file input after the upload
+- Add regression tests for the desktop fetch proxy and for image uploads, and a desktop-check step to the release checklist

@@ -1064,7 +1064,7 @@ import { useUIStore } from '@/stores/ui'
 import { customersApi } from '@/api/customers'
 import { timeEntriesApi } from '@/api/timeEntries'
 import { groupsApi } from '@/api/groups'
-import { attachmentsApi } from '@/api/attachments'
+import { useImageUpload } from '@/composables/useImageUpload'
 import { resolveAssetUrl, getServerUrl } from '@/api/serverConfig'
 import BaseModal from '@/components/common/BaseModal.vue'
 import HelpIcon from '@/components/common/HelpIcon.vue'
@@ -1080,6 +1080,7 @@ const router = useRouter()
 const auth = useAuthStore()
 const custStore = useCustomersStore()
 const ui = useUIStore()
+const { uploadFromInput } = useImageUpload()
 
 const distanceUnit = computed(() => auth.user?.distance_unit || 'km')
 
@@ -2010,16 +2011,10 @@ function openEdit() {
   showEdit.value = true
 }
 
-async function onLogoFileSelected(e) {
-  const file = e.target.files[0]
-  if (!file) return
-  e.target.value = ''
-  try {
-    const { data } = await attachmentsApi.uploadImage(file)
-    editForm.value.logo_url = data.url
-  } catch (e) {
-    ui.error(e.response?.data?.error || 'Failed to upload image')
-  }
+function onLogoFileSelected(e) {
+  return uploadFromInput(e, (url) => {
+    editForm.value.logo_url = url
+  }, 'Failed to upload image')
 }
 
 async function saveEdit() {

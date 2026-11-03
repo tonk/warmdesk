@@ -488,7 +488,7 @@ import { useHelpSectionObserver } from '@/composables/useHelpSectionObserver'
 import client from '@/api/client'
 import { getServerUrl, resolveAssetUrl } from '@/api/serverConfig'
 import { customersApi } from '@/api/customers'
-import { attachmentsApi } from '@/api/attachments'
+import { useImageUpload } from '@/composables/useImageUpload'
 import HelpIcon from '@/components/common/HelpIcon.vue'
 
 const route = useRoute()
@@ -499,6 +499,7 @@ const slug = computed(() => route.params.slug)
 const projectStore = useProjectStore()
 const sidebarStore = useSidebarStore()
 const ui = useUIStore()
+const { uploadFromInput } = useImageUpload()
 const auth = useAuthStore()
 
 const tab = ref('general')
@@ -669,16 +670,10 @@ async function saveGeneral() {
   }
 }
 
-async function onProjectAvatarSelected(e) {
-  const file = e.target.files?.[0]
-  if (!file) return
-  e.target.value = ''
-  try {
-    const { data } = await attachmentsApi.uploadImage(file)
-    form.value.avatar = data.url
-  } catch {
-    ui.error('Failed to upload avatar')
-  }
+function onProjectAvatarSelected(e) {
+  return uploadFromInput(e, (url) => {
+    form.value.avatar = url
+  }, 'Failed to upload avatar')
 }
 
 function groupAvatar(group) {

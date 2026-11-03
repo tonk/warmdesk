@@ -2012,7 +2012,7 @@ import client, { triggerDownload } from '@/api/client'
 import { groupsApi } from '@/api/groups'
 import { customersApi } from '@/api/customers'
 import { projectsApi } from '@/api/projects'
-import { attachmentsApi } from '@/api/attachments'
+import { useImageUpload } from '@/composables/useImageUpload'
 import { newsApi } from '@/api/news'
 import { resolveAssetUrl } from '@/api/serverConfig'
 import { useUIStore } from '@/stores/ui'
@@ -2033,6 +2033,7 @@ import HelpIcon from '@/components/common/HelpIcon.vue'
 
 const { t } = useI18n()
 const ui = useUIStore()
+const { uploadFromInput } = useImageUpload()
 const sidebarStore = useSidebarStore()
 const systemStore = useSystemStore()
 const auth = useAuthStore()
@@ -2793,16 +2794,10 @@ async function loadSettings() {
   }
 }
 
-async function onLogoFileSelected(e) {
-  const file = e.target.files[0]
-  if (!file) return
-  e.target.value = ''
-  try {
-    const { data } = await attachmentsApi.uploadImage(file)
-    systemSettings.value.company_logo = data.url
-  } catch (e) {
-    ui.error(e.response?.data?.error || 'Failed to upload image')
-  }
+function onLogoFileSelected(e) {
+  return uploadFromInput(e, (url) => {
+    systemSettings.value.company_logo = url
+  }, 'Failed to upload image')
 }
 
 async function clearCompanyLogo() {
@@ -2810,16 +2805,10 @@ async function clearCompanyLogo() {
   await saveBrandingSettings()
 }
 
-async function onLogoDarkFileSelected(e) {
-  const file = e.target.files[0]
-  if (!file) return
-  e.target.value = ''
-  try {
-    const { data } = await attachmentsApi.uploadImage(file)
-    systemSettings.value.company_logo_dark = data.url
-  } catch (e) {
-    ui.error(e.response?.data?.error || 'Failed to upload image')
-  }
+function onLogoDarkFileSelected(e) {
+  return uploadFromInput(e, (url) => {
+    systemSettings.value.company_logo_dark = url
+  }, 'Failed to upload image')
 }
 
 async function clearCompanyLogoDark() {
@@ -3599,40 +3588,22 @@ function groupAvatar(group) {
   return resolveAssetUrl(group?.avatar || '')
 }
 
-async function onNewProjectAvatarSelected(e) {
-  const file = e.target.files?.[0]
-  if (!file) return
-  e.target.value = ''
-  try {
-    const { data } = await attachmentsApi.uploadImage(file)
-    newProject.value.avatar = data.url
-  } catch (e) {
-    ui.error(e.response?.data?.error || 'Failed to upload avatar')
-  }
+function onNewProjectAvatarSelected(e) {
+  return uploadFromInput(e, (url) => {
+    newProject.value.avatar = url
+  }, 'Failed to upload avatar')
 }
 
-async function onEditProjectAvatarSelected(e) {
-  const file = e.target.files?.[0]
-  if (!file) return
-  e.target.value = ''
-  try {
-    const { data } = await attachmentsApi.uploadImage(file)
-    editProject.value.avatar = data.url
-  } catch (e) {
-    ui.error(e.response?.data?.error || 'Failed to upload avatar')
-  }
+function onEditProjectAvatarSelected(e) {
+  return uploadFromInput(e, (url) => {
+    editProject.value.avatar = url
+  }, 'Failed to upload avatar')
 }
 
-async function onGroupAvatarSelected(e) {
-  const file = e.target.files?.[0]
-  if (!file) return
-  e.target.value = ''
-  try {
-    const { data } = await attachmentsApi.uploadImage(file)
-    groupForm.value.avatar = data.url
-  } catch (e) {
-    ui.error(e.response?.data?.error || 'Failed to upload avatar')
-  }
+function onGroupAvatarSelected(e) {
+  return uploadFromInput(e, (url) => {
+    groupForm.value.avatar = url
+  }, 'Failed to upload avatar')
 }
 
 async function toggleArchive(project) {

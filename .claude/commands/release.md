@@ -19,6 +19,9 @@ If `$ARGUMENTS` doesn't match the required bump, say so and confirm the correct 
 
 Releases at or before v0.12.42 used a flat incrementing counter regardless of change type; don't use that range as a precedent for what kind of bump a given change "usually" gets.
 
+## 0b. Desktop-affecting fixes need a desktop check
+If a fix touches the Tauri path (`frontend/index.html` fetch proxy, `src/api/client.js`, `src-tauri/`), don't tag until the fix has been confirmed in a real desktop build (`npm run tauri:dev` or a built AppImage/installer) — the web UI doesn't exercise that code, so a green browser test proves nothing. Ask the user to confirm, or say explicitly in the release notes that it is unverified on desktop.
+
 ## 1. Gather changes
 Run `git log --oneline $(git describe --tags --abbrev=0)..HEAD` to see all commits since the last tag. Use these to write the release notes.
 

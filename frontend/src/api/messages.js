@@ -17,7 +17,7 @@ export const messagesApi = {
   leaveConversation: (convId) => client.delete(`/conversations/${convId}`),
   addMember: (convId, data) => client.post(`/conversations/${convId}/members`, data),
   removeMember: (convId, userId) => client.delete(`/conversations/${convId}/members/${userId}`),
-  uploadAvatar: (convId, formData) => client.post(`/conversations/${convId}/avatar`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  uploadAvatar: (convId, formData) => client.post(`/conversations/${convId}/avatar`, formData),
   editConvMessage: (convId, msgId, body) => client.patch(`/conversations/${convId}/messages/${msgId}`, { body }),
   toggleConvReaction: (convId, msgId, emoji) => client.post(`/conversations/${convId}/messages/${msgId}/reactions`, { emoji }),
   /** LiveKit room token for group video (503 if not configured on server). */

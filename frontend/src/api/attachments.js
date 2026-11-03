@@ -36,9 +36,7 @@ export function stopMediaTicketRefresh() {
 }
 
 export const attachmentsApi = {
-  upload: (formData) => client.post('/attachments', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
+  upload: (formData) => client.post('/attachments', formData),
   delete: (id) => client.delete(`/attachments/${id}`),
   // Returns an absolute URL when a server is configured (Tauri/desktop mode)
   // so that <img src="..."> and <a href="..."> resolve correctly outside the browser.
@@ -59,6 +57,6 @@ export const attachmentsApi = {
   uploadImage: (file) => {
     const fd = new FormData()
     fd.append('file', file)
-    return client.post('/upload/image', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+    return client.post('/upload/image', fd)
   }
 }
