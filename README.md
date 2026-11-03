@@ -8,9 +8,9 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.42.1)
+## Latest release (v0.43.0)
 
-- **Company logo in every e-mail** — The logo is embedded in the e-mail itself, so it shows in Gmail, Outlook, and other mail programs, also in ticket replies and invoices.
+- **My cards** — A new dashboard view lists every open card assigned to you across all your projects, sortable by key, title, project, column, priority, or due date.
 
 ## Experiment
 

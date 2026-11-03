@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.43.0 — 2026-11-03
+
+### Added
+- **My cards** — the dashboard's *Tiles* / *List* switch has a third option, *My cards*, that lists every open card assigned to you across all your projects, whether you are the card's main assignee or one of its extra assignees. The table shows each card's key, title, project, column, priority, and due date; click the key or title to open the card on its board. Cards are sorted by due date by default, with overdue dates in red and cards without a due date at the bottom. Click a column header to sort by it, and click again to reverse the order. The customer filter works here too, and your view and sort order are remembered in your browser.
+
 ## v0.42.1 — 2026-11-02
 
 ### Fixed

@@ -957,3 +957,4 @@ Create an application that has all these features and requirements
 - Embed the company logo and the WarmDesk icon as inline images in every e-mail so they show in Gmail, Outlook, and other mail programs
 - Send ticket replies and invoice e-mails in the branded HTML layout with the company logo
 - Seed time entry locations, a running timer, private ticket notes, reminders, a major incident, and more in the demo data
+- Add a *My cards* dashboard view listing every open card assigned to the current user across all projects, with sortable columns and overdue due dates highlighted

@@ -1,6 +1,6 @@
 = WarmDesk — User Guide
-:revnumber: v0.42.1
-:revdate: 2026-11-02
+:revnumber: v0.43.0
+:revdate: 2026-11-03
 Ton Kersten <tonk@smartowl.nl>
 ifdef::backend-pdf[]
 :title-page:
@@ -264,6 +264,17 @@ The *Tiles* / *List* switch at the top of the dashboard changes how your project
 *List* shows a table with each project's name, customer, board type, and number of open cards.
 Click a column header to sort by it, and click again to reverse the order.
 The customer selector works in both views, and your choice of view and sort order is remembered on this browser.
+
+=== My cards
+
+The third option of the switch, *My cards*, lists every open card assigned to you across all your projects — whether you are the card's main assignee or one of its extra assignees.
+Closed cards, and cards in closed projects, are not shown.
+The table shows each card's key, title, project, column, priority, and due date.
+Click the key or title to open the card on its board, or the project name to open the board itself.
+
+By default the cards are sorted by due date, soonest first; overdue dates are shown in red, and cards without a due date are listed last.
+Click a column header to sort by it, and click again to reverse the order — sorting by *Priority* puts the most urgent cards first.
+The customer selector filters this view as well, and your sort order is remembered on this browser.
 
 === Creating a project
 
