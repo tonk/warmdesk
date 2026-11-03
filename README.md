@@ -8,10 +8,9 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.44.2)
+## Latest release (v0.44.3)
 
-- **Clearer image-upload errors** — A rejected image now reports which file type the server received.
-- **Sturdier uploads** — Avatar and logo uploads share one helper, and regression tests guard the desktop upload path.
+- **Linux AppImage build fixed** — `make appimage` works again with the latest `appimagetool`.
 
 ## Experiment
 

@@ -1,0 +1,19 @@
+---
+title: "v0.44.3: Linux AppImage build fixed"
+date: "2026-11-03"
+author: "Ton Kersten"
+description: "make appimage works again with the latest appimagetool."
+draft: false
+---
+:doctype: article
+:icons!:
+
+A patch release for people who build the Linux desktop app themselves.
+
+== Fixed
+
+`make appimage` stopped at the step that adds the GStreamer plugins, because the newest `appimagetool` refuses an unpacked AppImage whose directories are only readable by their owner. The build now makes the unpacked tree world-readable before repacking it, so the AppImage is built again.
+
+== Upgrade
+
+Download `v0.44.3` from the link:../../download[download page] or pull the latest release tag. The server and the web interface are unchanged, so there is nothing to upgrade unless you build the desktop app yourself.

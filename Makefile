@@ -200,6 +200,7 @@ _bundle-gst-appimage:
 			curl -fsSL -o /tmp/appimagetool "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"; \
 			chmod +x /tmp/appimagetool; \
 		fi; \
+		chmod -R a+rX squashfs-root; \
 		ARCH=x86_64 /tmp/appimagetool squashfs-root "$$APPIMAGE" >/dev/null; \
 	); \
 	rm -rf "$$WORKDIR"

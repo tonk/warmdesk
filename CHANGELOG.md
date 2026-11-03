@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.44.3 — 2026-11-03
+
+### Fixed
+- **Linux AppImage build** — `make appimage` failed while adding the GStreamer plugins, because the newest `appimagetool` refuses an AppDir with restrictive (0700) permissions. The build now makes the unpacked AppDir world-readable before repacking it.
+
 ## v0.44.2 — 2026-11-03
 
 ### Fixed
