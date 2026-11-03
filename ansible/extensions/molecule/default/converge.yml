@@ -652,6 +652,55 @@
         fail_msg: "lookup did not follow the move: {{ move_lookup_old_result.msg | default('') }}"
 
     # =========================================================================
+    # my_cards lookup
+    # =========================================================================
+
+    - name: "[my_cards] Create a card assigned to the API key's owner"
+      ansilabnl.warmdesk.card:
+        warmdesk_url: "{{ warmdesk_url }}"
+        warmdesk_api_key: "{{ warmdesk_api_key }}"
+        project: "{{ move_dst.slug }}"
+        column: Backlog
+        title: "Molecule my card {{ lookup('ansible.builtin.pipe', 'date +%s%N') }}"
+        assignee: "{{ warmdesk_admin_username }}"
+        due_date: "2030-01-01"
+      register: my_card
+
+    - name: "[my_cards] Look up my open cards (all projects, and filtered)"
+      ansible.builtin.set_fact:
+        my_cards_all: "{{ query('ansilabnl.warmdesk.my_cards', url=warmdesk_url, api_key=warmdesk_api_key) }}"
+        my_cards_dst: "{{ query('ansilabnl.warmdesk.my_cards', project=move_dst.slug,
+                                url=warmdesk_url, api_key=warmdesk_api_key) }}"
+        my_cards_src: "{{ query('ansilabnl.warmdesk.my_cards', project=move_src.slug,
+                                url=warmdesk_url, api_key=warmdesk_api_key) }}"
+
+    - name: "[my_cards] Assert the assigned card is listed with its reference"
+      ansible.builtin.assert:
+        that:
+          - my_card.card.id in (my_cards_all | map(attribute='id') | list)
+          - my_card.card.id in (my_cards_dst | map(attribute='id') | list)
+          - my_card.card.id not in (my_cards_src | map(attribute='id') | list)
+          - (my_cards_dst | selectattr('id', 'equalto', my_card.card.id) | first).card_ref == my_card.card.card_ref
+          - (my_cards_dst | selectattr('id', 'equalto', my_card.card.id) | first).column_name == 'Backlog'
+        fail_msg: "my_cards lookup did not return the assigned card: {{ my_cards_dst }}"
+
+    - name: "[my_cards] Close the card"
+      ansilabnl.warmdesk.card:
+        warmdesk_url: "{{ warmdesk_url }}"
+        warmdesk_api_key: "{{ warmdesk_api_key }}"
+        project: "{{ move_dst.slug }}"
+        title: "{{ my_card.card.title }}"
+        card_number: "{{ my_card.card.card_ref }}"
+        closed: true
+
+    - name: "[my_cards] Assert a closed card is no longer listed"
+      ansible.builtin.assert:
+        that:
+          - my_card.card.id not in (query('ansilabnl.warmdesk.my_cards', url=warmdesk_url, api_key=warmdesk_api_key)
+                                    | map(attribute='id') | list)
+        fail_msg: "my_cards lookup still returns a closed card"
+
+    # =========================================================================
     # check_mode smoke test
     # =========================================================================
 

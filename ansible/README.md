@@ -115,6 +115,7 @@ Any parameter set in `module_defaults` can still be overridden per task by suppl
 | Plugin | Description |
 |---|---|
 | `ansilabnl.warmdesk.card` | Look up one or more cards by reference (a moved card is also found by its old reference) |
+| `ansilabnl.warmdesk.my_cards` | List all open cards assigned to the authenticated user across all projects, optionally filtered by project (WarmDesk v0.43.0+) |
 | `ansilabnl.warmdesk.project` | Look up projects by slug |
 | `ansilabnl.warmdesk.customer` | Look up customers by name |
 | `ansilabnl.warmdesk.contract` | Look up contracts by name |
