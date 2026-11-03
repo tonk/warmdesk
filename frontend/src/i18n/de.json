@@ -98,7 +98,13 @@
     "view_list": "Liste",
     "view_mode": "Projektansicht",
     "open_cards_col": "Offene Karten",
-    "actions": "Aktionen"
+    "actions": "Aktionen",
+    "view_my_cards": "Meine Karten",
+    "my_cards": "Meine offenen Karten",
+    "card_key": "Schlüssel",
+    "column": "Spalte",
+    "no_my_cards": "Dir sind keine offenen Karten zugewiesen.",
+    "my_cards_load_failed": "Deine Karten konnten nicht geladen werden"
   },
   "customer": {
     "customers": "Kunden",

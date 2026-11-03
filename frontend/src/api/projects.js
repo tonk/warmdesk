@@ -3,6 +3,9 @@ import client from './client'
 export const projectsApi = {
   list: () => client.get('/projects'),
 
+  // All open cards assigned to the current user, across projects
+  myCards: () => client.get('/my-cards'),
+
   // Time-tracking-only projects (no board)
   listTimeTracking: () => client.get('/time-tracking-projects'),
   createTimeTracking: (data) => client.post('/time-tracking-projects', data),

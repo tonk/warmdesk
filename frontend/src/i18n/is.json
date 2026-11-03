@@ -98,7 +98,13 @@
     "view_list": "Listi",
     "view_mode": "Verkefnasýn",
     "open_cards_col": "Opin spjöld",
-    "actions": "Aðgerðir"
+    "actions": "Aðgerðir",
+    "view_my_cards": "Mín spjöld",
+    "my_cards": "Mín opnu spjöld",
+    "card_key": "Lykill",
+    "column": "Dálkur",
+    "no_my_cards": "Engin opin spjöld eru úthlutuð þér.",
+    "my_cards_load_failed": "Ekki tókst að hlaða spjöldunum þínum"
   },
   "customer": {
     "customers": "Viðskiptavinir",

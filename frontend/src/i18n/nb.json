@@ -98,7 +98,13 @@
     "view_list": "Liste",
     "view_mode": "Prosjektvisning",
     "open_cards_col": "Åpne kort",
-    "actions": "Handlinger"
+    "actions": "Handlinger",
+    "view_my_cards": "Mine kort",
+    "my_cards": "Mine åpne kort",
+    "card_key": "Nøkkel",
+    "column": "Kolonne",
+    "no_my_cards": "Du har ingen åpne kort tildelt.",
+    "my_cards_load_failed": "Kortene dine kunne ikke lastes inn"
   },
   "customer": {
     "customers": "Kunder",

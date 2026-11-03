@@ -2,7 +2,7 @@
   <main class="dashboard-main">
       <div class="dashboard-container">
         <div class="dashboard-header">
-          <h1>{{ $t('project.projects') }}</h1>
+          <h1>{{ viewMode === 'mine' ? $t('project.my_cards') : $t('project.projects') }}</h1>
           <div class="dashboard-header-controls">
             <select v-if="customerOptions.length > 1" class="form-input customer-filter" v-model="selectedCustomer" aria-label="Filter by customer">
               <option value="">{{ $t('customer.all_customers') }}</option>
@@ -21,15 +21,67 @@
                 :aria-pressed="viewMode === 'list'"
                 @click="setViewMode('list')"
               ><span aria-hidden="true">☰</span> {{ $t('project.view_list') }}</button>
+              <button
+                type="button"
+                class="btn btn-ghost btn-sm view-switch-btn"
+                :aria-pressed="viewMode === 'mine'"
+                @click="setViewMode('mine')"
+              ><span aria-hidden="true">👤</span> {{ $t('project.view_my_cards') }}</button>
             </div>
-            <button v-if="canCreateProject" class="btn btn-primary" @click="showCreate = true">+ {{ $t('project.new_project') }}</button>
+            <button v-if="canCreateProject && viewMode !== 'mine'" class="btn btn-primary" @click="showCreate = true">+ {{ $t('project.new_project') }}</button>
           </div>
         </div>
 
         <!-- ── Dashboard news widgets ─────────────────────────────────────── -->
         <DashboardNews />
 
-        <div v-if="projectStore.loading" class="loading-state">
+        <div v-if="viewMode === 'mine'">
+          <div v-if="myCardsLoading && !myCards.length" class="loading-state">
+            <div class="spinner" style="width:32px;height:32px;border-width:3px"></div>
+          </div>
+          <div v-else-if="filteredMyCards.length === 0" class="empty-state">
+            <p>{{ $t('project.no_my_cards') }}</p>
+          </div>
+          <div v-else class="projects-table-wrap">
+            <table class="projects-table">
+              <caption class="sr-only">{{ $t('project.my_cards') }}</caption>
+              <thead>
+                <tr>
+                  <th v-for="col in myCardColumns" :key="col.field" scope="col" :aria-sort="myAriaSort(col.field)">
+                    <button type="button" class="th-sort-btn" @click="toggleMySort(col.field)">
+                      {{ col.label }}
+                      <span v-if="mySortField === col.field" aria-hidden="true">{{ mySortDir === 'asc' ? '▲' : '▼' }}</span>
+                    </button>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="card in sortedMyCards" :key="card.id">
+                  <td class="col-key">
+                    <RouterLink :to="cardLink(card)" class="project-link">{{ card.project.key_prefix }}-{{ card.card_number }}</RouterLink>
+                  </td>
+                  <td class="col-title">
+                    <RouterLink :to="cardLink(card)" class="card-title-link">{{ card.title }}</RouterLink>
+                  </td>
+                  <td>
+                    <div class="col-name-inner">
+                      <span class="project-color-dot" :style="{ background: card.project.color || '#6366f1' }" aria-hidden="true"></span>
+                      <RouterLink :to="`/projects/${card.project.slug}`" class="card-title-link">{{ card.project.name }}</RouterLink>
+                    </div>
+                  </td>
+                  <td>{{ card.column_name }}</td>
+                  <td>
+                    <span v-if="card.priority && card.priority !== 'none'" class="badge" :class="`priority-${card.priority}`">{{ $t(`board.priorities.${card.priority}`) }}</span>
+                    <span v-else class="text-muted">—</span>
+                  </td>
+                  <td :class="{ overdue: isOverdue(card) }">{{ card.due_date ? formatDate(card.due_date.slice(0, 10)) : '—' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div v-else-if="projectStore.loading" class="loading-state">
           <div class="spinner" style="width:32px;height:32px;border-width:3px"></div>
         </div>
 
@@ -188,6 +240,8 @@ import { useAuthStore } from '@/stores/auth'
 import { useSystemStore } from '@/stores/system'
 import { resolveAssetUrl } from '@/api/serverConfig'
 import { customersApi } from '@/api/customers'
+import { projectsApi } from '@/api/projects'
+import { useDateFormat } from '@/composables/useDateFormat'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -228,10 +282,105 @@ function writeStorage(key, value) {
   try { localStorage.setItem(key, value) } catch { /* storage unavailable */ }
 }
 
-const viewMode = ref(readStorage('dashboard_project_view', 'tiles') === 'list' ? 'list' : 'tiles')
+const VIEW_MODES = ['tiles', 'list', 'mine']
+const storedView = readStorage('dashboard_project_view', 'tiles')
+const viewMode = ref(VIEW_MODES.includes(storedView) ? storedView : 'tiles')
 function setViewMode(mode) {
   viewMode.value = mode
   writeStorage('dashboard_project_view', mode)
+  if (mode === 'mine') loadMyCards()
+}
+
+// ── "My cards": open cards assigned to the current user ─────────────────────
+const { formatDate } = useDateFormat()
+const myCards = ref([])
+const myCardsLoading = ref(false)
+
+async function loadMyCards() {
+  myCardsLoading.value = true
+  try {
+    const { data } = await projectsApi.myCards()
+    myCards.value = data || []
+  } catch {
+    ui.error(t('project.my_cards_load_failed'))
+  } finally {
+    myCardsLoading.value = false
+  }
+}
+
+const filteredMyCards = computed(() => {
+  if (!selectedCustomer.value) return myCards.value
+  return myCards.value.filter(c => String(c.project.customer_id) === selectedCustomer.value)
+})
+
+const myCardColumns = computed(() => [
+  { field: 'key', label: t('project.card_key') },
+  { field: 'title', label: t('board.card_title') },
+  { field: 'project', label: t('project.project_name') },
+  { field: 'column', label: t('project.column') },
+  { field: 'priority', label: t('board.priority') },
+  { field: 'due_date', label: t('board.due_date') },
+])
+const MY_SORT_FIELDS = ['key', 'title', 'project', 'column', 'priority', 'due_date']
+// Fields whose natural "first click" order is most-important-first.
+const MY_SORT_DESC_FIRST = ['priority']
+const PRIORITY_RANK = { none: 0, low: 1, medium: 2, high: 3, critical: 4 }
+const storedMySort = readStorage('dashboard_my_cards_sort', 'due_date:asc').split(':')
+const mySortField = ref(MY_SORT_FIELDS.includes(storedMySort[0]) ? storedMySort[0] : 'due_date')
+const mySortDir = ref(storedMySort[1] === 'desc' ? 'desc' : 'asc')
+
+function toggleMySort(field) {
+  if (mySortField.value === field) {
+    mySortDir.value = mySortDir.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    mySortField.value = field
+    mySortDir.value = MY_SORT_DESC_FIRST.includes(field) ? 'desc' : 'asc'
+  }
+  writeStorage('dashboard_my_cards_sort', `${mySortField.value}:${mySortDir.value}`)
+}
+
+function myAriaSort(field) {
+  if (mySortField.value !== field) return 'none'
+  return mySortDir.value === 'asc' ? 'ascending' : 'descending'
+}
+
+const textCmp = (a, b) => (a || '').localeCompare(b || '', undefined, { sensitivity: 'base', numeric: true })
+// Stable tie-breaker: key prefix, then card number (PRJ-2 before PRJ-10).
+const keyCmp = (a, b) => textCmp(a.project.key_prefix, b.project.key_prefix) || a.card_number - b.card_number
+
+const sortedMyCards = computed(() => {
+  const field = mySortField.value
+  const dir = mySortDir.value === 'asc' ? 1 : -1
+  return [...filteredMyCards.value].sort((a, b) => {
+    let cmp = 0
+    if (field === 'due_date') {
+      // Cards without a due date always go last, regardless of direction.
+      if (!a.due_date !== !b.due_date) return a.due_date ? -1 : 1
+      cmp = (a.due_date || '').localeCompare(b.due_date || '')
+    } else if (field === 'priority') {
+      cmp = (PRIORITY_RANK[a.priority] ?? 0) - (PRIORITY_RANK[b.priority] ?? 0)
+    } else if (field === 'title') {
+      cmp = textCmp(a.title, b.title)
+    } else if (field === 'project') {
+      cmp = textCmp(a.project.name, b.project.name)
+    } else if (field === 'column') {
+      cmp = textCmp(a.column_name, b.column_name)
+    } else {
+      cmp = keyCmp(a, b)
+    }
+    return cmp * dir || keyCmp(a, b)
+  })
+})
+
+function cardLink(card) {
+  return { path: `/projects/${card.project.slug}`, query: { card: card.id } }
+}
+
+function isOverdue(card) {
+  if (!card.due_date) return false
+  const today = new Date()
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+  return card.due_date.slice(0, 10) < todayStr
 }
 
 const listColumns = computed(() => [
@@ -314,6 +463,7 @@ onMounted(async () => {
     }
     return
   }
+  if (viewMode.value === 'mine') loadMyCards()
   await projectStore.fetchProjects()
   sidebarStore.fetchStarred()
   customersApi.list().then(r => { createCustomers.value = r.data || [] }).catch(() => {})
@@ -414,6 +564,13 @@ async function handleCreate() {
   cursor: pointer;
 }
 .th-sort-btn:hover { color: var(--color-text); }
+
+.card-title-link { color: var(--color-text); text-decoration: none; }
+.card-title-link:hover, .card-title-link:focus-visible { color: var(--color-primary); text-decoration: underline; }
+.projects-table .col-key { font-family: monospace; }
+.projects-table .col-title { white-space: normal; min-width: 240px; }
+.projects-table td.overdue { color: var(--color-danger); font-weight: 600; }
+.text-muted { color: var(--color-text-muted); }
 
 .star-btn { color: var(--color-text-muted); }
 .star-btn.starred { color: var(--color-warning); }

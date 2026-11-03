@@ -98,7 +98,13 @@
     "view_list": "Lista",
     "view_mode": "Vista de projetos",
     "open_cards_col": "Cartões abertos",
-    "actions": "Ações"
+    "actions": "Ações",
+    "view_my_cards": "Os meus cartões",
+    "my_cards": "Os meus cartões abertos",
+    "card_key": "Chave",
+    "column": "Coluna",
+    "no_my_cards": "Não tem cartões abertos atribuídos.",
+    "my_cards_load_failed": "Não foi possível carregar os seus cartões"
   },
   "customer": {
     "customers": "Clientes",

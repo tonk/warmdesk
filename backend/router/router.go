@@ -508,6 +508,9 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 				convs.GET("/:id/livekit-token", handlers.GetLiveKitToken)
 			}
 
+			// Open cards assigned to the current user, across all projects
+			protected.GET("/my-cards", middleware.BlockCustomerRole(), middleware.RequireFeature("board_enabled"), handlers.ListMyCards)
+
 			// Projects
 			projects := protected.Group("/projects")
 			projects.Use(middleware.BlockCustomerRole(), middleware.RequireFeature("board_enabled"))

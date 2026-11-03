@@ -98,7 +98,13 @@
     "view_list": "Lista",
     "view_mode": "Projektinäkymä",
     "open_cards_col": "Avoimet kortit",
-    "actions": "Toiminnot"
+    "actions": "Toiminnot",
+    "view_my_cards": "Omat kortit",
+    "my_cards": "Omat avoimet kortit",
+    "card_key": "Tunnus",
+    "column": "Sarake",
+    "no_my_cards": "Sinulle ei ole määritetty avoimia kortteja.",
+    "my_cards_load_failed": "Korttiesi lataaminen epäonnistui"
   },
   "customer": {
     "customers": "Asiakkaat",

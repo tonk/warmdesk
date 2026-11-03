@@ -98,7 +98,13 @@
     "view_list": "Lista",
     "view_mode": "Vista de proyectos",
     "open_cards_col": "Tarjetas abiertas",
-    "actions": "Acciones"
+    "actions": "Acciones",
+    "view_my_cards": "Mis tarjetas",
+    "my_cards": "Mis tarjetas abiertas",
+    "card_key": "Clave",
+    "column": "Columna",
+    "no_my_cards": "No tienes tarjetas abiertas asignadas.",
+    "my_cards_load_failed": "No se pudieron cargar tus tarjetas"
   },
   "customer": {
     "customers": "Clientes",

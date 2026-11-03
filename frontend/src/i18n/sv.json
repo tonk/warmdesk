@@ -98,7 +98,13 @@
     "view_list": "Lista",
     "view_mode": "Projektvy",
     "open_cards_col": "Öppna kort",
-    "actions": "Åtgärder"
+    "actions": "Åtgärder",
+    "view_my_cards": "Mina kort",
+    "my_cards": "Mina öppna kort",
+    "card_key": "Nyckel",
+    "column": "Kolumn",
+    "no_my_cards": "Du har inga öppna kort tilldelade.",
+    "my_cards_load_failed": "Dina kort kunde inte läsas in"
   },
   "customer": {
     "customers": "Kunder",

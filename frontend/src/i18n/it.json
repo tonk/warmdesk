@@ -98,7 +98,13 @@
     "view_list": "Elenco",
     "view_mode": "Vista progetti",
     "open_cards_col": "Schede aperte",
-    "actions": "Azioni"
+    "actions": "Azioni",
+    "view_my_cards": "Le mie schede",
+    "my_cards": "Le mie schede aperte",
+    "card_key": "Chiave",
+    "column": "Colonna",
+    "no_my_cards": "Non hai schede aperte assegnate.",
+    "my_cards_load_failed": "Impossibile caricare le tue schede"
   },
   "customer": {
     "customers": "Clienti",

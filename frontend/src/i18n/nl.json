@@ -98,7 +98,13 @@
     "view_list": "Lijst",
     "view_mode": "Projectweergave",
     "open_cards_col": "Open kaarten",
-    "actions": "Acties"
+    "actions": "Acties",
+    "view_my_cards": "Mijn kaarten",
+    "my_cards": "Mijn open kaarten",
+    "card_key": "Sleutel",
+    "column": "Kolom",
+    "no_my_cards": "Er zijn geen open kaarten aan je toegewezen.",
+    "my_cards_load_failed": "Je kaarten konden niet worden geladen"
   },
   "customer": {
     "customers": "Klanten",
