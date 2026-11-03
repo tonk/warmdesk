@@ -958,3 +958,5 @@ Create an application that has all these features and requirements
 - Send ticket replies and invoice e-mails in the branded HTML layout with the company logo
 - Seed time entry locations, a running timer, private ticket notes, reminders, a major incident, and more in the demo data
 - Add a *My cards* dashboard view listing every open card assigned to the current user across all projects, with sortable columns and overdue due dates highlighted
+- Show the number of open cards assigned to the current user as a badge on the dashboard's *My cards* button
+- Add a `my_cards` lookup to the Ansible collection that lists all open cards assigned to the authenticated user

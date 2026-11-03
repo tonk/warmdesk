@@ -8,9 +8,10 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.43.0)
+## Latest release (v0.44.0)
 
-- **My cards** — A new dashboard view lists every open card assigned to you across all your projects, sortable by key, title, project, column, priority, or due date.
+- **Card count on My cards** — The *My cards* button shows how many open cards are assigned to you, in every dashboard view.
+- **`my_cards` Ansible lookup** — List your open cards from a playbook with the new `ansilabnl.warmdesk.my_cards` lookup.
 
 ## Experiment
 
@@ -362,7 +363,7 @@ See [INSTALL.md](INSTALL.md) for full instructions including:
 - **Time tracking calendar view** — toggle the Log Time tab between the weekly table and a drag-and-drop calendar: entries render as blocks positioned by start/end time, draggable to move between days/times and resizable to change duration; right-click or click-drag an empty slot to create a new entry; select several blocks or a whole day to copy, paste (shifted to the clicked time or at the original times), or delete them together; zoomable grid density (remembered per browser); blocks color-coded per customer or per project (switchable via a "Calendar block color" user setting); a "Log Time view" user setting picks which one opens by default
 - **Global search** — the search bar in the header matches card titles/descriptions, card comments, chat and direct messages, ticket subjects, and time-entry descriptions, scoped to what you have access to; clicking a comment or time-entry result jumps straight to and highlights it
 - **Search & replace** — find and replace text across cards, card comments, direct messages, tickets, and time entries; pick which categories to include, preview every match (with a before/after snippet) before anything changes, and matches you don't have permission to edit are shown greyed out and can't be applied; the 20-per-category preview limit is adjustable up to 500
-- **Multi-project** — each project has its own board, members, and chat; open card counts shown on project tiles and in the admin panel; admins can drag-reorder projects on the dashboard; switch the dashboard between tiles, a list sortable by name, customer, board type, or open cards, and a "My cards" view of every open card assigned to you across all projects (sorted by due date, overdue dates highlighted)
+- **Multi-project** — each project has its own board, members, and chat; open card counts shown on project tiles and in the admin panel; admins can drag-reorder projects on the dashboard; switch the dashboard between tiles, a list sortable by name, customer, board type, or open cards, and a "My cards" view of every open card assigned to you across all projects (sorted by due date, overdue dates highlighted), with a count badge on its button
 - **Role-based access** — global roles (admin / user / viewer / metrics / backup / customer) and per-project roles (owner / admin / member / viewer); project admins can manage columns; the `customer` role gives end-customers a read/comment-only ticket portal; project creation itself can be restricted to explicitly-permitted users (Admin → Users), off by default for non-admins
 - **Real-time** — board changes, card moves, and chat messages sync instantly across all connected users via WebSocket
 - **Internal chat** — per-project team chat and direct messages between users; group chats support custom avatars and member management; every user group automatically gets a linked group conversation that stays in sync with group membership

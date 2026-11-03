@@ -1,5 +1,5 @@
 = WarmDesk — User Guide
-:revnumber: v0.43.0
+:revnumber: v0.44.0
 :revdate: 2026-11-03
 Ton Kersten <tonk@smartowl.nl>
 ifdef::backend-pdf[]
@@ -268,6 +268,7 @@ The customer selector works in both views, and your choice of view and sort orde
 === My cards
 
 The third option of the switch, *My cards*, lists every open card assigned to you across all your projects — whether you are the card's main assignee or one of its extra assignees.
+The button shows how many open cards are assigned to you, also while another view is selected; the count follows the customer selector and is hidden when you have none.
 Closed cards, and cards in closed projects, are not shown.
 The table shows each card's key, title, project, column, priority, and due date.
 Click the key or title to open the card on its board, or the project name to open the board itself.

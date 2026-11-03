@@ -95,6 +95,7 @@ Filter the dashboard by customer using the dropdown at the top.
 === My cards
 
 The *Tiles* / *List* / *My cards* switch at the top of the dashboard has a *My cards* view that lists every open card assigned to you across all your projects, with its key, title, project, column, priority, and due date.
+The button shows how many open cards are assigned to you, in every view.
 Click a card to open it on its board.
 The list is sorted by due date (overdue dates in red, undated cards last); click a column header to sort by it, and click again to reverse the order.
 

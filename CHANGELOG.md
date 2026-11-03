@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.44.0 — 2026-11-03
+
+### Added
+- **Card count on *My cards*** — the *My cards* button on the dashboard now shows how many open cards are assigned to you, also while you are looking at the *Tiles* or *List* view. The count follows the customer filter, is hidden when you have no open cards, and is read out by screen readers.
+- **`my_cards` Ansible lookup** — the Ansible collection (now 0.6.6) has a new `ansilabnl.warmdesk.my_cards` lookup that returns all open cards assigned to the authenticated user across all projects, with an optional `project` filter and the card reference (e.g. `EDA-42`) of each card. Requires a WarmDesk v0.43.0 or newer server.
+
 ## v0.43.0 — 2026-11-03
 
 ### Added
