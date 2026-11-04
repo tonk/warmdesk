@@ -1,5 +1,9 @@
 [build]
 rustc-wrapper = "sccache"
+# Compiling Slint's generated library and test harness together can exhaust
+# memory on a 16 GiB development host, including editor background checks.
+# Larger builders can opt into more parallelism with Cargo's -j option.
+jobs = 8
 
 [target.x86_64-unknown-linux-gnu]
 linker = "clang"
