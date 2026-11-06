@@ -126,20 +126,19 @@ package: build
 	@tar -czf $(ARCHIVE) -C $(DIST_DIR) .
 	@echo "Distribution package: $(ARCHIVE)"
 
-# Stamp version into tauri.conf.json and Cargo.toml from the current git tag.
+# Write the version from the current git tag into a generated (gitignored)
+# Tauri config override, passed to every `tauri build` via $(TAURI_CFG). The
+# tracked tauri.conf.json / Cargo.toml / Cargo.lock are left untouched, so a
+# local build never leaves them modified. (tauri.conf.json's version takes
+# precedence over Cargo.toml's.)
+TAURI_VERSION_CFG := src-tauri/tauri.version.conf.json
+TAURI_CFG         := --config $(TAURI_VERSION_CFG)
 stamp-desktop-version:
 	@node -e "\
 		const fs = require('fs');\
 		const ver = '$(VERSION)'.replace(/^v/, '');\
-		const tp = '$(FRONTEND)/src-tauri/tauri.conf.json';\
-		const tc = JSON.parse(fs.readFileSync(tp, 'utf8'));\
-		tc.version = ver;\
-		fs.writeFileSync(tp, JSON.stringify(tc, null, 2) + '\n');\
-		const cp = '$(FRONTEND)/src-tauri/Cargo.toml';\
-		let cargo = fs.readFileSync(cp, 'utf8');\
-		cargo = cargo.replace(/^version = \"[^\"]*\"/m, 'version = \"' + ver + '\"');\
-		fs.writeFileSync(cp, cargo);\
-		console.log('Stamped desktop version:', ver);\
+		fs.writeFileSync('$(FRONTEND)/$(TAURI_VERSION_CFG)', JSON.stringify({ version: ver }, null, 2) + '\\n');\
+		console.log('Desktop build version:', ver);\
 	"
 
 # Post-process the built AppImage to bundle real GStreamer plugins (v4l2src,
@@ -215,7 +214,7 @@ _bundle-gst-appimage:
 # NO_STRIP=true works around linuxdeploy's bundled strip being too old for newer glibc.
 appimage: stamp-desktop-version
 	@echo "Building WarmDesk desktop app (AppImage)..."
-	cd $(FRONTEND) && NO_STRIP=true npm run tauri:build -- --bundles appimage
+	cd $(FRONTEND) && NO_STRIP=true npm run tauri:build -- $(TAURI_CFG) --bundles appimage
 	$(MAKE) _bundle-gst-appimage
 	@echo "AppImage: $(FRONTEND)/src-tauri/target/release/bundle/appimage/WarmDesk_*_amd64.AppImage"
 
@@ -232,14 +231,14 @@ appimage: stamp-desktop-version
 appimage-arm64: stamp-desktop-version
 	@echo "Building WarmDesk desktop app (AppImage, arm64)..."
 	rustup target add aarch64-unknown-linux-gnu 2>/dev/null || true
-	cd $(FRONTEND) && NO_STRIP=true npm run tauri:build -- --target aarch64-unknown-linux-gnu --bundles appimage
+	cd $(FRONTEND) && NO_STRIP=true npm run tauri:build -- $(TAURI_CFG) --target aarch64-unknown-linux-gnu --bundles appimage
 	@echo "AppImage: $(FRONTEND)/src-tauri/target/aarch64-unknown-linux-gnu/release/bundle/appimage/WarmDesk_*_aarch64.AppImage"
 
 # Build the Tauri desktop client as a .deb package (Debian/Ubuntu).
 # Requires: Rust, dpkg, webkit2gtk4.1-devel, gtk3-devel, librsvg2-devel, openssl-devel
 deb: stamp-desktop-version
 	@echo "Building WarmDesk desktop app (.deb)..."
-	cd $(FRONTEND) && npm run tauri:build -- --bundles deb
+	cd $(FRONTEND) && npm run tauri:build -- $(TAURI_CFG) --bundles deb
 	@echo "Package: $(FRONTEND)/src-tauri/target/release/bundle/deb/"
 
 # Build the Tauri desktop client as a .deb package (Debian/Ubuntu, arm64).
@@ -247,14 +246,14 @@ deb: stamp-desktop-version
 deb-arm64: stamp-desktop-version
 	@echo "Building WarmDesk desktop app (.deb, arm64)..."
 	rustup target add aarch64-unknown-linux-gnu 2>/dev/null || true
-	cd $(FRONTEND) && npm run tauri:build -- --target aarch64-unknown-linux-gnu --bundles deb
+	cd $(FRONTEND) && npm run tauri:build -- $(TAURI_CFG) --target aarch64-unknown-linux-gnu --bundles deb
 	@echo "Package: $(FRONTEND)/src-tauri/target/aarch64-unknown-linux-gnu/release/bundle/deb/"
 
 # Build the Tauri desktop client as an .rpm package (Fedora/RHEL).
 # Requires: Rust, rpm-build, webkit2gtk4.1-devel, gtk3-devel, librsvg2-devel, openssl-devel
 rpm: stamp-desktop-version
 	@echo "Building WarmDesk desktop app (.rpm)..."
-	cd $(FRONTEND) && npm run tauri:build -- --bundles rpm
+	cd $(FRONTEND) && npm run tauri:build -- $(TAURI_CFG) --bundles rpm
 	@echo "Package: $(FRONTEND)/src-tauri/target/release/bundle/rpm/"
 
 # Build the Tauri desktop client as an .rpm package (Fedora/RHEL, arm64).
@@ -262,7 +261,7 @@ rpm: stamp-desktop-version
 rpm-arm64: stamp-desktop-version
 	@echo "Building WarmDesk desktop app (.rpm, arm64)..."
 	rustup target add aarch64-unknown-linux-gnu 2>/dev/null || true
-	cd $(FRONTEND) && npm run tauri:build -- --target aarch64-unknown-linux-gnu --bundles rpm
+	cd $(FRONTEND) && npm run tauri:build -- $(TAURI_CFG) --target aarch64-unknown-linux-gnu --bundles rpm
 	@echo "Package: $(FRONTEND)/src-tauri/target/aarch64-unknown-linux-gnu/release/bundle/rpm/"
 
 # Build the Tauri desktop client as a macOS DMG (universal: Intel + Apple Silicon).
@@ -270,14 +269,14 @@ rpm-arm64: stamp-desktop-version
 dmg: stamp-desktop-version
 	@echo "Building WarmDesk desktop app (macOS DMG)..."
 	rustup target add aarch64-apple-darwin x86_64-apple-darwin 2>/dev/null || true
-	cd $(FRONTEND) && npm run tauri:build -- --bundles dmg --target universal-apple-darwin
+	cd $(FRONTEND) && npm run tauri:build -- $(TAURI_CFG) --bundles dmg --target universal-apple-darwin
 	@echo "DMG: $(FRONTEND)/src-tauri/target/universal-apple-darwin/release/bundle/dmg/WarmDesk_*.dmg"
 
 # Build the Tauri desktop client as a Windows NSIS installer.
 # Must be run on Windows. Requires: Rust, WebView2 (pre-installed on Windows 11).
 windows-installer: stamp-desktop-version
 	@echo "Building WarmDesk desktop app (Windows installer)..."
-	cd $(FRONTEND) && npm run tauri:build -- --bundles nsis
+	cd $(FRONTEND) && npm run tauri:build -- $(TAURI_CFG) --bundles nsis
 	@echo "Installer: $(FRONTEND)/src-tauri/target/release/bundle/nsis/WarmDesk_*_x64-setup.exe"
 
 # Build the Tauri desktop client as a portable Windows zip — extract and run, no installation.
@@ -285,7 +284,7 @@ windows-installer: stamp-desktop-version
 # WebView2 is pre-installed on Windows 10 (2018+) and Windows 11.
 windows-portable: stamp-desktop-version
 	@echo "Building WarmDesk desktop app (Windows portable zip)..."
-	cd $(FRONTEND) && npm run tauri:build -- --bundles nsis
+	cd $(FRONTEND) && npm run tauri:build -- $(TAURI_CFG) --bundles nsis
 	powershell -Command "Compress-Archive -Path '$(FRONTEND)/src-tauri/target/release/WarmDesk.exe' -DestinationPath 'WarmDesk-portable.zip' -Force"
 	@echo "Portable zip: WarmDesk-portable.zip"
 

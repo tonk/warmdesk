@@ -30,7 +30,12 @@ if (!goArch) {
   process.exit(1)
 }
 
-const { version } = JSON.parse(readFileSync(join(tauriDir, 'tauri.conf.json'), 'utf8'))
+// `make stamp-desktop-version` writes the git-tag version to a generated
+// override (gitignored) instead of editing tauri.conf.json; prefer it if present.
+const readVersion = (f) => JSON.parse(readFileSync(join(tauriDir, f), 'utf8')).version
+let version
+try { version = readVersion('tauri.version.conf.json') } catch { /* no override */ }
+version ??= readVersion('tauri.conf.json')
 const out = join(tauriDir, 'bin', 'warmdesk-timer')
 mkdirSync(dirname(out), { recursive: true })
 

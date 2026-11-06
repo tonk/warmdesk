@@ -35,6 +35,7 @@ frontend/dist/
 frontend/src-tauri/target/
 frontend/src-tauri/gen/
 frontend/src-tauri/bin/
+frontend/src-tauri/tauri.version.conf.json
 # Packaged installers/bundles (AppImage, DMG, MSI, NSIS, deb, rpm, etc.)
 frontend/src-tauri/target/release/bundle/
 frontend/src-tauri/Cargo.lock
