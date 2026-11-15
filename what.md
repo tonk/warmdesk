@@ -968,3 +968,4 @@ Create an application that has all these features and requirements
 - Make the unpacked AppDir world-readable before repacking the AppImage so the latest appimagetool accepts it
 - Show the month name(s) next to the week number in the time-tracking week header
 - Stop stamping tracked Tauri files, untrack Cargo.lock and compile the desktop build with more jobs
+- Track Cargo.lock again so the Windows desktop build uses fixed dependency versions

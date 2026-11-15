@@ -1,0 +1,19 @@
+---
+title: "v0.45.1: Windows desktop build fixed"
+date: "2026-11-15"
+author: "Ton Kersten"
+description: "v0.45.0 failed to build on Windows; this patch release fixes it."
+draft: false
+---
+:doctype: article
+:icons!:
+
+A patch release that replaces v0.45.0 for Windows desktop users.
+
+== Fixed
+
+The Windows desktop build of v0.45.0 did not compile. Since `Cargo.lock` was no longer tracked, the build picked up newer WebView2 crates than the code is written against. `Cargo.lock` is tracked again, so desktop builds use fixed dependency versions. The month in the time-tracking week header from v0.45.0 is unchanged.
+
+== Upgrade
+
+Download `v0.45.1` from the link:../../download[download page] or pull the latest release tag. The server and the web interface are unchanged compared to v0.45.0.

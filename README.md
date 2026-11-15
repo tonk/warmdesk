@@ -8,9 +8,9 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.45.0)
+## Latest release (v0.45.1)
 
-- **Month in the time-tracking header** — the week selector now shows the month (or both months) next to the week number.
+- **Windows desktop build fixed** — v0.45.0 failed to build on Windows; dependency versions are pinned again.
 
 ## Experiment
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.45.1 — 2026-11-15
+
+### Fixed
+- **Windows desktop build** — the v0.45.0 Windows build failed to compile (`no method named 'cast' found for ICoreWebView2Settings`) because, without a lockfile, the build picked up newer WebView2 crates than the ones the code is written against. `Cargo.lock` is tracked again, so desktop builds use fixed dependency versions.
+
 ## v0.45.0 — 2026-11-15
 
 ### Added
