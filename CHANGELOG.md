@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.45.0 — 2026-11-15
+
+### Added
+- **Month in the time-tracking week header** — the week selector now shows the month next to the week number (`Week 46 2026 · november`). A week that spans two months shows both (`sep – okt`). The names follow your language setting.
+
+### Changed
+- **Desktop build** — Tauri build files that were rewritten on every build are no longer stamped, `Cargo.lock` is untracked, and the build compiles with more parallel jobs. Not yet verified in a real desktop build.
+
 ## v0.44.3 — 2026-11-03
 
 ### Fixed

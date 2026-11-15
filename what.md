@@ -966,3 +966,5 @@ Create an application that has all these features and requirements
 - Share one image-upload helper across avatar and logo pickers and reset the file input after the upload
 - Add regression tests for the desktop fetch proxy and for image uploads, and a desktop-check step to the release checklist
 - Make the unpacked AppDir world-readable before repacking the AppImage so the latest appimagetool accepts it
+- Show the month name(s) next to the week number in the time-tracking week header
+- Stop stamping tracked Tauri files, untrack Cargo.lock and compile the desktop build with more jobs

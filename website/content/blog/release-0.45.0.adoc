@@ -1,0 +1,23 @@
+---
+title: "v0.45.0: Month in the time-tracking week header"
+date: "2026-11-15"
+author: "Ton Kersten"
+description: "The time-tracking week selector now shows which month the week is in."
+draft: false
+---
+:doctype: article
+:icons!:
+
+A small feature release for the time-tracking screen.
+
+== Added
+
+The week selector at the top of the time-tracking page used to show only the week number and year. It now also shows the month, for example `Week 46 2026 · november`. A week that runs across two months shows both, such as `sep – okt`. Month names follow your language setting, and screen readers announce the month as well.
+
+== Changed
+
+The desktop build no longer rewrites tracked Tauri files on every build, `Cargo.lock` is no longer tracked, and the build uses more parallel jobs. This has not yet been verified in a real desktop build.
+
+== Upgrade
+
+Download `v0.45.0` from the link:../../download[download page] or pull the latest release tag. There are no configuration or database changes.
