@@ -18,8 +18,8 @@
         <div class="wk-picker-wrap" ref="wkPickerRef">
           <button class="wk-label" @click="openWkPicker"
             :aria-expanded="String(wkPickerOpen)" aria-haspopup="true"
-            :aria-label="$t('timeTracking.week') + ' ' + weekInfo.week + ' ' + weekInfo.year">
-            {{ $t('timeTracking.week') }} &nbsp; {{ weekInfo.week }} &nbsp; {{ weekInfo.year }}
+            :aria-label="$t('timeTracking.week') + ' ' + weekInfo.week + ' ' + weekInfo.year + ' · ' + weekMonthLabel">
+            {{ $t('timeTracking.week') }} &nbsp; {{ weekInfo.week }} &nbsp; {{ weekInfo.year }} &nbsp;·&nbsp; {{ weekMonthLabel }}
           </button>
           <div v-if="wkPickerOpen" class="wk-cal" role="dialog" aria-modal="true" :aria-label="$t('timeTracking.week') + ' ' + weekInfo.week">
             <div class="wk-cal-hdr">
@@ -1673,6 +1673,19 @@ const weekInfo = computed(() => {
   const d = new Date(Date.UTC(thu.getFullYear(), thu.getMonth(), thu.getDate()))
   const y0 = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
   return { year: d.getUTCFullYear(), week: Math.ceil(((d - y0) / 86400000 + 1) / 7) }
+})
+
+// Month name(s) of the visible week; a week spanning two months shows both (short).
+const weekMonthLabel = computed(() => {
+  const first = new Date(weekStart.value)
+  const last = new Date(weekStart.value)
+  last.setDate(last.getDate() + 6)
+  const loc = locale.value || 'en'
+  if (first.getMonth() === last.getMonth()) {
+    return new Intl.DateTimeFormat(loc, { month: 'long' }).format(first)
+  }
+  const fmt = new Intl.DateTimeFormat(loc, { month: 'short' })
+  return `${fmt.format(first)} – ${fmt.format(last)}`
 })
 
 const weekDays = computed(() => {
