@@ -176,6 +176,7 @@ func stopTimer(tx *gorm.DB, timer *models.TimeTimer, end time.Time) ([]models.Ti
 			UserID:      timer.UserID,
 			CustomerID:  timer.CustomerID,
 			ProjectID:   timer.ProjectID,
+			CardID:      timer.CardID,
 			Date:        date,
 			Minutes:     seg.Minutes,
 			Description: timer.Description,
@@ -203,7 +204,7 @@ type timerResponse struct {
 
 func loadTimer(userID uint) (*models.TimeTimer, error) {
 	var timer models.TimeTimer
-	err := database.DB.Preload("Customer").Preload("Project").Where("user_id = ?", userID).First(&timer).Error
+	err := database.DB.Preload("Customer").Preload("Project").Preload("Card").Where("user_id = ?", userID).First(&timer).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
@@ -270,12 +271,14 @@ func GetTimerTargets(c *gin.Context) {
 // @Description  Needs project_id and/or customer_id (see GET /timer/targets). A board project brings its
 // @Description  own customer. A timer that is already running is stopped first and booked; those entries
 // @Description  are returned as stopped_entries. time_zone is an IANA zone name (default: the user's setting).
+// @Description  card_id times a board card: it brings its own project, and an empty description resumes
+// @Description  the one last used on that card (else "KEY-n title").
 // @Tags         time-tracking
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
 // @Security     ApiKeyAuth
-// @Param        body body map[string]interface{} true "project_id, customer_id, description, time_zone"
+// @Param        body body map[string]interface{} true "project_id, customer_id, card_id, description, time_zone"
 // @Success      201 {object} timerResponse
 // @Failure      400 {object} map[string]string
 // @Router       /timer/start [post]
@@ -284,6 +287,7 @@ func StartTimer(c *gin.Context) {
 	var req struct {
 		ProjectID   *uint  `json:"project_id"`
 		CustomerID  *uint  `json:"customer_id"`
+		CardID      *uint  `json:"card_id"`
 		Description string `json:"description"`
 		TimeZone    string `json:"time_zone"`
 	}
@@ -291,12 +295,62 @@ func StartTimer(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
 		return
 	}
-	if req.ProjectID == nil && req.CustomerID == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "project_id or customer_id is required"})
+	stopped, err := startUserTimer(userID, middleware.GetGlobalRole(c), timerStart{
+		ProjectID: req.ProjectID, CustomerID: req.CustomerID, CardID: req.CardID,
+		Description: req.Description, TimeZone: req.TimeZone,
+	})
+	var bad timerRequestError
+	if errors.As(err, &bad) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": bad.Error()})
 		return
 	}
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to start timer"})
+		return
+	}
+	timer, _ := loadTimer(userID)
+	c.JSON(http.StatusCreated, timerResponse{Running: true, Timer: timer, StoppedEntries: preloadEntries(stopped)})
+}
 
-	targets := loadTimerTargets(userID, middleware.GetGlobalRole(c))
+// timerRequestError is a start request the caller got wrong (a 400).
+type timerRequestError string
+
+func (e timerRequestError) Error() string { return string(e) }
+
+// timerStart is what to time: a project and/or customer, optionally a card
+// of that project.
+type timerStart struct {
+	ProjectID   *uint
+	CustomerID  *uint
+	CardID      *uint
+	Description string
+	TimeZone    string
+}
+
+// startUserTimer starts userID's timer, booking a running one first (those
+// entries are returned), and tells the user's clients. A card brings its own
+// project and, when no description is given, the description last used on it
+// (see cardTimerDescription). Errors the caller caused are timerRequestError.
+func startUserTimer(userID uint, globalRole string, req timerStart) ([]models.TimeEntry, error) {
+	if req.CardID != nil {
+		var card models.Card
+		if err := database.DB.First(&card, *req.CardID).Error; err != nil {
+			return nil, timerRequestError("card not found")
+		}
+		if req.ProjectID != nil && *req.ProjectID != card.ProjectID {
+			return nil, timerRequestError("card belongs to another project")
+		}
+		// Access is the project's: it must be among the user's timer targets below.
+		req.ProjectID = &card.ProjectID
+		if strings.TrimSpace(req.Description) == "" {
+			req.Description = cardTimerDescription(userID, &card)
+		}
+	}
+	if req.ProjectID == nil && req.CustomerID == nil {
+		return nil, timerRequestError("project_id or customer_id is required")
+	}
+
+	targets := loadTimerTargets(userID, globalRole)
 	if req.ProjectID != nil {
 		var project *timerTarget
 		for i := range targets.Projects {
@@ -305,13 +359,11 @@ func StartTimer(c *gin.Context) {
 			}
 		}
 		if project == nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "project not available for time tracking"})
-			return
+			return nil, timerRequestError("project not available for time tracking")
 		}
 		if project.CustomerID != nil {
 			if req.CustomerID != nil && *req.CustomerID != *project.CustomerID {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "project belongs to another customer"})
-				return
+				return nil, timerRequestError("project belongs to another customer")
 			}
 			req.CustomerID = project.CustomerID
 		}
@@ -324,16 +376,14 @@ func StartTimer(c *gin.Context) {
 		// A board project's own customer is fine even without direct
 		// customer access: the project access already covers it.
 		if !found && (req.ProjectID == nil || !projectHasCustomer(targets, *req.ProjectID, *req.CustomerID)) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "customer not available for time tracking"})
-			return
+			return nil, timerRequestError("customer not available for time tracking")
 		}
 	}
 
 	now := time.Now()
 	_, zone := timerLocation(req.TimeZone, userID)
 	if err := checkContractNotExpired(database.DB, req.CustomerID, req.ProjectID, nil, now); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return nil, timerRequestError(err.Error())
 	}
 
 	var stopped []models.TimeEntry
@@ -349,18 +399,17 @@ func StartTimer(c *gin.Context) {
 			UserID:      userID,
 			CustomerID:  req.CustomerID,
 			ProjectID:   req.ProjectID,
-			Description: strings.TrimSpace(req.Description),
+			CardID:      req.CardID,
+			Description: truncateRunes(strings.TrimSpace(req.Description), 255),
 			TimeZone:    zone,
 			StartedAt:   now,
 		}).Error
 	})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to start timer"})
-		return
+		return nil, err
 	}
-	timer, _ := loadTimer(userID)
 	notifyTimerChanged(userID, true, len(stopped))
-	c.JSON(http.StatusCreated, timerResponse{Running: true, Timer: timer, StoppedEntries: preloadEntries(stopped)})
+	return stopped, nil
 }
 
 func projectHasCustomer(targets timerTargets, projectID, customerID uint) bool {

@@ -1,5 +1,8 @@
 <template>
-  <div class="board-card" :class="{ 'board-card--closed': card.closed, 'board-card--overdue': isOverdue }" role="button" tabindex="0" @click="$emit('open', card)" @keydown.enter="$emit('open', card)" @keydown.space.prevent="$emit('open', card)">
+  <!-- The wrapper carries the sortable attributes; the timer button sits
+       beside the card (not inside it) so it isn't a button within a button. -->
+  <div class="board-card-wrap" :class="{ 'board-card-wrap--timing': timingThis }">
+  <div class="board-card" :class="{ 'board-card--closed': card.closed, 'board-card--overdue': isOverdue, 'board-card--timing': timingThis }" role="button" tabindex="0" @click="$emit('open', card)" @keydown.enter="$emit('open', card)" @keydown.space.prevent="$emit('open', card)">
     <!-- Epic colour bar -->
     <div v-if="card.epic" class="card-epic-bar" :style="{ background: card.epic.color }" :title="card.epic.name"></div>
     <!-- Assignee avatars — top right (shows multi-assignees if present, else primary) -->
@@ -56,15 +59,32 @@
       </span>
     </div>
   </div>
+  <button
+    v-if="canTime"
+    type="button"
+    class="card-timer-btn"
+    :class="{ 'card-timer-btn--running': timingThis }"
+    :disabled="timerBusy"
+    :aria-pressed="timingThis"
+    :aria-label="timingThis ? $t('board.card_timer_stop', { card: cardLabel }) : $t('board.card_timer_start', { card: cardLabel })"
+    :title="timingThis ? $t('board.card_timer_stop', { card: cardLabel }) : $t('board.card_timer_start', { card: cardLabel })"
+    @click.stop="toggleTimer"
+  ><span aria-hidden="true">{{ timingThis ? '■' : '▶' }}</span></button>
+  </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useDateFormat } from '@/composables/useDateFormat'
 import { avatarUrl } from '@/composables/useAvatar'
 import { renderMarkdown } from '@/composables/useCardRef'
 import { useProjectStore } from '@/stores/project'
 import { useSystemStore } from '@/stores/system'
+import { useAuthStore } from '@/stores/auth'
+import { useTimerStore } from '@/stores/timer'
+import { useUIStore } from '@/stores/ui'
+import { timerBookedMessage } from '@/utils/timerFormat'
 
 const props = defineProps({ card: { type: Object, required: true } })
 defineEmits(['open'])
@@ -72,6 +92,11 @@ defineEmits(['open'])
 const { formatDate } = useDateFormat()
 const projectStore = useProjectStore()
 const systemStore = useSystemStore()
+const auth = useAuthStore()
+const timerStore = useTimerStore()
+const ui = useUIStore()
+const { t } = useI18n()
+const timerBusy = ref(false)
 
 // Primary assignee first, then extra assignees (deduplicated)
 const allAssignees = computed(() => {
@@ -87,6 +112,35 @@ const cardRef = computed(() => {
   return prefix && props.card.card_number ? `${prefix}-${props.card.card_number}` : null
 })
 
+const cardLabel = computed(() => cardRef.value || props.card.title || '')
+
+// Same rule as the top-bar TimerButton (AppHeader.vue), plus the server
+// actually having the timer.
+const canTime = computed(() =>
+  !systemStore.noTimeTrackingMode && !!auth.user &&
+  (auth.isAdmin || !!auth.user.time_tracking_enabled) &&
+  timerStore.available === true && !!props.card.id
+)
+const timingThis = computed(() => timerStore.running && timerStore.timer?.card_id === props.card.id)
+
+async function toggleTimer() {
+  if (timerBusy.value) return
+  timerBusy.value = true
+  try {
+    if (timingThis.value) {
+      const entries = await timerStore.stop()
+      ui.success(timerBookedMessage(t, entries))
+    } else {
+      await timerStore.start({ cardId: props.card.id })
+      ui.success(t('board.card_timer_started', { card: cardLabel.value }))
+    }
+  } catch (e) {
+    ui.error(e?.response?.data?.error || t('board.card_timer_failed'))
+  } finally {
+    timerBusy.value = false
+  }
+}
+
 const isOverdue = computed(() => {
   if (!props.card.due_date) return false
   const today = new Date()
@@ -96,6 +150,44 @@ const isOverdue = computed(() => {
 </script>
 
 <style scoped>
+.board-card-wrap { position: relative; }
+.card-timer-btn {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 10px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0;
+  transition: opacity .15s;
+}
+/* Hover reveals it; keyboard focus must too (WCAG 2.1.1). */
+.board-card-wrap:hover .card-timer-btn,
+.board-card-wrap:focus-within .card-timer-btn,
+.card-timer-btn--running { opacity: 1; }
+.card-timer-btn:hover { color: var(--color-primary); border-color: var(--color-primary); }
+.card-timer-btn--running {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+.card-timer-btn--running:hover { color: #fff; }
+.card-timer-btn:disabled { cursor: wait; }
+.board-card--timing {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+  padding-bottom: 30px;
+}
 .card-epic-bar {
   position: absolute;
   top: 0;

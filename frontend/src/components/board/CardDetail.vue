@@ -496,6 +496,36 @@
         </div>
       </div>
 
+      <section v-if="!isNew && (columnTimes.length || cardTime.rows.length || cardTime.running.length)" class="history-section card-time-section" aria-labelledby="card-time-heading">
+        <h4 id="card-time-heading">{{ $t('board.card_time') }}</h4>
+        <div v-if="columnTimes.length" class="card-time-block">
+          <h5 class="card-time-sub">{{ $t('board.card_time_per_column') }}</h5>
+          <ul class="card-time-list">
+            <li v-for="row in columnTimes" :key="row.column_id" class="card-time-row" :class="{ 'card-time-row--current': row.current }">
+              <span class="history-col">{{ row.name }}</span>
+              <span v-if="timedColumnIds.has(row.column_id)" class="card-time-timed" role="img" :aria-label="$t('board.timed_column')" :title="$t('board.timed_column')">⏱</span>
+              <span class="card-time-dur">{{ formatSpan(row.minutes) }}</span>
+              <span v-if="row.current" class="card-time-now">{{ $t('board.card_time_current') }}</span>
+            </li>
+          </ul>
+        </div>
+        <div v-if="cardTime.rows.length || cardTime.running.length" class="card-time-block">
+          <h5 class="card-time-sub">{{ $t('board.card_time_booked', { total: fmtCardTime(cardTime.total_minutes) }) }}</h5>
+          <ul class="card-time-list">
+            <li v-for="(row, i) in cardTime.rows" :key="'b' + i" class="card-time-row">
+              <span class="history-who">{{ row.user_name }}</span>
+              <span class="card-time-desc">{{ row.description || '—' }}</span>
+              <span class="card-time-dur">{{ fmtCardTime(row.minutes) }}</span>
+            </li>
+            <li v-for="r in cardTime.running" :key="'r' + r.user_id" class="card-time-row card-time-row--running">
+              <span class="history-who">{{ r.user_name }}</span>
+              <span class="card-time-desc">{{ r.description || '—' }}</span>
+              <span class="card-time-now">{{ $t('board.card_time_running_since', { time: formatDateTime(r.started_at) }) }}</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+
       <div v-if="!isNew && columnHistory.length" class="history-section">
         <h4>{{ $t('board.column_history') }}</h4>
         <div class="history-list">
@@ -603,6 +633,8 @@ import { useSystemStore } from '@/stores/system'
 import { useEpicsStore } from '@/stores/epics'
 import { useDateFormat } from '@/composables/useDateFormat'
 import { avatarUrl } from '@/composables/useAvatar'
+import { useTimerStore } from '@/stores/timer'
+import { columnDurations, formatSpan } from '@/utils/cardColumnTime'
 
 const props = defineProps({
   card: { type: Object, required: true },
@@ -767,6 +799,24 @@ const checklistPct = computed(() => {
   if (!checklist.value.length) return 0
   return Math.round(checklist.value.filter(i => i.is_completed).length / checklist.value.length * 100)
 })
+
+// Wall-clock time per column (from the history) and time booked on the card
+// (card timers / timed columns, GET .../time).
+const timerStore = useTimerStore()
+const cardTime = ref({ total_minutes: 0, rows: [], running: [] })
+const columnTimes = computed(() => columnDurations(history.value, props.card, boardStore.columns || []))
+const timedColumnIds = computed(() => new Set((boardStore.columns || []).filter(c => c.timed).map(c => c.id)))
+
+async function loadCardTime() {
+  if (isNew.value || !props.card?.id) return
+  try {
+    const { data } = await projectsApi.getCardTime(props.projectSlug, props.card.id)
+    cardTime.value = { total_minutes: data?.total_minutes || 0, rows: data?.rows || [], running: data?.running || [] }
+  } catch {
+    // Older server without the endpoint: just leave the section out.
+  }
+}
+watch(() => [timerStore.bookedVersion, timerStore.timer?.card_id, timerStore.running], loadCardTime)
 
 const columnHistory = computed(() =>
   history.value.filter(h => h.event_type === 'column_move' || !h.event_type)
@@ -1127,6 +1177,7 @@ onMounted(async () => {
     projectsApi.getCardLinks(props.projectSlug, props.card.id).catch(() => ({ data: [] })),
   ])
   history.value = histRes.data
+  loadCardTime()
   checklist.value = checkRes.data || []
   gitLinks.value = linksRes.data || []
   await loadSubCards()
@@ -1864,6 +1915,15 @@ function renderMarkdown(text) {
 .transfer-subcards legend { width: 100%; margin-bottom: 4px; }
 .transfer-radio { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
 
+.card-time-block + .card-time-block { margin-top: 14px; }
+.card-time-sub { margin: 0 0 6px; font-size: 12px; font-weight: 600; color: var(--color-text-muted); }
+.card-time-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.card-time-row { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+.card-time-row--current .history-col { border-color: var(--color-primary); }
+.card-time-timed { font-size: 11px; color: var(--color-text-muted); }
+.card-time-desc { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--color-text-muted); }
+.card-time-dur { font-variant-numeric: tabular-nums; font-weight: 600; margin-left: auto; }
+.card-time-now { font-size: 11px; color: var(--color-primary); }
 .history-section { margin-top: 24px; border-top: 1px solid var(--color-border); padding-top: 20px; }
 .history-section h4 { margin-bottom: 12px; font-size: 14px; color: var(--color-text-muted); }
 .history-list { display: flex; flex-direction: column; gap: 6px; }

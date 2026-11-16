@@ -403,6 +403,34 @@ const docTemplate = `{
                 }
             }
         },
+        "/my-cards": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Covers both the legacy single assignee and the multi-assignee list. Only cards in open, non-deleted projects the user is (still) a member of are returned (admins: all projects).",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cards"
+                ],
+                "summary": "List all open cards assigned to the current user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/handlers.MyCardItem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/projects": {
             "get": {
                 "security": [
@@ -1097,6 +1125,65 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/models.Card"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{projectSlug}/cards/{cardId}/time": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Time entries linked to the card (from card timers and timed columns), summed per user\nand description, plus the timers running on it right now.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cards"
+                ],
+                "summary": "Time booked on a card",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project slug",
+                        "name": "projectSlug",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.cardTimeResponse"
                         }
                     },
                     "403": {
@@ -2155,7 +2242,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Needs project_id and/or customer_id (see GET /timer/targets). A board project brings its\nown customer. A timer that is already running is stopped first and booked; those entries\nare returned as stopped_entries. time_zone is an IANA zone name (default: the user's setting).",
+                "description": "Needs project_id and/or customer_id (see GET /timer/targets). A board project brings its\nown customer. A timer that is already running is stopped first and booked; those entries\nare returned as stopped_entries. time_zone is an IANA zone name (default: the user's setting).\ncard_id times a board card: it brings its own project, and an empty description resumes\nthe one last used on that card (else \"KEY-n title\").",
                 "consumes": [
                     "application/json"
                 ],
@@ -2168,7 +2255,7 @@ const docTemplate = `{
                 "summary": "Start the time-tracking timer",
                 "parameters": [
                     {
-                        "description": "project_id, customer_id, description, time_zone",
+                        "description": "project_id, customer_id, card_id, description, time_zone",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -2338,6 +2425,115 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "handlers.MyCardItem": {
+            "type": "object",
+            "properties": {
+                "card_number": {
+                    "type": "integer"
+                },
+                "column_name": {
+                    "type": "string"
+                },
+                "due_date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "priority": {
+                    "type": "string"
+                },
+                "project": {
+                    "$ref": "#/definitions/handlers.MyCardProject"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.MyCardProject": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "customer_id": {
+                    "type": "integer"
+                },
+                "customer_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "key_prefix": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "slug": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.cardTimeResponse": {
+            "type": "object",
+            "properties": {
+                "rows": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.cardTimeRow"
+                    }
+                },
+                "running": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.cardTimeRunning"
+                    }
+                },
+                "total_minutes": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.cardTimeRow": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "minutes": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "user_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.cardTimeRunning": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "started_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "user_name": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.loginRequest": {
             "type": "object",
             "required": [
@@ -3013,6 +3209,10 @@ const docTemplate = `{
                 "project_id": {
                     "type": "integer"
                 },
+                "timed": {
+                    "description": "Timed columns start the mover's time-tracking timer on the card when a\ncard is moved into them, and stop it when the card leaves for an untimed\ncolumn (see handlers/card_timer.go).",
+                    "type": "boolean"
+                },
                 "updated_at": {
                     "type": "string"
                 },
@@ -3038,6 +3238,9 @@ const docTemplate = `{
                 },
                 "end_date": {
                     "type": "string"
+                },
+                "hours_per_week": {
+                    "type": "number"
                 },
                 "id": {
                     "type": "integer"
@@ -3393,11 +3596,36 @@ const docTemplate = `{
                 }
             }
         },
+        "models.RequestData": {
+            "type": "object",
+            "additionalProperties": {}
+        },
         "models.SlaPolicy": {
             "type": "object",
             "properties": {
+                "calendar_id": {
+                    "description": "CalendarID selects the business hours deadlines are counted in; nil = 24×7.",
+                    "type": "integer"
+                },
+                "category_id": {
+                    "type": "integer"
+                },
                 "created_at": {
                     "type": "string"
+                },
+                "customer_id": {
+                    "description": "Optional extra match filters. A policy matches a ticket only when every\nnon-empty filter matches; the most specific matching policy wins\n(services.MatchSlaPolicy).",
+                    "type": "integer"
+                },
+                "escalation_group_id": {
+                    "description": "Escalation on breach: notify the group/user and, when EscalationReassign\nis set, reassign the ticket to them.",
+                    "type": "integer"
+                },
+                "escalation_reassign": {
+                    "type": "boolean"
+                },
+                "escalation_user_id": {
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
@@ -3417,14 +3645,34 @@ const docTemplate = `{
                 "response_time_minutes": {
                     "type": "integer"
                 },
+                "type_filter": {
+                    "type": "string"
+                },
                 "updated_at": {
                     "type": "string"
+                },
+                "warning_percent": {
+                    "description": "WarningPercent: share of the SLA time after which assignee/group are\nwarned (0 disables the warning).",
+                    "type": "integer"
                 }
             }
         },
         "models.Ticket": {
             "type": "object",
             "properties": {
+                "approval_group_id": {
+                    "type": "integer"
+                },
+                "approval_round": {
+                    "type": "integer"
+                },
+                "approval_status": {
+                    "description": "Approval round (service requests and changes). ApprovalStatus is \"\"\n(no approval needed), pending, approved or rejected; ApprovalRound\nincrements each time approval is (re)requested so earlier decisions\ndon't count towards a new round.",
+                    "type": "string"
+                },
+                "approvals_required": {
+                    "type": "integer"
+                },
                 "assigned_to": {
                     "$ref": "#/definitions/models.User"
                 },
@@ -3437,6 +3685,31 @@ const docTemplate = `{
                         "$ref": "#/definitions/models.Attachment"
                     }
                 },
+                "backout_plan": {
+                    "type": "string"
+                },
+                "catalog_item_id": {
+                    "description": "Service request fields — set when the ticket was ordered from the\nservice catalogue.",
+                    "type": "integer"
+                },
+                "category": {
+                    "$ref": "#/definitions/models.TicketCategory"
+                },
+                "category_id": {
+                    "type": "integer"
+                },
+                "change_outcome": {
+                    "description": "successful | partially_successful | failed",
+                    "type": "string"
+                },
+                "change_status": {
+                    "description": "see services.ValidChangeStatuses",
+                    "type": "string"
+                },
+                "change_type": {
+                    "description": "Change-enablement fields — only meaningful when Type == \"change_request\".",
+                    "type": "string"
+                },
                 "checklist_items": {
                     "type": "array",
                     "items": {
@@ -3447,6 +3720,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "close_at": {
+                    "type": "string"
+                },
+                "closed_at": {
                     "type": "string"
                 },
                 "created_at": {
@@ -3488,6 +3764,19 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "impact": {
+                    "description": "ITIL incident fields. Priority is derived from Impact × Urgency via the\nadmin priority matrix when both are set (services.DerivePriority), but\ncan still be overridden manually.",
+                    "type": "string"
+                },
+                "implementation_plan": {
+                    "type": "string"
+                },
+                "is_known_error": {
+                    "type": "boolean"
+                },
+                "is_major_incident": {
+                    "type": "boolean"
+                },
                 "is_spam": {
                     "type": "boolean"
                 },
@@ -3503,7 +3792,17 @@ const docTemplate = `{
                 "owner_id": {
                     "type": "integer"
                 },
+                "planned_end": {
+                    "type": "string"
+                },
+                "planned_start": {
+                    "type": "string"
+                },
                 "priority": {
+                    "type": "string"
+                },
+                "problem_status": {
+                    "description": "Problem-management fields — only meaningful when Type == \"problem\".",
                     "type": "string"
                 },
                 "raw_email": {
@@ -3511,6 +3810,44 @@ const docTemplate = `{
                 },
                 "reminder_at": {
                     "type": "string"
+                },
+                "reopen_count": {
+                    "type": "integer"
+                },
+                "request_data": {
+                    "$ref": "#/definitions/models.RequestData"
+                },
+                "resolution_code": {
+                    "$ref": "#/definitions/models.TicketResolutionCode"
+                },
+                "resolution_code_id": {
+                    "type": "integer"
+                },
+                "resolution_notes": {
+                    "type": "string"
+                },
+                "resolved_at": {
+                    "type": "string"
+                },
+                "review_notes": {
+                    "type": "string"
+                },
+                "risk": {
+                    "description": "low | medium | high",
+                    "type": "string"
+                },
+                "root_cause": {
+                    "type": "string"
+                },
+                "sla_escalated_at": {
+                    "type": "string"
+                },
+                "sla_paused_at": {
+                    "description": "SLA clock state. The resolution clock pauses while the ticket is\n\"pending\" (waiting on the customer): SlaPausedAt marks when the current\npause began, SlaPausedMinutes accumulates the business minutes of all\ncompleted pauses, which push the resolution deadline back.",
+                    "type": "string"
+                },
+                "sla_paused_minutes": {
+                    "type": "integer"
                 },
                 "sla_policy": {
                     "$ref": "#/definitions/models.SlaPolicy"
@@ -3530,6 +3867,9 @@ const docTemplate = `{
                 "sla_response_deadline": {
                     "type": "string"
                 },
+                "sla_warned_at": {
+                    "type": "string"
+                },
                 "status": {
                     "type": "string"
                 },
@@ -3539,11 +3879,46 @@ const docTemplate = `{
                         "$ref": "#/definitions/models.TicketTag"
                     }
                 },
+                "test_plan": {
+                    "type": "string"
+                },
                 "title": {
                     "type": "string"
                 },
                 "type": {
                     "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "urgency": {
+                    "type": "string"
+                },
+                "workaround": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.TicketCategory": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parent_id": {
+                    "type": "integer"
+                },
+                "sort_order": {
+                    "type": "integer"
                 },
                 "updated_at": {
                     "type": "string"
@@ -3600,6 +3975,10 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "inbound": {
+                    "description": "Inbound marks a message that arrived from the requester (an IMAP reply)\nrather than one written by an agent — used by the first-contact\nresolution metric.",
+                    "type": "boolean"
+                },
                 "is_private": {
                     "type": "boolean"
                 },
@@ -3626,6 +4005,29 @@ const docTemplate = `{
                 }
             }
         },
+        "models.TicketResolutionCode": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "sort_order": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "models.TicketTag": {
             "type": "object",
             "properties": {
@@ -3646,6 +4048,10 @@ const docTemplate = `{
         "models.TimeEntry": {
             "type": "object",
             "properties": {
+                "card_id": {
+                    "description": "CardID is the board card the time was spent on (a timer started from a\ncard or by a timed column); nil for everything else.",
+                    "type": "integer"
+                },
                 "contract": {
                     "$ref": "#/definitions/models.Contract"
                 },
@@ -3717,6 +4123,13 @@ const docTemplate = `{
         "models.TimeTimer": {
             "type": "object",
             "properties": {
+                "card": {
+                    "$ref": "#/definitions/models.Card"
+                },
+                "card_id": {
+                    "description": "CardID is the board card being timed; stopping books it on the entries.",
+                    "type": "integer"
+                },
                 "customer": {
                     "$ref": "#/definitions/models.Customer"
                 },

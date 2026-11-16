@@ -1,0 +1,19 @@
+meta {
+  name: Card Time
+  type: http
+  seq: 16
+}
+
+get {
+  url: {{baseUrl}}/api/v1/projects/{{projectSlug}}/cards/{{cardId}}/time
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  Time booked on this card (card timers and timed columns), summed per user and description, plus the timers running on it now.
+}

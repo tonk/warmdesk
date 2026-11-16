@@ -1154,8 +1154,9 @@ are refused because these routes have no project in their path.
 
 | Field | Notes |
 |-------|-------|
-| `project_id` / `customer_id` | At least one. A board project brings its own customer (another `customer_id` is a `400`); a time-tracking-only project can be combined with any customer from `/timer/targets`. |
-| `description` | Optional; copied to every booked entry. |
+| `project_id` / `customer_id` | At least one (or `card_id`). A board project brings its own customer (another `customer_id` is a `400`); a time-tracking-only project can be combined with any customer from `/timer/targets`. |
+| `card_id` | Optional board card to time. It brings its own project (a different `project_id` is a `400`); the booked entries carry `card_id`. |
+| `description` | Optional; copied to every booked entry. With `card_id` and no description, the one last booked on that card is resumed, else `KEY-n title`. |
 | `time_zone` | IANA zone the entries' dates and times are computed in. Default: the user's time zone setting. |
 
 **Response** `201 Created` — `{running, timer, stopped_entries}`; `stopped_entries`
@@ -1176,5 +1177,20 @@ How the time is booked:
   one day; an entry that runs to midnight has `end_time` `"00:00"`, and a full
   day in between is `00:00`–`00:00` with 1440 minutes.
 - Entries carry `start_time`/`end_time` matching their `minutes`, the timer's
-  project, customer and description.
+  project, customer, card and description.
+
+### Timed columns and card time
+
+A column with `"timed": true` (`POST`/`PUT /api/v1/projects/{slug}/columns[/{id}]`)
+drives the timer of whoever moves a card (`PATCH .../cards/{id}/move`): moving a
+card in starts their timer on it, moving it on to an untimed column stops and
+books it. The move itself never fails because of this.
+
+`GET /api/v1/projects/{slug}/cards/{id}/time` returns the time booked on a card:
+
+```json
+{ "total_minutes": 90,
+  "rows": [{ "user_id": 1, "user_name": "Ton", "description": "Refactor", "minutes": 90 }],
+  "running": [{ "user_id": 2, "user_name": "Ann", "description": "Review", "started_at": "2026-11-16T09:00:00Z" }] }
+```
 

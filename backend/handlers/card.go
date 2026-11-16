@@ -536,6 +536,8 @@ func MoveCard(c *gin.Context) {
 		})
 	}
 
+	applyTimedColumn(userID, middleware.GetGlobalRole(c), &card, oldColumnID, req.ColumnID)
+
 	ws.BroadcastToProject(project.ID, ws.Message{
 		Type: ws.TypeBoardCardMoved,
 		Payload: map[string]interface{}{

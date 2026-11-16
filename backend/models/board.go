@@ -33,6 +33,10 @@ type Column struct {
 	Position  float64        `gorm:"not null;default:0" json:"position"`
 	Color     string         `gorm:"size:7" json:"color"`
 	WIPLimit  *int           `gorm:"column:wip_limit" json:"wip_limit"`
+	// Timed columns start the mover's time-tracking timer on the card when a
+	// card is moved into them, and stop it when the card leaves for an untimed
+	// column (see handlers/card_timer.go).
+	Timed     bool           `gorm:"default:false" json:"timed"`
 	Cards     []Card         `json:"cards,omitempty"`
 }
 

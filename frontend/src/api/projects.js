@@ -43,6 +43,7 @@ export const projectsApi = {
   reorderCards: (slug, columnId, items) => client.patch(`/projects/${slug}/columns/${columnId}/cards/reorder`, items),
   getCard: (slug, cardId) => client.get(`/projects/${slug}/cards/${cardId}`),
   getCardHistory: (slug, cardId) => client.get(`/projects/${slug}/cards/${cardId}/history`),
+  getCardTime: (slug, cardId) => client.get(`/projects/${slug}/cards/${cardId}/time`),
   updateCard: (slug, cardId, data) => client.put(`/projects/${slug}/cards/${cardId}`, data),
   deleteCard: (slug, cardId) => client.delete(`/projects/${slug}/cards/${cardId}`),
   moveCard: (slug, cardId, data) => client.patch(`/projects/${slug}/cards/${cardId}/move`, data),

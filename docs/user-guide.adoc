@@ -360,11 +360,28 @@ Project admins can:
 * *Add* a column with the *+ Add Column* button
 * *Reorder* columns by dragging the column header
 * *Delete* an empty column using the trash icon that appears when the column has no cards
+* *Edit* a column with the ⚙ icon: its name, colour, WIP limit, and whether it is a *timed column*
+
+==== Timed columns
+
+A timed column (marked ⏱ in its header) works the timer for you.
+When you move a card into a timed column, your timer starts on that card; when you move the card on to a column that isn't timed, the timer stops and the time is booked on the card.
+Moving a card between two timed columns (say *In Progress* → *Ready for Review*) keeps the same timer running.
+
+* The timer resumes the description you last booked on that card; the first time it uses the card's reference and title (`WEB-12 Build login`).
+* It only affects the person who moves the card: a timer belongs to one person, a card doesn't.
+* A timer that is already running for something else is booked first, exactly as with *Switch…*.
+* Nothing happens for users without time tracking, or on a board-only server.
+
+=== Cards in columns
 
 === Cards in columns
 
 Cards are shown as tiles within each column.
 Each tile shows the card title, labels, priority indicator, due date, assignee avatars, and a checklist completion counter if the card has checklist items.
+
+When time tracking is enabled for you, hovering over a tile (or tabbing to it) shows a ▶ button in its bottom-right corner: it starts your timer on that card without opening it.
+While your timer runs on a card, the tile is outlined and the button turns into ■, which stops the timer and books the time.
 
 === Sorting cards
 
@@ -612,6 +629,9 @@ Fields:
 
 |*Comments*
 |Markdown, @mentions, and reply quoting
+
+|*Time*
+|How long the card has spent in each column (calendar time, counted from the column history), and the time booked on it with card timers and timed columns — per person and description, plus any timer running on it right now
 
 |*Column history*
 |Log of every column transition
@@ -1325,6 +1345,7 @@ Click it again to:
 
 The time is booked exactly as with the command-line timer below: rounded up to whole 15 minutes, split at midnight, and shown in the weekly grid, calendar, and reports.
 In the desktop app, the tray menu has the timer too (see <<_system_tray,System tray>>).
+You can also time a single card: use the ▶ button on a card tile, or a timed column (see <<_timed_columns,Timed columns>>). Time booked this way is linked to the card and listed in the card's *Time* section.
 The top-bar button and the command-line timer are the same timer, so you can start it in the browser and stop it from a terminal or another computer; open WarmDesk windows follow along straight away, and an open *Log Time* tab reloads when time is booked.
 
 === Timer from the command line

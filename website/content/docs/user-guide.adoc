@@ -114,6 +114,8 @@ Click a column title to rename it; drag the column header to reorder; remove an 
 Open *Column settings* (⚙) on a column header to change its colour and optional *WIP limit* (maximum cards).
 The header shows count versus limit (for example `3 / 5`); it is emphasized when the column is at or over the limit.
 Leave the limit empty to turn off WIP tracking.
+Tick *Timed column* to let the column drive the timer: moving a card into it starts your timer on that card, moving it on to an untimed column stops the timer and books the time on the card. A timed column shows ⏱ in its header.
+With time tracking enabled, each card tile also has a ▶ button (on hover or keyboard focus) to start or stop your timer on that card, and the card detail's *Time* section shows how long the card spent in each column and the time booked on it.
 
 === Cards
 

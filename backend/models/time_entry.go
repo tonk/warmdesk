@@ -39,6 +39,9 @@ type TimeEntry struct {
 	TicketID    *uint     `gorm:"index" json:"ticket_id,omitempty"`
 	Ticket      *Ticket   `gorm:"foreignKey:TicketID" json:"ticket,omitempty"`
 	LocationID  *uint             `gorm:"index" json:"location_id,omitempty"`
+	// CardID is the board card the time was spent on (a timer started from a
+	// card or by a timed column); nil for everything else.
+	CardID      *uint     `gorm:"index" json:"card_id,omitempty"`
 	Location    *CustomerLocation `gorm:"foreignKey:LocationID" json:"location,omitempty"`
 	Date        time.Time `gorm:"not null;index" json:"date"`
 	Minutes     int     `gorm:"not null" json:"minutes"`
@@ -60,6 +63,9 @@ type TimeTimer struct {
 	Customer    *Customer `gorm:"foreignKey:CustomerID" json:"customer,omitempty"`
 	ProjectID   *uint     `json:"project_id"`
 	Project     *Project  `gorm:"foreignKey:ProjectID" json:"project,omitempty"`
+	// CardID is the board card being timed; stopping books it on the entries.
+	CardID      *uint     `json:"card_id"`
+	Card        *Card     `gorm:"foreignKey:CardID" json:"card,omitempty"`
 	Description string    `json:"description"`
 	// TimeZone is the IANA zone the timer was started in; entry dates and
 	// wall-clock times are computed in it when the timer stops.

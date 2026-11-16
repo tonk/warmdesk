@@ -49,6 +49,7 @@ func CreateColumn(c *gin.Context) {
 		Name     string `json:"name" binding:"required"`
 		Color    string `json:"color"`
 		WIPLimit *int   `json:"wip_limit"`
+		Timed    bool   `json:"timed"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
@@ -67,6 +68,7 @@ func CreateColumn(c *gin.Context) {
 		Name:      req.Name,
 		Color:     req.Color,
 		WIPLimit:  req.WIPLimit,
+		Timed:     req.Timed,
 		Position:  maxPos + 1000,
 	}
 	database.DB.Create(&col)
@@ -105,6 +107,7 @@ func UpdateColumn(c *gin.Context) {
 		Color         string `json:"color"`
 		WIPLimit      *int   `json:"wip_limit"`
 		ClearWIPLimit bool   `json:"wip_limit_clear"`
+		Timed         *bool  `json:"timed"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
@@ -117,6 +120,9 @@ func UpdateColumn(c *gin.Context) {
 	}
 	if req.Color != "" {
 		updates["color"] = req.Color
+	}
+	if req.Timed != nil {
+		updates["timed"] = *req.Timed
 	}
 	if req.ClearWIPLimit {
 		updates["wip_limit"] = nil

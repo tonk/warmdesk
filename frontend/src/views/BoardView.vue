@@ -173,6 +173,13 @@
           <input class="form-input" type="text" inputmode="numeric" v-model="newColumn.wip" autocomplete="off" />
           <p class="form-hint">{{ $t('board.wip_limit_hint') }}</p>
         </div>
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" v-model="newColumn.timed" aria-describedby="newColumn-timed-hint" />
+            {{ $t('board.timed_column') }}
+          </label>
+          <p id="newColumn-timed-hint" class="form-hint">{{ $t('board.timed_column_hint') }}</p>
+        </div>
       </form>
       <template #footer>
         <button class="btn btn-secondary" @click="showAddColumn = false">{{ $t('common.cancel') }}</button>
@@ -195,6 +202,13 @@
           <label class="form-label">{{ $t('board.wip_limit') }}</label>
           <input class="form-input" type="text" inputmode="numeric" v-model="editColumn.wip" autocomplete="off" />
           <p class="form-hint">{{ $t('board.wip_limit_hint') }}</p>
+        </div>
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" v-model="editColumn.timed" aria-describedby="editColumn-timed-hint" />
+            {{ $t('board.timed_column') }}
+          </label>
+          <p id="editColumn-timed-hint" class="form-hint">{{ $t('board.timed_column_hint') }}</p>
         </div>
       </form>
       <template #footer>
@@ -250,8 +264,8 @@ const showAddColumn = ref(false)
 const showEditColumn = ref(false)
 const editingColumnId = ref(null)
 const selectedCard = ref(null)
-const newColumn = ref({ name: '', color: '#94a3b8', wip: '' })
-const editColumn = ref({ name: '', color: '#94a3b8', wip: '' })
+const newColumn = ref({ name: '', color: '#94a3b8', wip: '', timed: false })
+const editColumn = ref({ name: '', color: '#94a3b8', wip: '', timed: false })
 const columnsEl = ref(null)
 let columnSortable = null
 
@@ -442,7 +456,7 @@ function openAddCard(columnId) {
 async function submitAddColumn() {
   if (!newColumn.value.name.trim()) return
   try {
-    const extra = { color: newColumn.value.color }
+    const extra = { color: newColumn.value.color, timed: !!newColumn.value.timed }
     const raw = String(newColumn.value.wip ?? '').trim()
     if (raw !== '') {
       const n = parseInt(raw, 10)
@@ -454,7 +468,7 @@ async function submitAddColumn() {
     }
     await boardStore.createColumn(newColumn.value.name.trim(), extra)
     showAddColumn.value = false
-    newColumn.value = { name: '', color: '#94a3b8', wip: '' }
+    newColumn.value = { name: '', color: '#94a3b8', wip: '', timed: false }
   } catch (e) {
     ui.error(e.response?.data?.error || 'Failed to create column')
   }
@@ -465,7 +479,8 @@ function openEditColumn(column) {
   editColumn.value = {
     name: column.name,
     color: column.color || '#94a3b8',
-    wip: column.wip_limit != null && column.wip_limit !== undefined ? String(column.wip_limit) : ''
+    wip: column.wip_limit != null && column.wip_limit !== undefined ? String(column.wip_limit) : '',
+    timed: !!column.timed
   }
   showEditColumn.value = true
 }
@@ -473,7 +488,7 @@ function openEditColumn(column) {
 async function submitEditColumn() {
   const name = editColumn.value.name.trim()
   if (!name || editingColumnId.value == null) return
-  const payload = { name, color: editColumn.value.color || '#94a3b8' }
+  const payload = { name, color: editColumn.value.color || '#94a3b8', timed: !!editColumn.value.timed }
   const raw = String(editColumn.value.wip ?? '').trim()
   if (raw === '') {
     payload.wip_limit_clear = true
@@ -581,6 +596,7 @@ async function onCardMoved({ cardId, fromColumnId, toColumnId, newIndex }) {
 </script>
 
 <style scoped>
+.checkbox-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; }
 .board-layout { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
 
 .board-toolbar {

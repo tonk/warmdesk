@@ -226,10 +226,12 @@ The `warmdesk-timer` command-line tool uses these endpoints. They need time trac
 |Method |Path |Action
 |`GET` |`/api/v1/timer` |Running timer, or `{"running": false}`
 |`GET` |`/api/v1/timer/targets` |Projects and customers you can start a timer on
-|`POST` |`/api/v1/timer/start` |Start (`project_id` and/or `customer_id`, optional `description`, `time_zone`); a running timer is booked first
+|`POST` |`/api/v1/timer/start` |Start (`project_id` and/or `customer_id`, or a board `card_id`; optional `description`, `time_zone`); a running timer is booked first
 |`POST` |`/api/v1/timer/stop` |Stop and book; optional `end` (RFC 3339) for a forgotten timer
 |`DELETE` |`/api/v1/timer` |Discard without booking
 |===
+
+A column with `"timed": true` starts the mover's timer on a card moved into it and books it when the card moves on to an untimed column. `GET /api/v1/projects/{slug}/cards/{id}/time` lists the time booked on a card per user and description, plus timers running on it.
 
 The duration is rounded up to whole 15 minutes and split at midnight into one entry per day, in the timer's time zone (default: the user's setting).
 

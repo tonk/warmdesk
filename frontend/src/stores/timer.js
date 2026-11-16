@@ -61,10 +61,13 @@ export const useTimerStore = defineStore('timer', () => {
   }
 
   // Starts a timer; a running one is booked first (returned as stopped_entries).
-  async function start({ projectId, customerId, description }) {
+  // A cardId times a board card: the server takes its project, and an empty
+  // description resumes the one last used on that card.
+  async function start({ projectId, customerId, cardId, description }) {
     const body = { description: description || '' }
     if (projectId) body.project_id = projectId
     if (customerId) body.customer_id = customerId
+    if (cardId) body.card_id = cardId
     const zone = browserTimeZone()
     if (zone) body.time_zone = zone
     const { data } = await timerApi.start(body)

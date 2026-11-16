@@ -573,6 +573,7 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 
 				// Card history
 				projects.GET("/:projectSlug/cards/:cardId/history", handlers.GetCardHistory)
+				projects.GET("/:projectSlug/cards/:cardId/time", handlers.GetCardTime)
 
 				// Card git links
 				projects.GET("/:projectSlug/cards/:cardId/links", handlers.ListCardLinks)

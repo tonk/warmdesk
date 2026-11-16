@@ -19,6 +19,13 @@
           @dblclick="canManageColumns ? startEdit() : null"
           :title="canManageColumns ? $t('board.double_click_rename') : ''"
         >{{ column.name }}</span>
+        <span
+          v-if="column.timed"
+          class="column-timed"
+          role="img"
+          :aria-label="$t('board.timed_column')"
+          :title="$t('board.timed_column_tooltip')"
+        >⏱</span>
         <div
           class="header-stat-tip-host"
           :class="{ 'tip-pinned': countTipPinned }"
@@ -398,5 +405,7 @@ onBeforeUnmount(() => sortable?.destroy())
 .add-card-btn:hover { background: var(--color-border); color: var(--color-text); }
 
 :global(.card-ghost) { opacity: 0.4; background: var(--color-primary) !important; }
+:global(.card-ghost .board-card) { background: var(--color-primary) !important; }
+.column-timed { font-size: 12px; color: var(--color-text-muted); flex-shrink: 0; }
 :global(.card-drag) { transform: rotate(1deg); box-shadow: var(--shadow-md); }
 </style>
