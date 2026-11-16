@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.46.0 — 2026-11-16
+
+### Added
+- **Contract hours per week** — a customer contract can now have an optional number of contract hours per week (0–168). Set it in the contract form; the contract header shows it next to the rates. The Ansible `contract` module (collection now 0.6.7) has a matching `hours_per_week` option and keeps the value when a task doesn't mention it.
+- **Warning when a contract's weekly hours are exceeded** — the server counts the hours booked on a contract per ISO week (Monday to Sunday), by all users together and without holidays. Once the total passes the contract hours, every booking on that contract shows a warning such as `Retainer: 26 of 24 contract hours booked this week`. The booking is still saved. Bulk actions (macros, fill from slots, paste) give one warning per contract.
+- **Weekly contract-hours counter in the time sheet** — a row linked to such a contract shows `18 / 24 h this week` under the contract name, turning red with a ⚠ once the limit is passed. New endpoint: `GET /api/v1/time-entries/contract-usage`; time-entry create/update responses now include a `contract_usage` object.
+
+### Changed
+- The `ansible/.ansible/` lint cache directory is ignored by git.
+
 ## v0.45.1 — 2026-11-15
 
 ### Fixed

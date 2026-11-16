@@ -8,9 +8,10 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.45.1)
+## Latest release (v0.46.0)
 
-- **Windows desktop build fixed** — v0.45.0 failed to build on Windows; dependency versions are pinned again.
+- **Contract hours per week** — customer contracts can have an optional number of contract hours per week.
+- **Over-the-limit warning** — the time sheet counts the hours booked on a contract per ISO week, by all users together, and warns on every booking once the contract hours are exceeded.
 
 ## Experiment
 
@@ -341,7 +342,7 @@ See [INSTALL.md](INSTALL.md) for full instructions including:
 ## Features
 
 - **Ticket-system-only mode** — `app_mode: ticketsystem` (or `--mode=ticketsystem`) runs WarmDesk as a dedicated helpdesk server: boards, chat, and time tracking are disabled, ticket-on-desk logos and a login-page badge replace the defaults, and `/` opens your tickets
-- **Customer / Contract / Project hierarchy** — customers are top-level entities; contracts sit under a customer; projects can be linked to a customer and optionally to a contract; manage from the Customers page or from Project Settings; customers (including time-tracking-only ones) can be given a color, used to color-code the time-tracking calendar view
+- **Customer / Contract / Project hierarchy** — customers are top-level entities; contracts sit under a customer; projects can be linked to a customer and optionally to a contract; manage from the Customers page or from Project Settings; customers (including time-tracking-only ones) can be given a color, used to color-code the time-tracking calendar view; contracts can have optional contract hours per week, with a per-week counter in the time sheet and a warning on every booking once they are exceeded (counted over all users, per ISO week)
 - **Customer locations** — a customer can have multiple locations, each with a name (shown in time-tracking Location dropdowns), a full address (line 1/2, city, postcode, region, country), phone number, contact person (name, email, phone), and a standard travel distance; managed from the customer detail page's Locations tab
 - **Customers sidebar** — starred customers listed in the sidebar with star/unstar toggle; dedicated Customers page (`/customers`) with grid view and full Customer detail page
 - **Sub-cards** — add child cards (one level deep) inside a parent card's detail view; hidden from the board; parent card shows a done/total progress pill; each sub-card has its own card number, assignees, labels, and comments; opening a sub-card shows a ← back link to return to the parent

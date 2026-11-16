@@ -969,3 +969,5 @@ Create an application that has all these features and requirements
 - Show the month name(s) next to the week number in the time-tracking week header
 - Stop stamping tracked Tauri files, untrack Cargo.lock and compile the desktop build with more jobs
 - Track Cargo.lock again so the Windows desktop build uses fixed dependency versions
+- Add an optional contract hours per week field to customer contracts, in the API, the contract form and the Ansible contract module
+- Count the hours booked on a contract per ISO week over all users, show the count in the time sheet and warn on every booking once the contract hours are exceeded

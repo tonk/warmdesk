@@ -1,0 +1,35 @@
+---
+title: "v0.46.0: Contract hours per week"
+date: "2026-11-16"
+author: "Ton Kersten"
+description: "Customer contracts can have weekly contract hours, and the time sheet warns when a week goes over them."
+draft: false
+---
+:doctype: article
+:icons!:
+
+A feature release for customers, contracts, and time tracking.
+
+== Added
+
+=== Contract hours per week
+
+A customer contract has a new, optional field: the number of contract hours per week. Fill it in on the contract form (any value from 0 to 168); the contract header on the customer page then shows it next to the rates. Leave it empty and nothing changes.
+
+The Ansible collection (now 0.6.7) supports it too: the `ansilabnl.warmdesk.contract` module has a new `hours_per_week` option, and a task that doesn't mention it keeps the value that is already set.
+
+=== A warning when a week goes over the contract hours
+
+WarmDesk now keeps track of how many hours are booked on such a contract. The server counts every user's bookings on the contract in one ISO week, Monday to Sunday. Holiday entries don't count.
+
+* In the time sheet, a row linked to the contract shows the count under the contract name, for example `18 / 24 h this week`. Once the limit is passed, the counter turns red and gets a ⚠ sign.
+* Every booking on the contract while it is over the limit shows a warning, for example `Retainer: 26 of 24 contract hours booked this week`. The booking is saved anyway; the warning only tells you.
+* Bulk actions such as macros, *Fill from slots*, and pasting give one warning per contract instead of one per cell.
+
+Because all users count together, you can get the warning because colleagues have booked on the same contract. With a Sunday week start, the counter uses the ISO week of the Monday in the grid.
+
+For API users: time-entry create and update responses now include a `contract_usage` object, and `GET /api/v1/time-entries/contract-usage` returns the weekly usage of a list of contracts.
+
+== Upgrade
+
+Download `v0.46.0` from the link:../../download[download page] or pull the latest release tag. The new `hours_per_week` column on `contracts` is added automatically on startup; there are no configuration changes.

@@ -345,6 +345,7 @@ Click a cell to enter the hours worked that day; row, day, and week totals updat
 
 * Hover a cell for buttons to set a *time range* (⏱), a travel *distance* (⇆), or mark it as a *holiday*.
 * Link a row to a *contract* to show its rate and, if the contract has time slots, fill the week from them.
+* If the contract has *contract hours per week*, the row shows the hours booked on it this ISO week by all users together (e.g. `18 / 24 h this week`). Once they are exceeded the counter turns red and every booking on that contract shows a warning; the booking is still saved.
 * Edit a row's customer, project, contract, location, or activity with ✎ or by double-clicking it.
 * *Copy Previous Week* copies the row layout without hours; *Undo* reverts the last change.
 * Export the week as XLSX or PDF, or a printable *Grid PDF* for a whole week, month, or year.
@@ -589,7 +590,7 @@ If your organisation uses customer management:
 
 * You only see customers you have been assigned to (administrators see all)
 * Star a customer for quick access
-* The customer detail page shows its projects, contracts (with rates and optional time slots), billing information, contacts, and invoices
+* The customer detail page shows its projects, contracts (with rates, optional time slots, and optional contract hours per week), billing information, contacts, and invoices
 * *Locations* list the customer's sites, each with a name, address, contact details, and a standard *travel distance* used by <<travel-distance-auto-fill,travel distance auto-fill>>
 * Give a customer a *colour* to identify its blocks in the time-tracking calendar; customers without one get an unused colour automatically
 

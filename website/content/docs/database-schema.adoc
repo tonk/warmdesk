@@ -431,6 +431,7 @@ Free-text tags on a card (distinct from `labels`, which are project-scoped and c
 |`end_date` |TIMESTAMP |nullable |
 |`price_per_hour` |REAL |nullable |Base hourly rate
 |`price_per_km` |REAL |nullable |Base per-kilometre travel rate
+|`hours_per_week` |REAL |nullable |Contract hours per week (0–168); the time sheet warns when a week's bookings exceed it
 |`currency` |VARCHAR(3) |default `€` |Displayed alongside monetary values
 |===
 
