@@ -186,6 +186,8 @@
     "edit": "Modifier le contrat",
     "price_per_hour": "Prix par heure",
     "price_per_km": "Prix par {unit}",
+    "hours_per_week": "Heures contractuelles par semaine",
+    "hours_per_week_short": "{hours} h/semaine",
     "currency": "Monnaie",
     "time_slots": "Créneaux supplémentaires",
     "add_time_slot": "Ajouter un créneau",

@@ -186,6 +186,8 @@
     "edit": "Edit Contract",
     "price_per_hour": "Price per hour",
     "price_per_km": "Price per {unit}",
+    "hours_per_week": "Contract hours per week",
+    "hours_per_week_short": "{hours} h/week",
     "currency": "Currency",
     "time_slots": "Extra time slots",
     "add_time_slot": "Add Time Slot",

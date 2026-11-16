@@ -186,6 +186,8 @@
     "edit": "Breyta samningi",
     "price_per_hour": "Verð á klst.",
     "price_per_km": "Verð á {unit}",
+    "hours_per_week": "Samningsbundnar klukkustundir á viku",
+    "hours_per_week_short": "{hours} klst./viku",
     "currency": "Gjaldmiðill",
     "time_slots": "Aukatímabil",
     "add_time_slot": "Bæta við tímabili",

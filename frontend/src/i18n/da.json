@@ -186,6 +186,8 @@
     "edit": "Rediger kontrakt",
     "price_per_hour": "Pris pr. time",
     "price_per_km": "Pris pr. {unit}",
+    "hours_per_week": "Kontrakttimer pr. uge",
+    "hours_per_week_short": "{hours} t/uge",
     "currency": "Valuta",
     "time_slots": "Ekstra tidslots",
     "add_time_slot": "Tilføj tidslot",

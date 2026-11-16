@@ -186,6 +186,8 @@
     "edit": "Editar contrato",
     "price_per_hour": "Preço por hora",
     "price_per_km": "Preço por {unit}",
+    "hours_per_week": "Horas contratuais por semana",
+    "hours_per_week_short": "{hours} h/semana",
     "currency": "Moeda",
     "time_slots": "Faixas de horário extra",
     "add_time_slot": "Adicionar faixa",

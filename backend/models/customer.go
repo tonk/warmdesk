@@ -36,6 +36,7 @@ type Contract struct {
 	EndDate       *time.Time           `json:"end_date,omitempty"`
 	PricePerHour  *float64             `json:"price_per_hour,omitempty"`
 	PricePerKm    *float64             `json:"price_per_km,omitempty"`
+	HoursPerWeek  *float64             `json:"hours_per_week,omitempty"`
 	Currency      string               `gorm:"size:3;default:€" json:"currency"`
 	TimeSlots     []ContractTimeSlot   `gorm:"foreignKey:ContractID" json:"time_slots,omitempty"`
 	CreatedAt     time.Time            `json:"created_at"`

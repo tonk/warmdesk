@@ -186,6 +186,8 @@
     "edit": "Muokkaa sopimusta",
     "price_per_hour": "Tuntihinta",
     "price_per_km": "Hinta per {unit}",
+    "hours_per_week": "Sopimustunnit viikossa",
+    "hours_per_week_short": "{hours} h/vko",
     "currency": "Valuutta",
     "time_slots": "Lisäaikavälyt",
     "add_time_slot": "Lisää aikaväli",

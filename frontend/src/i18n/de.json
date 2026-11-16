@@ -186,6 +186,8 @@
     "edit": "Vertrag bearbeiten",
     "price_per_hour": "Preis pro Stunde",
     "price_per_km": "Preis pro {unit}",
+    "hours_per_week": "Vertragsstunden pro Woche",
+    "hours_per_week_short": "{hours} Std./Woche",
     "currency": "Währung",
     "time_slots": "Zusätzliche Zeitslots",
     "add_time_slot": "Zeitslot hinzufügen",

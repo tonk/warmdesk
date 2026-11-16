@@ -449,6 +449,7 @@ func CreateContract(c *gin.Context) {
 		EndDate      string   `json:"end_date"`
 		PricePerHour *float64 `json:"price_per_hour"`
 		PricePerKm   *float64 `json:"price_per_km"`
+		HoursPerWeek *float64 `json:"hours_per_week"`
 		Currency     string   `json:"currency"`
 		TimeSlots    []struct {
 			Label                string   `json:"label"`
@@ -464,6 +465,10 @@ func CreateContract(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
 		return
 	}
+	if !validHoursPerWeek(req.HoursPerWeek) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "hours_per_week must be between 0 and 168"})
+		return
+	}
 	currency := req.Currency
 	if currency == "" {
 		currency = "€"
@@ -474,6 +479,7 @@ func CreateContract(c *gin.Context) {
 		Description:  req.Description,
 		PricePerHour: req.PricePerHour,
 		PricePerKm:   req.PricePerKm,
+		HoursPerWeek: req.HoursPerWeek,
 		Currency:     currency,
 	}
 	if t, err := parseContractDate(req.StartDate); err == nil && t != nil {
@@ -509,6 +515,12 @@ func CreateContract(c *gin.Context) {
 	c.JSON(http.StatusCreated, con)
 }
 
+// validHoursPerWeek reports whether an optional weekly contract-hours value
+// is acceptable: unset, or between 0 and the 168 hours a week has.
+func validHoursPerWeek(h *float64) bool {
+	return h == nil || (*h >= 0 && *h <= 168)
+}
+
 // UpdateContract updates a contract.
 func UpdateContract(c *gin.Context) {
 	contractID, err := strconv.Atoi(c.Param("contractId"))
@@ -532,6 +544,7 @@ func UpdateContract(c *gin.Context) {
 		EndDate      string   `json:"end_date"`
 		PricePerHour *float64 `json:"price_per_hour"`
 		PricePerKm   *float64 `json:"price_per_km"`
+		HoursPerWeek *float64 `json:"hours_per_week"`
 		Currency     string   `json:"currency"`
 		TimeSlots    []struct {
 			Label                string   `json:"label"`
@@ -547,6 +560,10 @@ func UpdateContract(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
 		return
 	}
+	if !validHoursPerWeek(req.HoursPerWeek) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "hours_per_week must be between 0 and 168"})
+		return
+	}
 	updates := map[string]interface{}{"description": req.Description}
 	if req.Name != "" {
 		updates["name"] = req.Name
@@ -559,6 +576,7 @@ func UpdateContract(c *gin.Context) {
 	}
 	updates["price_per_hour"] = req.PricePerHour
 	updates["price_per_km"] = req.PricePerKm
+	updates["hours_per_week"] = req.HoursPerWeek
 	if req.Currency != "" {
 		updates["currency"] = req.Currency
 	}

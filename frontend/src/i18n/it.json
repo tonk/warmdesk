@@ -186,6 +186,8 @@
     "edit": "Modifica contratto",
     "price_per_hour": "Prezzo all'ora",
     "price_per_km": "Prezzo per {unit}",
+    "hours_per_week": "Ore contrattuali settimanali",
+    "hours_per_week_short": "{hours} h/settimana",
     "currency": "Valuta",
     "time_slots": "Fasce orarie aggiuntive",
     "add_time_slot": "Aggiungi fascia",

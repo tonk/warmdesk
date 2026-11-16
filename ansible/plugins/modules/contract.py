@@ -21,7 +21,8 @@ notes:
   - Date strings must be in C(YYYY-MM-DD) format or omitted entirely.  Passing
     an empty string clears a previously set date.
   - The API's update endpoint overwrites C(description), C(start_date),
-    C(end_date), C(price_per_hour), C(price_per_km), and C(time_slots) from
+    C(end_date), C(price_per_hour), C(price_per_km), C(hours_per_week), and
+    C(time_slots) from
     whatever is in the request body on every call — an omitted field is
     indistinguishable, server-side, from an explicit clear.  This module
     works around that by fetching the current contract and resending its
@@ -74,6 +75,12 @@ options:
   price_per_km:
     description:
       - Per-kilometre travel rate for this contract, as a decimal string.
+      - Omit to leave unset or unchanged; pass an empty string to clear it.
+    type: str
+
+  hours_per_week:
+    description:
+      - Number of contract hours per week (0–168), as a decimal string.
       - Omit to leave unset or unchanged; pass an empty string to clear it.
     type: str
 
@@ -185,6 +192,7 @@ EXAMPLES = r"""
     name: Standby Support 2025
     price_per_hour: "95.00"
     price_per_km: "0.35"
+    hours_per_week: "24"
     currency: EUR
     time_slots:
       - label: Evening
@@ -281,6 +289,11 @@ contract:
       returned: always
       type: float
       sample: 0.35
+    hours_per_week:
+      description: Contract hours per week, or null when unset.
+      returned: always
+      type: float
+      sample: 24.0
     currency:
       description: Currency code or symbol.
       returned: always
@@ -379,7 +392,7 @@ def _build_body(p, existing=None):
     """Build a create/update body from module params.
 
     On update (existing is not None), fields in _MERGE_ON_UPDATE plus
-    price_per_hour/price_per_km/time_slots are resent with their current
+    price_per_hour/price_per_km/hours_per_week/time_slots are resent with their current
     value whenever the caller didn't explicitly supply a new one — see
     _MERGE_ON_UPDATE's comment for why this is necessary.
     """
@@ -407,6 +420,12 @@ def _build_body(p, existing=None):
         body['price_per_km'] = price_per_km
     elif existing is not None:
         body['price_per_km'] = existing.get('price_per_km')
+
+    hours_per_week, given = _resolve_price(p.get('hours_per_week'))
+    if given:
+        body['hours_per_week'] = hours_per_week
+    elif existing is not None:
+        body['hours_per_week'] = existing.get('hours_per_week')
 
     if p.get('time_slots') is not None:
         body['time_slots'] = _normalize_time_slots(p['time_slots'])
@@ -440,7 +459,7 @@ def _fields_changed(existing, p):
     if p.get('currency') is not None and existing.get('currency') != p['currency']:
         return True
 
-    for key in ('price_per_hour', 'price_per_km'):
+    for key in ('price_per_hour', 'price_per_km', 'hours_per_week'):
         desired, given = _resolve_price(p.get(key))
         if not given:
             continue
@@ -470,6 +489,7 @@ def run_module():
         end_date=dict(type='str'),
         price_per_hour=dict(type='str'),
         price_per_km=dict(type='str'),
+        hours_per_week=dict(type='str'),
         currency=dict(type='str'),
         time_slots=dict(type='list', elements='dict', options=dict(
             label=dict(type='str'),

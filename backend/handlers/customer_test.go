@@ -63,3 +63,56 @@ func ginTestContext(t *testing.T, method, path, body string) (*gin.Context, *htt
 	c.Request.Header.Set("Content-Type", "application/json")
 	return c, w
 }
+
+// Contract hours per week are optional: they round-trip through create and
+// update, an update without them clears them, and out-of-range values
+// (negative, or more than the 168 hours a week has) are refused.
+func TestContractHoursPerWeek(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	db, cleanup := testutil.SetupTestDB()
+	defer cleanup()
+	prevDB := database.DB
+	database.DB = db
+	defer func() { database.DB = prevDB }()
+
+	cust := &models.Customer{Name: "Acme"}
+	require.NoError(t, db.Create(cust).Error)
+
+	asAdmin := func(method, path, body string, params gin.Params) *httptest.ResponseRecorder {
+		c, w := ginTestContext(t, method, path, body)
+		c.Set(middleware.ContextGlobalRole, "admin")
+		c.Params = params
+		switch method {
+		case http.MethodPost:
+			CreateContract(c)
+		case http.MethodPut:
+			UpdateContract(c)
+		}
+		return w
+	}
+	custParams := gin.Params{{Key: "customerId", Value: "1"}}
+
+	w := asAdmin(http.MethodPost, "/customers/1/contracts", `{"name":"Retainer","hours_per_week":24}`, custParams)
+	require.Equal(t, http.StatusCreated, w.Code)
+	var con models.Contract
+	require.NoError(t, db.First(&con).Error)
+	require.NotNil(t, con.HoursPerWeek)
+	require.Equal(t, 24.0, *con.HoursPerWeek)
+
+	conParams := gin.Params{{Key: "contractId", Value: "1"}}
+	w = asAdmin(http.MethodPut, "/contracts/1", `{"name":"Retainer","hours_per_week":32.5}`, conParams)
+	require.Equal(t, http.StatusOK, w.Code)
+	require.NoError(t, db.First(&con, con.ID).Error)
+	require.Equal(t, 32.5, *con.HoursPerWeek)
+
+	w = asAdmin(http.MethodPut, "/contracts/1", `{"name":"Retainer","hours_per_week":169}`, conParams)
+	require.Equal(t, http.StatusBadRequest, w.Code)
+	w = asAdmin(http.MethodPost, "/customers/1/contracts", `{"name":"Bad","hours_per_week":-1}`, custParams)
+	require.Equal(t, http.StatusBadRequest, w.Code)
+
+	w = asAdmin(http.MethodPut, "/contracts/1", `{"name":"Retainer"}`, conParams)
+	require.Equal(t, http.StatusOK, w.Code)
+	var reloaded models.Contract
+	require.NoError(t, db.First(&reloaded, con.ID).Error)
+	require.Nil(t, reloaded.HoursPerWeek)
+}

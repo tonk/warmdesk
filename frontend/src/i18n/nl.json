@@ -186,6 +186,8 @@
     "edit": "Contract bewerken",
     "price_per_hour": "Prijs per uur",
     "price_per_km": "Prijs per {unit}",
+    "hours_per_week": "Contracturen per week",
+    "hours_per_week_short": "{hours} u/week",
     "currency": "Valuta",
     "time_slots": "Extra tijdslots",
     "add_time_slot": "Tijdslot toevoegen",

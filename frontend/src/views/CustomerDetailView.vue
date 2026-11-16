@@ -105,6 +105,7 @@
               </span>
               <span v-if="grp.price_per_hour != null" class="contract-rate">{{ grp.price_per_hour }} {{ grp.currency }}/h</span>
               <span v-if="grp.price_per_km != null" class="contract-rate">{{ grp.price_per_km }} {{ grp.currency }}/{{ distanceUnit }}</span>
+              <span v-if="grp.hours_per_week != null" class="contract-rate">{{ $t('contract.hours_per_week_short', { hours: grp.hours_per_week }) }}</span>
             </div>
             <div v-if="grp.time_slots && grp.time_slots.length" class="slot-indicator-wrap">
               <span class="slot-badge" tabindex="0" :aria-label="grp.time_slots.length + ' ' + $t('contract.time_slots')">
@@ -597,6 +598,10 @@
             <option value="PLN">PLN (zł)</option>
             <option value="CZK">CZK (Kč)</option>
           </select>
+        </div>
+        <div class="form-group half">
+          <label class="form-label" for="contract-hours-week">{{ $t('contract.hours_per_week') }}</label>
+          <input id="contract-hours-week" class="form-input" type="number" min="0" max="168" step="0.5" v-model="contractForm.hours_per_week" />
         </div>
       </div>
       <div class="form-group">
@@ -1663,7 +1668,7 @@ const slotTimePlaceholder = computed(() => prefers12HourSlotTime.value ? 'hh:mm 
 
 const showAddContract = ref(false)
 const editingContract = ref(null)
-const contractForm = ref({ name: '', description: '', start_date: '', end_date: '', price_per_hour: null, price_per_km: null, currency: '€', time_slots: [] })
+const contractForm = ref({ name: '', description: '', start_date: '', end_date: '', price_per_hour: null, price_per_km: null, hours_per_week: null, currency: '€', time_slots: [] })
 const emptySlot = () => ({ label: '', start_time: '', end_time: '', day_type: 'all', end_day_offset: 1, multiplication_factor: null, hourly_rate: null })
 
 function isOvernightSlot(slot) {
@@ -2049,6 +2054,7 @@ function editContract(grp) {
     end_date:   grp.end_date   ? grp.end_date.split('T')[0]   : '',
     price_per_hour: grp.price_per_hour != null ? grp.price_per_hour : null,
     price_per_km:   grp.price_per_km != null ? grp.price_per_km : null,
+    hours_per_week: grp.hours_per_week != null ? grp.hours_per_week : null,
     currency:       grp.currency || '€',
     time_slots: (grp.time_slots || []).map(s => ({
       label:                s.label || '',
@@ -2075,7 +2081,7 @@ function removeTimeSlot(idx) {
 function closeContractModal() {
   showAddContract.value = false
   editingContract.value = null
-  contractForm.value = { name: '', description: '', start_date: '', end_date: '', price_per_hour: null, currency: '€', time_slots: [] }
+  contractForm.value = { name: '', description: '', start_date: '', end_date: '', price_per_hour: null, price_per_km: null, hours_per_week: null, currency: '€', time_slots: [] }
   displayContractStartDate.value = ''
   displayContractEndDate.value   = ''
 }
@@ -2088,6 +2094,7 @@ async function saveContract() {
     end_date:       contractForm.value.end_date   || '',
     price_per_hour: contractForm.value.price_per_hour,
     price_per_km:   contractForm.value.price_per_km,
+    hours_per_week: contractForm.value.hours_per_week !== null && contractForm.value.hours_per_week !== '' ? parseFloat(contractForm.value.hours_per_week) : null,
     currency:       contractForm.value.currency || '€',
     time_slots:     contractForm.value.time_slots
       .filter(s => s.start_time && s.end_time)
