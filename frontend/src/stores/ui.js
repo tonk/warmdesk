@@ -16,6 +16,7 @@ export const useUIStore = defineStore('ui', () => {
   function success(message) { toast(message, 'success') }
   function error(message) { toast(message, 'error', 5000) }
   function info(message) { toast(message, 'info') }
+  function warning(message) { toast(message, 'warning', 6000) }
 
   function mention(senderName, body, context) {
     const id = ++nextId
@@ -52,7 +53,7 @@ export const useUIStore = defineStore('ui', () => {
   }
 
   return {
-    toasts, toast, success, error, info, mention,
+    toasts, toast, success, error, info, warning, mention,
     confirmState, confirm, _confirmResolve,
     helpContext, setHelpContext,
   }

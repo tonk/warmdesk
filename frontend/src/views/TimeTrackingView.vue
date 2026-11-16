@@ -203,6 +203,11 @@
                 >
                   <div class="rc-cust">{{ row.customer_name || '—' }}</div>
                   <div v-if="row.contract_name" class="rc-contract">{{ row.contract_name }}</div>
+                  <div v-if="rowContractUsage(row)" class="rc-contract-usage"
+                    :class="{ 'is-exceeded': rowContractUsage(row).exceeded }"
+                    :title="$t('timeTracking.contract_usage_title')">
+                    <span v-if="rowContractUsage(row).exceeded" aria-hidden="true">⚠ </span>{{ contractUsageLabel(rowContractUsage(row)) }}<span v-if="rowContractUsage(row).exceeded" class="sr-only"> — {{ $t('timeTracking.contract_usage_exceeded') }}</span>
+                  </div>
                   <div v-else class="rc-proj">{{ row.project_name || '—' }}</div>
                   <span class="rc-comment-wrap">
                   <button v-if="!viewingOther" class="rc-comment-btn"
@@ -1474,6 +1479,7 @@ import { useUIStore } from '@/stores/ui'
 import HolidayCountryMenu from '@/components/common/HolidayCountryMenu.vue'
 import { useSystemStore } from '@/stores/system'
 import { useTimerStore } from '@/stores/timer'
+import { useContractUsageStore, formatContractHours } from '@/stores/contractUsage'
 import { timeEntriesApi } from '@/api/timeEntries'
 import { customersApi } from '@/api/customers'
 import { projectsApi } from '@/api/projects'
@@ -1994,6 +2000,27 @@ const allRows = computed(() => {
   return [...entryRows.value, ...extras]
 })
 
+// Weekly contract hours, counted by the backend over all users in the ISO
+// week — with a Sunday week start, the grid's Monday is its second column.
+const contractUsage = useContractUsageStore()
+const isoWeekMondayIso = computed(() => weekDays.value[weekStartDay.value === 0 ? 1 : 0].iso)
+const gridContractIds = computed(() =>
+  [...new Set(allRows.value.map(r => r.contract_id).filter(Boolean))].sort((a, b) => a - b).join(','))
+watch([isoWeekMondayIso, gridContractIds], ([week, ids]) => {
+  contractUsage.load(week, ids ? ids.split(',').map(Number) : [])
+}, { immediate: true })
+
+function rowContractUsage(row) {
+  return row.contract_id ? contractUsage.get(row.contract_id, isoWeekMondayIso.value) : null
+}
+
+function contractUsageLabel(u) {
+  return t('timeTracking.contract_usage', {
+    booked: formatContractHours(u.booked_minutes),
+    limit: formatContractHours(u.limit_minutes),
+  })
+}
+
 // ── Sorting ───────────────────────────────────────────────────────────────
 const sortCol = ref(null)   // null | 'info' | 'desc'
 const sortDir = ref('asc')  // 'asc' | 'desc'
@@ -2259,6 +2286,8 @@ async function loadWeek() {
     ])
     if (myToken !== loadWeekToken) return // a newer loadWeek() has since started
     rawEntries.value = data
+    // Other users may have booked on the same contracts since the last load.
+    contractUsage.refresh()
     // Eagerly load contracts for all customers that appear in this week's entries
     // so the rate column is populated without waiting for a row interaction.
     const contractCustomerIds = [...new Set(
@@ -6406,6 +6435,8 @@ td.c-day-holiday-cell.c-day-popup-open {
 .rc-cust { font-weight: 600; font-size: 12px; line-height: 1.3; color: var(--color-text); }
 .rc-proj { font-size: 11px; color: var(--color-text-muted); line-height: 1.3; }
 .rc-contract { font-size: 11px; color: var(--color-primary); line-height: 1.3; }
+.rc-contract-usage { font-size: 11px; color: var(--color-text-muted); line-height: 1.3; white-space: nowrap; }
+.rc-contract-usage.is-exceeded { color: var(--color-danger); font-weight: 600; }
 .rc-rate { font-size: 12px; color: var(--color-text-muted); white-space: nowrap; }
 .rc-rate-slots { color: var(--color-primary); font-size: 10px; margin-left: 2px; cursor: default; }
 .rc-comment-wrap { position: relative; display: inline-block; }

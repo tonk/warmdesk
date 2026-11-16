@@ -175,7 +175,7 @@ func CreateTimeEntry(c *gin.Context) {
 		return
 	}
 	database.DB.Preload("Customer").Preload("Project").Preload("Contract").Preload("User").First(&entry, entry.ID)
-	c.JSON(http.StatusCreated, entry)
+	c.JSON(http.StatusCreated, withContractUsage(entry))
 }
 
 // UpdateTimeEntry updates a time entry owned by the authenticated user.
@@ -264,7 +264,7 @@ func UpdateTimeEntry(c *gin.Context) {
 		return
 	}
 	database.DB.Preload("Customer").Preload("Project").Preload("Contract").First(&entry, entry.ID)
-	c.JSON(http.StatusOK, entry)
+	c.JSON(http.StatusOK, withContractUsage(entry))
 }
 
 // DeleteTimeEntry removes a time entry owned by the authenticated user.

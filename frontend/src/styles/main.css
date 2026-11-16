@@ -349,6 +349,8 @@ select.form-input[multiple] { height: auto; }
 .toast-success  { background: var(--color-success); }
 .toast-error    { background: var(--color-danger); }
 .toast-info     { background: var(--color-primary); }
+/* Dark text: white on amber falls short of WCAG AA contrast. */
+.toast-warning  { background: var(--color-warning); color: #1e293b; max-width: 360px; }
 .toast-mention  { background: var(--color-primary); max-width: 320px; font-weight: normal; }
 
 @keyframes slideIn {

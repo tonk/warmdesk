@@ -1109,6 +1109,16 @@ Clicking *Fill from slots* fills the entire week according to the contract's slo
 You can also set or edit times per cell with the ⏱ button inside the cell (see *Icons and indicators* above).
 Cells without a stored range show a 09:00–17:00 placeholder in the popup.
 
+==== Weekly contract hours
+
+When a row's contract has *contract hours per week* set, the row shows how many of those hours have been booked this week, e.g. *18 / 24 h this week*.
+The count covers all users who book on the contract, over the ISO week (Monday to Sunday) — with a Sunday week start, that is the week of the grid's Monday.
+Holiday entries don't count.
+
+Once the weekly hours are exceeded, the counter turns red with a ⚠ sign, and every booking on that contract shows a warning such as *Retainer: 26 of 24 contract hours booked this week*.
+The booking itself is saved; the warning only informs you.
+Bulk actions (macros, fill from slots, paste) give one warning per contract.
+
 Multi-day overnight slots (e.g. a Friday standby that runs until Monday 07:00) are handled automatically: the anchor day stores the slot's actual start time, and the continuation days (Saturday, Sunday) store 00:00–00:00 to indicate full-day coverage.
 
 [[editing-rows]]
@@ -1979,6 +1989,9 @@ Each contract shows its name, date range, hourly rate, and linked projects.
 Contracts can have *time slots* — named time-of-day rate tiers (e.g. "Evening", "Weekend") with configurable start/end time, day type, hourly rate, and multiplication factor.
 When a contract has time slots, a badge appears; hover or focus to see the full list.
 Time slots are used in PDF and XLSX time-tracking exports to compute slot-aware billing automatically.
+
+A contract can optionally have *contract hours per week*.
+The time sheet then counts the hours booked on the contract per ISO week (Monday to Sunday), by all users together, and warns when that number is exceeded (see *Weekly contract hours* under Time Tracking).
 
 ==== Billing information
 
