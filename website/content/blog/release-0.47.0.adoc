@@ -1,0 +1,42 @@
+---
+title: "v0.47.0: Card timers and timed columns"
+date: "2026-11-16"
+author: "Ton Kersten"
+description: "Time a board card with one click, or let a timed column start and stop the timer as cards move across the board."
+draft: false
+---
+:doctype: article
+:icons!:
+
+A feature release for boards and time tracking, prompted by a feature request on GitHub (issue #2).
+
+== Added
+
+=== Timer on a card
+
+Hover over a card tile, or tab to it, and a ▶ button appears in its bottom-right corner. It starts your time-tracking timer on that card without opening the card. While the timer runs, the card is outlined and the button turns into ■: click it to stop the timer and book the time.
+
+The timer is the same one as the stopwatch in the top bar, the tray menu, and `warmdesk-timer`. Time booked from a card ends up in the weekly grid and the reports as usual, and is now also linked to the card. When no description is given, the timer resumes the description you last booked on that card; the first time it uses the card key and title, for example `WEB-12 Build login`.
+
+=== Timed columns
+
+A column's settings (⚙) have a new *Timed column* option, and a timed column shows ⏱ in its header.
+
+* Move a card *into* a timed column and your timer starts on that card. A timer that was running for something else is booked first.
+* Move it between two timed columns (say *In Progress* → *Ready for Review*) and the same timer keeps running.
+* Move it *out* to an untimed column, for example back to *To do* at the end of the day, and the timer stops and the time is booked on the card.
+
+Only the person who moves the card is affected: a timer belongs to one person, a card doesn't. Moving a card never fails because of the timer. Users without time tracking, and board-only servers, see no timer behaviour at all.
+
+=== Time in the card detail
+
+The card detail has a new *Time* section:
+
+* *Time per column* — how long the card has been in each column. This is calendar time, worked out from the column history; it is not booked as worked time.
+* *Booked time* — the time booked on the card, per person and description, plus any timer running on it right now.
+
+For API users: `POST /api/v1/timer/start` accepts `card_id`, columns have a `timed` flag, and `GET /api/v1/projects/{slug}/cards/{id}/time` returns the time booked on a card.
+
+== Upgrade
+
+Download `v0.47.0` from the link:../../download[download page] or pull the latest release tag. The new `timed` column on `columns` and `card_id` on time entries and timers are added automatically on startup; there are no configuration changes.

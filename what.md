@@ -971,3 +971,6 @@ Create an application that has all these features and requirements
 - Track Cargo.lock again so the Windows desktop build uses fixed dependency versions
 - Add an optional contract hours per week field to customer contracts, in the API, the contract form and the Ansible contract module
 - Count the hours booked on a contract per ISO week over all users, show the count in the time sheet and warn on every booking once the contract hours are exceeded
+- Add a start/stop timer button to card tiles and link timer bookings to the card
+- Add timed columns that start the mover's timer when a card enters them and book it when the card moves on to an untimed column
+- Show time per column and booked time per person and description in the card detail

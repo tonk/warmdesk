@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.47.0 — 2026-11-16
+
+### Added
+- **Timer on a card** — hovering over a card tile (or tabbing to it) shows a ▶ button that starts your time-tracking timer on that card without opening it. While it runs, the card is outlined and the button becomes ■, which stops the timer and books the time. Time booked this way is linked to the card. Requested in #2.
+- **Timed columns** — a new *Timed column* option in the column settings (⚙). Moving a card into a timed column starts your timer on it; moving it between timed columns keeps it running; moving it on to an untimed column stops it and books the time on the card. The timer resumes the description you last used on that card (the first time: the card key and title). Only the person who moves the card is affected, and nothing happens for users without time tracking or on a board-only server. Timed columns show ⏱ in their header.
+- **Time section in the card detail** — how long the card spent in each column (calendar time, from the column history) and the time booked on it per person and description, plus timers running on it right now.
+- **API** — `POST /api/v1/timer/start` accepts `card_id`, columns have a `timed` flag, and `GET /api/v1/projects/{slug}/cards/{id}/time` returns the time booked on a card. The Swagger docs were regenerated and now also list a few endpoints that were missing.
+
 ## v0.46.0 — 2026-11-16
 
 ### Added

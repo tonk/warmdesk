@@ -8,10 +8,11 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.46.0)
+## Latest release (v0.47.0)
 
-- **Contract hours per week** — customer contracts can have an optional number of contract hours per week.
-- **Over-the-limit warning** — the time sheet counts the hours booked on a contract per ISO week, by all users together, and warns on every booking once the contract hours are exceeded.
+- **Timer on a card** — a ▶ button on each card tile starts your time-tracking timer on that card; the time is booked on the card.
+- **Timed columns** — mark a column as timed and moving a card into it starts your timer, moving it out stops and books it.
+- **Time per card** — the card detail shows how long the card spent in each column and the time booked on it.
 
 ## Experiment
 
@@ -359,6 +360,7 @@ See [INSTALL.md](INSTALL.md) for full instructions including:
 - **Comment replies** — reply to any comment; replies are visually indented
 - **Time tracking** — log hours and minutes spent directly on a card; the weekly timesheet also supports time-tracking-only projects and customers (lightweight entries that don't create a board or CRM record), managed via the ⚙ button in the time-tracking view; each time-tracking project can carry an *undeclarable minutes* value (travel time, holidays, etc.) that is automatically subtracted from totals in the sheet, report, PDF, and XLSX export
 - **Travel distance auto-fill** — pick one of a customer's locations from the weekly grid (add row, edit row, or the per-cell distance popup), the calendar entry editor, or a time macro row to auto-fill the standard travel distance, staying freely editable for day-to-day variation; re-picking a row's location also corrects that week's already-logged distances
+- **Card timers and timed columns** — start or stop your timer on a card from its tile; mark a column as *timed* so moving a card into it starts your timer on that card and moving it on to an untimed column books the time; the card detail shows time per column and the time booked on the card per person and description
 - **Command-line timer** — `warmdesk-timer start Website` when you begin, `warmdesk-timer stop` when you're done: the time is rounded up to whole 15 minutes, split at midnight, and booked as regular time entries on the chosen project; starting a new timer books the running one first, `stop --at 17:30` fixes a forgotten timer, a default project and customer in `timer.yaml` (see `timer.yaml.example`) make a plain `warmdesk-timer start` enough, and the timer lives on the server so it can be stopped from another machine — or from the stopwatch button in the web interface's top bar and the desktop app's tray menu, which run the same timer and follow CLI changes live. Installed by the Linux desktop `.deb`/`.rpm` packages, and ships with the server and as a standalone download for Linux, macOS, and Windows
 - **Time tracking calendar view** — toggle the Log Time tab between the weekly table and a drag-and-drop calendar: entries render as blocks positioned by start/end time, draggable to move between days/times and resizable to change duration; right-click or click-drag an empty slot to create a new entry; select several blocks or a whole day to copy, paste (shifted to the clicked time or at the original times), or delete them together; zoomable grid density (remembered per browser); blocks color-coded per customer or per project (switchable via a "Calendar block color" user setting); a "Log Time view" user setting picks which one opens by default
 - **Global search** — the search bar in the header matches card titles/descriptions, card comments, chat and direct messages, ticket subjects, and time-entry descriptions, scoped to what you have access to; clicking a comment or time-entry result jumps straight to and highlights it
