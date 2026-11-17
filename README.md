@@ -52,8 +52,12 @@ The result is a ~45,000 line Go backend and a ~45,000 line Vue 3 frontend that a
 | *Ticket inbox — all unassigned tickets grouped by status with SLA indicators* | *Weekly timesheet — declarable totals with aligned undeclarable deductions* |
 | ![Time tracking macro editor](screenshots/25-time-tracking-macro-editor.png) | ![Run macro popout](screenshots/26-time-tracking-macro-run.png) |
 | *Macro editor — alternating Pattern A/B day template* | *Run macro popout — apply a saved macro to the current week* |
-| ![Time tracking calendar](screenshots/27-time-tracking-calendar.png) | |
-| *Calendar view — drag-and-drop weekly grid, including overnight standby shifts* | |
+| ![Time tracking calendar](screenshots/27-time-tracking-calendar.png) | ![Time overview: norm](screenshots/28-time-overview-norm.png) |
+| *Calendar view — drag-and-drop weekly grid, including overnight standby shifts* | *Overview — the year's booked hours against the norm, per month* |
+| ![Time overview: checks](screenshots/29-time-overview-checks.png) | ![Time overview: travel](screenshots/30-time-overview-travel.png) |
+| *Overview checks — overlaps, missing distances, days over or under the norm* | *Overview travel — own and declarable time and kilometres per route* |
+| ![Time overview: vacation](screenshots/31-time-overview-vacation.png) | ![Time overview: settings](screenshots/32-time-overview-settings.png) |
+| *Overview vacation — balance with the carry-over from previous years* | *Overview settings — weekly hours, vacation and project categories* |
 
 ## Quick Start
 

@@ -7,7 +7,8 @@ const __dirname = path.dirname(__filename)
 const SS = path.resolve(__dirname, '../../screenshots')
 const AUTH_FILE = path.resolve(__dirname, '.auth.json')
 
-const BASE_URL = 'http://localhost:5173'
+// Override to run against another instance (e.g. a backend serving the built frontend).
+const BASE_URL = process.env.E2E_BASE_URL || 'http://localhost:5173'
 
 // Helpers ---------------------------------------------------------------
 function ss(name) {
@@ -448,6 +449,58 @@ test.describe('screenshots', () => {
     await page.locator('.cal-scroll').evaluate((el) => { el.scrollTop = 900 })
     await page.waitForTimeout(400)
     await page.screenshot(ss('27-time-tracking-calendar'))
+    await context.close()
+  })
+
+  // ── 28–32: Time tracking — Overview tab ────────────────────────────
+  // Logs in as demo.admin, whose seeded year of entries (holidays, vacation,
+  // sick days, Heen/Terug travel with distances and a few deliberate problems)
+  // is what the year overviews are built to show.
+  async function openOverview(browser, sub, height = 900) {
+    const context = await browser.newContext()
+    const page = await context.newPage()
+    // A taller window shows the whole table instead of cutting it off.
+    await page.setViewportSize({ width: 1440, height })
+    await loginAs(page)
+    await page.goto(`${BASE_URL}/time-tracking?tab=overview`)
+    await page.waitForSelector('.ov-root')
+    await dismissWelcome(page)
+    if (sub !== 'norm') await page.locator(`#ov-tab-${sub}`).click()
+    await page.waitForSelector(`#ov-panel-${sub}[aria-busy="false"] table, #ov-panel-${sub}[aria-busy="false"] .ov-card`)
+    await page.waitForTimeout(400)
+    return { context, page }
+  }
+
+  test('28-time-overview-norm', async ({ browser }) => {
+    const { context, page } = await openOverview(browser, 'norm', 1060)
+    await page.screenshot(ss('28-time-overview-norm'))
+    await context.close()
+  })
+
+  test('29-time-overview-checks', async ({ browser }) => {
+    const { context, page } = await openOverview(browser, 'checks')
+    await page.screenshot(ss('29-time-overview-checks'))
+    await context.close()
+  })
+
+  test('30-time-overview-travel', async ({ browser }) => {
+    const { context, page } = await openOverview(browser, 'travel', 1260)
+    await page.screenshot(ss('30-time-overview-travel'))
+    await context.close()
+  })
+
+  test('31-time-overview-vacation', async ({ browser }) => {
+    const { context, page } = await openOverview(browser, 'vacation', 1080)
+    await page.screenshot(ss('31-time-overview-vacation'))
+    await context.close()
+  })
+
+  test('32-time-overview-settings', async ({ browser }) => {
+    const { context, page } = await openOverview(browser, 'norm')
+    await page.locator('.ov-toolbar > button.ov-btn').last().click()
+    await page.waitForSelector('[role="dialog"]')
+    await page.waitForTimeout(500)
+    await page.screenshot(ss('32-time-overview-settings'))
     await context.close()
   })
 })

@@ -13,7 +13,7 @@
         <strong v-else class="tt-emp-name">{{ displayName }}</strong>
       </div>
 
-      <div class="tt-week-nav" v-show="mode !== 'board-report'">
+      <div class="tt-week-nav" v-show="mode !== 'board-report' && mode !== 'overview'">
         <button class="nav-btn" @click="shiftWeek(-1)" :title="$t('timeTracking.prev_week')" :aria-label="$t('timeTracking.prev_week')">&#9664;</button>
         <div class="wk-picker-wrap" ref="wkPickerRef">
           <button class="wk-label" @click="openWkPicker"
@@ -78,6 +78,18 @@
           v-if="auth.timeTrackingEnabled"
         >
           {{ $t('timeTracking.tab_report') }}
+        </button>
+        <button
+          v-if="auth.timeTrackingEnabled"
+          id="tab-overview"
+          class="tt-mode-btn"
+          role="tab"
+          :aria-selected="mode === 'overview'"
+          aria-controls="panel-overview"
+          :class="{ active: mode === 'overview' }"
+          @click="mode = 'overview'"
+        >
+          {{ $t('timeOverview.tab') }}
         </button>
         <button
           v-if="auth.canViewReports && !systemStore.isTimetrackingMode"
@@ -1007,6 +1019,7 @@
             <div class="rpt-group-hd">
               <span>{{ grp.label }}</span>
               <span class="rpt-grp-count">{{ $t('timeTracking.entries_count', { n: grp.entries.length }) }}</span>
+              <span v-if="grp.days" class="rpt-grp-count">{{ $t('timeOverview.report_days', { n: grp.days }) }}</span>
               <span class="rpt-grp-total">{{ fmtTime(grp.declarable_minutes) }}</span>
               <button
                 v-if="rpt.group_by === 'customer' && grp.entries.some(e => e.contract_id)"
@@ -1162,10 +1175,16 @@
         <div class="rpt-grand-total">
           <span class="rpt-gt-label">{{ $t('timeTracking.totals') }}</span>
           <span v-if="report.total_distance > 0" class="rpt-gt-item">{{ $t('timeTracking.distance_total') }} ({{ distanceUnit }}): {{ fmtDistance(report.total_distance) }}</span>
+          <span v-if="report.total_days" class="rpt-gt-item">{{ $t('timeOverview.report_total_days', { n: report.total_days }) }}</span>
           <span v-if="report.undeclarable_minutes > 0" class="rpt-gt-item">{{ $t('timeTracking.undeclarable') }}: -{{ fmtTime(report.undeclarable_minutes) }}</span>
           <span>{{ fmtTime(report.undeclarable_minutes > 0 ? report.declarable_minutes : report.total_minutes) }}</span>
         </div>
       </template>
+    </div>
+
+    <!-- ── Overview ──────────────────────────────────────────────────────────── -->
+    <div v-if="mode === 'overview'" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" class="tt-board-rpt-outer">
+      <OverviewTab :user-id="selectedUserId || 0" />
     </div>
 
     <!-- ── Board Report ──────────────────────────────────────────────────────── -->
@@ -1489,6 +1508,7 @@ import BaseModal from '@/components/common/BaseModal.vue'
 import HelpIcon from '@/components/common/HelpIcon.vue'
 import ContractRatesModal from '@/components/common/ContractRatesModal.vue'
 import DatePicker from '@/components/common/DatePicker.vue'
+import OverviewTab from '@/components/timetracking/overview/OverviewTab.vue'
 import TimeTrackingCalendar from '@/components/timetracking/TimeTrackingCalendar.vue'
 const BoardReportPanel = defineAsyncComponent(() => import('@/components/reports/BoardReportPanel.vue'))
 import { useDateFormat } from '@/composables/useDateFormat'
@@ -1643,6 +1663,7 @@ const gridPdfMonthNames = computed(() => {
 // when the user only has canViewReports and no time-tracking access.
 const _initialMode = (() => {
   if (route.query.tab === 'board-report' && auth.canViewReports) return 'board-report'
+  if (route.query.tab === 'overview' && auth.timeTrackingEnabled) return 'overview'
   if (!auth.timeTrackingEnabled && auth.canViewReports) return 'board-report'
   return 'sheet'
 })()

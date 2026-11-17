@@ -4308,6 +4308,7 @@ Pagerduty schedules will be updated to match this by Friday.`,
 		{name: "Holidays", slug: "holidays-tt", color: "#10b981", undeclarable: 480, customer: "Smart Owl Consulting"},
 		{name: "Study & Training", slug: "study-tt", color: "#6366f1", undeclarable: 0, customer: "Personal"},
 		{name: "Internal", slug: "internal-tt", color: "#8b5cf6", undeclarable: 60, customer: "Smart Owl Consulting"},
+		{name: "Sick leave", slug: "sick-tt", color: "#ef4444", undeclarable: 0, customer: "Smart Owl Consulting"},
 	}
 	ttProjIDBySlug := map[string]uint{}
 	for _, ps := range ttProjectSpecs {
@@ -4380,6 +4381,30 @@ Pagerduty schedules will be updated to match this by Friday.`,
 	}
 	fmt.Printf("   Created %d TT-only customers, %d TT-only projects, %d personal time entries for tonk\n",
 		len(ttCustomers), len(ttProjectSpecs), len(ttEntries))
+
+	// ── 10c2. A year of time entries for demo.admin (the time overviews) ──────
+	// Norm, vacation balance, travel/km and checks need a whole year, holiday
+	// entries and settings; the entries above only cover the last weeks. It is
+	// booked on demo.admin because demo users are wiped by --reset (tonk is not).
+	fmt.Println("→ Creating a year of time entries for demo.admin (time overviews)…")
+	overviewRes, err := seedOverviewYear(db, overviewSeed{
+		UserID:   users["admin"].ID,
+		Acme:     custIDByName["Acme Corporation"],
+		Globex:   custIDByName["Globex Systems"],
+		SmartOwl: ttCustIDByName["Smart Owl Consulting"],
+		Web:      projects["website-redesign"].project.ID,
+		Devops:   projects["devops-infra"].project.ID,
+		Phase1:   contractIDByName["Phase 1 — Marketing Site"],
+		Managed:  contractIDByName["Managed DevOps 2025"],
+		Travel:   ttProjIDBySlug["travel-tt"],
+		Holidays: ttProjIDBySlug["holidays-tt"],
+		Sick:     ttProjIDBySlug["sick-tt"],
+		Internal: ttProjIDBySlug["internal-tt"],
+	}, time.Now())
+	must(err)
+	fmt.Printf("   Created %d entries: %d holidays, %d vacation days (%d planned) + %d last year, %d sick days, %d travel entries\n",
+		overviewRes.Entries, overviewRes.Holidays, overviewRes.VacationDays, overviewRes.PlannedDays,
+		overviewRes.PrevVacation, overviewRes.SickDays, overviewRes.TravelEntries)
 
 	// ── 10b1. Running timer for tonk ─────────────────────────────────────────
 	fmt.Println("→ Starting a running timer for tonk…")
@@ -5160,6 +5185,7 @@ Happy shipping! 🚀`,
 	fmt.Printf("  Customers     : %d (Acme Corporation, Globex Systems, Initech Ltd)\n", len(demoCustomers))
 	fmt.Printf("  Groups        : %d (Frontend Team, DevOps Team, Acme Stakeholders)\n", len(demoGroupSpecs))
 	fmt.Printf("  Time entries  : %d (tonk, demo.admin, demo.sarah, demo.marc, demo.lisa)\n", totalTimeEntries)
+	fmt.Printf("  Time overviews: %d entries for demo.admin this and last year (holidays, vacation, sick, travel, checks)\n", overviewRes.Entries)
 	fmt.Printf("  News items    : %d\n", totalNewsItems)
 	fmt.Println()
 	fmt.Println("  Starred projects")
@@ -5479,6 +5505,8 @@ func removeDemoData(db *gorm.DB) {
 		}
 		db.Where("user_id IN ?", userIDs).Delete(&models.TimeEntry{})
 		db.Where("user_id IN ?", userIDs).Delete(&models.TimeMacroLibrary{})
+		db.Where("user_id IN ?", userIDs).Delete(&models.TimeNormYear{})
+		db.Where("user_id IN ?", userIDs).Delete(&models.TimeCategoryProject{})
 		db.Where("user_id IN ?", userIDs).Delete(&models.TimeTimer{})
 		db.Where("sender_id IN ? OR receiver_id IN ?", userIDs, userIDs).Delete(&models.DirectMessage{})
 		db.Where("user_id IN ? OR favorite_user_id IN ?", userIDs, userIDs).Delete(&models.FavoriteUser{})

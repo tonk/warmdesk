@@ -16,6 +16,7 @@
 9. [Invoice Templates](#9-invoice-templates)
 10. [Customer Contacts](#10-customer-contacts)
 11. [Time-Tracking Timer](#11-time-tracking-timer)
+12. [Time Overviews](#12-time-overviews)
 
 See also: [Interactive API (Swagger UI)](#interactive-api-swagger-ui) · [Bruno Collection](#bruno-collection)
 
@@ -1194,3 +1195,48 @@ books it. The move itself never fails because of this.
   "running": [{ "user_id": 2, "user_name": "Ann", "description": "Review", "started_at": "2026-11-16T09:00:00Z" }] }
 ```
 
+---
+
+## 12. Time Overviews
+
+Read-only yearly overviews of one user's time entries, plus the settings they
+need. Authenticated (session or API key), time tracking must be enabled for
+the user. Every call takes `?year=YYYY` (default: the current year); admins and
+time-tracking viewers may add `?user_id=` to look at someone else.
+
+| Method | Path | Returns |
+|---|---|---|
+| `GET` | `/api/v1/time-entries/overview/norm` | Booked minutes against the norm per month: norm days and minutes, worked (of which travel), sick, vacation, difference, booked and unbooked norm days, totals, "to date" figures and what is planned after today |
+| `GET` | `/api/v1/time-entries/overview/checks` | Findings (`overlap`, `duration_mismatch`, `time_format`, `no_times`, `missing_distance`, `no_contract`, `weekend_entries`, `day_over_norm`, `day_under_norm`, `day_without_entries`) with per-type `counts`, and the distinct descriptions per project |
+| `GET` | `/api/v1/time-entries/overview/travel` | Travel time (total, own and declarable) and kilometres per month, direction (`out`/`back`/`no_direction`), customer and route |
+| `GET` | `/api/v1/time-entries/overview/vacation` | Entitlement, carry-over, used (up to today), planned, remaining, per month, and `suggested_carry_over_minutes` |
+| `GET` | `/api/v1/time-entries/overview/settings` | The year's effective settings and the project categories |
+| `PUT` | `/api/v1/time-entries/overview/settings` | Store the year's settings (below) |
+
+**Rules.** A *norm day* is a Monday–Friday that is not one of the user's own
+holiday entries; the norm per day is `hours_per_week / 5`. A *day* is a date with
+at least one non-holiday entry, so every `days` figure counts distinct dates —
+totals are never the sum of the rows. Entries count as `sick`, `vacation` or
+`travel` by project; everything else is worked time, and travel is part of it.
+Direction and route of a travel entry come from the description suffix
+`<route> - Heen` / `<route> - Terug`.
+
+**`PUT /settings`**
+
+```json
+{ "year": 2026,
+  "hours_per_week": 40,
+  "vacation_hours": 294,
+  "carry_over_hours": 16,
+  "categories": { "sick": [21], "vacation": [15], "travel": [13] } }
+```
+
+`hours_per_week` (above 0, up to 168) and `vacation_hours` (0–2000) are inherited by later
+years without their own value. `carry_over_hours` — vacation left over from
+previous years — is entered **per year** and never inherited. A key that is
+left out is not touched; a `null` clears that year's own value. `categories` is optional: when present it
+replaces the project mapping, `{}` returns to guessing from the project names
+(Ziek/Sick, Vrij/Vacation, Reistijd/Travel).
+
+The time report (`GET /api/v1/time-entries/report`, with its PDF and XLSX
+exports) also returns `days` per group and `total_days` for the whole report.

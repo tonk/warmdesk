@@ -981,7 +981,7 @@ Once a report is generated, a row of export controls appears above it:
 == Time Tracking
 
 Time tracking is an optional module (enabled in User Settings).
-When active, the *Time Tracking* page (`/time-tracking`) has three tabs:
+When active, the *Time Tracking* page (`/time-tracking`) has these tabs:
 
 NOTE: WarmDesk can be deployed in *time-tracking-only mode* by the administrator (`--mode=timetracking`).
 In this mode the Kanban boards, chat, topics, and helpdesk are not available — only time tracking and user management remain active.
@@ -997,6 +997,9 @@ If you are missing those features, check with your administrator whether the ser
 |*Report*
 |Personal time-tracking report with PDF/XLSX export
 
+|*Overview*
+|A whole year at a glance: hours against the norm, consistency checks, travel and kilometres, and the vacation balance — see <<time-overview,Overview tab>>
+
 |*Board*
 |Project-board time report extracted from card time entries
 |===
@@ -1005,6 +1008,7 @@ The gear button at the far right of the tab bar opens the time-tracking project 
 
 If you are an administrator, or have the *Time Tracking Viewer* flag set on your account, an *Employee* dropdown appears at the top of the Log Time and Report tabs so you can view (and export) another user's time sheet or report, or select *All Employees*.
 
+[[weekly-grid]]
 === Weekly grid (Log Time tab)
 
 Each row represents a customer + project + activity combination.
@@ -1304,6 +1308,62 @@ The default teaching-block example ships with four rows (travel out, preparation
 * Click *Run macro* to create any missing rows and write time entries for the selected days.
 * Adjust individual cells in the sheet afterwards if one day differs.
 * Undo works like other cell edits.
+
+[[time-overview]]
+=== Overview tab
+
+The *Overview* tab (`/time-tracking?tab=overview`) summarises a whole year of your time entries.
+Choose the year with the arrows; the sub-tabs *Norm*, *Checks*, *Travel* and *Vacation* show different views of the same data, and *Settings* holds the numbers they work from.
+Administrators and time-tracking viewers can look at another employee through the *Employee* dropdown.
+
+How the numbers are counted:
+
+* A *norm day* is a Monday–Friday that is not one of your holiday entries (see *Add holidays* under <<weekly-grid,Weekly grid>>). The norm per day is your *Hours per week* divided by five, so 40 hours a week is 8 hours a day.
+* Entries on the projects you mapped to *sick leave* or *vacation* count as sick or vacation time; *travel* is a part of the worked time. Until you map projects, WarmDesk guesses from the project names (Ziek or Sick, Vrij, Vacation or Holidays, Reistijd or Travel).
+* A *day* is a date with at least one entry. A day with several entries counts once, so a day total is never the sum of the rows above it.
+* Entries after today are *planned*: they count towards the year, and the overview also shows the figures up to today.
+
+==== Norm
+
+image::../screenshots/28-time-overview-norm.png[The Norm overview: hours per month against the norm,pdfwidth=100%]
+
+Per month: the norm days and hours, the hours worked (with the travel part shown separately), sick and vacation hours, the total booked, the difference with the norm (always with a `+` or `-` sign), the days booked, and the norm days without any booking.
+Above the table are the year totals, the figures up to today, and what is planned after today. The public holidays on weekdays that were taken out of the norm are listed below it.
+
+==== Checks
+
+image::../screenshots/29-time-overview-checks.png[The Checks overview: findings per type,pdfwidth=100%]
+
+Lists what looks wrong or inconsistent, with a count per type that also works as a filter:
+
+* *Overlapping entries*, and entries whose duration differs from their start and end time.
+* *Travel without distance*, and entries without a start and end time (sick and vacation excepted).
+* *No contract* — only for customers that have a contract.
+* *Day over the norm*, *Day under the norm* (travel not counted), *Entries on a weekend*, and *Norm day without entries* for days in the past.
+
+A second section shows every description used per project, most variants first — handy for spotting spelling differences such as `Nieuwegen` next to `Nieuwegein`.
+
+==== Travel
+
+image::../screenshots/30-time-overview-travel.png[The Travel overview: time and kilometres per route,pdfwidth=100%]
+
+Travel time and kilometres per month, per direction, per customer and per route. For every entry on a travel project the *own time* is the project's undeclarable minutes (never more than the entry itself); the rest is *declarable*.
+The direction and the route come from the description: write travel as `<route> - Heen` and `<route> - Terug`, for example `Python - Nieuwegein - Heen`. Entries without that ending are counted as _No direction_.
+
+==== Vacation
+
+image::../screenshots/31-time-overview-vacation.png[The Vacation overview: balance, carry-over and months,pdfwidth=100%]
+
+The balance of the year: the *Entitlement* (vacation hours per year), the *Carry-over* from previous years, what is *Used* up to today, what is *Planned* after today, and what remains, with and without the planned days.
+The carry-over is entered *per year*: type the hours left over from previous years for the year you are looking at and press *Save*, or use *Use previous year's remainder* to fill in what is left from the year before (entitlement plus its carry-over, minus the vacation booked in it).
+
+==== Settings
+
+image::../screenshots/32-time-overview-settings.png[The Overview settings: hours per week, vacation hours, carry-over and project categories,pdfwidth=70%]
+
+* *Hours per week* and *Vacation hours per year* apply to the chosen year and to later years until you set them again.
+* *Carry-over from previous years* applies to the chosen year only.
+* *Project categories* chooses which of your projects count as sick leave, vacation or travel. *Back to guessing by project name* removes your choice.
 
 [[time-tracking-only-projects-and-customers]]
 === Time-tracking-only projects and customers

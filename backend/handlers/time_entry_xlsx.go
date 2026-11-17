@@ -256,6 +256,13 @@ func GetTimeEntryReportXLSX(c *gin.Context) {
 		f.SetCellStyle(sheetName, cell(1, row), cell(8, row), bold)
 	}
 
+	// Distinct days over the whole report (not the sum of the groups).
+	if report.TotalDays > 0 {
+		row++
+		f.SetCellValue(sheetName, cell(4, row), "Days")
+		f.SetCellValue(sheetName, cell(5, row), report.TotalDays)
+	}
+
 	f.SetColWidth(sheetName, "A", "A", 14)
 	f.SetColWidth(sheetName, "B", "B", 25)
 	f.SetColWidth(sheetName, "C", "C", 25)

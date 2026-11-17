@@ -79,6 +79,8 @@ func allModels() []interface{} {
 		&models.GroupProjectAccess{},
 		&models.GroupCustomerAccess{},
 		&models.TimeEntry{},
+		&models.TimeNormYear{},
+		&models.TimeCategoryProject{},
 		&models.TimeTimer{},
 		&models.NewsItem{},
 		&models.PasskeyCredential{},

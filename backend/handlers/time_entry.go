@@ -292,6 +292,9 @@ type timeEntryGroup struct {
 	UndeclarableMinutes int                `json:"undeclarable_minutes"`
 	DeclarableMinutes   int                `json:"declarable_minutes"`
 	TotalDistance       float64            `json:"total_distance"`
+	// Days is the number of distinct days with at least one non-holiday entry
+	// in the group, so a day with several entries counts once.
+	Days int `json:"days"`
 }
 
 // TimeEntryReportResponse is the shape returned by GetTimeEntryReport.
@@ -303,8 +306,11 @@ type TimeEntryReportResponse struct {
 	UndeclarableMinutes int              `json:"undeclarable_minutes"`
 	DeclarableMinutes   int              `json:"declarable_minutes"`
 	TotalDistance       float64          `json:"total_distance"`
-	CompanyName         string           `json:"company_name"`
-	CompanyLogo         string           `json:"company_logo"`
+	// TotalDays counts distinct days over the whole report; it is not the sum
+	// of the groups' Days, because the same day can occur in several groups.
+	TotalDays   int    `json:"total_days"`
+	CompanyName string `json:"company_name"`
+	CompanyLogo string `json:"company_logo"`
 }
 
 // resolveReportEntries resolves the requested period into a [from, to) date
@@ -419,6 +425,7 @@ func assembleTimeEntryReport(c *gin.Context, targetUserID uint) (*TimeEntryRepor
 	if declarable < 0 {
 		declarable = 0
 	}
+	totalDays := setGroupDays(groups)
 
 	settings := loadAllSettings()
 	return &TimeEntryReportResponse{
@@ -429,6 +436,7 @@ func assembleTimeEntryReport(c *gin.Context, targetUserID uint) (*TimeEntryRepor
 		UndeclarableMinutes: undeclarable,
 		DeclarableMinutes:   declarable,
 		TotalDistance:       totalDist,
+		TotalDays:           totalDays,
 		CompanyName:         settings["company_name"],
 		CompanyLogo:         settings["company_logo"],
 	}, 0, ""
@@ -740,6 +748,25 @@ func buildGroupsByCustomerProject(entries []models.TimeEntry) []timeEntryGroup {
 		result = append(result, *b)
 	}
 	return setDeclarable(result)
+}
+
+// setGroupDays fills Group.Days (distinct non-holiday days per group) and
+// returns the number of distinct days over all groups.
+func setGroupDays(groups []timeEntryGroup) int {
+	all := map[string]bool{}
+	for i := range groups {
+		own := map[string]bool{}
+		for _, e := range groups[i].Entries {
+			if e.IsHoliday {
+				continue
+			}
+			k := e.Date.UTC().Format("2006-01-02")
+			own[k] = true
+			all[k] = true
+		}
+		groups[i].Days = len(own)
+	}
+	return len(all)
 }
 
 // projUndecl returns how many minutes of a single entry are undeclarable,

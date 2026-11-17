@@ -335,6 +335,7 @@ The *Time Tracking* page (`/time-tracking`) has these tabs:
 
 * *Log Time* — the weekly grid or the calendar view
 * *Report* — your personal time report with PDF/XLSX export
+* *Overview* — a whole year at a glance: hours against the norm, consistency checks, travel and kilometres, and the vacation balance
 * *Board* — time logged on project cards (for users with report access)
 * *Invoices* — invoices across your customers (when invoicing is available to you)
 
@@ -388,6 +389,32 @@ Store recurring weekly patterns (for example travel out, preparation, teaching, 
 Open the editor with *⚡* in the top bar to create, duplicate, import, or export macros; each row presets customer, project, activity, hours, optional start/end times, distance, and location — either the same for every day or as an alternating A/B pattern.
 Run a macro from *⚡ Macro* in the bottom bar: pick the macro and the start day, and it fills the current week.
 Macros are stored on the server, so they follow you across devices.
+
+=== Overview
+
+The *Overview* tab summarises a year of your time entries. Pick the year with the arrows; the sub-tabs show the *Norm*, the *Checks*, your *Travel* and your *Vacation*, and *Settings* holds the numbers they work from. Administrators and time-tracking viewers can pick another employee in the *Employee* dropdown.
+
+A *norm day* is a Monday–Friday that is not one of your holiday entries, and the norm per day is your hours per week divided by five. Sick and vacation time are recognised by the projects you map to them in the settings (or guessed from names such as Ziek, Vrij, Vacation or Reistijd), and travel counts as part of the worked time. A *day* is a date with at least one entry — a day with several entries counts once, and totals never add up per-row day counts.
+
+image::../../images/screenshots/28-time-overview-norm.png[Norm overview: hours per month against the norm, 900]
+
+*Norm* shows per month the norm, the hours worked (with the travel part), sick and vacation hours, the total booked and the difference, plus the figures up to today and what is planned after it.
+
+image::../../images/screenshots/29-time-overview-checks.png[Checks overview: findings per type, 900]
+
+*Checks* lists overlapping entries, durations that differ from the start and end time, travel without distance, entries without a contract, days over or under the norm, weekend entries and past norm days without any booking, with a count per type that filters the list. A second section shows every description per project, which makes spelling variants easy to spot.
+
+image::../../images/screenshots/30-time-overview-travel.png[Travel overview: time and kilometres per route, 900]
+
+*Travel* splits travel time into your own time (the project's undeclarable minutes) and declarable time, and adds up the kilometres per month, direction, customer and route. Direction and route come from the description: write travel as `<route> - Heen` and `<route> - Terug`.
+
+image::../../images/screenshots/31-time-overview-vacation.png[Vacation overview: balance and carry-over, 900]
+
+*Vacation* shows the entitlement, the carry-over from previous years, what is used up to today, what is planned and what remains. The carry-over is entered per year; *Use previous year's remainder* fills in what was left over from the year before.
+
+image::../../images/screenshots/32-time-overview-settings.png[Overview settings, 600]
+
+The settings hold the hours per week, the vacation hours per year, the carry-over for the chosen year, and which projects count as sick leave, vacation or travel.
 
 === Time-tracking-only projects and customers
 

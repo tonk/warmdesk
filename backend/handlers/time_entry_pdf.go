@@ -635,6 +635,24 @@ func GetTimeEntryReportPDF(c *gin.Context) {
 			setTxt(pdf, rgb{180, 80, 80})
 			pdf.CellFormat(colHours, rowH, "-"+fmtDecimalH(report.UndeclarableMinutes), "0", 1, "R", true, 0, "")
 		}
+
+		// Distinct days over the whole report (not the sum of the groups).
+		if report.TotalDays > 0 {
+			setFill(pdf, rgb{245, 245, 245})
+			setTxt(pdf, clrMuted)
+			pdf.SetFont(fontFamily, "", 8.5)
+			pdf.CellFormat(nonHourW-colCost-colDist-colUndecl, rowH, "  "+tr.Days, "0", 0, "L", true, 0, "")
+			if showCosts {
+				pdf.CellFormat(colCost, rowH, "", "0", 0, "R", true, 0, "")
+			}
+			if showDistance {
+				pdf.CellFormat(colDist, rowH, "", "0", 0, "R", true, 0, "")
+			}
+			if showUndeclarableRow {
+				pdf.CellFormat(colUndecl, rowH, "", "0", 0, "R", true, 0, "")
+			}
+			pdf.CellFormat(colHours, rowH, strconv.Itoa(report.TotalDays), "0", 1, "R", true, 0, "")
+		}
 	}
 
 	// ── Output ────────────────────────────────────────────────────────────────
