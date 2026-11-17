@@ -974,3 +974,7 @@ Create an application that has all these features and requirements
 - Add a start/stop timer button to card tiles and link timer bookings to the card
 - Add timed columns that start the mover's timer when a card enters them and book it when the card moves on to an untimed column
 - Show time per column and booked time per person and description in the card detail
+- Add an Overview tab to time tracking with year overviews: the booked hours against the norm per month, consistency checks, travel time and kilometres, and the vacation balance
+- Store the norm settings per user and year, with the carry-over of vacation hours entered per year and a project to sick/vacation/travel mapping
+- Count distinct days in every overview and in the time report, PDF and XLSX
+- Seed a whole year of demo time entries for demo.admin and add Overview screenshots and documentation

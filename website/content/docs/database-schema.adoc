@@ -756,6 +756,42 @@ localStorage value, persisted server-side for cross-device sync).
 |`payload` |TEXT |not null |JSON blob
 |===
 
+=== time_norm_years
+
+A user's yearly time norm settings for the Overview tab — one row per user and year. A year without a row inherits
+`hours_per_week` and `vacation_hours` from the nearest earlier year; `carry_over_hours` is entered per year and never
+inherited. A column that is NULL means "not set for this year".
+
+[cols="2,2,1,4",options="header"]
+|===
+|Column |Type |Constraints |Notes
+
+|`id` |BIGINT |PK, auto |
+|`user_id` |BIGINT |not null, unique with `year` |
+|`year` |INTEGER |not null, unique with `user_id` |
+|`hours_per_week` |DOUBLE |nullable |Contractual working week; the norm per day is this divided by 5
+|`vacation_hours` |DOUBLE |nullable |Vacation entitlement for the year, in hours
+|`carry_over_hours` |DOUBLE |nullable |Vacation left over from previous years, in hours
+|`created_at` |TIMESTAMP | |
+|`updated_at` |TIMESTAMP | |
+|===
+
+=== time_category_projects
+
+Maps a project to the category it counts as for a user in the Overview tab: `sick`, `vacation` or `travel`. A user with
+no rows has their categories guessed from the project names.
+
+[cols="2,2,1,4",options="header"]
+|===
+|Column |Type |Constraints |Notes
+
+|`id` |BIGINT |PK, auto |
+|`user_id` |BIGINT |not null, unique with `project_id` |
+|`project_id` |BIGINT |not null, unique with `user_id` |
+|`category` |VARCHAR(10) |not null |`sick`, `vacation` or `travel`
+|`created_at` |TIMESTAMP | |
+|===
+
 === time_timers
 
 A user's running time-tracking timer — at most one per user. Stopping it books the elapsed time (rounded up to whole

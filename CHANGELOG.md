@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.48.0 — 2026-11-17
+
+### Added
+- **Overview tab in time tracking** — a new tab with a year at a glance, per user (administrators and time-tracking viewers can pick an employee). Pick the year with the arrows; four sub-tabs and a settings dialog:
+  - **Norm** — the booked hours against the norm per month: norm days and hours, hours worked (with the travel part shown separately), sick and vacation hours, total booked, difference (with a `+`/`-` sign), booked days and norm days without any booking, plus the figures up to today and what is planned after it. A norm day is a Monday–Friday that is not one of your holiday entries; the norm per day is your hours per week divided by five.
+  - **Checks** — overlapping entries, durations that differ from the start and end time, travel without distance, entries without a contract (for customers that have one), days over or under the norm, weekend entries and past norm days without any booking, each with a count that filters the list; plus every description used per project, which makes spelling variants easy to spot.
+  - **Travel** — travel time split into your own time (the project's undeclarable minutes) and declarable time, and kilometres, per month, direction, customer and route. Direction and route come from the description: `<route> - Heen` / `<route> - Terug`.
+  - **Vacation** — entitlement, carry-over, used, planned and remaining vacation. The carry-over (hours left from previous years) is entered **per year**, and *Use previous year's remainder* fills in what is left from the year before.
+  - **Settings** — hours per week, vacation hours per year, the carry-over for the year, and which projects count as sick leave, vacation or travel. Until you choose, they are guessed from the project names (Ziek/Sick, Vrij/Vacation/Holidays, Reistijd/Travel).
+- **Days in the time report** — every overview, and now also the report, shows the number of distinct days: a day with several entries counts once, and the total is never the sum of the rows. Report groups show `days`, the grand total shows the total days, and the PDF (all 12 languages) and the XLSX have a *Days* line.
+- **API** — `GET /api/v1/time-entries/overview/{norm,checks,travel,vacation}` and `GET`/`PUT /api/v1/time-entries/overview/settings` (partial updates: a missing key is left alone, `null` clears it); the report response gains `days` per group and `total_days`. Two new tables, `time_norm_years` and `time_category_projects`, are created on startup.
+- **Demo data** — the seed tool books a whole year for `demo.admin`: Dutch public holidays, work days, on-site days with Heen/Terug travel and distances, sick days, vacation (also planned and last year), settings with a carry-over, and a few deliberate problems for the checks. `--reset` removes it again.
+- **Screenshots and documentation** — five new screenshots (28–32) and an *Overview tab* section in the user guide, the website guide, the API reference and the database schema.
+
 ## v0.47.0 — 2026-11-16
 
 ### Added

@@ -1,0 +1,39 @@
+---
+title: "v0.48.0: Time overviews"
+date: "2026-11-17"
+author: "Ton Kersten"
+description: "A new Overview tab shows a year of time entries against the norm, with consistency checks, travel and kilometres, and the vacation balance."
+draft: false
+---
+:imagesdir: ../../images
+:doctype: article
+:icons!:
+
+A feature release for time tracking: the new *Overview* tab answers the questions you used to need a spreadsheet for — am I on track for the year, is anything in my bookings wrong, how much did I travel, and how much vacation is left?
+
+== Added
+
+=== Overview tab
+
+image::screenshots/28-time-overview-norm.png[The Norm overview, 900]
+
+Pick the year with the arrows; four views and a settings dialog share one set of rules. A *norm day* is a Monday–Friday that is not one of your holiday entries, and the norm per day is your hours per week divided by five. Sick and vacation time are recognised by the projects you map to them (or guessed from names such as Ziek, Vrij or Reistijd). A *day* is a date with at least one entry, so a day with several entries counts once and a total is never a sum of per-row day counts.
+
+* *Norm* — per month the norm, the hours worked (travel shown as a part of it), sick and vacation hours, the total and the difference, plus the figures up to today and what is planned after it.
+* *Checks* — overlaps, durations that differ from the start and end time, travel without distance, entries without a contract, days over or under the norm, weekend entries and past norm days without any booking, plus every description used per project.
+* *Travel* — own and declarable travel time and kilometres per month, direction, customer and route. Write travel as `<route> - Heen` and `<route> - Terug` and WarmDesk knows direction and route.
+* *Vacation* — entitlement, carry-over, used, planned and remaining. The carry-over is entered *per year*, and *Use previous year's remainder* fills in what is left from the year before.
+
+Administrators and time-tracking viewers can look at another employee. The settings hold the hours per week, the vacation hours per year, the carry-over for the year and the project categories.
+
+=== Days in the time report
+
+The report now shows the number of distinct days per group and in the total, and the PDF (in all 12 languages) and the XLSX have a *Days* line.
+
+=== API and demo data
+
+`GET /api/v1/time-entries/overview/{norm,checks,travel,vacation}` and `GET`/`PUT /api/v1/time-entries/overview/settings` are new; the settings update is partial, so a key that is left out stays as it is and `null` clears it. The seed tool now books a whole year for `demo.admin`, including a few deliberate problems for the checks.
+
+== Upgrade
+
+Two tables, `time_norm_years` and `time_category_projects`, are created on startup; nothing else needs to be done. Until you map projects in the overview settings, sick, vacation and travel are guessed from the project names.

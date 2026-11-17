@@ -8,11 +8,11 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.47.0)
+## Latest release (v0.48.0)
 
-- **Timer on a card** — a ▶ button on each card tile starts your time-tracking timer on that card; the time is booked on the card.
-- **Timed columns** — mark a column as timed and moving a card into it starts your timer, moving it out stops and books it.
-- **Time per card** — the card detail shows how long the card spent in each column and the time booked on it.
+- **Time overviews** — a new Overview tab in time tracking: the year's hours against the norm per month, consistency checks, travel time and kilometres per route, and the vacation balance with the carry-over from previous years.
+- **Days everywhere** — overviews and the time report count distinct days (a day with several entries counts once), also in the PDF and XLSX.
+- **Demo data and screenshots** — the seed tool books a whole demo year for `demo.admin`, and five new screenshots show the overviews.
 
 ## Experiment
 
@@ -122,7 +122,8 @@ realistic demo content (users, projects, cards, comments, time entries, topics,
 conversations, customer locations, helpdesk tickets, problems, knowledge base
 articles, a service catalogue with approvals, changes, CMDB configuration items,
 business-hours calendars with public holidays, a running timer, travel entries
-with customer locations, private ticket notes, a major incident, customer
+with customer locations, a whole year of time entries for `demo.admin` (holidays,
+vacation, sick days, travel with distances) for the time overviews, private ticket notes, a major incident, customer
 contacts, direct messages, API keys, login history, and system settings
 including company branding):
 
@@ -366,6 +367,7 @@ See [INSTALL.md](INSTALL.md) for full instructions including:
 - **Travel distance auto-fill** — pick one of a customer's locations from the weekly grid (add row, edit row, or the per-cell distance popup), the calendar entry editor, or a time macro row to auto-fill the standard travel distance, staying freely editable for day-to-day variation; re-picking a row's location also corrects that week's already-logged distances
 - **Card timers and timed columns** — start or stop your timer on a card from its tile; mark a column as *timed* so moving a card into it starts your timer on that card and moving it on to an untimed column books the time; the card detail shows time per column and the time booked on the card per person and description
 - **Command-line timer** — `warmdesk-timer start Website` when you begin, `warmdesk-timer stop` when you're done: the time is rounded up to whole 15 minutes, split at midnight, and booked as regular time entries on the chosen project; starting a new timer books the running one first, `stop --at 17:30` fixes a forgotten timer, a default project and customer in `timer.yaml` (see `timer.yaml.example`) make a plain `warmdesk-timer start` enough, and the timer lives on the server so it can be stopped from another machine — or from the stopwatch button in the web interface's top bar and the desktop app's tray menu, which run the same timer and follow CLI changes live. Installed by the Linux desktop `.deb`/`.rpm` packages, and ships with the server and as a standalone download for Linux, macOS, and Windows
+- **Time overviews** — an *Overview* tab with a year at a glance: booked hours against the norm per month (norm days are Monday–Friday minus your holiday entries, 8 h at 40 h/week), consistency checks (overlaps, travel without distance, entries without a contract, days over/under the norm, norm days without entries, description variants), travel time split into own and declarable time with kilometres per month/direction/customer/route, and the vacation balance with a carry-over entered per year; every overview counts distinct days
 - **Time tracking calendar view** — toggle the Log Time tab between the weekly table and a drag-and-drop calendar: entries render as blocks positioned by start/end time, draggable to move between days/times and resizable to change duration; right-click or click-drag an empty slot to create a new entry; select several blocks or a whole day to copy, paste (shifted to the clicked time or at the original times), or delete them together; zoomable grid density (remembered per browser); blocks color-coded per customer or per project (switchable via a "Calendar block color" user setting); a "Log Time view" user setting picks which one opens by default
 - **Global search** — the search bar in the header matches card titles/descriptions, card comments, chat and direct messages, ticket subjects, and time-entry descriptions, scoped to what you have access to; clicking a comment or time-entry result jumps straight to and highlights it
 - **Search & replace** — find and replace text across cards, card comments, direct messages, tickets, and time entries; pick which categories to include, preview every match (with a before/after snippet) before anything changes, and matches you don't have permission to edit are shown greyed out and can't be applied; the 20-per-category preview limit is adjustable up to 500
