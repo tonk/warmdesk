@@ -1,0 +1,26 @@
+---
+title: "v0.48.1: Vacation days in the norm overview"
+date: "2026-11-18"
+author: "Ton Kersten"
+description: "The Norm overview now also shows how many vacation days you booked in the year."
+draft: false
+---
+:imagesdir: ../../images
+:doctype: article
+:icons!:
+
+A small follow-up to v0.48.0, which introduced the Overview tab in time tracking.
+
+== Changed
+
+=== Vacation days in the Norm overview
+
+image::screenshots/28-time-overview-norm.png[The Norm overview with the vacation days in the norm line, 900]
+
+The line under the Norm cards already told you what the norm is based on. It now also gives the number of *vacation days* booked in the year: `Norm based on 40 hours per week (8:00 per day). Vacation days: 18.`
+
+The number is the vacation time of the year divided by the norm per day, so it follows your hours per week: with a 36-hour week a day is 7:12 long, and 10 hours and 48 minutes of vacation show as 1.5 days. Which projects count as vacation is set in the Overview settings. The text is available in all 12 languages.
+
+== Upgrade
+
+Nothing to do; there are no database or API changes.

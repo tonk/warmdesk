@@ -8,11 +8,10 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.48.0)
+## Latest release (v0.48.1)
 
-- **Time overviews** — a new Overview tab in time tracking: the year's hours against the norm per month, consistency checks, travel time and kilometres per route, and the vacation balance with the carry-over from previous years.
-- **Days everywhere** — overviews and the time report count distinct days (a day with several entries counts once), also in the PDF and XLSX.
-- **Demo data and screenshots** — the seed tool books a whole demo year for `demo.admin`, and five new screenshots show the overviews.
+- **Vacation days in the Norm overview** — the line under the Norm cards now also shows how many vacation days were booked in the year.
+- Builds on v0.48.0's Overview tab: the year's hours against the norm, checks, travel and kilometres, and the vacation balance.
 
 ## Experiment
 

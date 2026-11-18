@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.48.1 — 2026-11-18
+
+### Changed
+- **Vacation days in the Norm overview** — the line under the Norm cards now also gives the number of vacation days booked in the year, for example `Norm based on 40 hours per week (8:00 per day). Vacation days: 18.` It is the vacation time divided by the norm per day, so a 36-hour week (7:12 per day) shows part days such as 1.5. The text is available in all 12 languages and the Norm screenshot in the documentation is updated.
+
 ## v0.48.0 — 2026-11-17
 
 ### Added

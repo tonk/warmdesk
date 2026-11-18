@@ -978,3 +978,4 @@ Create an application that has all these features and requirements
 - Store the norm settings per user and year, with the carry-over of vacation hours entered per year and a project to sick/vacation/travel mapping
 - Count distinct days in every overview and in the time report, PDF and XLSX
 - Seed a whole year of demo time entries for demo.admin and add Overview screenshots and documentation
+- Show the number of vacation days booked in the year in the norm line of the Overview tab
