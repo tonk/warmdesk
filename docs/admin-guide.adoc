@@ -1,5 +1,5 @@
 = WarmDesk — Administrator Guide
-:revnumber: v0.48.1
+:revnumber: v0.49.0
 :revdate: 2026-11-18
 Ton Kersten <tonk@smartowl.nl>
 ifdef::backend-pdf[]
@@ -586,6 +586,9 @@ In time-tracking mode the Helpdesk and Change & configuration groups, and Projec
 
 |`backup`
 |Can only call `POST /api/v1/backup`; no access to any other endpoint
+
+|`apidocs`
+|Can only open the Swagger UI at `/swagger`; no boards, chat, helpdesk or time tracking
 
 |`customer`
 |Customer-portal access: can view and comment on tickets for assigned customers only; blocked from boards, chat, and time tracking

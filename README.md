@@ -8,10 +8,11 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.48.1)
+## Latest release (v0.49.0)
 
-- **Vacation days in the Norm overview** — the line under the Norm cards now also shows how many vacation days were booked in the year.
-- Builds on v0.48.0's Overview tab: the year's hours against the norm, checks, travel and kilometres, and the vacation balance.
+- **Swagger UI behind a login** — only admins and the new `apidocs` global role can open `/swagger`; the role grants nothing else.
+- **Dependency security updates** — dompurify, axios, vue, vue-i18n, x/net, x/text and excelize; audits are clean.
+- **Accessibility** — a translated colour label on the dashboard and a keyboard-operable emoji picker.
 
 ## Experiment
 

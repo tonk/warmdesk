@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.49.0 — 2026-11-18
+
+### Added
+- **`apidocs` global role** — a new role (Admin → Users) that gives read access to the Swagger UI and nothing else: no boards, chat, helpdesk or time tracking. Like `metrics` and `backup` it carries no feature flags and does not appear in the direct-message user list; it is also counted in the `warmdesk_users_total` metric. The role name is translated in all 12 languages.
+
+### Changed
+- **Swagger UI requires authentication** — `/swagger` used to be reachable by anyone who passed the IP allowlist. It now needs a login (session cookie, Bearer token or API key) as an **admin** or an **`apidocs`** user; anonymous browser requests are redirected to the login page and other roles get `403`. If you link colleagues or tools to the Swagger UI, give them an `apidocs` account.
+
+### Security
+- **Dependency updates** — `dompurify` (critical XSS), `axios`, `vue` and `vue-i18n` (XSS) on the frontend; `golang.org/x/net` (HTTP/2 DoS), `golang.org/x/text` and `excelize` (DoS/panics) on the backend. `npm audit --omit=dev` and `govulncheck` now report nothing.
+
+### Fixed
+- **Accessibility** — the colour input in the dashboard's new-project dialog had a hard-coded English label and now uses the translated one with a proper `<label>`. The emoji reaction picker is now a labelled dialog: focus moves into it, Tab stays inside, arrow keys/Home/End move between emojis, Escape closes it and focus returns to the opening button; the emoji names are translated.
+
 ## v0.48.1 — 2026-11-18
 
 ### Changed

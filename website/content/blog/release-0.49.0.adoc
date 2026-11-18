@@ -1,0 +1,36 @@
+---
+title: "v0.49.0: Swagger behind a login, security updates"
+date: "2026-11-18"
+author: "Ton Kersten"
+description: "The Swagger UI now requires an admin or the new apidocs role, plus dependency security updates and two accessibility fixes."
+draft: false
+---
+:doctype: article
+:icons!:
+
+This release closes the last anonymous door to the API documentation, brings the dependencies up to date and fixes two accessibility gaps.
+
+== Added
+
+=== The `apidocs` role
+
+A new global role, assignable under *Admin → Users*, that can open the Swagger UI and nothing else. Like the `metrics` and `backup` roles it has no boards, chat, helpdesk or time tracking, and it does not show up in the direct-message list.
+
+== Changed
+
+=== Swagger UI requires a login
+
+`/swagger` was reachable by anyone who passed the IP allowlist. It now needs a login as an *admin* or an *apidocs* user. Anonymous browser requests are sent to the login page; other roles receive `403`.
+
+== Security
+
+The frontend now ships dompurify (a critical XSS fix), axios, vue and vue-i18n in patched versions, and the backend uses updated `golang.org/x/net`, `golang.org/x/text` and `excelize`. `npm audit` for production dependencies and `govulncheck` report nothing.
+
+== Fixed
+
+* The colour input in the dashboard's new-project dialog now has a translated label.
+* The emoji reaction picker is a proper dialog: focus moves into it, Tab stays inside, arrow keys move between emojis, Escape closes it and focus returns to the button you came from.
+
+== Upgrade
+
+Nothing to migrate. If colleagues or tools open the Swagger UI, give them an account with the `apidocs` role (or an admin account); anonymous access no longer works.

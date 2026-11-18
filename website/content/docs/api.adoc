@@ -21,6 +21,8 @@ http://<your-server>:8080/swagger/index.html
 The interactive documentation lists every endpoint, shows request/response schemas, and lets you try requests directly from the browser.
 Enter a valid JWT Bearer token via the *Authorize* button to authenticate requests.
 
+The Swagger UI itself requires a login: sign in to WarmDesk first with an *admin* account or an account with the dedicated *apidocs* global role (assignable under *Admin → Users*; it grants access to the documentation only). Anonymous browser requests are redirected to the login page; other roles receive `403`.
+
 == Authentication
 
 === JWT (user sessions)

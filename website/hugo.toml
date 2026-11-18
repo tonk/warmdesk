@@ -15,14 +15,15 @@ enableEmoji = true
   # Social preview image (absolute URL built via absURL). Prefer ≥1200×630 PNG/JPEG for best crawler support.
   og_image = "images/logo-full.svg"
   # Release info — update both this and warmdesk-version in [markup.asciidocext.attributes] on each release
-  warmdesk_version = "v0.48.1"
+  warmdesk_version = "v0.49.0"
   release_date     = "2026-11-18"
   # Blog post slug for the current release (linked from the homepage "What's new" strip)
-  release_blog     = "blog/release-0.48.1/"
+  release_blog     = "blog/release-0.49.0/"
   # Release highlights shown in the "What's new" strip on the homepage (2-3 bullets)
   release_highlights = [
-    "**Vacation days in the norm** — the Norm overview now also shows how many vacation days you booked this year.",
-    "**Time overviews** — the Overview tab from v0.48.0: hours against the norm, checks, travel and kilometres, and the vacation balance.",
+    "**Swagger behind a login** — only admins and the new `apidocs` role can open the API documentation.",
+    "**Security updates** — dompurify, axios, vue, vue-i18n and the Go x/net, x/text and excelize modules are up to date.",
+    "**Accessibility** — a keyboard-operable emoji picker and a translated colour label on the dashboard.",
   ]
 
 [markup]
@@ -41,7 +42,7 @@ enableEmoji = true
       "source-highlighter" = "highlight.js"
       "sectanchors" = ""
       "sectlinks" = ""
-      "warmdesk-version" = "v0.48.1"
+      "warmdesk-version" = "v0.49.0"
 
   # Chroma off — fenced Markdown code stays plain <pre><code>; AsciiDoc uses hljs (see theme head).
   [markup.highlight]

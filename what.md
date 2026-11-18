@@ -979,3 +979,6 @@ Create an application that has all these features and requirements
 - Count distinct days in every overview and in the time report, PDF and XLSX
 - Seed a whole year of demo time entries for demo.admin and add Overview screenshots and documentation
 - Show the number of vacation days booked in the year in the norm line of the Overview tab
+- Add an `apidocs` global role that may only open the Swagger UI, and require authentication (admin or `apidocs`) for `/swagger`
+- Update dompurify, axios, vue, vue-i18n, golang.org/x/net, golang.org/x/text and excelize to clear the reported vulnerabilities
+- Translate the dashboard colour input label and make the emoji picker a labelled dialog with focus trap and arrow-key navigation

@@ -93,6 +93,9 @@ A custom company logo (*Admin → Settings → Branding & Billing*) still takes 
 |`backup`
 |Can only trigger backups via `POST /api/v1/backup`
 
+|`apidocs`
+|Can only open the Swagger UI at `/swagger`; no boards, chat, helpdesk or time tracking
+
 |`customer`
 |Customer-portal access: view and comment on tickets of assigned customers; blocked from boards, chat, and time tracking
 |===
