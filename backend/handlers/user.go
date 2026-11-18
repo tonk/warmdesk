@@ -223,7 +223,7 @@ func AdminUpdateUser(c *gin.Context) {
 	}
 
 	updates := map[string]interface{}{}
-	validRoles := map[string]bool{"admin": true, "user": true, "viewer": true, "metrics": true, "backup": true}
+	validRoles := map[string]bool{"admin": true, "user": true, "viewer": true, "metrics": true, "backup": true, "apidocs": true}
 	if validRoles[req.GlobalRole] {
 		updates["global_role"] = req.GlobalRole
 	}
@@ -353,7 +353,7 @@ func AdminUpdateUser(c *gin.Context) {
 		database.DB.Select("global_role").First(&existing, id)
 		finalRole = existing.GlobalRole
 	}
-	if finalRole == "metrics" || finalRole == "backup" {
+	if finalRole == "metrics" || finalRole == "backup" || finalRole == "apidocs" {
 		updates["time_tracking_enabled"] = false
 		updates["time_tracking_viewer"] = false
 		updates["board_enabled"] = false
@@ -504,7 +504,7 @@ func AdminCreateUser(c *gin.Context) {
 	}
 	role := req.GlobalRole
 	switch role {
-	case "admin", "user", "metrics", "backup":
+	case "admin", "user", "metrics", "backup", "apidocs":
 	default:
 		role = "user"
 	}

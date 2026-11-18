@@ -705,6 +705,7 @@
     "backup_email_address_placeholder": "alice{'@'}exemple.fr, bob{'@'}exemple.fr",
     "backup_include_uploads": "Inclure les fichiers téléchargés (pièces jointes, avatars, logos)",
     "role_backup": "Sauvegarde",
+    "role_apidocs": "Documentation API",
     "role_customer": "Client",
     "customer_role_hint": "Les utilisateurs avec le rôle client peuvent uniquement voir et commenter les tickets des clients assignés.",
     "timetracking_viewer": "Lecteur suivi du temps",
@@ -767,6 +768,13 @@
     "download": "Télécharger"
   },
   "common": {
+    "emoji_picker": "Choisir une réaction",
+    "emoji_thumbs_up": "Pouce levé",
+    "emoji_heart": "Cœur",
+    "emoji_laughing": "Rieur",
+    "emoji_surprised": "Surpris",
+    "emoji_sad": "Triste",
+    "emoji_thumbs_down": "Pouce baissé",
     "save": "Enregistrer",
     "cancel": "Annuler",
     "copied": "Copié !",

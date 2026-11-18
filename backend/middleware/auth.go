@@ -23,6 +23,7 @@ const (
 	RoleViewer   = "viewer"
 	RoleMetrics  = "metrics"
 	RoleBackup   = "backup"
+	RoleAPIDocs  = "apidocs"
 	RoleCustomer = "customer"
 )
 
@@ -109,6 +110,34 @@ func BackupAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		role, _ := c.Get(ContextGlobalRole)
 		if role != "admin" && role != "backup" {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "forbidden"})
+			return
+		}
+		c.Next()
+	}
+}
+
+// SwaggerLoginRedirect sends an anonymous browser request for the Swagger UI to
+// the login page instead of a bare JSON 401. Use it before Auth.
+func SwaggerLoginRedirect() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		_, cookieErr := c.Cookie("access_token")
+		hasCreds := cookieErr == nil || c.GetHeader("Authorization") != "" || c.GetHeader("X-API-Key") != ""
+		if !hasCreds && strings.Contains(c.GetHeader("Accept"), "text/html") {
+			c.Redirect(http.StatusFound, "/login")
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
+}
+
+// SwaggerAuth allows only admins and the dedicated "apidocs" role to open the
+// Swagger UI. It must run after Auth (which itself calls c.Next()).
+func SwaggerAuth() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		role, _ := c.Get(ContextGlobalRole)
+		if role != RoleAdmin && role != RoleAPIDocs {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "forbidden"})
 			return
 		}

@@ -35,6 +35,13 @@ schemas, and lets you try requests directly from the browser. A valid JWT
 Bearer token (obtained from `POST /api/v1/auth/login`) can be entered via the
 **Authorize** button to authenticate requests.
 
+Access to the Swagger UI itself requires authentication: log in to WarmDesk
+first (the session cookie is used) with either an **admin** account or an
+account with the dedicated **API docs** global role (`apidocs`, assignable under
+Admin → Users). The `apidocs` role grants read access to the documentation only —
+no boards, chat, helpdesk or time tracking. Anonymous browser requests are
+redirected to the login page; everyone else receives `403`.
+
 ---
 
 ## Bruno Collection

@@ -705,6 +705,7 @@
     "backup_email_address_placeholder": "alice{'@'}voorbeeld.nl, bob{'@'}voorbeeld.nl",
     "backup_include_uploads": "Geüploade bestanden meenemen (bijlagen, avatars, logo's)",
     "role_backup": "Back-up",
+    "role_apidocs": "API-documentatie",
     "role_customer": "Klant",
     "customer_role_hint": "Klant-rol gebruikers kunnen alleen tickets bekijken en becommentariëren voor toegewezen klanten.",
     "timetracking_viewer": "Tijdregistratie-bekijker",
@@ -767,6 +768,13 @@
     "download": "Downloaden"
   },
   "common": {
+    "emoji_picker": "Kies een reactie",
+    "emoji_thumbs_up": "Duim omhoog",
+    "emoji_heart": "Hartje",
+    "emoji_laughing": "Lachend",
+    "emoji_surprised": "Verrast",
+    "emoji_sad": "Verdrietig",
+    "emoji_thumbs_down": "Duim omlaag",
     "save": "Opslaan",
     "cancel": "Annuleren",
     "copied": "Gekopieerd!",

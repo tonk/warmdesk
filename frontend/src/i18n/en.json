@@ -746,6 +746,7 @@
     "backup_email_address_placeholder": "alice{'@'}example.com, bob{'@'}example.com",
     "backup_include_uploads": "Include uploaded files (attachments, avatars, logos)",
     "role_backup": "Backup",
+    "role_apidocs": "API docs",
     "role_customer": "Customer",
     "customer_role_hint": "Customer-role users can only view and comment on tickets for assigned customers.",
     "timetracking_viewer": "Time Tracking Viewer",
@@ -826,6 +827,13 @@
     "download": "Download"
   },
   "common": {
+    "emoji_picker": "Pick a reaction",
+    "emoji_thumbs_up": "Thumbs up",
+    "emoji_heart": "Heart",
+    "emoji_laughing": "Laughing",
+    "emoji_surprised": "Surprised",
+    "emoji_sad": "Sad",
+    "emoji_thumbs_down": "Thumbs down",
     "save": "Save",
     "cancel": "Cancel",
     "copied": "Copied!",

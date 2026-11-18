@@ -531,11 +531,11 @@ func migrateGroupConversations(db *gorm.DB) error {
 	return nil
 }
 
-// clearServiceAccountFeatures ensures metrics and backup users never have feature
+// clearServiceAccountFeatures ensures metrics, backup and apidocs users never have feature
 // flags set — runs at startup to fix any rows created before this policy existed.
 func clearServiceAccountFeatures(db *gorm.DB) error {
 	return db.Model(&models.User{}).
-		Where("global_role IN ('metrics','backup')").
+		Where("global_role IN ('metrics','backup','apidocs')").
 		Updates(map[string]interface{}{
 			"board_enabled":         false,
 			"chat_enabled":          false,

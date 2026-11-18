@@ -705,6 +705,7 @@
     "backup_email_address_placeholder": "alice{'@'}example.com, bob{'@'}example.com",
     "backup_include_uploads": "Inkluder uploadede filer (vedhæftninger, avatarer, logoer)",
     "role_backup": "Sikkerhedskopi",
+    "role_apidocs": "API-dokumentation",
     "role_customer": "Kunde",
     "customer_role_hint": "Brugere med kunderollen kan kun se og kommentere billetter for tildelte kunder.",
     "timetracking_viewer": "Tidsregistreringsfremviser",
@@ -803,6 +804,13 @@
     "download": "Download"
   },
   "common": {
+    "emoji_picker": "Vælg en reaktion",
+    "emoji_thumbs_up": "Tommel op",
+    "emoji_heart": "Hjerte",
+    "emoji_laughing": "Grinende",
+    "emoji_surprised": "Overrasket",
+    "emoji_sad": "Ked af det",
+    "emoji_thumbs_down": "Tommel ned",
     "save": "Gem",
     "cancel": "Annullér",
     "copied": "Kopieret!",

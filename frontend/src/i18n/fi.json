@@ -705,6 +705,7 @@
     "backup_email_address_placeholder": "alice{'@'}example.com, bob{'@'}example.com",
     "backup_include_uploads": "Sisällytä ladatut tiedostot (liitteet, avatarit, logot)",
     "role_backup": "Varmuuskopio",
+    "role_apidocs": "API-dokumentaatio",
     "role_customer": "Asiakas",
     "customer_role_hint": "Asiakasroolin käyttäjät voivat vain tarkastella ja kommentoida tiketit heille osoitetuille asiakkaille.",
     "timetracking_viewer": "Ajanseurannan katselija",
@@ -803,6 +804,13 @@
     "download": "Lataa"
   },
   "common": {
+    "emoji_picker": "Valitse reaktio",
+    "emoji_thumbs_up": "Peukku ylös",
+    "emoji_heart": "Sydän",
+    "emoji_laughing": "Nauraa",
+    "emoji_surprised": "Yllättynyt",
+    "emoji_sad": "Surullinen",
+    "emoji_thumbs_down": "Peukku alas",
     "save": "Tallenna",
     "cancel": "Peruuta",
     "copied": "Kopioitu!",

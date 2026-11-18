@@ -705,6 +705,7 @@
     "backup_email_address_placeholder": "alice{'@'}example.com, bob{'@'}example.com",
     "backup_include_uploads": "Inkluder opplastede filer (vedlegg, avatarer, logoer)",
     "role_backup": "Sikkerhetskopi",
+    "role_apidocs": "API-dokumentasjon",
     "role_customer": "Kunde",
     "customer_role_hint": "Brukere med kunderollen kan bare se og kommentere saker for tildelte kunder.",
     "timetracking_viewer": "Tidsregistreringsviser",
@@ -803,6 +804,13 @@
     "download": "Last ned"
   },
   "common": {
+    "emoji_picker": "Velg en reaksjon",
+    "emoji_thumbs_up": "Tommel opp",
+    "emoji_heart": "Hjerte",
+    "emoji_laughing": "Ler",
+    "emoji_surprised": "Overrasket",
+    "emoji_sad": "Trist",
+    "emoji_thumbs_down": "Tommel ned",
     "save": "Lagre",
     "cancel": "Avbryt",
     "copied": "Kopiert!",

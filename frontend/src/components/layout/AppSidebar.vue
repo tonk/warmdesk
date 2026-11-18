@@ -479,7 +479,7 @@ function isOnline(userId) {
   return onlineIds.value.has(userId)
 }
 
-const SERVICE_ROLES = new Set(['metrics', 'backup', 'customer'])
+const SERVICE_ROLES = new Set(['metrics', 'backup', 'apidocs', 'customer'])
 const humanUsers = computed(() =>
   sidebarStore.allUsers.filter(u => !SERVICE_ROLES.has(u.global_role))
 )

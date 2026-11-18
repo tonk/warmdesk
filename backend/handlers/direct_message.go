@@ -12,7 +12,7 @@ import (
 
 // serviceAccountRoles are global roles that represent automated accounts with no
 // human behind them. They are excluded from DM user lists and cannot be messaged.
-var serviceAccountRoles = []string{middleware.RoleMetrics, middleware.RoleBackup}
+var serviceAccountRoles = []string{middleware.RoleMetrics, middleware.RoleBackup, middleware.RoleAPIDocs}
 
 // ListDirectMessages returns messages between the current user and the given user.
 func ListDirectMessages(c *gin.Context) {

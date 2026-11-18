@@ -60,7 +60,7 @@ func GetMetrics(c *gin.Context) {
 	// warmdesk_users_total — active and inactive counts per global role
 	fmt.Fprintf(&buf, "\n# HELP warmdesk_users_total Number of users per global role and active state\n")
 	fmt.Fprintf(&buf, "# TYPE warmdesk_users_total gauge\n")
-	for _, role := range []string{"admin", "user", "viewer", "metrics", "backup", "customer"} {
+	for _, role := range []string{"admin", "user", "viewer", "metrics", "backup", "apidocs", "customer"} {
 		var active, inactive int64
 		database.DB.Model(&models.User{}).Where("global_role = ? AND is_active = true AND deleted_at IS NULL", role).Count(&active)
 		database.DB.Model(&models.User{}).Where("global_role = ? AND is_active = false AND deleted_at IS NULL", role).Count(&inactive)

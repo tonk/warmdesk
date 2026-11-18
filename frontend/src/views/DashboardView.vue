@@ -202,8 +202,8 @@
           <textarea class="form-input" v-model="newProject.description" rows="3"></textarea>
         </div>
         <div class="form-group">
-          <label class="form-label">{{ $t('project.color') }}</label>
-          <input type="color" class="form-input" v-model="newProject.color" style="height:40px;padding:4px" aria-label="Project color" />
+          <label class="form-label" for="dash-new-project-color">{{ $t('project.color') }}</label>
+          <input id="dash-new-project-color" type="color" class="form-input" v-model="newProject.color" style="height:40px;padding:4px" :aria-label="$t('project.color')" />
         </div>
         <div class="form-group">
           <label class="form-label">{{ $t('project.customer') }} *</label>

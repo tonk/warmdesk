@@ -705,6 +705,7 @@
     "backup_email_address_placeholder": "alice{'@'}beispiel.de, bob{'@'}beispiel.de",
     "backup_include_uploads": "Hochgeladene Dateien einbeziehen (Anhänge, Avatare, Logos)",
     "role_backup": "Sicherung",
+    "role_apidocs": "API-Dokumentation",
     "role_customer": "Kunde",
     "customer_role_hint": "Benutzer mit der Kunden-Rolle können nur Tickets für zugewiesene Kunden anzeigen und kommentieren.",
     "timetracking_viewer": "Zeiterfassungs-Betrachter",
@@ -767,6 +768,13 @@
     "download": "Download"
   },
   "common": {
+    "emoji_picker": "Reaktion auswählen",
+    "emoji_thumbs_up": "Daumen hoch",
+    "emoji_heart": "Herz",
+    "emoji_laughing": "Lachend",
+    "emoji_surprised": "Überrascht",
+    "emoji_sad": "Traurig",
+    "emoji_thumbs_down": "Daumen runter",
     "save": "Speichern",
     "cancel": "Abbrechen",
     "copied": "Kopiert!",

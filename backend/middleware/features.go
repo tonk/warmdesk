@@ -18,7 +18,7 @@ func RequireFeature(feature string) gin.HandlerFunc {
 			c.Next()
 			return
 		}
-		if role == "metrics" {
+		if role == RoleMetrics || role == RoleAPIDocs {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "feature not available"})
 			return
 		}

@@ -705,6 +705,7 @@
     "backup_email_address_placeholder": "alice{'@'}example.com, bob{'@'}example.com",
     "backup_include_uploads": "Inkludera uppladdade filer (bilagor, avatarer, logotyper)",
     "role_backup": "Backup",
+    "role_apidocs": "API-dokumentation",
     "role_customer": "Kund",
     "customer_role_hint": "Användare med kundrollen kan bara visa och kommentera ärenden för tilldelade kunder.",
     "timetracking_viewer": "Tidsspårningsvisare",
@@ -803,6 +804,13 @@
     "download": "Ladda ner"
   },
   "common": {
+    "emoji_picker": "Välj en reaktion",
+    "emoji_thumbs_up": "Tummen upp",
+    "emoji_heart": "Hjärta",
+    "emoji_laughing": "Skrattande",
+    "emoji_surprised": "Förvånad",
+    "emoji_sad": "Ledsen",
+    "emoji_thumbs_down": "Tummen ner",
     "save": "Spara",
     "cancel": "Avbryt",
     "copied": "Kopierat!",

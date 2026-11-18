@@ -705,6 +705,7 @@
     "backup_email_address_placeholder": "alice{'@'}example.com, bob{'@'}example.com",
     "backup_include_uploads": "Setja upphlaðnar skrár með (viðhengi, notandamyndir, merki)",
     "role_backup": "Afrit",
+    "role_apidocs": "API-skjölun",
     "role_customer": "Viðskiptavinur",
     "customer_role_hint": "Notendur með viðskiptavinahlutverkið geta aðeins skoðað og skrifað athugasemdir við miða fyrir úthlutaða viðskiptavini.",
     "timetracking_viewer": "Tímaskráningarskoðari",
@@ -803,6 +804,13 @@
     "download": "Sækja"
   },
   "common": {
+    "emoji_picker": "Veldu viðbrögð",
+    "emoji_thumbs_up": "Þumall upp",
+    "emoji_heart": "Hjarta",
+    "emoji_laughing": "Hlæjandi",
+    "emoji_surprised": "Hissa",
+    "emoji_sad": "Dapur",
+    "emoji_thumbs_down": "Þumall niður",
     "save": "Vista",
     "cancel": "Hætta við",
     "copied": "Afritað!",

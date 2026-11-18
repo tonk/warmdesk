@@ -111,6 +111,7 @@
                     <option value="viewer">{{ $t('admin.role_viewer') }}</option>
                     <option value="metrics">{{ $t('admin.role_metrics') }}</option>
                     <option value="backup">{{ $t('admin.role_backup') }}</option>
+                    <option value="apidocs">{{ $t('admin.role_apidocs') }}</option>
                     <option value="customer">{{ $t('admin.role_customer') }}</option>
                   </select>
                 </td>
@@ -182,35 +183,35 @@
                   <td v-if="!systemStore.isRestrictedMode" style="text-align:center;">
                     <template v-if="user.global_role === 'admin'"><span class="feat-check feat-always">✓</span></template>
                     <template v-else-if="user.global_role === 'customer'"><span class="feat-check feat-off">—</span></template>
-                    <span v-else-if="user.global_role === 'metrics' || user.global_role === 'backup'" class="feat-check feat-off">—</span>
+                    <span v-else-if="SERVICE_ACCOUNT_ROLES.has(user.global_role)" class="feat-check feat-off">—</span>
                     <input v-else type="checkbox" class="feat-toggle" :checked="user.board_enabled !== false" @change="toggleFeature(user, 'board_enabled', $event.target.checked)" />
                   </td>
                   <td v-if="!systemStore.isRestrictedMode" style="text-align:center;">
                     <template v-if="user.global_role === 'admin'"><span class="feat-check feat-always">✓</span></template>
                     <template v-else-if="user.global_role === 'customer'"><span class="feat-check feat-off">—</span></template>
-                    <span v-else-if="user.global_role === 'metrics' || user.global_role === 'backup'" class="feat-check feat-off">—</span>
+                    <span v-else-if="SERVICE_ACCOUNT_ROLES.has(user.global_role)" class="feat-check feat-off">—</span>
                     <input v-else type="checkbox" class="feat-toggle" :checked="user.chat_enabled !== false" @change="toggleFeature(user, 'chat_enabled', $event.target.checked)" />
                   </td>
                   <td v-if="!systemStore.noTimeTrackingMode" style="text-align:center;">
                     <template v-if="user.global_role === 'customer'"><span class="feat-check feat-off">—</span></template>
-                    <span v-else-if="user.global_role === 'metrics' || user.global_role === 'backup'" class="feat-check feat-off">—</span>
+                    <span v-else-if="SERVICE_ACCOUNT_ROLES.has(user.global_role)" class="feat-check feat-off">—</span>
                     <input v-else type="checkbox" class="feat-toggle" :checked="!!user.time_tracking_enabled" @change="toggleFeature(user, 'time_tracking_enabled', $event.target.checked)" />
                   </td>
                   <td v-if="!systemStore.noTimeTrackingMode" style="text-align:center;">
                     <template v-if="user.global_role === 'customer'"><span class="feat-check feat-off">—</span></template>
-                    <span v-else-if="user.global_role === 'metrics' || user.global_role === 'backup'" class="feat-check feat-off">—</span>
+                    <span v-else-if="SERVICE_ACCOUNT_ROLES.has(user.global_role)" class="feat-check feat-off">—</span>
                     <input v-else type="checkbox" class="feat-toggle" :checked="!!user.time_tracking_viewer" @change="toggleFeature(user, 'time_tracking_viewer', $event.target.checked)" />
                   </td>
                   <td v-if="!systemStore.noHelpdeskMode" style="text-align:center;">
                     <template v-if="user.global_role === 'admin'"><span class="feat-check feat-always">✓</span></template>
                     <template v-else-if="user.global_role === 'customer'"><span class="feat-check feat-always">✓</span></template>
-                    <span v-else-if="user.global_role === 'metrics' || user.global_role === 'backup'" class="feat-check feat-off">—</span>
+                    <span v-else-if="SERVICE_ACCOUNT_ROLES.has(user.global_role)" class="feat-check feat-off">—</span>
                     <input v-else type="checkbox" class="feat-toggle" :checked="!!user.helpdesk_enabled" @change="toggleFeature(user, 'helpdesk_enabled', $event.target.checked)" />
                   </td>
                   <td v-if="!systemStore.isRestrictedMode" style="text-align:center;">
                     <template v-if="user.global_role === 'admin'"><span class="feat-check feat-always">✓</span></template>
                     <template v-else-if="user.global_role === 'customer' || user.global_role === 'viewer'"><span class="feat-check feat-off">—</span></template>
-                    <span v-else-if="user.global_role === 'metrics' || user.global_role === 'backup'" class="feat-check feat-off">—</span>
+                    <span v-else-if="SERVICE_ACCOUNT_ROLES.has(user.global_role)" class="feat-check feat-off">—</span>
                     <input v-else type="checkbox" class="feat-toggle" :checked="!!user.can_create_projects" @change="toggleFeature(user, 'can_create_projects', $event.target.checked)" />
                   </td>
                   <td style="text-align:center;">
@@ -1309,6 +1310,7 @@
         <option value="viewer">{{ $t('admin.role_viewer') }}</option>
         <option value="metrics">{{ $t('admin.role_metrics') }}</option>
         <option value="backup">{{ $t('admin.role_backup') }}</option>
+        <option value="apidocs">{{ $t('admin.role_apidocs') }}</option>
       </select>
     </div>
     <div class="form-group">
@@ -1381,6 +1383,7 @@
           <option value="admin">{{ $t('admin.role_admin') }}</option>
           <option value="metrics">{{ $t('admin.role_metrics') }}</option>
           <option value="backup">{{ $t('admin.role_backup') }}</option>
+          <option value="apidocs">{{ $t('admin.role_apidocs') }}</option>
         </select>
       </div>
       <div class="form-group">
@@ -1426,7 +1429,7 @@
           {{ $t('admin.must_change_password') }}
         </label>
       </div>
-      <template v-if="editUser.global_role !== 'metrics' && editUser.global_role !== 'backup'">
+      <template v-if="!SERVICE_ACCOUNT_ROLES.has(editUser.global_role)">
         <div class="form-group">
           <label class="form-label">{{ $t('admin.timetracking_viewer') }}</label>
           <label class="checkbox-label">
@@ -1472,7 +1475,7 @@
         </div>
         <span v-else class="badge badge-inactive">{{ $t('passkey.none_registered') }}</span>
       </div>
-      <template v-if="editUser.global_role !== 'metrics' && editUser.global_role !== 'backup'">
+      <template v-if="!SERVICE_ACCOUNT_ROLES.has(editUser.global_role)">
         <div class="form-group">
           <label class="form-label">{{ $t('groups.title') }}</label>
           <div class="labels-picker">
@@ -3506,9 +3509,12 @@ function copyPasswordToClipboard(password) {
   ui.success(t('admin.password_copied'))
 }
 
+// Roles without feature flags (no boards/chat/helpdesk/time tracking).
+const SERVICE_ACCOUNT_ROLES = new Set(['metrics', 'backup', 'apidocs'])
+
 async function saveEditUser() {
   try {
-    const isServiceAccount = editUser.value.global_role === 'metrics' || editUser.value.global_role === 'backup'
+    const isServiceAccount = SERVICE_ACCOUNT_ROLES.has(editUser.value.global_role)
     const payload = {
       global_role: editUser.value.global_role,
       first_name: editUser.value.first_name,

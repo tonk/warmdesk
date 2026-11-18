@@ -42,9 +42,10 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 	v1 := r.Group("/api/v1")
 	v1.Use(middleware.IPAllowlist())
 
-	// Swagger UI — protected by the same IP allowlist as the API
+	// Swagger UI — IP allowlist plus authentication; only admins and the
+	// dedicated "apidocs" global role may open it.
 	swagger := r.Group("/swagger")
-	swagger.Use(middleware.IPAllowlist())
+	swagger.Use(middleware.IPAllowlist(), middleware.SwaggerLoginRedirect(), middleware.Auth(authSvc), middleware.SwaggerAuth())
 	{
 		swagger.GET("", func(c *gin.Context) { c.Redirect(http.StatusMovedPermanently, "/swagger/index.html") })
 		swagger.GET("/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
