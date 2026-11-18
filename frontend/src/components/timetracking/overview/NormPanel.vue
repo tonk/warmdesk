@@ -10,7 +10,7 @@
       <div class="ov-card"><dt>{{ $t('timeOverview.planned') }}</dt><dd>{{ fmtHM(data.planned_minutes) }}</dd></div>
       <div class="ov-card"><dt>{{ $t('timeOverview.days') }}</dt><dd>{{ data.total_days }}</dd></div>
     </dl>
-    <p class="ov-muted">{{ $t('timeOverview.norm_basis', { hours: data.hours_per_week, perDay: fmtHM(data.norm_minutes_per_day) }) }}</p>
+    <p class="ov-muted">{{ $t('timeOverview.norm_basis', { hours: data.hours_per_week, perDay: fmtHM(data.norm_minutes_per_day), days: minutesToDays(data.total.vacation_minutes, data.norm_minutes_per_day) }) }}</p>
 
     <div class="ov-table-wrap">
       <table class="ov-table">
@@ -78,7 +78,7 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
 import { useDateFormat } from '@/composables/useDateFormat'
-import { fmtHM, fmtSignedHM, diffClass, monthName } from '@/utils/timeOverviewFormat'
+import { fmtHM, fmtSignedHM, diffClass, monthName, minutesToDays } from '@/utils/timeOverviewFormat'
 import './overview.css'
 
 defineProps({ data: { type: Object, required: true } })

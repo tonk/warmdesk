@@ -42,3 +42,10 @@ export function fmtKm(km) {
 export function monthName(locale, month) {
   return new Intl.DateTimeFormat(locale || 'en', { month: 'long' }).format(new Date(2024, month - 1, 1))
 }
+
+/** Minutes -> days of `perDayMinutes` each, at most two decimals: (720, 480) -> 1.5. */
+export function minutesToDays(minutes, perDayMinutes) {
+  const per = Number(perDayMinutes) || 0
+  if (per <= 0) return 0
+  return Math.round(((Number(minutes) || 0) / per) * 100) / 100
+}

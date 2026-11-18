@@ -3215,7 +3215,7 @@
     "booked_days": "Dias registados",
     "unbooked_norm_days": "Dias de norma sem registo",
     "norm_caption": "Horas registadas face à norma por mês em {year}",
-    "norm_basis": "Norma baseada em {hours} horas por semana ({perDay} por dia).",
+    "norm_basis": "Norma baseada em {hours} horas por semana ({perDay} por dia). Dias de férias: {days}.",
     "norm_to_date": "Norma até hoje",
     "booked_to_date": "Registado até hoje",
     "diff_to_date": "Diferença até hoje",

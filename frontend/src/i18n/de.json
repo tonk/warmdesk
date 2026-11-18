@@ -3215,7 +3215,7 @@
     "booked_days": "Gebuchte Tage",
     "unbooked_norm_days": "Nicht gebuchte Normtage",
     "norm_caption": "Gebuchte Stunden gegenüber der Norm pro Monat in {year}",
-    "norm_basis": "Norm basierend auf {hours} Stunden pro Woche ({perDay} pro Tag).",
+    "norm_basis": "Norm basierend auf {hours} Stunden pro Woche ({perDay} pro Tag). Urlaubstage: {days}.",
     "norm_to_date": "Norm bis heute",
     "booked_to_date": "Bisher gebucht",
     "diff_to_date": "Differenz bis heute",

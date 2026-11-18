@@ -3212,7 +3212,7 @@
     "booked_days": "Booked days",
     "unbooked_norm_days": "Unbooked norm days",
     "norm_caption": "Hours booked against the norm per month in {year}",
-    "norm_basis": "Norm based on {hours} hours per week ({perDay} per day).",
+    "norm_basis": "Norm based on {hours} hours per week ({perDay} per day). Vacation days: {days}.",
     "norm_to_date": "Norm to date",
     "booked_to_date": "Booked to date",
     "diff_to_date": "Difference to date",

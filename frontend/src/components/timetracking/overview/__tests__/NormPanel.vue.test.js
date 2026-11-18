@@ -51,6 +51,17 @@ describe('NormPanel', () => {
     expect(w.text()).toContain('198')
   })
 
+  it('shows the number of vacation days in the norm line', () => {
+    // total vacation 480 min at 480 min a day = 1 day
+    expect(mountIt().text()).toContain('Norm based on 40 hours per week (8:00 per day). Vacation days: 1.')
+  })
+
+  it('counts part days when the norm day is shorter', () => {
+    const data = { ...fixture, hours_per_week: 36, norm_minutes_per_day: 432, total: { ...fixture.total, vacation_minutes: 648 } }
+    const w = mount(NormPanel, { props: { data }, global: { plugins: [i18n] } })
+    expect(w.text()).toContain('Vacation days: 1.5.')
+  })
+
   it('lists the holiday weekdays', () => {
     expect(mountIt().text()).toContain('2026-12-25')
   })

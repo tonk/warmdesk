@@ -3215,7 +3215,7 @@
     "booked_days": "Bokförda dagar",
     "unbooked_norm_days": "Obokförda normdagar",
     "norm_caption": "Bokförda timmar mot normen per månad {year}",
-    "norm_basis": "Norm baserad på {hours} timmar per vecka ({perDay} per dag).",
+    "norm_basis": "Norm baserad på {hours} timmar per vecka ({perDay} per dag). Semesterdagar: {days}.",
     "norm_to_date": "Norm hittills",
     "booked_to_date": "Bokfört hittills",
     "diff_to_date": "Skillnad hittills",

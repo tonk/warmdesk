@@ -3215,7 +3215,7 @@
     "booked_days": "Jours saisis",
     "unbooked_norm_days": "Jours de norme non saisis",
     "norm_caption": "Heures saisies par rapport à la norme par mois en {year}",
-    "norm_basis": "Norme basée sur {hours} heures par semaine ({perDay} par jour).",
+    "norm_basis": "Norme basée sur {hours} heures par semaine ({perDay} par jour). Jours de congé : {days}.",
     "norm_to_date": "Norme à ce jour",
     "booked_to_date": "Saisi à ce jour",
     "diff_to_date": "Écart à ce jour",

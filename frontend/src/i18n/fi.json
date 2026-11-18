@@ -3215,7 +3215,7 @@
     "booked_days": "Kirjatut päivät",
     "unbooked_norm_days": "Kirjaamattomat normipäivät",
     "norm_caption": "Kirjatut tunnit normia vastaan kuukausittain vuonna {year}",
-    "norm_basis": "Normi perustuu {hours} tuntiin viikossa ({perDay} päivässä).",
+    "norm_basis": "Normi perustuu {hours} tuntiin viikossa ({perDay} päivässä). Lomapäivät: {days}.",
     "norm_to_date": "Normi tähän mennessä",
     "booked_to_date": "Kirjattu tähän mennessä",
     "diff_to_date": "Erotus tähän mennessä",

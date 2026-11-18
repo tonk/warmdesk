@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { fmtHM, fmtSignedHM, minutesToHours, hoursToMinutes, diffClass, fmtKm } from './timeOverviewFormat'
+import { fmtHM, fmtSignedHM, minutesToHours, hoursToMinutes, diffClass, fmtKm, minutesToDays } from './timeOverviewFormat'
 
 describe('timeOverviewFormat', () => {
   it('formats minutes as h:mm', () => {
@@ -30,5 +30,14 @@ describe('timeOverviewFormat', () => {
   it('rounds kilometres', () => {
     expect(fmtKm(12.345)).toBe('12.3')
     expect(fmtKm(null)).toBe('0')
+  })
+
+  it('converts minutes to days of the norm length', () => {
+    expect(minutesToDays(480, 480)).toBe(1)
+    expect(minutesToDays(8640, 480)).toBe(18)
+    expect(minutesToDays(720, 480)).toBe(1.5)
+    expect(minutesToDays(3000, 432)).toBe(6.94) // a 36-hour week has 7:12 days
+    expect(minutesToDays(480, 0)).toBe(0)
+    expect(minutesToDays(undefined, 480)).toBe(0)
   })
 })

@@ -3215,7 +3215,7 @@
     "booked_days": "Geboekte dagen",
     "unbooked_norm_days": "Niet-geboekte normdagen",
     "norm_caption": "Geboekte uren ten opzichte van de norm per maand in {year}",
-    "norm_basis": "Norm gebaseerd op {hours} uur per week ({perDay} per dag).",
+    "norm_basis": "Norm gebaseerd op {hours} uur per week ({perDay} per dag). Vakantiedagen: {days}.",
     "norm_to_date": "Norm tot nu toe",
     "booked_to_date": "Geboekt tot nu toe",
     "diff_to_date": "Verschil tot nu toe",

@@ -3215,7 +3215,7 @@
     "booked_days": "Skráðir dagar",
     "unbooked_norm_days": "Óskráðir viðmiðsdagar",
     "norm_caption": "Skráðar stundir miðað við viðmið á mánuði árið {year}",
-    "norm_basis": "Viðmið byggt á {hours} stundum á viku ({perDay} á dag).",
+    "norm_basis": "Viðmið byggt á {hours} stundum á viku ({perDay} á dag). Orlofsdagar: {days}.",
     "norm_to_date": "Viðmið til þessa",
     "booked_to_date": "Skráð til þessa",
     "diff_to_date": "Mismunur til þessa",

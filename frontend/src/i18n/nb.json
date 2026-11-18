@@ -3215,7 +3215,7 @@
     "booked_days": "Registrerte dager",
     "unbooked_norm_days": "Uregistrerte normdager",
     "norm_caption": "Registrerte timer mot normen per måned i {year}",
-    "norm_basis": "Norm basert på {hours} timer per uke ({perDay} per dag).",
+    "norm_basis": "Norm basert på {hours} timer per uke ({perDay} per dag). Feriedager: {days}.",
     "norm_to_date": "Norm hittil",
     "booked_to_date": "Registrert hittil",
     "diff_to_date": "Differanse hittil",
