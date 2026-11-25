@@ -249,18 +249,22 @@ func (sc *overviewScope) bookedDays() map[string]bool {
 // ── Year norm ─────────────────────────────────────────────────────────────
 
 type normMonthRow struct {
-	Month                int `json:"month"`
-	NormDays             int `json:"norm_days"`
-	NormMinutes          int `json:"norm_minutes"`
-	WorkedMinutes        int `json:"worked_minutes"` // everything except sick and vacation, incl. travel
-	TravelMinutes        int `json:"travel_minutes"` // part of worked_minutes
-	SickMinutes          int `json:"sick_minutes"`
-	VacationMinutes      int `json:"vacation_minutes"`
-	BookedMinutes        int `json:"booked_minutes"`
-	DiffMinutes          int `json:"diff_minutes"`
-	BookedDays           int `json:"booked_days"`
-	UnbookedNormDays     int `json:"unbooked_norm_days"`
-	PastUnbookedNormDays int `json:"past_unbooked_norm_days"`
+	Month         int `json:"month"`
+	NormDays      int `json:"norm_days"`
+	NormMinutes   int `json:"norm_minutes"`
+	WorkedMinutes int `json:"worked_minutes"` // everything except sick and vacation, incl. travel
+	TravelMinutes int `json:"travel_minutes"` // part of worked_minutes
+	// TravelDeclarableMinutes is the part of travel_minutes that remains
+	// after the project's undeclarable minutes (see projUndecl).
+	TravelDeclarableMinutes int     `json:"travel_declarable_minutes"`
+	Distance                float64 `json:"distance"` // km on all entries of the month, any project
+	SickMinutes             int     `json:"sick_minutes"`
+	VacationMinutes         int     `json:"vacation_minutes"`
+	BookedMinutes           int     `json:"booked_minutes"`
+	DiffMinutes             int     `json:"diff_minutes"`
+	BookedDays              int     `json:"booked_days"`
+	UnbookedNormDays        int     `json:"unbooked_norm_days"`
+	PastUnbookedNormDays    int     `json:"past_unbooked_norm_days"`
 }
 
 // NormOverview is the shape returned by GetOverviewNorm.
@@ -335,11 +339,15 @@ func buildNormOverview(sc *overviewScope) NormOverview {
 			r.VacationMinutes += e.Minutes
 		case overviewCatTravel:
 			r.TravelMinutes += e.Minutes
+			r.TravelDeclarableMinutes += e.Minutes - projUndecl(e)
 			r.WorkedMinutes += e.Minutes
 		default:
 			r.WorkedMinutes += e.Minutes
 		}
 		r.BookedMinutes += e.Minutes
+		if e.Distance != nil {
+			r.Distance += *e.Distance
+		}
 		if !e.Date.UTC().After(sc.Today) {
 			out.BookedToDateMinute += e.Minutes
 		} else {
@@ -353,6 +361,8 @@ func buildNormOverview(sc *overviewScope) NormOverview {
 		t.NormMinutes += rows[i].NormMinutes
 		t.WorkedMinutes += rows[i].WorkedMinutes
 		t.TravelMinutes += rows[i].TravelMinutes
+		t.TravelDeclarableMinutes += rows[i].TravelDeclarableMinutes
+		t.Distance += rows[i].Distance
 		t.SickMinutes += rows[i].SickMinutes
 		t.VacationMinutes += rows[i].VacationMinutes
 		t.BookedMinutes += rows[i].BookedMinutes

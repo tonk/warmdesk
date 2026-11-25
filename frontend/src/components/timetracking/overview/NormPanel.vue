@@ -22,6 +22,8 @@
             <th scope="col">{{ $t('timeOverview.norm') }}</th>
             <th scope="col">{{ $t('timeOverview.worked') }}</th>
             <th scope="col">{{ $t('timeOverview.of_which_travel') }}</th>
+            <th scope="col">{{ $t('timeOverview.of_which_declarable') }}</th>
+            <th scope="col">{{ $t('timeOverview.kilometres') }}</th>
             <th scope="col">{{ $t('timeOverview.sick') }}</th>
             <th scope="col">{{ $t('timeOverview.vacation') }}</th>
             <th scope="col">{{ $t('timeOverview.booked') }}</th>
@@ -37,6 +39,8 @@
             <td>{{ fmtHM(m.norm_minutes) }}</td>
             <td>{{ fmtHM(m.worked_minutes) }}</td>
             <td>{{ fmtHM(m.travel_minutes) }}</td>
+            <td>{{ fmtHM(m.travel_declarable_minutes) }}</td>
+            <td>{{ fmtKm(m.distance) }}</td>
             <td>{{ fmtHM(m.sick_minutes) }}</td>
             <td>{{ fmtHM(m.vacation_minutes) }}</td>
             <td>{{ fmtHM(m.booked_minutes) }}</td>
@@ -52,6 +56,8 @@
             <td>{{ fmtHM(data.total.norm_minutes) }}</td>
             <td>{{ fmtHM(data.total.worked_minutes) }}</td>
             <td>{{ fmtHM(data.total.travel_minutes) }}</td>
+            <td>{{ fmtHM(data.total.travel_declarable_minutes) }}</td>
+            <td>{{ fmtKm(data.total.distance) }}</td>
             <td>{{ fmtHM(data.total.sick_minutes) }}</td>
             <td>{{ fmtHM(data.total.vacation_minutes) }}</td>
             <td>{{ fmtHM(data.total.booked_minutes) }}</td>
@@ -78,7 +84,7 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
 import { useDateFormat } from '@/composables/useDateFormat'
-import { fmtHM, fmtSignedHM, diffClass, monthName, minutesToDays } from '@/utils/timeOverviewFormat'
+import { fmtHM, fmtSignedHM, fmtKm, diffClass, monthName, minutesToDays } from '@/utils/timeOverviewFormat'
 import './overview.css'
 
 defineProps({ data: { type: Object, required: true } })

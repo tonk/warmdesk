@@ -3216,6 +3216,8 @@
     "norm_days": "Normdagar",
     "worked": "Arbetat",
     "of_which_travel": "varav restid",
+    "of_which_declarable": "varav debiterbar",
+    "kilometres": "Kilometer",
     "sick": "Sjuk",
     "vacation": "Semester",
     "booked": "Bokfört",

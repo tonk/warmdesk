@@ -3216,6 +3216,8 @@
     "norm_days": "Normdager",
     "worked": "Arbeidet",
     "of_which_travel": "herav reisetid",
+    "of_which_declarable": "herav fakturerbar",
+    "kilometres": "Kilometer",
     "sick": "Syk",
     "vacation": "Ferie",
     "booked": "Registrert",

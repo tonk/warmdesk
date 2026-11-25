@@ -131,8 +131,8 @@ func TestOverviewNorm(t *testing.T) {
 	f.add(t, models.TimeEntry{Date: day("2026-04-05"), IsHoliday: true, Description: "Eerste Paasdag"}) // Sunday: no norm day lost
 	f.add(t, models.TimeEntry{Date: day("2026-04-27"), IsHoliday: true, Description: "Koningsdag"})
 	f.add(t, models.TimeEntry{CustomerID: &f.acme.ID, ProjectID: &f.sick.ID, Date: day("2026-01-02"), Minutes: 480})
-	f.add(t, models.TimeEntry{CustomerID: &f.acme.ID, ProjectID: &f.teach.ID, Date: day("2026-03-30"), Minutes: 480})
-	f.add(t, models.TimeEntry{CustomerID: &f.acme.ID, ProjectID: &f.travel.ID, Date: day("2026-03-30"), Minutes: 105})
+	f.add(t, models.TimeEntry{CustomerID: &f.acme.ID, ProjectID: &f.teach.ID, Date: day("2026-03-30"), Minutes: 480, Distance: fp(10)})
+	f.add(t, models.TimeEntry{CustomerID: &f.acme.ID, ProjectID: &f.travel.ID, Date: day("2026-03-30"), Minutes: 105, Distance: fp(42.5)})
 	f.add(t, models.TimeEntry{CustomerID: &f.acme.ID, ProjectID: &f.vacation.ID, Date: day("2026-12-24"), Minutes: 480}) // planned
 
 	var o NormOverview
@@ -153,6 +153,10 @@ func TestOverviewNorm(t *testing.T) {
 	mar := o.Months[2]
 	require.Equal(t, 585, mar.WorkedMinutes)
 	require.Equal(t, 105, mar.TravelMinutes)
+	require.Equal(t, 30, mar.TravelDeclarableMinutes) // 105 minus 75 undeclarable
+	require.Equal(t, 52.5, mar.Distance) // travel and teaching km together
+	require.Equal(t, 30, o.Total.TravelDeclarableMinutes)
+	require.Equal(t, 52.5, o.Total.Distance)
 	require.Equal(t, 1, mar.BookedDays) // two entries, one day
 
 	require.Equal(t, 480, o.Total.SickMinutes)

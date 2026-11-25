@@ -4,11 +4,13 @@ import { createPinia, setActivePinia } from 'pinia'
 import { createI18n } from 'vue-i18n'
 import en from '@/i18n/en.json'
 import NormPanel from '../NormPanel.vue'
+import { fmtKm } from '@/utils/timeOverviewFormat'
 
 const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
 
 const row = (month, o = {}) => ({
   month, norm_days: 20, norm_minutes: 9600, worked_minutes: 9000, travel_minutes: 600,
+  travel_declarable_minutes: 300, distance: 85.5,
   sick_minutes: 0, vacation_minutes: 480, booked_minutes: 9480, diff_minutes: -120,
   booked_days: 19, unbooked_norm_days: 1, past_unbooked_norm_days: 1, ...o,
 })
@@ -36,10 +38,10 @@ describe('NormPanel', () => {
 
   it('shows signed, coloured differences', () => {
     const w = mountIt()
-    const first = w.get('tbody tr').findAll('td')[7]
+    const first = w.get('tbody tr').findAll('td')[9]
     expect(first.text()).toBe('+1:30')
     expect(first.classes()).toContain('diff-pos')
-    const second = w.findAll('tbody tr')[1].findAll('td')[7]
+    const second = w.findAll('tbody tr')[1].findAll('td')[9]
     expect(second.text()).toBe('-2:00')
     expect(second.classes()).toContain('diff-neg')
   })
@@ -47,7 +49,7 @@ describe('NormPanel', () => {
   it('uses the API unique day total, not a sum of rows', () => {
     const w = mountIt()
     const cells = w.get('tfoot').findAll('td')
-    expect(cells[8].text()).toBe('198')
+    expect(cells[10].text()).toBe('198')
     expect(w.text()).toContain('198')
   })
 
@@ -60,6 +62,13 @@ describe('NormPanel', () => {
     const data = { ...fixture, hours_per_week: 36, norm_minutes_per_day: 432, total: { ...fixture.total, vacation_minutes: 648 } }
     const w = mount(NormPanel, { props: { data }, global: { plugins: [i18n] } })
     expect(w.text()).toContain('Vacation days: 1.5.')
+  })
+
+  it('shows the declarable travel time and the kilometres', () => {
+    const cells = mountIt().get('tbody tr').findAll('td')
+    expect(cells[3].text()).toBe('10:00')
+    expect(cells[4].text()).toBe('5:00')
+    expect(cells[5].text()).toBe(fmtKm(85.5))
   })
 
   it('lists the holiday weekdays', () => {
