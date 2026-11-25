@@ -418,6 +418,13 @@ func (a *travelAcc) add(e models.TimeEntry) {
 	a.Days = len(a.dates)
 }
 
+// addKm counts only the distance of an entry that is not travel time (for
+// example kilometres booked on a work entry), so the kilometres cover every
+// entry while entries, days and minutes stay travel only.
+func (a *travelAcc) addKm(e models.TimeEntry) {
+	a.Distance += *e.Distance
+}
+
 type travelMonthRow struct {
 	Month int `json:"month"`
 	travelAcc
@@ -460,23 +467,34 @@ func buildTravelOverview(sc *overviewScope) TravelOverview {
 	byRoute := map[string]*travelRouteRow{}
 	projects := map[uint]bool{}
 	for _, e := range sc.Entries {
-		if sc.category(e) != overviewCatTravel {
+		travel := sc.category(e) == overviewCatTravel
+		if !travel && (e.IsHoliday || e.Distance == nil || *e.Distance == 0) {
 			continue
 		}
-		projects[e.Project.ID] = true
-		months[int(e.Date.UTC().Month())-1].add(e)
-		out.Total.add(e)
+		// Travel entries count in full; any other entry only with its kilometres.
+		add := func(a *travelAcc) {
+			if travel {
+				a.add(e)
+			} else {
+				a.addKm(e)
+			}
+		}
+		if travel {
+			projects[e.Project.ID] = true
+			if e.Distance == nil {
+				out.WithoutDistance++
+			}
+		}
+		add(&months[int(e.Date.UTC().Month())-1].travelAcc)
+		add(&out.Total)
 		route, dir := travelDirection(e.Description)
 		switch dir {
 		case "out":
-			out.Out.add(e)
+			add(&out.Out)
 		case "back":
-			out.Back.add(e)
+			add(&out.Back)
 		default:
-			out.NoDirection.add(e)
-		}
-		if e.Distance == nil {
-			out.WithoutDistance++
+			add(&out.NoDirection)
 		}
 		var cid uint
 		cname := ""
@@ -495,14 +513,14 @@ func buildTravelOverview(sc *overviewScope) TravelOverview {
 			}
 			byCust[cid] = cr
 		}
-		cr.add(e)
+		add(&cr.travelAcc)
 		key := cname + "\x00" + route
 		rr := byRoute[key]
 		if rr == nil {
 			rr = &travelRouteRow{Route: route, Customer: cname}
 			byRoute[key] = rr
 		}
-		rr.add(e)
+		add(&rr.travelAcc)
 	}
 	out.Months = months
 	out.TotalDays = out.Total.Days

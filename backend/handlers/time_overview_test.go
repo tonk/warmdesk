@@ -154,7 +154,7 @@ func TestOverviewNorm(t *testing.T) {
 	require.Equal(t, 585, mar.WorkedMinutes)
 	require.Equal(t, 105, mar.TravelMinutes)
 	require.Equal(t, 30, mar.TravelDeclarableMinutes) // 105 minus 75 undeclarable
-	require.Equal(t, 52.5, mar.Distance) // travel and teaching km together
+	require.Equal(t, 52.5, mar.Distance)              // travel and teaching km together
 	require.Equal(t, 30, o.Total.TravelDeclarableMinutes)
 	require.Equal(t, 52.5, o.Total.Distance)
 	require.Equal(t, 1, mar.BookedDays) // two entries, one day
@@ -283,6 +283,9 @@ func TestOverviewTravel(t *testing.T) {
 	f.add(t, models.TimeEntry{CustomerID: &f.acme.ID, ProjectID: &f.travel.ID, Date: day("2026-03-30"), Minutes: 105, Description: "Python - Plaats - Terug", Distance: fp(95), StartTime: sp("16:30"), EndTime: sp("18:15")})
 	f.add(t, models.TimeEntry{CustomerID: &f.other.ID, ProjectID: &f.travel.ID, Date: day("2026-10-01"), Minutes: 45, Description: "Velp - Heen"}) // shorter than the 75 own minutes, no distance
 	f.add(t, models.TimeEntry{CustomerID: &f.acme.ID, ProjectID: &f.teach.ID, Date: day("2026-03-30"), Minutes: 480})                              // not travel
+	// Kilometres on a work entry count; its time, entry and day do not.
+	f.add(t, models.TimeEntry{CustomerID: &f.acme.ID, ProjectID: &f.teach.ID, Date: day("2026-11-04"), Minutes: 480, Description: "Lesgeven", Distance: fp(12.5)})
+	f.add(t, models.TimeEntry{Date: day("2026-12-25"), IsHoliday: true, Description: "Kerst", Distance: fp(99)}) // holiday: ignored
 
 	var o TravelOverview
 	require.Equal(t, http.StatusOK, f.get(t, GetOverviewTravel, "?year=2026", &o))
@@ -290,22 +293,28 @@ func TestOverviewTravel(t *testing.T) {
 	require.Equal(t, 240, o.Total.TotalMinutes)
 	require.Equal(t, 75+75+45, o.Total.OwnMinutes) // own time never exceeds the entry
 	require.Equal(t, 15+30, o.Total.DeclarableMinutes)
-	require.Equal(t, 190.0, o.Total.Distance)
+	require.Equal(t, 202.5, o.Total.Distance)
 	require.Equal(t, 2, o.Total.Days)
 	require.Equal(t, 2, o.TotalDays)
 	require.Equal(t, 1, o.WithoutDistance)
 	require.Equal(t, 2, o.Out.Entries)
 	require.Equal(t, 1, o.Back.Entries)
 	require.Equal(t, 0, o.NoDirection.Entries)
+	require.Equal(t, 12.5, o.NoDirection.Distance)
 
 	require.Equal(t, 195, o.Months[2].TotalMinutes)
 	require.Equal(t, 1, o.Months[2].Days)
 	require.Equal(t, 45, o.Months[9].TotalMinutes)
+	require.Equal(t, 12.5, o.Months[10].Distance)
+	require.Equal(t, 0, o.Months[10].Entries)
+	require.Equal(t, 0, o.Months[10].Days)
+	require.Equal(t, 0.0, o.Months[11].Distance)
 
 	require.Len(t, o.ByCustomer, 2)
 	require.Equal(t, "Acme", o.ByCustomer[0].Customer)
-	require.Equal(t, 190.0, o.ByCustomer[0].Distance)
-	require.Len(t, o.ByRoute, 2)
+	require.Equal(t, 202.5, o.ByCustomer[0].Distance)
+	require.Equal(t, 3, o.ByCustomer[0].Entries+o.ByCustomer[1].Entries)
+	require.Len(t, o.ByRoute, 3) // plus "Lesgeven" with only its kilometres
 	require.Equal(t, "Python - Plaats", o.ByRoute[0].Route)
 	require.Equal(t, 2, o.ByRoute[0].Entries)
 	require.Equal(t, 190.0, o.ByRoute[0].Distance)
