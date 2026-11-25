@@ -3,6 +3,7 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"reflect"
@@ -449,15 +450,51 @@ func TestOverviewNormPDF(t *testing.T) {
 	require.Equal(t, http.StatusBadRequest, w.Code)
 }
 
+// The Travel overview PDF renders every table and runs over several pages
+// when there are many routes, repeating the table header.
+func TestOverviewTravelPDF(t *testing.T) {
+	f := setupOverview(t)
+	defer f.cleanup()
+
+	for i := 0; i < 40; i++ {
+		d := day("2026-01-05").AddDate(0, 0, i*7)
+		desc := fmt.Sprintf("Cursus %02d - Plaats %02d", i, i)
+		f.add(t, models.TimeEntry{CustomerID: &f.acme.ID, ProjectID: &f.travel.ID, Date: d, Minutes: 90, Description: desc + " - Heen", Distance: fp(80)})
+		f.add(t, models.TimeEntry{CustomerID: &f.acme.ID, ProjectID: &f.travel.ID, Date: d, Minutes: 90, Description: desc + " - Terug", Distance: fp(80)})
+	}
+	f.add(t, models.TimeEntry{CustomerID: &f.other.ID, ProjectID: &f.teach.ID, Date: day("2026-11-04"), Minutes: 480, Description: "Lesgeven", Distance: fp(12.5)})
+
+	for _, lang := range []string{"en", "nl", "is"} {
+		c, w := ginTestContext(t, http.MethodGet, "/x?year=2026&lang="+lang, "")
+		c.Set(middleware.ContextUserID, f.user.ID)
+		c.Set(middleware.ContextGlobalRole, "member")
+		GetOverviewTravelPDF(c)
+		require.Equal(t, http.StatusOK, w.Code, lang)
+		require.Equal(t, "application/pdf", w.Header().Get("Content-Type"))
+		require.Contains(t, w.Header().Get("Content-Disposition"), "travel-overview-2026.pdf")
+		require.True(t, bytes.HasPrefix(w.Body.Bytes(), []byte("%PDF")), lang)
+		if os.Getenv("NORM_PDF_OUT") != "" {
+			require.NoError(t, os.WriteFile(os.Getenv("NORM_PDF_OUT")+"-travel-"+lang+".pdf", w.Body.Bytes(), 0o644))
+		}
+	}
+
+	// A year without travel still renders (empty customer and route tables).
+	c, w := ginTestContext(t, http.MethodGet, "/x?year=2020", "")
+	c.Set(middleware.ContextUserID, f.user.ID)
+	c.Set(middleware.ContextGlobalRole, "member")
+	GetOverviewTravelPDF(c)
+	require.Equal(t, http.StatusOK, w.Code)
+}
+
 // Every language of the Norm PDF has all its labels filled in.
 func TestNormPDFTranslationsComplete(t *testing.T) {
-	require.Len(t, normPDFTranslations, 12)
-	for lang, l := range normPDFTranslations {
+	require.Len(t, overviewPDFTranslations, 12)
+	for lang, l := range overviewPDFTranslations {
 		v := reflect.ValueOf(l)
 		for i := 0; i < v.NumField(); i++ {
 			require.NotEmpty(t, v.Field(i).String(), "%s.%s", lang, v.Type().Field(i).Name)
 		}
 	}
-	require.Equal(t, "Overzicht", normPDFLabelsFromLang("nl-NL").Title)
-	require.Equal(t, "Overview", normPDFLabelsFromLang("xx").Title)
+	require.Equal(t, "Overzicht", overviewPDFLabelsFromLang("nl-NL").Title)
+	require.Equal(t, "Overview", overviewPDFLabelsFromLang("xx").Title)
 }

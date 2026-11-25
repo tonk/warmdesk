@@ -1330,7 +1330,7 @@ image::../screenshots/28-time-overview-norm.png[The Norm overview: hours per mon
 Per month: the norm days and hours, the hours worked (with the travel part shown separately, followed by the declarable part of that travel time — the travel minus the project's undeclarable minutes, as in the *Travel* sub-tab — and the total kilometres of all entries in the month, whatever the project), sick and vacation hours, the total booked, the difference with the norm (always with a `+` or `-` sign), the days booked, and the norm days without any booking.
 Above the table are the year totals, the figures up to today, and what is planned after today, followed by a line with the norm basis (hours per week and per day) and the number of *vacation days* booked in the year — the vacation time divided by the norm per day. The public holidays on weekdays that were taken out of the norm are listed below the table; hover over a date (or move to it with Tab) to see its weekday and the name of the holiday, for example _Monday · Koningsdag_.
 
-The *PDF* button next to *Settings* (shown on the *Norm* sub-tab) downloads the same overview as a landscape PDF in the language of the interface: the year totals, the norm basis, the month table and the public holidays with their weekday and name.
+The *PDF* button next to *Settings* (shown on the *Norm* and *Travel* sub-tabs) downloads the same overview as a landscape PDF in the language of the interface: the year totals, the norm basis, the month table and the public holidays with their weekday and name.
 
 ==== Checks
 
@@ -1351,6 +1351,8 @@ image::../screenshots/30-time-overview-travel.png[The Travel overview: time and 
 
 Travel time and kilometres per month, per direction, per customer and per route. For every entry on a travel project the *own time* is the project's undeclarable minutes (never more than the entry itself); the rest is *declarable*.
 The kilometres include *every* entry with a distance, not only travel: kilometres booked on a work entry count too (usually under _No direction_, with the description as the route), but that entry's time, entry and day are not counted as travel.
+
+The *PDF* button (also shown on the *Travel* sub-tab) downloads this overview as a landscape PDF in the language of the interface, with all four tables; long route lists continue on the next page with the table header repeated.
 The direction and the route come from the description: write travel as `<route> - Heen` and `<route> - Terug`, for example `Python - Nieuwegein - Heen`. Entries without that ending are counted as _No direction_.
 
 ==== Vacation

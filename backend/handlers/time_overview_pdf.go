@@ -28,49 +28,136 @@ func GetOverviewNormPDF(c *gin.Context) {
 		return
 	}
 	o := buildNormOverview(sc)
-
-	userID := middleware.GetUserID(c)
-	var requester models.User
-	database.DB.First(&requester, userID)
-
-	fontFamily := "FreeSans"
-	if requester.Font != "" {
-		fontFamily = pdfFontFamily(requester.Font)
-	}
-	if fam, ok := pdfFontFromParam(c.Query("font")); ok {
-		fontFamily = fam
-	}
-	tr := pdfI18nFromLang(c.Query("lang"))
-	lb := normPDFLabelsFromLang(c.Query("lang"))
-
-	employee := userDisplayName(sc.UserID)
-
-	settings := loadAllSettings()
-	company := settings[settingCompanyName]
-	if company == "" {
-		company = "WarmDesk"
-	}
-	dateLayout := jsDateOnlyToGoLayout(requester.DateTimeFormat)
-
-	buf, err := buildNormOverviewPDF(o, lb, tr, fontFamily, company, settings[settingCompanyLogo], employee, dateLayout)
+	pc := loadOverviewPDFContext(c, sc)
+	buf, err := buildNormOverviewPDF(o, pc)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "pdf generation failed"})
 		return
 	}
 	filename := fmt.Sprintf("norm-overview-%d.pdf", o.Year)
+	sendPDF(c, filename, buf)
+}
+
+// overviewPDFContext is what every overview PDF needs besides its data: the
+// labels, fonts, company branding, employee name and the user's date format.
+type overviewPDFContext struct {
+	lb         overviewPDFLabels
+	tr         pdfI18n
+	ff         string
+	company    string
+	logo       string
+	employee   string
+	dateLayout string
+}
+
+func loadOverviewPDFContext(c *gin.Context, sc *overviewScope) overviewPDFContext {
+	var requester models.User
+	database.DB.First(&requester, middleware.GetUserID(c))
+
+	ff := "FreeSans"
+	if requester.Font != "" {
+		ff = pdfFontFamily(requester.Font)
+	}
+	if fam, ok := pdfFontFromParam(c.Query("font")); ok {
+		ff = fam
+	}
+	settings := loadAllSettings()
+	company := settings[settingCompanyName]
+	if company == "" {
+		company = "WarmDesk"
+	}
+	return overviewPDFContext{
+		lb:         overviewPDFLabelsFromLang(c.Query("lang")),
+		tr:         pdfI18nFromLang(c.Query("lang")),
+		ff:         ff,
+		company:    company,
+		logo:       settings[settingCompanyLogo],
+		employee:   userDisplayName(sc.UserID),
+		dateLayout: jsDateOnlyToGoLayout(requester.DateTimeFormat),
+	}
+}
+
+func sendPDF(c *gin.Context, filename string, buf bytes.Buffer) {
 	c.Header("Content-Disposition", `attachment; filename="`+filename+`"`)
 	c.Data(http.StatusOK, "application/pdf", buf.Bytes())
 }
 
-func normPDFLabelsFromLang(lang string) normPDFLabels {
+// startOverviewPDF opens a landscape page with the document header and footer
+// and returns the PDF and the Y position below the header.
+func startOverviewPDF(pc overviewPDFContext, title string) (*gofpdf.Fpdf, float64) {
+	pdf := newLandscapePDF(pc.ff)
+	pdf.SetTitle(title, true)
+	pdf.SetAuthor(pc.employee, true)
+	pdf.SetSubject(pc.company+" — "+title, true)
+	pdf.SetCreator(pc.company, true)
+	setGridFooter(pdf, pc.ff, pc.company, title, pc.tr)
+	pdf.AddPage()
+	return pdf, drawGridDocHeader(pdf, pc.ff, pc.logo, pc.company, pc.employee, title)
+}
+
+// drawOverviewTableHeader draws a table header row at y and returns the Y
+// below it. Labels wrap between words and all cells are as tall as the
+// tallest one; a label whose longest word does not fit gets a smaller font
+// instead of being broken inside that word ("Niet-geboekte"). The first
+// leftCols columns are left-aligned, the others right-aligned.
+func drawOverviewTableHeader(pdf *gofpdf.Fpdf, ff string, y float64, heads []string, widths []float64, leftCols int) float64 {
+	const lineH = 3.6
+	sizes := make([]float64, len(heads))
+	maxLines := 1
+	for i, h := range heads {
+		size := 7.5
+		for ; size > 5; size -= 0.5 {
+			pdf.SetFont(ff, "B", size)
+			fits := true
+			for _, word := range strings.Fields(h) {
+				if pdf.GetStringWidth(word) > widths[i]-2 {
+					fits = false
+					break
+				}
+			}
+			if fits {
+				break
+			}
+		}
+		sizes[i] = size
+		pdf.SetFont(ff, "B", size)
+		if n := len(wrapWords(pdf, h, widths[i]-2)); n > maxLines {
+			maxLines = n
+		}
+	}
+	hdrH := float64(maxLines)*lineH + 2
+	x := gMargin
+	for i, h := range heads {
+		w := widths[i]
+		setFill(pdf, gClrPrimary)
+		pdf.Rect(x, y, w, hdrH, "F")
+		setTxt(pdf, gClrWhite)
+		align := "R"
+		if i < leftCols {
+			align = "L"
+		}
+		pdf.SetFont(ff, "B", sizes[i])
+		lines := wrapWords(pdf, h, w-2)
+		ty := y + (hdrH-float64(len(lines))*lineH)/2
+		for _, ln := range lines {
+			pdf.SetXY(x+1, ty)
+			pdf.CellFormat(w-2, lineH, ln, "", 0, align, false, 0, "")
+			ty += lineH
+		}
+		x += w
+	}
+	return y + hdrH
+}
+
+func overviewPDFLabelsFromLang(lang string) overviewPDFLabels {
 	code := strings.ToLower(lang)
 	if i := strings.IndexByte(code, '-'); i > 0 {
 		code = code[:i]
 	}
-	if l, ok := normPDFTranslations[code]; ok {
+	if l, ok := overviewPDFTranslations[code]; ok {
 		return l
 	}
-	return normPDFTranslations["en"]
+	return overviewPDFTranslations["en"]
 }
 
 // fmtHMSigned formats minutes as H:MM, negative with "-", positive with "+"
@@ -147,17 +234,9 @@ func diffColor(m int) rgb {
 	return gClrText
 }
 
-func buildNormOverviewPDF(o NormOverview, lb normPDFLabels, tr pdfI18n, ff, company, logo, employee, dateLayout string) (bytes.Buffer, error) {
-	pdf := newLandscapePDF(ff)
-	title := fmt.Sprintf("%s — %s %d", lb.Title, lb.Norm, o.Year)
-	pdf.SetTitle(title, true)
-	pdf.SetAuthor(employee, true)
-	pdf.SetSubject(company+" — "+title, true)
-	pdf.SetCreator(company, true)
-	setGridFooter(pdf, ff, company, title, tr)
-	pdf.AddPage()
-
-	y := drawGridDocHeader(pdf, ff, logo, company, employee, title)
+func buildNormOverviewPDF(o NormOverview, pc overviewPDFContext) (bytes.Buffer, error) {
+	lb, tr, ff, dateLayout := pc.lb, pc.tr, pc.ff, pc.dateLayout
+	pdf, y := startOverviewPDF(pc, fmt.Sprintf("%s — %s %d", lb.Title, lb.Norm, o.Year))
 
 	// ── Year cards ───────────────────────────────────────────────────────────
 	type card struct {
@@ -215,62 +294,13 @@ func buildNormOverviewPDF(o NormOverview, lb normPDFLabels, tr pdfI18n, ff, comp
 		lb.Kilometres, lb.Sick, lb.Vacation, lb.Booked, lb.Diff, lb.BookedDays, lb.UnbookedNormDays}
 	const colMonth = 31.0
 	colW := (gBodyW - colMonth) / float64(len(heads)-1)
-	width := func(i int) float64 {
-		if i == 0 {
-			return colMonth
-		}
-		return colW
+	widths := make([]float64, len(heads))
+	for i := range widths {
+		widths[i] = colW
 	}
-
-	// Header: wrapped labels, all cells as tall as the tallest one. A label
-	// whose longest word does not fit gets a smaller font instead of being
-	// broken in the middle of that word ("Niet-geboekte").
-	const lineH = 3.6
-	sizes := make([]float64, len(heads))
-	maxLines := 1
-	for i, h := range heads {
-		size := 7.5
-		for ; size > 5; size -= 0.5 {
-			pdf.SetFont(ff, "B", size)
-			fits := true
-			for _, word := range strings.Fields(h) {
-				if pdf.GetStringWidth(word) > width(i)-2 {
-					fits = false
-					break
-				}
-			}
-			if fits {
-				break
-			}
-		}
-		sizes[i] = size
-		pdf.SetFont(ff, "B", size)
-		if n := len(wrapWords(pdf, h, width(i)-2)); n > maxLines {
-			maxLines = n
-		}
-	}
-	hdrH := float64(maxLines)*lineH + 2
-	x := gMargin
-	for i, h := range heads {
-		w := width(i)
-		setFill(pdf, gClrPrimary)
-		pdf.Rect(x, y, w, hdrH, "F")
-		setTxt(pdf, gClrWhite)
-		align := "R"
-		if i == 0 {
-			align = "L"
-		}
-		pdf.SetFont(ff, "B", sizes[i])
-		lines := wrapWords(pdf, h, w-2)
-		ty := y + (hdrH-float64(len(lines))*lineH)/2
-		for _, ln := range lines {
-			pdf.SetXY(x+1, ty)
-			pdf.CellFormat(w-2, lineH, ln, "", 0, align, false, 0, "")
-			ty += lineH
-		}
-		x += w
-	}
-	y += hdrH
+	widths[0] = colMonth
+	width := func(i int) float64 { return widths[i] }
+	y = drawOverviewTableHeader(pdf, ff, y, heads, widths, 1)
 
 	const rowH = 6.0
 	row := func(label string, r normMonthRow, days int, bold, alt bool) {
@@ -358,6 +388,167 @@ func buildNormOverviewPDF(o NormOverview, lb normPDFLabels, tr pdfI18n, ff, comp
 			pdf.CellFormat(hw, 5, truncStr(label, 60), "", ln, "L", false, 0, "")
 		}
 	}
+
+	var buf bytes.Buffer
+	if err := pdf.Output(&buf); err != nil {
+		return bytes.Buffer{}, err
+	}
+	return buf, nil
+}
+
+// GetOverviewTravelPDF renders the Travel overview (GET /overview/travel) of
+// one user's year as a landscape A4 PDF: travel per direction, month,
+// customer and route, each with entries, days, total / own / declarable time
+// and kilometres.
+// Route: GET /api/v1/time-entries/overview/travel/pdf
+// Query params: year, user_id (admins / time-tracking viewers), lang, font.
+func GetOverviewTravelPDF(c *gin.Context) {
+	sc, status, msg := loadOverviewScope(c)
+	if status != 0 {
+		c.JSON(status, gin.H{"error": msg})
+		return
+	}
+	o := buildTravelOverview(sc)
+	buf, err := buildTravelOverviewPDF(o, loadOverviewPDFContext(c, sc))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "pdf generation failed"})
+		return
+	}
+	sendPDF(c, fmt.Sprintf("travel-overview-%d.pdf", o.Year), buf)
+}
+
+func buildTravelOverviewPDF(o TravelOverview, pc overviewPDFContext) (bytes.Buffer, error) {
+	lb, tr, ff := pc.lb, pc.tr, pc.ff
+	pdf, y := startOverviewPDF(pc, fmt.Sprintf("%s — %s %d", lb.Title, lb.Travel, o.Year))
+
+	const (
+		rowH      = 6.0
+		bottom    = gPageH - 15.0 // auto page break margin of newLandscapePDF
+		valueW    = 26.0
+		valueCols = 6
+	)
+	valueHeads := []string{lb.Entries, lb.Days, lb.TotalTime, lb.OwnTime, lb.Declarable, lb.DistanceKm}
+	values := func(a travelAcc, days int) []string {
+		return []string{strconv.Itoa(a.Entries), strconv.Itoa(days), fmtHM(a.TotalMinutes),
+			fmtHM(a.OwnMinutes), fmtHM(a.DeclarableMinutes), fmtDistance(a.Distance)}
+	}
+
+	if o.WithoutDistance > 0 {
+		pdf.SetXY(gMargin, y)
+		pdf.SetFont(ff, "", 8.5)
+		setTxt(pdf, gClrDanger)
+		pdf.CellFormat(gBodyW, 5, strings.ReplaceAll(lb.NoDistanceWarning, "{n}", strconv.Itoa(o.WithoutDistance)), "", 1, "L", false, 0, "")
+		y = pdf.GetY() + 1
+	}
+
+	// table draws one titled table. labelHeads/labelW are the left-aligned
+	// label columns; the value columns share what is left of the page width.
+	// A row that does not fit starts a new page and repeats the header.
+	table := func(title string, labelHeads []string, labelW []float64, rows [][]string, total []string, empty string) {
+		heads := append(append([]string{}, labelHeads...), valueHeads...)
+		widths := append([]float64{}, labelW...)
+		rest := gBodyW
+		for _, w := range labelW {
+			rest -= w
+		}
+		for i := 0; i < valueCols; i++ {
+			widths = append(widths, rest/valueCols)
+		}
+		// Keep the title with the header and at least one row.
+		if y+7+12+rowH > bottom {
+			pdf.AddPage()
+			y = gMargin
+		}
+		pdf.SetXY(gMargin, y+2)
+		pdf.SetFont(ff, "B", 10)
+		setTxt(pdf, gClrText)
+		pdf.CellFormat(gBodyW, 6, title, "", 1, "L", false, 0, "")
+		y = pdf.GetY()
+		y = drawOverviewTableHeader(pdf, ff, y, heads, widths, len(labelHeads))
+
+		draw := func(cells []string, bold, alt bool) {
+			if y+rowH > bottom {
+				pdf.AddPage()
+				y = drawOverviewTableHeader(pdf, ff, gMargin, heads, widths, len(labelHeads))
+			}
+			style := ""
+			if bold {
+				style = "B"
+				setFill(pdf, gClrTotFill)
+			} else if alt {
+				setFill(pdf, gClrAlt)
+			}
+			setDraw(pdf, rgb{220, 225, 235})
+			pdf.SetLineWidth(0.1)
+			pdf.SetFont(ff, style, 8)
+			setTxt(pdf, gClrText)
+			pdf.SetXY(gMargin, y)
+			for i, v := range cells {
+				align := "R"
+				if i < len(labelHeads) {
+					align = "L"
+					v = truncStr(v, int(widths[i]/1.6))
+				}
+				pdf.CellFormat(widths[i], rowH, v, "B", 0, align, bold || alt, 0, "")
+			}
+			y += rowH
+		}
+		if len(rows) == 0 {
+			pdf.SetXY(gMargin, y)
+			pdf.SetFont(ff, "", 8)
+			setTxt(pdf, gClrMuted)
+			pdf.CellFormat(gBodyW, rowH, empty, "B", 1, "L", false, 0, "")
+			y += rowH
+		}
+		for i, r := range rows {
+			draw(r, false, i%2 == 1)
+		}
+		if total != nil {
+			draw(total, true, false)
+		}
+		y += 3
+	}
+
+	// Totals use total_days: days are distinct dates, never a sum of rows.
+	totalRow := append([]string{lb.Total}, values(o.Total, o.TotalDays)...)
+
+	table(lb.TravelByDirection, []string{lb.Direction}, []float64{60}, [][]string{
+		append([]string{lb.DirOut}, values(o.Out, o.Out.Days)...),
+		append([]string{lb.DirBack}, values(o.Back, o.Back.Days)...),
+		append([]string{lb.DirNone}, values(o.NoDirection, o.NoDirection.Days)...),
+	}, totalRow, "")
+
+	var months [][]string
+	for _, m := range o.Months {
+		months = append(months, append([]string{capitalize(tr.MonthsFull[m.Month-1])}, values(m.travelAcc, m.Days)...))
+	}
+	table(lb.TravelByMonth, []string{lb.Month}, []float64{60}, months, totalRow, "")
+
+	var customers [][]string
+	for _, r := range o.ByCustomer {
+		name := r.Customer
+		if name == "" {
+			name = lb.NoCustomer
+		}
+		customers = append(customers, append([]string{name}, values(r.travelAcc, r.Days)...))
+	}
+	table(lb.TravelByCustomer, []string{lb.Customer}, []float64{60}, customers, nil, lb.NoTravel)
+
+	var routes [][]string
+	for _, r := range o.ByRoute {
+		routes = append(routes, append([]string{r.Route, r.Customer}, values(r.travelAcc, r.Days)...))
+	}
+	table(lb.TravelByRoute, []string{lb.Route, lb.Customer}, []float64{75, 45}, routes, nil, lb.NoTravel)
+
+	// Days note under the last table.
+	if y+5 > bottom {
+		pdf.AddPage()
+		y = gMargin
+	}
+	pdf.SetXY(gMargin, y)
+	pdf.SetFont(ff, "", 8)
+	setTxt(pdf, gClrMuted)
+	pdf.CellFormat(gBodyW, 5, strings.ReplaceAll(lb.DaysNote, "{n}", strconv.Itoa(o.TotalDays)), "", 1, "L", false, 0, "")
 
 	var buf bytes.Buffer
 	if err := pdf.Output(&buf); err != nil {

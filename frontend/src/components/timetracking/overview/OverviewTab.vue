@@ -16,7 +16,7 @@
         >{{ $t('timeOverview.sub_' + s) }}</button>
       </div>
       <button
-        v-if="sub === 'norm'" type="button" class="ov-btn"
+        v-if="pdfExporters[sub]" type="button" class="ov-btn"
         :disabled="exporting || loading || !data" :aria-busy="String(exporting)"
         :aria-label="$t('timeTracking.export_pdf')"
         @click="exportPdf"
@@ -98,14 +98,21 @@ async function load() {
   }
 }
 
-// The Norm overview as PDF, rendered server-side in the UI language.
+// Sub-tabs with a PDF export, rendered server-side in the UI language.
+const pdfExporters = {
+  norm: { fetch: timeEntriesApi.overviewNormPDF, name: 'norm-overview' },
+  travel: { fetch: timeEntriesApi.overviewTravelPDF, name: 'travel-overview' },
+}
+
 async function exportPdf() {
+  const exporter = pdfExporters[sub.value]
+  if (!exporter) return
   exporting.value = true
   try {
-    const pdf = await timeEntriesApi.overviewNormPDF({ ...baseParams(), lang: locale.value })
-    await triggerDownload(pdf, `norm-overview-${year.value}.pdf`, 'application/pdf')
+    const pdf = await exporter.fetch({ ...baseParams(), lang: locale.value })
+    await triggerDownload(pdf, `${exporter.name}-${year.value}.pdf`, 'application/pdf')
   } catch (e) {
-    console.error('[export] norm overview PDF failed:', e)
+    console.error(`[export] ${sub.value} overview PDF failed:`, e)
     ui.error(String(e?.message || e))
   } finally {
     exporting.value = false

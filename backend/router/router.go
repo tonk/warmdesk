@@ -476,6 +476,7 @@ func Setup(authSvc *services.AuthService, allowedOrigins string, webFS fs.FS, ap
 			protected.GET("/time-entries/overview/norm/pdf", middleware.RequireFeature("time_tracking_enabled"), handlers.GetOverviewNormPDF)
 			protected.GET("/time-entries/overview/checks", middleware.RequireFeature("time_tracking_enabled"), handlers.GetOverviewChecks)
 			protected.GET("/time-entries/overview/travel", middleware.RequireFeature("time_tracking_enabled"), handlers.GetOverviewTravel)
+			protected.GET("/time-entries/overview/travel/pdf", middleware.RequireFeature("time_tracking_enabled"), handlers.GetOverviewTravelPDF)
 			protected.GET("/time-entries/overview/vacation", middleware.RequireFeature("time_tracking_enabled"), handlers.GetOverviewVacation)
 			protected.GET("/time-entries/overview/settings", middleware.RequireFeature("time_tracking_enabled"), handlers.GetOverviewSettings)
 			protected.PUT("/time-entries/overview/settings", middleware.RequireFeature("time_tracking_enabled"), handlers.UpdateOverviewSettings)

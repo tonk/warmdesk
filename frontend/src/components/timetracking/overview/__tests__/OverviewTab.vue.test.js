@@ -11,6 +11,7 @@ vi.mock('@/api/timeEntries', () => ({
     overviewTravel: vi.fn(),
     overviewVacation: vi.fn(),
     overviewNormPDF: vi.fn(),
+    overviewTravelPDF: vi.fn(),
   },
 }))
 vi.mock('@/api/client', () => ({ triggerDownload: vi.fn() }))
@@ -37,6 +38,18 @@ beforeEach(() => {
   setActivePinia(createPinia())
   vi.clearAllMocks()
   timeEntriesApi.overviewNorm.mockResolvedValue({ data: norm })
+  const acc = { entries: 0, days: 0, total_minutes: 0, own_minutes: 0, declarable_minutes: 0, distance: 0 }
+  timeEntriesApi.overviewTravel.mockResolvedValue({ data: {
+    year: 2026, months: Array.from({ length: 12 }, (_, i) => ({ month: i + 1, ...acc })),
+    total: acc, out: acc, back: acc, no_direction: acc, by_customer: [], by_route: [],
+    entries_without_distance: 0, total_days: 0, travel_project_count: 1,
+  } })
+  timeEntriesApi.overviewVacation.mockResolvedValue({ data: {
+    year: 2026, entitlement_minutes: 0, carry_over_minutes: 0, available_minutes: 0, used_minutes: 0,
+    planned_minutes: 0, remaining_minutes: 0, remaining_after_planned_minutes: 0,
+    months: Array.from({ length: 12 }, (_, i) => ({ month: i + 1, minutes: 0, days: 0 })),
+    total_days: 0, suggested_carry_over_minutes: 0, has_settings_row: true, vacation_projects_set: true,
+  } })
   timeEntriesApi.overviewChecks.mockResolvedValue({ data: { year: 2026, findings: [], counts: {}, description_variants: [], total_days: 0 } })
 })
 
@@ -59,11 +72,30 @@ describe('OverviewTab PDF export', () => {
     expect(triggerDownload).toHaveBeenCalledWith(buf, `norm-overview-${year}.pdf`, 'application/pdf')
   })
 
-  it('only offers the button on the Norm sub-tab', async () => {
+  it('downloads the Travel overview as PDF from the Travel sub-tab', async () => {
+    const buf = new ArrayBuffer(4)
+    timeEntriesApi.overviewTravelPDF.mockResolvedValue(buf)
+    const w = mount(OverviewTab, { global: { plugins: [i18n] } })
+    await flushPromises()
+    await w.get('#ov-tab-travel').trigger('click')
+    await flushPromises()
+    await pdfButton(w).trigger('click')
+    await flushPromises()
+
+    const year = new Date().getFullYear()
+    expect(timeEntriesApi.overviewTravelPDF).toHaveBeenCalledWith({ year, lang: 'en' })
+    expect(timeEntriesApi.overviewNormPDF).not.toHaveBeenCalled()
+    expect(triggerDownload).toHaveBeenCalledWith(buf, `travel-overview-${year}.pdf`, 'application/pdf')
+  })
+
+  it('only offers the button on the Norm and Travel sub-tabs', async () => {
     const w = mount(OverviewTab, { global: { plugins: [i18n] } })
     await flushPromises()
     expect(pdfButton(w)).toBeTruthy()
     await w.get('#ov-tab-checks').trigger('click')
+    await flushPromises()
+    expect(pdfButton(w)).toBeUndefined()
+    await w.get('#ov-tab-vacation').trigger('click')
     await flushPromises()
     expect(pdfButton(w)).toBeUndefined()
   })

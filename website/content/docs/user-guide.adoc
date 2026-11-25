@@ -406,7 +406,7 @@ image::../../images/screenshots/29-time-overview-checks.png[Checks overview: fin
 
 image::../../images/screenshots/30-time-overview-travel.png[Travel overview: time and kilometres per route, 900]
 
-*Travel* splits travel time into your own time (the project's undeclarable minutes) and declarable time, and adds up the kilometres per month, direction, customer and route. The kilometres include every entry with a distance, also a work entry; only the travel entries count towards the travel time and days. Direction and route come from the description: write travel as `<route> - Heen` and `<route> - Terug`.
+*Travel* splits travel time into your own time (the project's undeclarable minutes) and declarable time, and adds up the kilometres per month, direction, customer and route. The kilometres include every entry with a distance, also a work entry; only the travel entries count towards the travel time and days. The *PDF* button downloads this overview as a PDF too. Direction and route come from the description: write travel as `<route> - Heen` and `<route> - Terug`.
 
 image::../../images/screenshots/31-time-overview-vacation.png[Vacation overview: balance and carry-over, 900]
 
