@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.50.0 — 2026-11-25
+
+### Added
+- **Declarable travel and kilometres in the Norm overview** — two new columns after *of which travel*: *of which declarable* shows the part of the travel time that can be billed (the travel time minus the project's undeclarable minutes, the same figure as *declarable* in the Travel sub-tab), and *Kilometres* shows the total distance of all entries in the month, whatever the project. Both appear per month and in the totals row; the column headings are available in all 12 languages. The norm API returns the new `travel_declarable_minutes` and `distance` fields.
+
 ## v0.49.0 — 2026-11-18
 
 ### Added

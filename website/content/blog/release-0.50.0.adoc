@@ -1,0 +1,27 @@
+---
+title: "v0.50.0: declarable travel and kilometres in the Norm overview"
+date: "2026-11-25"
+author: "Ton Kersten"
+description: "The Norm overview in time tracking now shows the declarable part of the travel time and the kilometres per month."
+draft: false
+---
+:doctype: article
+:icons!:
+
+This release adds two columns to the *Norm* sub-tab of the time-tracking *Overview*.
+
+== Added
+
+=== Declarable travel
+
+Next to *of which travel* there is now *of which declarable*: the travel time minus the project's undeclarable minutes. It is the same figure as *declarable* in the *Travel* sub-tab, so you see per month how much of your travel can be billed without switching tabs.
+
+=== Kilometres
+
+The *Kilometres* column totals the distance of all entries in the month, whatever the project — kilometres on a travel entry count, and so do kilometres on a regular work entry. The totals row gives the figure for the whole year.
+
+Note that the *Travel* sub-tab still only counts kilometres on travel entries, so its total can be lower when you also record distances on other entries.
+
+== Upgrade
+
+Nothing to migrate. The norm API (`GET /api/v1/time-entries/overview/norm`) returns two new fields, `travel_declarable_minutes` and `distance`; existing fields are unchanged.
