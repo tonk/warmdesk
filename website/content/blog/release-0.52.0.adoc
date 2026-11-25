@@ -1,0 +1,32 @@
+---
+title: "v0.52.0: the Norm overview as PDF"
+date: "2026-11-25"
+author: "Ton Kersten"
+description: "The Norm overview in time tracking can be downloaded as a PDF, and its public holidays show their weekday and name on hover."
+draft: false
+---
+:doctype: article
+:icons!:
+
+Two additions to the *Norm* sub-tab of the time-tracking *Overview*.
+
+== Added
+
+=== PDF export
+
+Next to *Settings* there is now a *PDF* button. It downloads the Norm overview of the selected year as a landscape A4 PDF, in the language of the interface and with your company logo:
+
+* the year totals — norm, booked, difference, the figures up to today, what is planned and the number of days;
+* the norm basis with the number of vacation days;
+* the month table with the totals row, including the declarable part of the travel time and the kilometres, with the difference in green or red;
+* the public holidays on weekdays, each with its weekday and name.
+
+Administrators and time-tracking viewers get the PDF of the employee they are looking at.
+
+=== Weekday and holiday name on hover
+
+The public holidays listed below the Norm table now show a tooltip with the weekday and the name of the holiday, for example _Monday · Koningsdag_. The name is the description of your holiday entry. The tooltip also appears when you move to a date with Tab.
+
+== Upgrade
+
+Nothing to migrate. There is one new endpoint, `GET /api/v1/time-entries/overview/norm/pdf`, and `GET /api/v1/time-entries/overview/norm` returns a new `holiday_names` field; existing fields are unchanged.

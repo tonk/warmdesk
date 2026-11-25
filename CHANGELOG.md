@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.52.0 — 2026-11-25
+
+### Added
+- **PDF export of the Norm overview** — a *PDF* button next to *Settings* on the *Norm* sub-tab of the time-tracking *Overview* downloads the overview as a landscape A4 PDF in the language of the interface: the year totals, the norm basis with the vacation days, the month table with totals (including declarable travel and kilometres, with the difference in green or red), and the public holidays on weekdays with their weekday and name. Administrators and time-tracking viewers get the PDF of the employee they are looking at. New endpoint: `GET /api/v1/time-entries/overview/norm/pdf`.
+- **Weekday and holiday name on hover** — hovering over a date under *Public holidays on weekdays* in the Norm overview (or moving to it with Tab) shows its weekday and the name of the holiday, for example *Monday · Koningsdag*. The name is the description of your holiday entry. The norm API returns the names as the new `holiday_names` field.
+
 ## v0.51.0 — 2026-11-25
 
 ### Changed

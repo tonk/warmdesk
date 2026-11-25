@@ -984,3 +984,5 @@ Create an application that has all these features and requirements
 - Translate the dashboard colour input label and make the emoji picker a labelled dialog with focus trap and arrow-key navigation
 - Show the declarable part of the travel time and the total kilometres per month in the Norm overview
 - Count the kilometres of all entries, not only travel, in the Travel overview
+- Show the weekday and holiday name when hovering over a public holiday in the Norm overview
+- Add a PDF export of the Norm overview
