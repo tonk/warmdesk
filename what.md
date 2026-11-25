@@ -986,3 +986,4 @@ Create an application that has all these features and requirements
 - Count the kilometres of all entries, not only travel, in the Travel overview
 - Show the weekday and holiday name when hovering over a public holiday in the Norm overview
 - Add a PDF export of the Norm overview
+- Add a PDF export of the Travel overview

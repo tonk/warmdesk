@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.53.0 — 2026-11-25
+
+### Added
+- **PDF export of the Travel overview** — the *PDF* button is now also shown on the *Travel* sub-tab of the time-tracking *Overview*. It downloads the overview as a landscape A4 PDF in the language of the interface: travel per direction, per month, per customer and per route, each with entries, days, total time, own time, declarable time and kilometres, with totals for direction and month and the warning about travel without distance when there is any. Long tables (for example many routes) continue on the next page with the table header repeated. Administrators and time-tracking viewers get the PDF of the employee they are looking at. New endpoint: `GET /api/v1/time-entries/overview/travel/pdf`.
+
 ## v0.52.0 — 2026-11-25
 
 ### Added

@@ -1,0 +1,30 @@
+---
+title: "v0.53.0: the Travel overview as PDF"
+date: "2026-11-25"
+author: "Ton Kersten"
+description: "The Travel overview in time tracking can now be downloaded as a PDF, just like the Norm overview."
+draft: false
+---
+:doctype: article
+:icons!:
+
+After the Norm overview in v0.52.0, the *Travel* sub-tab of the time-tracking *Overview* gets its own PDF export.
+
+== Added
+
+=== Travel overview as PDF
+
+The *PDF* button next to *Settings* is now also shown on the *Travel* sub-tab. It downloads the overview of the selected year as a landscape A4 PDF, in the language of the interface and with your company logo. It contains the same four tables as the screen:
+
+* travel per direction (outbound, return, no direction), with a totals row;
+* travel per month, with a totals row;
+* travel per customer;
+* travel per route.
+
+Every table shows the number of entries and days, the total time, your own time, the declarable time and the kilometres. When travel entries without a distance exist, the PDF starts with the same warning as the screen.
+
+Long tables — a year with many routes, for example — continue on the next page with the table header repeated, so every page stays readable on its own. Administrators and time-tracking viewers get the PDF of the employee they are looking at.
+
+== Upgrade
+
+Nothing to migrate. There is one new endpoint, `GET /api/v1/time-entries/overview/travel/pdf`.
