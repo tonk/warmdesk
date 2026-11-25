@@ -1213,7 +1213,7 @@ time-tracking viewers may add `?user_id=` to look at someone else.
 
 | Method | Path | Returns |
 |---|---|---|
-| `GET` | `/api/v1/time-entries/overview/norm` | Booked minutes against the norm per month: norm days and minutes, worked (of which travel, the declarable part of that travel `travel_declarable_minutes` and the kilometres of all entries in the month `distance`), sick, vacation, difference, booked and unbooked norm days, totals, "to date" figures and what is planned after today |
+| `GET` | `/api/v1/time-entries/overview/norm` | Booked minutes against the norm per month (plus `holiday_weekdays` and `holiday_names`, date → holiday description): norm days and minutes, worked (of which travel, the declarable part of that travel `travel_declarable_minutes` and the kilometres of all entries in the month `distance`), sick, vacation, difference, booked and unbooked norm days, totals, "to date" figures and what is planned after today |
 | `GET` | `/api/v1/time-entries/overview/checks` | Findings (`overlap`, `duration_mismatch`, `time_format`, `no_times`, `missing_distance`, `no_contract`, `weekend_entries`, `day_over_norm`, `day_under_norm`, `day_without_entries`) with per-type `counts`, and the distinct descriptions per project |
 | `GET` | `/api/v1/time-entries/overview/travel` | Travel time (total, own and declarable) and kilometres per month (the kilometres of every entry, not only travel — a non-travel entry adds only its `distance`), direction (`out`/`back`/`no_direction`), customer and route |
 | `GET` | `/api/v1/time-entries/overview/vacation` | Entitlement, carry-over, used (up to today), planned, remaining, per month, and `suggested_carry_over_minutes` |

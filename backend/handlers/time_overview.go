@@ -222,6 +222,25 @@ func (sc *overviewScope) holidays() map[string]bool {
 	return h
 }
 
+// holidayNames maps each holiday entry date to its description; several
+// entries on one day are joined with ", ", empty descriptions are skipped.
+func (sc *overviewScope) holidayNames() map[string]string {
+	names := map[string]string{}
+	for _, e := range sc.Entries {
+		desc := strings.TrimSpace(e.Description)
+		if !e.IsHoliday || desc == "" {
+			continue
+		}
+		k := dateKey(e.Date)
+		if names[k] == "" {
+			names[k] = desc
+		} else if !strings.Contains(names[k], desc) {
+			names[k] += ", " + desc
+		}
+	}
+	return names
+}
+
 // normDays lists the norm days of the year (Mon–Fri, not a holiday entry).
 func (sc *overviewScope) normDays() []time.Time {
 	hol := sc.holidays()
@@ -269,18 +288,21 @@ type normMonthRow struct {
 
 // NormOverview is the shape returned by GetOverviewNorm.
 type NormOverview struct {
-	Year               int            `json:"year"`
-	HoursPerWeek       float64        `json:"hours_per_week"`
-	NormMinutesPerDay  int            `json:"norm_minutes_per_day"`
-	Weekdays           int            `json:"weekdays"`
-	HolidayWeekdays    []string       `json:"holiday_weekdays"`
-	Months             []normMonthRow `json:"months"`
-	Total              normMonthRow   `json:"total"`
-	NormToDateMinutes  int            `json:"norm_to_date_minutes"`
-	BookedToDateMinute int            `json:"booked_to_date_minutes"`
-	DiffToDateMinutes  int            `json:"diff_to_date_minutes"`
-	PlannedMinutes     int            `json:"planned_minutes"` // booked after today
-	TotalDays          int            `json:"total_days"`
+	Year              int      `json:"year"`
+	HoursPerWeek      float64  `json:"hours_per_week"`
+	NormMinutesPerDay int      `json:"norm_minutes_per_day"`
+	Weekdays          int      `json:"weekdays"`
+	HolidayWeekdays   []string `json:"holiday_weekdays"`
+	// HolidayNames maps each holiday weekday to the description(s) of its
+	// holiday entries (e.g. "Koningsdag"); a date without one is absent.
+	HolidayNames       map[string]string `json:"holiday_names"`
+	Months             []normMonthRow    `json:"months"`
+	Total              normMonthRow      `json:"total"`
+	NormToDateMinutes  int               `json:"norm_to_date_minutes"`
+	BookedToDateMinute int               `json:"booked_to_date_minutes"`
+	DiffToDateMinutes  int               `json:"diff_to_date_minutes"`
+	PlannedMinutes     int               `json:"planned_minutes"` // booked after today
+	TotalDays          int               `json:"total_days"`
 }
 
 func buildNormOverview(sc *overviewScope) NormOverview {
@@ -307,6 +329,7 @@ func buildNormOverview(sc *overviewScope) NormOverview {
 	if out.HolidayWeekdays == nil {
 		out.HolidayWeekdays = []string{}
 	}
+	out.HolidayNames = sc.holidayNames()
 
 	normToDate := 0
 	for _, d := range sc.normDays() {

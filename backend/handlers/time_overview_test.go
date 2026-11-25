@@ -140,6 +140,8 @@ func TestOverviewNorm(t *testing.T) {
 
 	require.Equal(t, 261, o.Weekdays)
 	require.Equal(t, []string{"2026-01-01", "2026-04-27"}, o.HolidayWeekdays)
+	require.Equal(t, "Koningsdag", o.HolidayNames["2026-04-27"])
+	require.Equal(t, "Nieuwjaarsdag", o.HolidayNames["2026-01-01"])
 	require.Equal(t, 259, o.Total.NormDays)
 	require.Equal(t, 259*480, o.Total.NormMinutes)
 	require.Equal(t, 480, o.NormMinutesPerDay)

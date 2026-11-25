@@ -39,6 +39,13 @@ export function fmtKm(km) {
 }
 
 /** Localised long month name for a 1-based month number. */
+// weekdayName returns the full weekday of a YYYY-MM-DD date in the locale,
+// computed in UTC so the date never shifts with the browser's time zone.
+export function weekdayName(locale, date) {
+  return new Intl.DateTimeFormat(locale || 'en', { weekday: 'long', timeZone: 'UTC' })
+    .format(new Date(`${date}T12:00:00Z`))
+}
+
 export function monthName(locale, month) {
   return new Intl.DateTimeFormat(locale || 'en', { month: 'long' }).format(new Date(2024, month - 1, 1))
 }

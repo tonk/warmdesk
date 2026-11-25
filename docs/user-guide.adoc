@@ -1328,7 +1328,7 @@ How the numbers are counted:
 image::../screenshots/28-time-overview-norm.png[The Norm overview: hours per month against the norm,pdfwidth=100%]
 
 Per month: the norm days and hours, the hours worked (with the travel part shown separately, followed by the declarable part of that travel time — the travel minus the project's undeclarable minutes, as in the *Travel* sub-tab — and the total kilometres of all entries in the month, whatever the project), sick and vacation hours, the total booked, the difference with the norm (always with a `+` or `-` sign), the days booked, and the norm days without any booking.
-Above the table are the year totals, the figures up to today, and what is planned after today, followed by a line with the norm basis (hours per week and per day) and the number of *vacation days* booked in the year — the vacation time divided by the norm per day. The public holidays on weekdays that were taken out of the norm are listed below the table.
+Above the table are the year totals, the figures up to today, and what is planned after today, followed by a line with the norm basis (hours per week and per day) and the number of *vacation days* booked in the year — the vacation time divided by the norm per day. The public holidays on weekdays that were taken out of the norm are listed below the table; hover over a date (or move to it with Tab) to see its weekday and the name of the holiday, for example _Monday · Koningsdag_.
 
 ==== Checks
 

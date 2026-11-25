@@ -17,7 +17,8 @@ const row = (month, o = {}) => ({
 
 const fixture = {
   year: 2026, hours_per_week: 40, norm_minutes_per_day: 480, weekdays: 261,
-  holiday_weekdays: ['2026-12-25'],
+  holiday_weekdays: ['2026-12-25', '2026-12-28'],
+  holiday_names: { '2026-12-25': 'Eerste Kerstdag' },
   months: Array.from({ length: 12 }, (_, i) => row(i + 1, i === 0 ? { diff_minutes: 90, booked_minutes: 9690 } : {})),
   total: row(0, { norm_days: 240, norm_minutes: 115200, booked_minutes: 113760, diff_minutes: -1440, booked_days: 200, unbooked_norm_days: 12, past_unbooked_norm_days: 3 }),
   norm_to_date_minutes: 60000, booked_to_date_minutes: 59000, diff_to_date_minutes: -1000, planned_minutes: 480,
@@ -73,5 +74,15 @@ describe('NormPanel', () => {
 
   it('lists the holiday weekdays', () => {
     expect(mountIt().text()).toContain('2026-12-25')
+  })
+
+  it('describes each holiday with its weekday and name in a tooltip', () => {
+    const items = mountIt().findAll('.ov-holiday')
+    const tip = items[0].get('[role="tooltip"]')
+    expect(tip.text()).toBe('Friday · Eerste Kerstdag')
+    expect(items[0].attributes('tabindex')).toBe('0')
+    expect(items[0].attributes('aria-describedby')).toBe(tip.attributes('id'))
+    // no description: only the weekday
+    expect(items[1].get('[role="tooltip"]').text()).toBe('Monday')
   })
 })

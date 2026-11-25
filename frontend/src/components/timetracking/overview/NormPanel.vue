@@ -75,7 +75,16 @@
       <h3 class="ov-h3">{{ $t('timeOverview.holidays_used') }}</h3>
       <p v-if="!data.holiday_weekdays.length" class="ov-muted">{{ $t('timeOverview.no_holidays') }}</p>
       <ul v-else class="ov-holidays">
-        <li v-for="d in data.holiday_weekdays" :key="d">{{ formatDate(d) }}</li>
+        <li
+          v-for="d in data.holiday_weekdays"
+          :key="d"
+          class="ov-holiday"
+          tabindex="0"
+          :aria-describedby="'ov-hol-' + d"
+        >
+          {{ formatDate(d) }}
+          <span :id="'ov-hol-' + d" class="ov-holiday-tip" role="tooltip">{{ holidayTip(d) }}</span>
+        </li>
       </ul>
     </section>
   </div>
@@ -84,15 +93,53 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
 import { useDateFormat } from '@/composables/useDateFormat'
-import { fmtHM, fmtSignedHM, fmtKm, diffClass, monthName, minutesToDays } from '@/utils/timeOverviewFormat'
+import { fmtHM, fmtSignedHM, fmtKm, diffClass, monthName, weekdayName, minutesToDays } from '@/utils/timeOverviewFormat'
 import './overview.css'
 
-defineProps({ data: { type: Object, required: true } })
+const props = defineProps({ data: { type: Object, required: true } })
 const { locale } = useI18n()
 const { formatDate } = useDateFormat()
+
+// "Monday · Koningsdag": the weekday in the UI language plus the
+// description of the holiday entry (only the weekday when it has none).
+function holidayTip(date) {
+  const weekday = weekdayName(locale.value, date)
+  const name = props.data.holiday_names?.[date]
+  return name ? `${weekday} · ${name}` : weekday
+}
 </script>
 
 <style scoped>
 .ov-holidays { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; padding: 0; margin: 6px 0 0; }
 .ov-holidays li { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 2px 10px; font-size: 12px; color: var(--color-text); }
+.ov-holiday { position: relative; cursor: default; }
+.ov-holiday:focus { outline: none; }
+.ov-holiday:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.ov-holiday-tip {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  width: max-content;
+  max-width: 240px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.12s ease, visibility 0.12s;
+}
+.ov-holiday:hover .ov-holiday-tip,
+.ov-holiday:focus-visible .ov-holiday-tip {
+  opacity: 1;
+  visibility: visible;
+}
 </style>
