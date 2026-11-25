@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.51.0 — 2026-11-25
+
+### Changed
+- **Kilometres of all entries in the Travel overview** — the *Travel* sub-tab of the time-tracking *Overview* now counts the distance of every entry, not only entries on travel projects, so its kilometres match the *Kilometres* column of the Norm overview. Kilometres booked on a work entry are added to the month, the total, the direction (usually *No direction*), the customer and the route (the entry's description); that entry's time, entry count and day are not counted as travel. Holiday entries are ignored, and the *travel without distance* warning still looks at travel entries only.
+
 ## v0.50.0 — 2026-11-25
 
 ### Added

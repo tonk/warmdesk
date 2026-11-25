@@ -983,3 +983,4 @@ Create an application that has all these features and requirements
 - Update dompurify, axios, vue, vue-i18n, golang.org/x/net, golang.org/x/text and excelize to clear the reported vulnerabilities
 - Translate the dashboard colour input label and make the emoji picker a labelled dialog with focus trap and arrow-key navigation
 - Show the declarable part of the travel time and the total kilometres per month in the Norm overview
+- Count the kilometres of all entries, not only travel, in the Travel overview

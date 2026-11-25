@@ -1,0 +1,25 @@
+---
+title: "v0.51.0: kilometres of all entries in the Travel overview"
+date: "2026-11-25"
+author: "Ton Kersten"
+description: "The Travel overview in time tracking now counts the kilometres of every entry, so it matches the Norm overview."
+draft: false
+---
+:doctype: article
+:icons!:
+
+A small follow-up to v0.50.0: the *Travel* sub-tab of the time-tracking *Overview* now counts kilometres the same way as the *Norm* sub-tab.
+
+== Changed
+
+=== Kilometres of all entries
+
+Until now the *Travel* sub-tab only counted the distance of entries on travel projects. If you record kilometres on a work entry instead — for example by picking a customer location on a *Lesgeven* row — those kilometres were missing there, while the *Norm* sub-tab did count them.
+
+The *Travel* sub-tab now includes every entry with a distance. A work entry adds only its kilometres: to the month, the total, the customer, the direction (usually _No direction_, since it has no `- Heen` or `- Terug`) and the route, which is its description. Its time, entry count and day are not counted as travel time. Holiday entries are ignored.
+
+The *travel without distance* warning still only looks at travel entries.
+
+== Upgrade
+
+Nothing to migrate. The travel API (`GET /api/v1/time-entries/overview/travel`) keeps its shape; the `distance` figures now include the kilometres of non-travel entries.
