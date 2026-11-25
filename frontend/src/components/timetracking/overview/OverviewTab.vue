@@ -15,6 +15,12 @@
           @click="sub = s"
         >{{ $t('timeOverview.sub_' + s) }}</button>
       </div>
+      <button
+        v-if="sub === 'norm'" type="button" class="ov-btn"
+        :disabled="exporting || loading || !data" :aria-busy="String(exporting)"
+        :aria-label="$t('timeTracking.export_pdf')"
+        @click="exportPdf"
+      >PDF</button>
       <button type="button" class="ov-btn" @click="settingsOpen = true">{{ $t('timeOverview.settings') }}</button>
     </div>
 
@@ -42,6 +48,7 @@
 import { ref, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { timeEntriesApi } from '@/api/timeEntries'
+import { triggerDownload } from '@/api/client'
 import { useUIStore } from '@/stores/ui'
 import NormPanel from './NormPanel.vue'
 import ChecksPanel from './ChecksPanel.vue'
@@ -52,7 +59,7 @@ import './overview.css'
 
 // userId: 0/null = the signed-in user; otherwise the employee an admin/viewer is looking at.
 const props = defineProps({ userId: { type: Number, default: 0 } })
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const ui = useUIStore()
 
 const subs = ['norm', 'checks', 'travel', 'vacation']
@@ -70,6 +77,7 @@ const loading = ref(false)
 const error = ref('')
 const saving = ref(false)
 const settingsOpen = ref(false)
+const exporting = ref(false)
 let token = 0
 
 const baseParams = () => ({ year: year.value, ...(props.userId ? { user_id: props.userId } : {}) })
@@ -87,6 +95,20 @@ async function load() {
     if (my === token) error.value = t('timeOverview.load_error')
   } finally {
     if (my === token) loading.value = false
+  }
+}
+
+// The Norm overview as PDF, rendered server-side in the UI language.
+async function exportPdf() {
+  exporting.value = true
+  try {
+    const pdf = await timeEntriesApi.overviewNormPDF({ ...baseParams(), lang: locale.value })
+    await triggerDownload(pdf, `norm-overview-${year.value}.pdf`, 'application/pdf')
+  } catch (e) {
+    console.error('[export] norm overview PDF failed:', e)
+    ui.error(String(e?.message || e))
+  } finally {
+    exporting.value = false
   }
 }
 

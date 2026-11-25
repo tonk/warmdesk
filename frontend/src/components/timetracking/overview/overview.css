@@ -22,6 +22,7 @@
 .ov-h3 { font-size: 14px; margin: 0; color: var(--color-text); }
 .ov-btn { padding: 5px 12px; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-surface); color: var(--color-text); cursor: pointer; font-size: 13px; }
 .ov-btn:hover { border-color: var(--color-primary); }
+.ov-btn:disabled { opacity: 0.6; cursor: default; }
 .ov-btn-primary { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
 .ov-btn:focus-visible, .ov-input:focus-visible, .ov-select:focus-visible, .ov-chip:focus-visible, .ov-sub-btn:focus-visible, .ov-link:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 .ov-input, .ov-select { padding: 5px 8px; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-bg); color: var(--color-text); font-size: 13px; }

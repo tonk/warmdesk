@@ -30,6 +30,7 @@ export const timeEntriesApi = {
   setMacroLibrary: (library) => client.put('/time-entries/macro-library', { library }),
   // Yearly overview (norm, checks, travel, vacation); params: { year, user_id? }
   overviewNorm: (params) => client.get('/time-entries/overview/norm', { params }),
+  overviewNormPDF: (params) => fetchBinary('/time-entries/overview/norm/pdf', params),
   overviewChecks: (params) => client.get('/time-entries/overview/checks', { params }),
   overviewTravel: (params) => client.get('/time-entries/overview/travel', { params }),
   overviewVacation: (params) => client.get('/time-entries/overview/vacation', { params }),

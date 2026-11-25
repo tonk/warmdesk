@@ -1,8 +1,11 @@
 package handlers
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
+	"os"
+	"reflect"
 	"testing"
 	"time"
 
@@ -413,4 +416,48 @@ func TestReportDistinctDays(t *testing.T) {
 	require.Equal(t, 1, days["Other"])
 	require.Equal(t, 3, sum)
 	require.Equal(t, 2, r.TotalDays) // 2 and 3 March, not 3
+}
+
+// The Norm overview PDF renders the same year as GET /overview/norm.
+func TestOverviewNormPDF(t *testing.T) {
+	f := setupOverview(t)
+	defer f.cleanup()
+
+	f.add(t, models.TimeEntry{Date: day("2026-04-27"), IsHoliday: true, Description: "Koningsdag"})
+	f.add(t, models.TimeEntry{CustomerID: &f.acme.ID, ProjectID: &f.teach.ID, Date: day("2026-03-30"), Minutes: 480, Distance: fp(10)})
+	f.add(t, models.TimeEntry{CustomerID: &f.acme.ID, ProjectID: &f.travel.ID, Date: day("2026-03-30"), Minutes: 105, Distance: fp(42.5)})
+
+	for _, lang := range []string{"en", "nl", "is"} {
+		c, w := ginTestContext(t, http.MethodGet, "/x?year=2026&lang="+lang, "")
+		c.Set(middleware.ContextUserID, f.user.ID)
+		c.Set(middleware.ContextGlobalRole, "member")
+		GetOverviewNormPDF(c)
+		require.Equal(t, http.StatusOK, w.Code, lang)
+		require.Equal(t, "application/pdf", w.Header().Get("Content-Type"))
+		require.Contains(t, w.Header().Get("Content-Disposition"), "norm-overview-2026.pdf")
+		require.True(t, bytes.HasPrefix(w.Body.Bytes(), []byte("%PDF")), lang)
+		if os.Getenv("NORM_PDF_OUT") != "" {
+			require.NoError(t, os.WriteFile(os.Getenv("NORM_PDF_OUT")+"-"+lang+".pdf", w.Body.Bytes(), 0o644))
+		}
+	}
+
+	// An invalid year is refused before any PDF is built.
+	c, w := ginTestContext(t, http.MethodGet, "/x?year=1800", "")
+	c.Set(middleware.ContextUserID, f.user.ID)
+	c.Set(middleware.ContextGlobalRole, "member")
+	GetOverviewNormPDF(c)
+	require.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+// Every language of the Norm PDF has all its labels filled in.
+func TestNormPDFTranslationsComplete(t *testing.T) {
+	require.Len(t, normPDFTranslations, 12)
+	for lang, l := range normPDFTranslations {
+		v := reflect.ValueOf(l)
+		for i := 0; i < v.NumField(); i++ {
+			require.NotEmpty(t, v.Field(i).String(), "%s.%s", lang, v.Type().Field(i).Name)
+		}
+	}
+	require.Equal(t, "Overzicht", normPDFLabelsFromLang("nl-NL").Title)
+	require.Equal(t, "Overview", normPDFLabelsFromLang("xx").Title)
 }
