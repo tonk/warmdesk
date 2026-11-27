@@ -1,5 +1,5 @@
 <template>
-  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="a11y-modal-title" @click.self="$emit('close')" @keydown.esc="$emit('close')">
+  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="a11y-modal-title" @mousedown="backdrop.onMousedown" @click="backdrop.onClick" @keydown.esc="$emit('close')">
     <div class="modal-box" tabindex="-1" ref="boxRef">
       <button class="modal-close" :aria-label="$t('common.close')" @click="$emit('close')">×</button>
       <div id="a11y-modal-title" class="a11y-tag">{{ $t('dashboard.a11y_title') }}</div>
@@ -20,8 +20,10 @@
 
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue'
+import { useBackdropClose } from '@/composables/useBackdropClose'
 
 const emit = defineEmits(['close'])
+const backdrop = useBackdropClose(() => emit('close'))
 
 const boxRef = ref(null)
 

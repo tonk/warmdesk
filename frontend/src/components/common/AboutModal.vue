@@ -1,6 +1,6 @@
 <template>
   <Teleport to="body">
-    <div class="modal-backdrop" @click.self="$emit('close')">
+    <div class="modal-backdrop" @mousedown="backdrop.onMousedown" @click="backdrop.onClick">
       <div class="about-modal" role="dialog" aria-modal="true" aria-labelledby="about-modal-title" ref="modalEl">
         <button class="about-close" @click="$emit('close')" aria-label="Close">✕</button>
 
@@ -56,8 +56,10 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import client from '@/api/client'
 import { useSystemStore } from '@/stores/system'
+import { useBackdropClose } from '@/composables/useBackdropClose'
 
 const emit = defineEmits(['close'])
+const backdrop = useBackdropClose(() => emit('close'))
 const systemStore = useSystemStore()
 
 const appVersion = __APP_VERSION__

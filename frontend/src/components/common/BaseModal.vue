@@ -1,6 +1,6 @@
 <template>
   <Teleport to="body">
-    <div class="modal-backdrop" :class="{ 'modal-backdrop-maximized': maximized }" @click.self="$emit('close')">
+    <div class="modal-backdrop" :class="{ 'modal-backdrop-maximized': maximized }" @mousedown="backdrop.onMousedown" @click="backdrop.onClick">
       <div
         ref="modalEl"
         class="modal"
@@ -34,10 +34,12 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useBackdropClose } from '@/composables/useBackdropClose'
 
 const { t } = useI18n()
 const props = defineProps({ title: String, resizable: { type: Boolean, default: false }, width: { type: String, default: '' } })
 const emit = defineEmits(['close'])
+const backdrop = useBackdropClose(() => emit('close'))
 
 const modalEl = ref(null)
 const maximized = ref(false)

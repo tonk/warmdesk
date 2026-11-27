@@ -1,6 +1,6 @@
 <template>
   <Teleport to="body">
-    <div class="welcome-backdrop" @click.self="close">
+    <div class="welcome-backdrop" @mousedown="backdrop.onMousedown" @click="backdrop.onClick">
       <div class="welcome-modal" role="dialog" aria-modal="true" :aria-labelledby="'welcome-title-' + current.id" ref="modalEl">
         <div class="welcome-header" :style="current.sidebar_color ? { borderTopColor: current.sidebar_color } : {}">
           <div class="welcome-logo-row">
@@ -35,12 +35,14 @@ import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import { useSystemStore } from '@/stores/system'
+import { useBackdropClose } from '@/composables/useBackdropClose'
 
 const systemStore = useSystemStore()
 const props = defineProps({
   items: { type: Array, required: true },
 })
 const emit = defineEmits(['close'])
+const backdrop = useBackdropClose(() => close())
 
 const idx = ref(0)
 const current = computed(() => props.items[idx.value])

@@ -18,7 +18,7 @@
 
       <!-- ── LiveKit: active (grid) ───────────────────────────────────────── -->
       <div v-else-if="lkState.phase === 'active'" class="call-video-chat-row" :class="{ 'is-windowed': isWindowed }" :style="windowStyle">
-        <div class="call-stage lk-grid-overlay" @click.self="closeInvitePicker">
+        <div class="call-stage lk-grid-overlay" @mousedown="stageBackdrop.onMousedown" @click="stageBackdrop.onClick">
         <div
           v-if="isWindowed"
           class="call-window-drag-handle"
@@ -427,6 +427,7 @@ import { useWebRTCCall } from '@/composables/useWebRTCCall'
 import { useLiveKitGroupCall } from '@/composables/useLiveKitGroupCall'
 import { useCallSettings } from '@/composables/useCallSettings'
 import { useCallChatPanel } from '@/composables/useCallChatPanel'
+import { useBackdropClose } from '@/composables/useBackdropClose'
 import { messagesApi } from '@/api/messages'
 import LkVideoCell from '@/components/call/LkVideoCell.vue'
 import CallChatSidebar from '@/components/call/CallChatSidebar.vue'
@@ -502,6 +503,8 @@ async function openInvitePickerWebRTC() {
   showInvitePicker.value = true
 }
 
+// Only an empty-stage click closes the picker, not a press that started inside it.
+const stageBackdrop = useBackdropClose(() => closeInvitePicker())
 function closeInvitePicker() {
   showInvitePicker.value = false
   selectedInviteIds.value = []

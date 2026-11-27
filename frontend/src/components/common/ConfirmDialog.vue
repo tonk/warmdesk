@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <Transition name="confirm-fade">
-      <div v-if="ui.confirmState" class="confirm-backdrop" @click.self="cancel" role="dialog" aria-modal="true" :aria-labelledby="titleId">
+      <div v-if="ui.confirmState" class="confirm-backdrop" @mousedown="backdrop.onMousedown" @click="backdrop.onClick" role="dialog" aria-modal="true" :aria-labelledby="titleId">
         <div ref="dialogEl" class="confirm-dialog">
           <h3 :id="titleId" class="confirm-title">{{ $t('common.confirm') }}</h3>
           <p class="confirm-message">{{ ui.confirmState.message }}</p>
@@ -24,6 +24,7 @@
 import { ref, watch, nextTick, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useUIStore } from '@/stores/ui'
+import { useBackdropClose } from '@/composables/useBackdropClose'
 
 const ui = useUIStore()
 const { t } = useI18n()
@@ -64,6 +65,7 @@ function onKey(e) {
 
 function ok() { ui._confirmResolve(true) }
 function cancel() { ui._confirmResolve(false) }
+const backdrop = useBackdropClose(() => cancel())
 </script>
 
 <style scoped>

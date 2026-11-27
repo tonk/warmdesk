@@ -1246,7 +1246,7 @@
 
   <!-- ── Create Invoice from report group modal ───────────────────────── -->
   <Teleport to="body">
-    <div v-if="showCreateInvoiceFromGroup" class="tt-modal-backdrop" @click.self="showCreateInvoiceFromGroup = false" @keydown.escape="showCreateInvoiceFromGroup = false">
+    <div v-if="showCreateInvoiceFromGroup" class="tt-modal-backdrop" @mousedown="invoiceBackdrop.onMousedown" @click="invoiceBackdrop.onClick" @keydown.escape="showCreateInvoiceFromGroup = false">
       <div class="tt-modal tt-modal-lg" role="dialog" aria-modal="true" aria-labelledby="cinv-grp-title" ref="createInvModalRef">
         <div class="tt-modal-hd">
           <h2 id="cinv-grp-title" class="tt-modal-title">{{ $t('invoice.new_invoice') }}</h2>
@@ -1351,7 +1351,7 @@
 
   <!-- ── Manage time-tracking projects & customers modal ───────────────── -->
   <Teleport to="body">
-    <div v-if="managingProjects" class="tt-modal-backdrop" @click.self="closeManageProjects" @keydown.escape="closeManageProjects">
+    <div v-if="managingProjects" class="tt-modal-backdrop" @mousedown="manageProjectsBackdrop.onMousedown" @click="manageProjectsBackdrop.onClick" @keydown.escape="closeManageProjects">
       <div class="tt-modal" role="dialog" aria-modal="true" aria-labelledby="tt-modal-title" ref="modalRef">
         <div class="tt-modal-hd">
           <h2 id="tt-modal-title" class="tt-modal-title">{{ $t('timeTracking.manage_tt_projects') }}</h2>
@@ -1488,6 +1488,7 @@
 </template>
 
 <script setup>
+import { useBackdropClose } from '@/composables/useBackdropClose'
 import { ref, computed, watch, nextTick, onMounted, onUnmounted, defineAsyncComponent } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -5402,6 +5403,7 @@ async function exportReportChartPDF() {
 
 // ── Time-tracking-only project & customer management ─────────────────────
 const managingProjects     = ref(false)
+const manageProjectsBackdrop = useBackdropClose(() => closeManageProjects())
 const manageTab            = ref('projects')
 const modalRef             = ref(null)
 
@@ -5752,6 +5754,7 @@ async function changeAllInvStatus(inv, status) {
 
 // ── Create invoice from report group ─────────────────────────────────────
 const showCreateInvoiceFromGroup = ref(false)
+const invoiceBackdrop = useBackdropClose(() => { showCreateInvoiceFromGroup.value = false })
 const createInvModalRef = ref(null)
 const createInvGroup   = ref(null)
 const createInvStep    = ref(1)
