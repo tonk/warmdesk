@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.53.1 — 2026-11-27
+
+### Fixed
+- **Dialogs no longer close when a drag ends outside them** — pressing the mouse button inside a dialog (for example while selecting text in the description of a time entry) and releasing it over the grey backdrop closed the dialog, and what you had typed was lost. A dialog now only closes when both the press and the release happen on the backdrop. This applies to every dialog: time entries and the other standard dialogs, confirmations, About, the accessibility status, the news welcome, creating an invoice and managing projects in time tracking, and the invite picker in a group call. Escape and the ✕ button work as before.
+
 ## v0.53.0 — 2026-11-25
 
 ### Added

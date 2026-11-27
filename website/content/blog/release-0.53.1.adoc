@@ -1,0 +1,25 @@
+---
+title: "v0.53.1: dialogs stay open while you select text"
+date: "2026-11-27"
+author: "Ton Kersten"
+description: "A dialog no longer closes when a mouse press that started inside it is released over the backdrop."
+draft: false
+---
+:doctype: article
+:icons!:
+
+A small fix for an annoying problem: losing what you typed in a dialog.
+
+== Fixed
+
+=== Dialogs no longer close after selecting text
+
+When you selected text in a field of a dialog — the description of a time entry, for example — and released the mouse button just outside the dialog, the dialog closed and your input was gone. The browser reports such a press-and-release as a click on the grey backdrop, and that click closed the dialog.
+
+A dialog now remembers where the mouse button was pressed. It only closes when both the press and the release happen on the backdrop. A normal click on the backdrop still closes it, and so do Escape and the ✕ button.
+
+The fix applies to every dialog: time entries and the other standard dialogs, confirmations, About, the accessibility status, the news welcome, creating an invoice and managing projects in time tracking, and the invite picker in a group call.
+
+== Upgrade
+
+Nothing to migrate.

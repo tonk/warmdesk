@@ -987,3 +987,4 @@ Create an application that has all these features and requirements
 - Show the weekday and holiday name when hovering over a public holiday in the Norm overview
 - Add a PDF export of the Norm overview
 - Add a PDF export of the Travel overview
+- Keep dialogs open when a mouse press that started inside them is released over the backdrop

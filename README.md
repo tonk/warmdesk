@@ -8,9 +8,9 @@
 A self-hosted, multi-user project management tool with Kanban and Scrum boards, real-time
 collaboration, direct messaging with 1:1 and group video chat, time tracking, and a ticket API.
 
-## Latest release (v0.53.0)
+## Latest release (v0.53.1)
 
-- **Travel overview as PDF** — the *PDF* button now also downloads the Travel overview: travel time and kilometres per direction, month, customer and route.
+- **Dialogs stay open while you select text** — releasing the mouse outside a dialog after selecting text in a field no longer closes it.
 
 ## Experiment
 
